@@ -7,6 +7,8 @@ export const Meta = ({ title, description }) => {
       ? `Alexey Golub`
       : `${title} | Alexey Golub`
 
+  description = description || `Alexey Golub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker`
+
   return (
     <Helmet
       htmlAttributes={{ lang: `en` }}
