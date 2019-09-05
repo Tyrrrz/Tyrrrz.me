@@ -22,6 +22,7 @@
     "gatsby-plugin-react-helmet": "^3.1.4",
     "gatsby-plugin-robots-txt": "^1.5.0",
     "gatsby-plugin-sharp": "^2.2.13",
+    "gatsby-plugin-sitemap": "^2.2.10",
     "gatsby-remark-highlight.js": "0.0.1",
     "gatsby-remark-images": "^3.1.19",
     "gatsby-remark-images-medium-zoom": "^1.2.1",

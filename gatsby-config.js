@@ -100,6 +100,7 @@ module.exports = {
         siteSpeedSampleRate: 10,
       },
     },
+    `gatsby-plugin-sitemap`,
     'gatsby-plugin-robots-txt',
     `gatsby-plugin-offline`,
   ],
