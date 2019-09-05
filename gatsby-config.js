@@ -2,6 +2,10 @@ const settings = require('./src/settings')
 const theme = require('./src/theme')
 
 module.exports = {
+  siteMetadata: {
+    siteUrl: settings.siteDomain
+  },
+
   plugins: [
     {
       resolve: `gatsby-source-filesystem`,
@@ -96,6 +100,7 @@ module.exports = {
         siteSpeedSampleRate: 10,
       },
     },
+    'gatsby-plugin-robots-txt',
     `gatsby-plugin-offline`,
   ],
 }
