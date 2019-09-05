@@ -1,4 +1,5 @@
 const settings = require('./src/settings')
+const theme = require('./src/theme')
 
 module.exports = {
   plugins: [
@@ -68,7 +69,8 @@ module.exports = {
       options: {
         name: `Tyrrrzme`,
         short_name: `Tyrrrzme`,
-        theme_color: `#343838`,
+        theme_color: theme.mainColor,
+        background_color: theme.mainColor,
         icon: `src/static/favicon.png`,
         start_url: `/`,
         display: `standalone`,
