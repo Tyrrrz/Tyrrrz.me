@@ -27,7 +27,7 @@ const Separator = styled.div`
 
 const Bio = styled.div``
 
-const MyAge = moment().diff(moment('28-Apr-1995'), 'years')
+const MyAge = moment().diff(moment('1995-04-28'), 'years')
 
 export default ({ data }) => (
   <Layout>
