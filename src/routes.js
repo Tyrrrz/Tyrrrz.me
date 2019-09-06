@@ -7,6 +7,10 @@ const staticRoutes = {
     path: `/`,
     component: getFullFilePath(`components/home.jsx`),
   },
+  error404: {
+    path: `404`,
+    component: getFullFilePath(`components/error404.jsx`),
+  },
   projects: {
     path: `/projects`,
     component: getFullFilePath(`components/projects.jsx`),
