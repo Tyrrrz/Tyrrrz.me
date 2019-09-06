@@ -47,7 +47,7 @@ const Content = styled.div`
 
 export default ({ data: { markdownRemark } }) => {
   const disqusConfig = {
-    url: `${settings.siteDomain}/${dynamicRoutes.blogPost.getPath(
+    url: `${settings.siteDomain}${dynamicRoutes.blogPost.getPath(
       markdownRemark.fields.slug
     )}`,
     identifier: `Blog/${markdownRemark.fields.slug}`,
