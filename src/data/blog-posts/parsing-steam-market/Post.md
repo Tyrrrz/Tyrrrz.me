@@ -33,7 +33,7 @@ It has 3 required parameters:
 
 The values for two main parameters, `appid` and `market_hash_name` can be extracted directly from the URL of any existing item listing, as shown in the following screenshot:
 
-![](1.png)
+![example listing](1.png)
 
 In this case the values are:
 
@@ -42,7 +42,7 @@ In this case the values are:
 
 I'm not sure what is the full list of valid `currency` values, however US dollar has the ID of `1`.
 
-Having put the correct parameter values, this is how the request URL should look for this example: http://steamcommunity.com/market/priceoverview/?appid=730&currency=1&market_hash_name=AK-47%20%7C%20Redline%20%28Field-Tested%29
+Having put the correct parameter values, this is how the request URL should look for this example: <http://steamcommunity.com/market/priceoverview/?appid=730&currency=1&market_hash_name=AK-47%20%7C%20Redline%20%28Field-Tested%29>
 
 ### Response
 

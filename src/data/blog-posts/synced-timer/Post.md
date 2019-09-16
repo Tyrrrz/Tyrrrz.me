@@ -147,7 +147,7 @@ timer.IsEnabled = true;
 
 You will notice that, no matter when the program is started, the timer ticks exactly on the minute.
 
-![](1.png)
+![on the minute](1.png)
 
 For a more complicated example, we can set the first tick time to 00:15, with an interval of one hour.
 
@@ -160,4 +160,4 @@ timer.IsEnabled = true;
 
 This example will output the current time to console every hour, but on the :15 minute mark instead.
 
-![](2.png)
+![on the hour](2.png)

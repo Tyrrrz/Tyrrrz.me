@@ -152,4 +152,4 @@ Input processing happens in the `HotkeyTextBox_PreviewKeyDown` method:
 
 Finally, here's how the control looks in [one of my applications](/Projects/LightBulb):
 
-![](1.png)
+![example usage](1.png)
