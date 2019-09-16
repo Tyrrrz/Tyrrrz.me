@@ -1,20 +1,20 @@
-import React from 'react'
-import styled from '@emotion/styled'
-import { graphql } from 'gatsby'
-import Icon from '@mdi/react'
-import { mdiStar, mdiCheckboxBlankCircle } from '@mdi/js'
+import React from 'react';
+import styled from '@emotion/styled';
+import { graphql } from 'gatsby';
+import Icon from '@mdi/react';
+import { mdiStar, mdiCheckboxBlankCircle } from '@mdi/js';
 
-import theme from '../theme'
+import theme from '../theme';
 
 const Container = styled.div`
   &:not(:last-child) {
     margin-bottom: 1.5em;
   }
-`
+`;
 
 const Name = styled.div`
   font-size: 1.5em;
-`
+`;
 
 const MetadataContainer = styled.div`
   margin-top: 0.3em;
@@ -30,11 +30,11 @@ const MetadataContainer = styled.div`
   span + span {
     margin-left: 1em;
   }
-`
+`;
 
 const Description = styled.div`
   margin-top: 0.3em;
-`
+`;
 
 export const ProjectListing = ({ node }) => (
   <Container>
@@ -57,7 +57,7 @@ export const ProjectListing = ({ node }) => (
     </MetadataContainer>
     <Description>{node.description}</Description>
   </Container>
-)
+);
 
 export const query = graphql`
   fragment ProjectListingFragment on GithubUserRepositoriesNodes {
@@ -79,4 +79,4 @@ export const query = graphql`
     isLocked
     isMirror
   }
-`
+`;

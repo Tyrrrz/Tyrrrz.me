@@ -1,22 +1,22 @@
-import React from 'react'
-import styled from '@emotion/styled'
-import { graphql, Link } from 'gatsby'
-import Icon from '@mdi/react'
-import { mdiCalendar, mdiClockOutline } from '@mdi/js'
+import React from 'react';
+import styled from '@emotion/styled';
+import { graphql, Link } from 'gatsby';
+import Icon from '@mdi/react';
+import { mdiCalendar, mdiClockOutline } from '@mdi/js';
 
-import { dynamicRoutes } from '../routes'
+import { dynamicRoutes } from '../routes';
 
-import moment from 'moment'
+import moment from 'moment';
 
 const Container = styled.div`
   &:not(:last-child) {
     margin-bottom: 1.5em;
   }
-`
+`;
 
 const Title = styled.div`
   font-size: 1.5em;
-`
+`;
 
 const MetadataContainer = styled.div`
   margin-top: 0.3em;
@@ -32,7 +32,7 @@ const MetadataContainer = styled.div`
   span + span {
     margin-left: 1em;
   }
-`
+`;
 
 const Excerpt = styled.div`
   margin-top: 0.3em;
@@ -40,7 +40,7 @@ const Excerpt = styled.div`
   a {
     font-weight: 600;
   }
-`
+`;
 
 export const BlogPostListing = ({ node }) => {
   return (
@@ -69,8 +69,8 @@ export const BlogPostListing = ({ node }) => {
         </Link>
       </Excerpt>
     </Container>
-  )
-}
+  );
+};
 
 export const query = graphql`
   fragment BlogPostListingFragment on MarkdownRemark {
@@ -84,4 +84,4 @@ export const query = graphql`
     excerpt(format: PLAIN, pruneLength: 350)
     timeToRead
   }
-`
+`;

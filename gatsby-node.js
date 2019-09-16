@@ -1,9 +1,9 @@
-const path = require('path')
-const routes = require('./src/routes')
+const path = require('path');
+const routes = require('./src/routes');
 
 exports.createPages = async ({ actions, graphql }) => {
-  await routes.createRoutes(actions, graphql)
-}
+  await routes.createRoutes(actions, graphql);
+};
 
 exports.onCreateNode = ({ actions, node }) => {
   // Add slug to markdown files
@@ -11,7 +11,7 @@ exports.onCreateNode = ({ actions, node }) => {
     actions.createNodeField({
       node,
       name: 'slug',
-      value: path.basename(path.dirname(node.fileAbsolutePath)),
-    })
+      value: path.basename(path.dirname(node.fileAbsolutePath))
+    });
   }
-}
+};

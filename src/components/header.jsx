@@ -1,16 +1,16 @@
-import React from 'react'
-import styled from '@emotion/styled'
-import { Link } from 'gatsby'
+import React from 'react';
+import styled from '@emotion/styled';
+import { Link } from 'gatsby';
 
-import theme from '../theme'
-import { staticRoutes } from '../routes'
+import theme from '../theme';
+import { staticRoutes } from '../routes';
 
 const Container = styled.header`
   padding-top: 0.3em;
   padding-bottom: 0.3em;
   background-color: ${theme.mainColor};
   color: ${theme.inverseTextColor};
-`
+`;
 
 const Grid = styled.div`
   display: grid;
@@ -28,7 +28,7 @@ const Grid = styled.div`
     display: block;
     text-align: center;
   }
-`
+`;
 
 const Title = styled.div`
   grid-area: title;
@@ -37,12 +37,12 @@ const Title = styled.div`
   a {
     text-decoration: none;
   }
-`
+`;
 
 const Menu = styled.div`
   grid-area: menu;
   font-size: 1.3em;
-`
+`;
 
 const MenuItem = styled.span`
   &:not(:last-child) {
@@ -59,11 +59,11 @@ const MenuItem = styled.span`
   a:hover {
     color: ${theme.accentColor};
   }
-`
+`;
 
 const ActiveMenuItemLinkStyle = {
-  borderColor: theme.accentColor,
-}
+  borderColor: theme.accentColor
+};
 
 export const Header = () => (
   <Container>
@@ -103,4 +103,4 @@ export const Header = () => (
       </Menu>
     </Grid>
   </Container>
-)
+);

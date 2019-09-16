@@ -1,12 +1,12 @@
-import React from 'react'
-import { graphql } from 'gatsby'
-import Img from 'gatsby-image'
-import styled from '@emotion/styled'
+import React from 'react';
+import { graphql } from 'gatsby';
+import Img from 'gatsby-image';
+import styled from '@emotion/styled';
 
-import { Layout } from './layout'
-import { Meta } from './meta'
+import { Layout } from './layout';
+import { Meta } from './meta';
 
-import moment from 'moment'
+import moment from 'moment';
 
 const PictureContainer = styled.div`
   margin-top: 1em;
@@ -15,7 +15,7 @@ const PictureContainer = styled.div`
   img {
     border-radius: 40%;
   }
-`
+`;
 
 const Separator = styled.div`
   margin: 2em auto;
@@ -23,11 +23,11 @@ const Separator = styled.div`
   opacity: 0.15;
   width: 75%;
   height: 1px;
-`
+`;
 
-const Bio = styled.div``
+const Bio = styled.div``;
 
-const MyAge = moment().diff(moment('1995-04-28'), 'years')
+const MyAge = moment().diff(moment('1995-04-28'), 'years');
 
 export default ({ data }) => (
   <Layout>
@@ -56,7 +56,7 @@ export default ({ data }) => (
       </p>
     </Bio>
   </Layout>
-)
+);
 
 export const query = graphql`
   query {
@@ -68,4 +68,4 @@ export const query = graphql`
       }
     }
   }
-`
+`;

@@ -1,11 +1,11 @@
-const settings = require('./src/settings')
-const theme = require('./src/theme')
+const settings = require('./src/settings');
+const theme = require('./src/theme');
 
 module.exports = {
   siteMetadata: {
     siteUrl: settings.siteDomain,
     title: `Alexey Golub`,
-    description: ``,
+    description: ``
   },
 
   plugins: [
@@ -13,14 +13,14 @@ module.exports = {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `content`,
-        path: `${__dirname}/src`,
-      },
+        path: `${__dirname}/src`
+      }
     },
     {
       resolve: 'gatsby-source-github',
       options: {
         headers: {
-          Authorization: `Bearer ${settings.githubToken}`,
+          Authorization: `Bearer ${settings.githubToken}`
         },
         queries: [
           `{
@@ -48,9 +48,9 @@ module.exports = {
               }
             }
           }
-          `,
-        ],
-      },
+          `
+        ]
+      }
     },
     {
       resolve: `gatsby-transformer-remark`,
@@ -60,14 +60,14 @@ module.exports = {
             resolve: `gatsby-remark-images`,
             options: {
               maxWidth: 1280,
-              linkImagesToOriginal: false,
-            },
+              linkImagesToOriginal: false
+            }
           },
           `gatsby-remark-images-medium-zoom`,
           `gatsby-remark-highlight.js`,
-          `gatsby-remark-smartypants`,
-        ],
-      },
+          `gatsby-remark-smartypants`
+        ]
+      }
     },
     `gatsby-transformer-sharp`,
     {
@@ -79,8 +79,8 @@ module.exports = {
         background_color: theme.mainColor,
         icon: `src/static/favicon.png`,
         start_url: `/`,
-        display: `standalone`,
-      },
+        display: `standalone`
+      }
     },
     `gatsby-plugin-sharp`,
     `gatsby-plugin-react-helmet`,
@@ -89,8 +89,8 @@ module.exports = {
     {
       resolve: `gatsby-plugin-disqus`,
       options: {
-        shortname: settings.disqusId,
-      },
+        shortname: settings.disqusId
+      }
     },
     {
       resolve: `gatsby-plugin-google-analytics`,
@@ -99,8 +99,8 @@ module.exports = {
         anonymize: false,
         respectDNT: false,
         sampleRate: 100,
-        siteSpeedSampleRate: 10,
-      },
+        siteSpeedSampleRate: 10
+      }
     },
     `gatsby-plugin-sitemap`,
     'gatsby-plugin-robots-txt',
@@ -108,8 +108,8 @@ module.exports = {
     {
       resolve: `gatsby-plugin-canonical-urls`,
       options: {
-        siteUrl: settings.siteDomain,
-      },
+        siteUrl: settings.siteDomain
+      }
     },
     {
       resolve: `gatsby-plugin-feed`,
@@ -135,9 +135,9 @@ module.exports = {
                   date: edge.node.frontmatter.date,
                   url: `${site.siteMetadata.siteUrl}/blog/${edge.node.fields.slug}`,
                   guid: edge.node.fields.slug,
-                  custom_elements: [{ "content:encoded": edge.node.html }],
-                })
-              })
+                  custom_elements: [{ 'content:encoded': edge.node.html }]
+                });
+              });
             },
             query: `
               {
@@ -158,11 +158,11 @@ module.exports = {
                 }
               }
             `,
-            output: "/rss.xml",
-            title: "Alexey Golub RSS feed",
-          },
-        ],
-      },
-    },
-  ],
-}
+            output: '/rss.xml',
+            title: 'Alexey Golub RSS feed'
+          }
+        ]
+      }
+    }
+  ]
+};

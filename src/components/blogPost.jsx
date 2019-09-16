@@ -1,20 +1,20 @@
-import React from 'react'
-import styled from '@emotion/styled'
-import { graphql } from 'gatsby'
-import Icon from '@mdi/react'
-import { mdiCalendar, mdiClockOutline } from '@mdi/js'
-import { Disqus } from 'gatsby-plugin-disqus'
+import React from 'react';
+import styled from '@emotion/styled';
+import { graphql } from 'gatsby';
+import Icon from '@mdi/react';
+import { mdiCalendar, mdiClockOutline } from '@mdi/js';
+import { Disqus } from 'gatsby-plugin-disqus';
 
-import { Layout } from './layout'
-import { Meta } from './meta'
-import { dynamicRoutes } from '../routes'
-import settings from '../settings'
+import { Layout } from './layout';
+import { Meta } from './meta';
+import { dynamicRoutes } from '../routes';
+import settings from '../settings';
 
-import moment from 'moment'
+import moment from 'moment';
 
 const Title = styled.div`
   font-size: 2em;
-`
+`;
 
 const MetadataContainer = styled.div`
   margin-top: 0.5em;
@@ -30,7 +30,7 @@ const MetadataContainer = styled.div`
   span + span {
     margin-left: 1em;
   }
-`
+`;
 
 const Content = styled.div`
   code {
@@ -43,7 +43,7 @@ const Content = styled.div`
     font-family: 'Fira Code';
     background-color: #f0f0f0;
   }
-`
+`;
 
 export default ({ data: { markdownRemark } }) => {
   const disqusConfig = {
@@ -51,8 +51,8 @@ export default ({ data: { markdownRemark } }) => {
       markdownRemark.fields.slug
     )}`,
     identifier: `Blog/${markdownRemark.fields.slug}`,
-    title: markdownRemark.frontmatter.title,
-  }
+    title: markdownRemark.frontmatter.title
+  };
 
   return (
     <Layout>
@@ -79,8 +79,8 @@ export default ({ data: { markdownRemark } }) => {
 
       <Disqus config={disqusConfig} />
     </Layout>
-  )
-}
+  );
+};
 
 export const query = graphql`
   query($slug: String!) {
@@ -97,4 +97,4 @@ export const query = graphql`
       timeToRead
     }
   }
-`
+`;

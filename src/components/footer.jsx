@@ -1,15 +1,20 @@
-import React from 'react'
-import styled from '@emotion/styled'
-import Icon from '@mdi/react'
-import { mdiAt, mdiGithubCircle, mdiTwitterCircle, mdiInstagram } from '@mdi/js'
+import React from 'react';
+import styled from '@emotion/styled';
+import Icon from '@mdi/react';
+import {
+  mdiAt,
+  mdiGithubCircle,
+  mdiTwitterCircle,
+  mdiInstagram
+} from '@mdi/js';
 
-import theme from '../theme'
+import theme from '../theme';
 
 const Container = styled.footer`
   margin-top: 2em;
   margin-bottom: 1.5em;
   text-align: center;
-`
+`;
 
 const SocialLink = styled.a`
   margin-left: 0.15em;
@@ -26,7 +31,7 @@ const SocialLink = styled.a`
       }
     }
   }
-`
+`;
 
 export const Footer = () => (
   <Container>
@@ -46,4 +51,4 @@ export const Footer = () => (
       <Icon path={mdiInstagram} />
     </SocialLink>
   </Container>
-)
+);

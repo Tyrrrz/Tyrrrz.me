@@ -1,9 +1,9 @@
-import React from 'react'
-import { graphql } from 'gatsby'
+import React from 'react';
+import { graphql } from 'gatsby';
 
-import { Layout } from './layout'
-import { Meta } from './meta'
-import { ProjectListing } from './projectListing'
+import { Layout } from './layout';
+import { Meta } from './meta';
+import { ProjectListing } from './projectListing';
 
 export default ({ data }) => (
   <Layout>
@@ -15,7 +15,7 @@ export default ({ data }) => (
         <ProjectListing node={node} />
       ))}
   </Layout>
-)
+);
 
 export const query = graphql`
   query {
@@ -27,4 +27,4 @@ export const query = graphql`
       }
     }
   }
-`
+`;
