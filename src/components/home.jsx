@@ -41,18 +41,18 @@ export default ({ data }) => (
 
     <Bio>
       <p>
-        Hey, my name is Alexey, also known online as Tyrrrz. I'm a {MyAge} y/o
+        Hello! My name is Alexey, also known online as Tyrrrz. I'm a {MyAge} y/o
         software developer based in Kyiv, Ukraine.
       </p>
       <p>
-        I'm currently employed by 3Shape, where I'm working on cloud-based
-        licensing and deployment solutions for our end-user products.
+        I'm mostly experienced in C#/.NET, Azure/AWS, cloud-native applications
+        and related technologies. At the moment I'm working as a senior software
+        developer for Svitla Systems, an outstaffing company.
       </p>
       <p>
         In my spare time, I'm developing and maintaining a number of open-source
-        projects. I'm also an aspiring photographer, avid traveler and a novice
-        public speaker. Occasionally I may write about something interesting in
-        my blog.
+        projects. I also sometimes speak at conferences and blog on technical
+        topics.
       </p>
     </Bio>
   </Layout>
