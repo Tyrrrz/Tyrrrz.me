@@ -1,3 +1,3 @@
 require('typeface-maven-pro');
-require('firacode/distr/fira_code.css');
+require('@openfonts/fira-code_all');
 require('highlight.js/styles/obsidian.css');
