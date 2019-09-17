@@ -34,13 +34,13 @@ const MetadataContainer = styled.div`
 
 const Content = styled.div`
   code {
-    font-family: 'Fira Code Light';
+    font-family: "Fira Code Light", "Consolas", "Courier New", "Courier", monospace;
     font-size: 0.8em;
     line-height: 1.2em;
   }
 
   code:not(.hljs) {
-    font-family: 'Fira Code';
+    font-family: "Fira Code", "Consolas", "Courier New", "Courier", monospace;
     background-color: #f0f0f0;
   }
 `;

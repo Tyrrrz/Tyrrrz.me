@@ -12,7 +12,7 @@ const GlobalStyle = css`
 
   html {
     color: ${theme.textColor};
-    font-family: 'Maven Pro';
+    font-family: "Maven Pro", "Tahoma", "Arial", sans-serif;
     font-size: 20px;
     word-wrap: break-word;
 
