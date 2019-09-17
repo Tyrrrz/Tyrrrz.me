@@ -105,6 +105,7 @@ module.exports = {
     `gatsby-plugin-sitemap`,
     'gatsby-plugin-robots-txt',
     `gatsby-plugin-offline`,
+    `gatsby-plugin-netlify`,
     {
       resolve: `gatsby-plugin-canonical-urls`,
       options: {

@@ -56,4 +56,29 @@ exports.createRoutes = async (actions, graphql) => {
       });
     });
   });
+
+  // Configure redirects for legacy URLs
+  const legacyProjectUrls = [
+    `/Projects/CliFx`,
+    `/Projects/CliWrap`,
+    `/Projects/DiscordChatExporter`,
+    `/Projects/Failsafe`,
+    `/Projects/Gress`,
+    `/Projects/Hashsum`,
+    `/Projects/LightBulb`,
+    `/Projects/LtGt`,
+    `/Projects/Onova`,
+    `/Projects/OsuHelper`,
+    `/Projects/WPSteamMarketExcerpt`,
+    `/Projects/YoutubeDownloader`,
+    `/Projects/YoutubeExplode`
+  ];
+  legacyProjectUrls.forEach(url => {
+    actions.createRedirect({
+      fromPath: url,
+      toPath: staticRoutes.projects.path,
+      force: true,
+      redirectInBrowser: true
+    });
+  });
 };
