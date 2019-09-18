@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 import { Link } from 'gatsby';
 
 import theme from '../theme';
-import { staticRoutes } from '../routes';
+import routes from '../routes';
 
 const Container = styled.header`
   padding-top: 0.3em;
@@ -65,11 +65,11 @@ const ActiveMenuItemLinkStyle = {
   borderColor: theme.accentColor
 };
 
-export const Header = () => (
+export default () => (
   <Container>
     <Grid>
       <Title>
-        <Link to={staticRoutes.home.path}>Alexey Golub</Link>
+        <Link to={routes.static.home.path}>Alexey Golub</Link>
       </Title>
 
       <Menu>
@@ -77,7 +77,7 @@ export const Header = () => (
           <Link
             activeStyle={ActiveMenuItemLinkStyle}
             partiallyActive={false}
-            to={staticRoutes.home.path}
+            to={routes.static.home.path}
           >
             home
           </Link>
@@ -86,7 +86,7 @@ export const Header = () => (
           <Link
             activeStyle={ActiveMenuItemLinkStyle}
             partiallyActive={true}
-            to={staticRoutes.projects.path}
+            to={routes.static.projects.path}
           >
             projects
           </Link>
@@ -95,7 +95,7 @@ export const Header = () => (
           <Link
             activeStyle={ActiveMenuItemLinkStyle}
             partiallyActive={true}
-            to={staticRoutes.blog.path}
+            to={routes.static.blog.path}
           >
             blog
           </Link>

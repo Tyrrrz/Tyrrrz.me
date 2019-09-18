@@ -4,7 +4,7 @@ import { graphql, Link } from 'gatsby';
 import Icon from '@mdi/react';
 import { mdiCalendar, mdiClockOutline } from '@mdi/js';
 
-import { dynamicRoutes } from '../routes';
+import routes from '../routes';
 
 import moment from 'moment';
 
@@ -42,11 +42,11 @@ const Excerpt = styled.div`
   }
 `;
 
-export const BlogPostListing = ({ node }) => {
+export default ({ node }) => {
   return (
     <Container>
       <Title>
-        <Link to={dynamicRoutes.blogPost.getPath(node.fields.slug)}>
+        <Link to={routes.dynamic.blogPost.getPath(node.fields.slug)}>
           {node.frontmatter.title}
         </Link>
       </Title>
@@ -57,14 +57,16 @@ export const BlogPostListing = ({ node }) => {
         </span>
 
         <span>
-          <Icon path={mdiClockOutline} />{' '}
+          <Icon path={mdiClockOutline} />
+          {` `}
           {moment.duration(node.timeToRead, 'minutes').humanize()} to read
         </span>
       </MetadataContainer>
 
       <Excerpt>
-        {node.excerpt}{' '}
-        <Link to={dynamicRoutes.blogPost.getPath(node.fields.slug)}>
+        {node.excerpt}
+        {` `}
+        <Link to={routes.dynamic.blogPost.getPath(node.fields.slug)}>
           continue reading
         </Link>
       </Excerpt>

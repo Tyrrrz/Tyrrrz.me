@@ -1,9 +1,9 @@
 import React from 'react';
 import { graphql } from 'gatsby';
 
-import { Layout } from './layout';
-import { Meta } from './meta';
-import { BlogPostListing } from './blogPostListing';
+import Layout from './layout';
+import Meta from './meta';
+import BlogPostListing from './blogPostListing';
 
 export default ({ data }) => (
   <Layout>

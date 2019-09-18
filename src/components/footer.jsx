@@ -33,7 +33,7 @@ const SocialLink = styled.a`
   }
 `;
 
-export const Footer = () => (
+export default () => (
   <Container>
     <SocialLink href="mailto:tyrrrz@gmail.com">
       <Icon path={mdiAt} />

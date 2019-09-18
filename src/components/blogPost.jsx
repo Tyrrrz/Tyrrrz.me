@@ -5,10 +5,11 @@ import Icon from '@mdi/react';
 import { mdiCalendar, mdiClockOutline } from '@mdi/js';
 import { Disqus } from 'gatsby-plugin-disqus';
 
-import { Layout } from './layout';
-import { Meta } from './meta';
-import { dynamicRoutes } from '../routes';
 import settings from '../settings';
+import routes from '../routes';
+
+import Layout from './layout';
+import Meta from './meta';
 
 import moment from 'moment';
 
@@ -34,20 +35,21 @@ const MetadataContainer = styled.div`
 
 const Content = styled.div`
   code {
-    font-family: "Fira Code Light", "Consolas", "Courier New", "Courier", monospace;
+    font-family: 'Fira Code Light', 'Consolas', 'Courier New', 'Courier',
+      monospace;
     font-size: 0.8em;
     line-height: 1.2em;
   }
 
   code:not(.hljs) {
-    font-family: "Fira Code", "Consolas", "Courier New", "Courier", monospace;
+    font-family: 'Fira Code', 'Consolas', 'Courier New', 'Courier', monospace;
     background-color: #f0f0f0;
   }
 `;
 
 export default ({ data: { markdownRemark } }) => {
   const disqusConfig = {
-    url: `${settings.siteDomain}${dynamicRoutes.blogPost.getPath(
+    url: `${settings.siteDomain}${routes.dynamic.blogPost.getPath(
       markdownRemark.fields.slug
     )}`,
     identifier: `Blog/${markdownRemark.fields.slug}`,

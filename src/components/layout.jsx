@@ -4,15 +4,16 @@ import styled from '@emotion/styled';
 import emotionNormalize from 'emotion-normalize';
 
 import theme from '../theme';
-import { Header } from './header';
-import { Footer } from './footer';
+
+import Header from './header';
+import Footer from './footer';
 
 const GlobalStyle = css`
   ${emotionNormalize}
 
   html {
     color: ${theme.textColor};
-    font-family: "Maven Pro", "Tahoma", "Arial", sans-serif;
+    font-family: 'Maven Pro', 'Tahoma', 'Arial', sans-serif;
     font-size: 20px;
     word-wrap: break-word;
 
@@ -39,7 +40,7 @@ const Content = styled.main`
   padding: 1em;
 `;
 
-export const Layout = ({ children }) => (
+export default ({ children }) => (
   <>
     <Global styles={GlobalStyle} />
 

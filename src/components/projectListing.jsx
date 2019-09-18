@@ -36,14 +36,15 @@ const Description = styled.div`
   margin-top: 0.3em;
 `;
 
-export const ProjectListing = ({ node }) => (
+export default ({ node }) => (
   <Container>
     <Name>
       <a href={node.url}>{node.name}</a>
     </Name>
     <MetadataContainer>
       <span>
-        <Icon path={mdiStar} color={theme.accentColor} />{' '}
+        <Icon path={mdiStar} color={theme.accentColor} />
+        {` `}
         {node.stargazers.totalCount}
       </span>
 
@@ -51,7 +52,8 @@ export const ProjectListing = ({ node }) => (
         <Icon
           path={mdiCheckboxBlankCircle}
           color={node.primaryLanguage.color}
-        />{' '}
+        />
+        {` `}
         {node.primaryLanguage.name}
       </span>
     </MetadataContainer>

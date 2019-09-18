@@ -1,39 +1,50 @@
 const path = require('path');
 
-const getFullFilePath = name => path.resolve(__dirname, name);
-
 const staticRoutes = {
   home: {
     path: `/`,
-    component: getFullFilePath(`components/home.jsx`)
+    component: path.resolve(__dirname, `components`, `home.jsx`)
   },
   error404: {
     path: `404`,
-    component: getFullFilePath(`components/error404.jsx`)
+    component: path.resolve(__dirname, `components`, `error404.jsx`)
   },
   projects: {
     path: `/projects`,
-    component: getFullFilePath(`components/projects.jsx`)
+    component: path.resolve(__dirname, `components`, `projects.jsx`)
   },
   blog: {
     path: `/blog`,
-    component: getFullFilePath(`components/blog.jsx`)
+    component: path.resolve(__dirname, `components`, `blog.jsx`)
   }
 };
-
-exports.staticRoutes = staticRoutes;
 
 const dynamicRoutes = {
   blogPost: {
     getPath: slug => `${staticRoutes.blog.path}/${slug}`,
-    component: getFullFilePath(`components/blogPost.jsx`),
+    component: path.resolve(__dirname, `components`, `blogPost.jsx`),
     query: `query { allMarkdownRemark { nodes { fields { slug } } } }`
   }
 };
 
-exports.dynamicRoutes = dynamicRoutes;
+const redirects = {
+  // Redirect legacy project URLs to their GitHub pages
+  '/Projects/CliFx': `https://github.com/Tyrrrz/CliFx`,
+  '/Projects/CliWrap': `https://github.com/Tyrrrz/CliWrap`,
+  '/Projects/DiscordChatExporter': `https://github.com/Tyrrrz/DiscordChatExporter`,
+  '/Projects/Failsafe': `https://github.com/Tyrrrz/Failsafe`,
+  '/Projects/Gress': `https://github.com/Tyrrrz/Gress`,
+  '/Projects/Hashsum': `https://github.com/Tyrrrz/Hashsum`,
+  '/Projects/LightBulb': `https://github.com/Tyrrrz/LightBulb`,
+  '/Projects/LtGt': `https://github.com/Tyrrrz/LtGt`,
+  '/Projects/Onova': `https://github.com/Tyrrrz/Onova`,
+  '/Projects/OsuHelper': `https://github.com/Tyrrrz/OsuHelper`,
+  '/Projects/WPSteamMarketExcerpt': `https://github.com/Tyrrrz/WPSteamMarketExcerpt`,
+  '/Projects/YoutubeDownloader': `https://github.com/Tyrrrz/YoutubeDownloader`,
+  '/Projects/YoutubeExplode': `https://github.com/Tyrrrz/YoutubeExplode`
+};
 
-exports.createRoutes = async (actions, graphql) => {
+const createRoutes = async (actions, graphql) => {
   // Generate pages for static routes
   Object.keys(staticRoutes).forEach(routeName =>
     actions.createPage(staticRoutes[routeName])
@@ -57,28 +68,19 @@ exports.createRoutes = async (actions, graphql) => {
     });
   });
 
-  // Configure redirects for legacy URLs
-  const legacyProjectUrls = [
-    `/Projects/CliFx`,
-    `/Projects/CliWrap`,
-    `/Projects/DiscordChatExporter`,
-    `/Projects/Failsafe`,
-    `/Projects/Gress`,
-    `/Projects/Hashsum`,
-    `/Projects/LightBulb`,
-    `/Projects/LtGt`,
-    `/Projects/Onova`,
-    `/Projects/OsuHelper`,
-    `/Projects/WPSteamMarketExcerpt`,
-    `/Projects/YoutubeDownloader`,
-    `/Projects/YoutubeExplode`
-  ];
-  legacyProjectUrls.forEach(url => {
+  // Configure redirects
+  Object.keys(redirects).forEach(from => {
     actions.createRedirect({
-      fromPath: url,
-      toPath: staticRoutes.projects.path,
+      fromPath: from,
+      toPath: redirects[from],
       force: true,
       redirectInBrowser: true
     });
   });
+};
+
+module.exports = {
+  static: staticRoutes,
+  dynamic: dynamicRoutes,
+  createRoutes: createRoutes
 };

@@ -3,8 +3,8 @@ import { graphql } from 'gatsby';
 import Img from 'gatsby-image';
 import styled from '@emotion/styled';
 
-import { Layout } from './layout';
-import { Meta } from './meta';
+import Layout from './layout';
+import Meta from './meta';
 
 import moment from 'moment';
 

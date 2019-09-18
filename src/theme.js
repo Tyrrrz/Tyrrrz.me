@@ -1,6 +1,6 @@
 module.exports = {
   mainColor: `#343838`,
-  accentColor: `#F9A825`,
+  accentColor: `#f9a825`,
   textColor: `#252525`,
-  inverseTextColor: `#FFFFFF`
+  inverseTextColor: `#ffffff`
 };

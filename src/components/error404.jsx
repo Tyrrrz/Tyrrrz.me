@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link } from 'gatsby';
 
-import { Layout } from '../components/layout';
-import { Meta } from '../components/meta';
-import { staticRoutes } from '../routes';
+import routes from '../routes';
+
+import Layout from '../components/layout';
+import Meta from '../components/meta';
 
 export default () => (
   <Layout>
@@ -11,7 +12,7 @@ export default () => (
 
     <h2>Page not found</h2>
     <p>
-      Go to <Link to={staticRoutes.home.path}>home page</Link>
+      Go to <Link to={routes.static.home.path}>home page</Link>
     </p>
   </Layout>
 );

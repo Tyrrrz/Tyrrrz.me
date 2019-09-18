@@ -1,18 +1,19 @@
 import React from 'react';
 import Helmet from 'react-helmet';
 
-const normalizeTitle = title => {
-  if (title === null || title === undefined) return `Alexey Golub`;
+import useSiteMetadata from './hooks/useSiteMetadata';
 
-  return `${title} | Alexey Golub`;
-};
+export default ({ title, description }) => {
+  const siteMetadata = useSiteMetadata();
 
-export const Meta = ({ title, description }) => {
-  title = normalizeTitle(title);
+  // Append site title to page title
+  title =
+    title !== null && title !== undefined
+      ? `${title} | ${siteMetadata.title}`
+      : siteMetadata.title;
 
-  description =
-    description ||
-    `Alexey Golub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker`;
+  // Use fallback description if it's not set
+  description = description || siteMetadata.description;
 
   return (
     <Helmet>
@@ -25,7 +26,7 @@ export const Meta = ({ title, description }) => {
 
       <meta property="og:type" content="website" />
 
-      <meta name="twitter:creator" content="@Tyrrrz" />
+      <meta name="twitter:creator" content={siteMetadata.twitter} />
       <meta name="twitter:card" content="summary" />
 
       <meta name="description" content={description} />
