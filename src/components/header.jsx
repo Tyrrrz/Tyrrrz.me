@@ -1,9 +1,11 @@
 import React from 'react';
-import styled from '@emotion/styled';
 import { Link } from 'gatsby';
+
+import styled from '@emotion/styled';
 
 import theme from '../theme';
 import routes from '../routes';
+import useSiteMetadata from './hooks/useSiteMetadata';
 
 const Container = styled.header`
   padding-top: 0.3em;
@@ -65,42 +67,46 @@ const ActiveMenuItemLinkStyle = {
   borderColor: theme.accentColor
 };
 
-export default () => (
-  <Container>
-    <Grid>
-      <Title>
-        <Link to={routes.static.home.path}>Alexey Golub</Link>
-      </Title>
+export default () => {
+  const siteMetadata = useSiteMetadata();
 
-      <Menu>
-        <MenuItem>
-          <Link
-            activeStyle={ActiveMenuItemLinkStyle}
-            partiallyActive={false}
-            to={routes.static.home.path}
-          >
-            home
-          </Link>
-        </MenuItem>
-        <MenuItem>
-          <Link
-            activeStyle={ActiveMenuItemLinkStyle}
-            partiallyActive={true}
-            to={routes.static.projects.path}
-          >
-            projects
-          </Link>
-        </MenuItem>
-        <MenuItem>
-          <Link
-            activeStyle={ActiveMenuItemLinkStyle}
-            partiallyActive={true}
-            to={routes.static.blog.path}
-          >
-            blog
-          </Link>
-        </MenuItem>
-      </Menu>
-    </Grid>
-  </Container>
-);
+  return (
+    <Container>
+      <Grid>
+        <Title>
+          <Link to={routes.static.home.path}>{siteMetadata.title}</Link>
+        </Title>
+
+        <Menu>
+          <MenuItem>
+            <Link
+              activeStyle={ActiveMenuItemLinkStyle}
+              partiallyActive={false}
+              to={routes.static.home.path}
+            >
+              home
+            </Link>
+          </MenuItem>
+          <MenuItem>
+            <Link
+              activeStyle={ActiveMenuItemLinkStyle}
+              partiallyActive={true}
+              to={routes.static.projects.path}
+            >
+              projects
+            </Link>
+          </MenuItem>
+          <MenuItem>
+            <Link
+              activeStyle={ActiveMenuItemLinkStyle}
+              partiallyActive={true}
+              to={routes.static.blog.path}
+            >
+              blog
+            </Link>
+          </MenuItem>
+        </Menu>
+      </Grid>
+    </Container>
+  );
+};

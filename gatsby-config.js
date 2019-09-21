@@ -1,3 +1,5 @@
+const path = require('path');
+
 const settings = require('./src/settings');
 const theme = require('./src/theme');
 
@@ -12,14 +14,17 @@ module.exports = {
     siteUrl: settings.siteDomain,
     title: `Alexey Golub`,
     description: `Alexey Golub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker`,
-    twitter: `@Tyrrrz`
+    email: `tyrrrz@gmail.com`,
+    twitter: `Tyrrrz`,
+    github: `Tyrrrz`,
+    instagram: `Tyrrrz`
   },
 
   plugins: [
     // Source: file system
     resolvePlugin(`gatsby-source-filesystem`, {
       name: `content`,
-      path: `${__dirname}/src`
+      path: path.resolve(__dirname, `src`)
     }),
 
     // Source: GitHub

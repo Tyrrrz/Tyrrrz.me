@@ -1,12 +1,12 @@
 import React from 'react';
-import styled from '@emotion/styled';
 import { graphql, Link } from 'gatsby';
+
+import styled from '@emotion/styled';
 import Icon from '@mdi/react';
 import { mdiCalendar, mdiClockOutline } from '@mdi/js';
 
 import routes from '../routes';
-
-import moment from 'moment';
+import { humanizeTimeToRead } from '../utils';
 
 const Container = styled.div`
   &:not(:last-child) {
@@ -42,38 +42,6 @@ const Excerpt = styled.div`
   }
 `;
 
-export default ({ node }) => {
-  return (
-    <Container>
-      <Title>
-        <Link to={routes.dynamic.blogPost.getPath(node.fields.slug)}>
-          {node.frontmatter.title}
-        </Link>
-      </Title>
-
-      <MetadataContainer>
-        <span>
-          <Icon path={mdiCalendar} /> {node.frontmatter.date}
-        </span>
-
-        <span>
-          <Icon path={mdiClockOutline} />
-          {` `}
-          {moment.duration(node.timeToRead, 'minutes').humanize()} to read
-        </span>
-      </MetadataContainer>
-
-      <Excerpt>
-        {node.excerpt}
-        {` `}
-        <Link to={routes.dynamic.blogPost.getPath(node.fields.slug)}>
-          continue reading
-        </Link>
-      </Excerpt>
-    </Container>
-  );
-};
-
 export const query = graphql`
   fragment BlogPostListingFragment on MarkdownRemark {
     frontmatter {
@@ -87,3 +55,33 @@ export const query = graphql`
     timeToRead
   }
 `;
+
+export default ({ node }) => (
+  <Container>
+    <Title>
+      <Link to={routes.dynamic.blogPost.getPath(node.fields.slug)}>
+        {node.frontmatter.title}
+      </Link>
+    </Title>
+
+    <MetadataContainer>
+      <span>
+        <Icon path={mdiCalendar} /> {node.frontmatter.date}
+      </span>
+
+      <span>
+        <Icon path={mdiClockOutline} />
+        {` `}
+        {humanizeTimeToRead(node.timeToRead)}
+      </span>
+    </MetadataContainer>
+
+    <Excerpt>
+      {node.excerpt}
+      {` `}
+      <Link to={routes.dynamic.blogPost.getPath(node.fields.slug)}>
+        continue reading
+      </Link>
+    </Excerpt>
+  </Container>
+);

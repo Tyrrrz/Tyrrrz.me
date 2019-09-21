@@ -5,16 +5,6 @@ import Layout from './layout';
 import Meta from './meta';
 import BlogPostListing from './blogPostListing';
 
-export default ({ data }) => (
-  <Layout>
-    <Meta title="Blog" />
-
-    {data.allMarkdownRemark.nodes.map(node => (
-      <BlogPostListing node={node} />
-    ))}
-  </Layout>
-);
-
 export const query = graphql`
   query {
     allMarkdownRemark(sort: { fields: frontmatter___date, order: DESC }) {
@@ -24,3 +14,13 @@ export const query = graphql`
     }
   }
 `;
+
+export default ({ data }) => (
+  <Layout>
+    <Meta title="Blog" />
+
+    {data.allMarkdownRemark.nodes.map(node => (
+      <BlogPostListing node={node} />
+    ))}
+  </Layout>
+);

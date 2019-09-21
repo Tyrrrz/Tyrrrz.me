@@ -1,6 +1,7 @@
 import React from 'react';
-import styled from '@emotion/styled';
 import { graphql } from 'gatsby';
+
+import styled from '@emotion/styled';
 import Icon from '@mdi/react';
 import { mdiStar, mdiCheckboxBlankCircle } from '@mdi/js';
 
@@ -36,31 +37,6 @@ const Description = styled.div`
   margin-top: 0.3em;
 `;
 
-export default ({ node }) => (
-  <Container>
-    <Name>
-      <a href={node.url}>{node.name}</a>
-    </Name>
-    <MetadataContainer>
-      <span>
-        <Icon path={mdiStar} color={theme.accentColor} />
-        {` `}
-        {node.stargazers.totalCount}
-      </span>
-
-      <span>
-        <Icon
-          path={mdiCheckboxBlankCircle}
-          color={node.primaryLanguage.color}
-        />
-        {` `}
-        {node.primaryLanguage.name}
-      </span>
-    </MetadataContainer>
-    <Description>{node.description}</Description>
-  </Container>
-);
-
 export const query = graphql`
   fragment ProjectListingFragment on GithubUserRepositoriesNodes {
     url
@@ -82,3 +58,30 @@ export const query = graphql`
     isMirror
   }
 `;
+
+export default ({ node }) => (
+  <Container>
+    <Name>
+      <a href={node.url}>{node.name}</a>
+    </Name>
+
+    <MetadataContainer>
+      <span>
+        <Icon path={mdiStar} color={theme.accentColor} />
+        {` `}
+        {node.stargazers.totalCount}
+      </span>
+
+      <span>
+        <Icon
+          path={mdiCheckboxBlankCircle}
+          color={node.primaryLanguage.color}
+        />
+        {` `}
+        {node.primaryLanguage.name}
+      </span>
+    </MetadataContainer>
+
+    <Description>{node.description}</Description>
+  </Container>
+);

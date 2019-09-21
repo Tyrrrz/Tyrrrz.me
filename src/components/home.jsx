@@ -1,6 +1,7 @@
 import React from 'react';
 import { graphql } from 'gatsby';
 import Img from 'gatsby-image';
+
 import styled from '@emotion/styled';
 
 import Layout from './layout';
@@ -25,9 +26,19 @@ const Separator = styled.div`
   height: 1px;
 `;
 
-const Bio = styled.div``;
-
 const MyAge = moment().diff(moment('1995-04-28'), 'years');
+
+export const query = graphql`
+  query {
+    file(relativePath: { eq: "static/me.png" }) {
+      childImageSharp {
+        fixed(width: 120) {
+          ...GatsbyImageSharpFixed
+        }
+      }
+    }
+  }
+`;
 
 export default ({ data }) => (
   <Layout>
@@ -39,7 +50,7 @@ export default ({ data }) => (
 
     <Separator />
 
-    <Bio>
+    <div>
       <p>
         Hello! My name is Alexey, also known online as Tyrrrz. I'm a {MyAge} y/o
         software developer based in Kyiv, Ukraine.
@@ -54,18 +65,6 @@ export default ({ data }) => (
         projects. I also sometimes speak at conferences and blog on technical
         topics.
       </p>
-    </Bio>
+    </div>
   </Layout>
 );
-
-export const query = graphql`
-  query {
-    file(relativePath: { eq: "static/me.png" }) {
-      childImageSharp {
-        fixed(width: 120) {
-          ...GatsbyImageSharpFixed
-        }
-      }
-    }
-  }
-`;

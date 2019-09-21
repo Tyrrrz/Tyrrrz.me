@@ -21,12 +21,12 @@ export default ({ title, description }) => {
 
       <title>{title}</title>
 
+      <meta property="og:type" content="website" />
+
       <meta property="og:title" content={title} />
       <meta name="twitter:title" content={title} />
 
-      <meta property="og:type" content="website" />
-
-      <meta name="twitter:creator" content={siteMetadata.twitter} />
+      <meta name="twitter:creator" content={`@${siteMetadata.twitter}`} />
       <meta name="twitter:card" content="summary" />
 
       <meta name="description" content={description} />

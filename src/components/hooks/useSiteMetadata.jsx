@@ -9,7 +9,10 @@ export default () => {
             siteUrl
             title
             description
+            email
+            github
             twitter
+            instagram
           }
         }
       }

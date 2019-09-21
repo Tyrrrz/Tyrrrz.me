@@ -1,6 +1,7 @@
 import React from 'react';
-import styled from '@emotion/styled';
 import { graphql } from 'gatsby';
+
+import styled from '@emotion/styled';
 import Icon from '@mdi/react';
 import { mdiCalendar, mdiClockOutline } from '@mdi/js';
 import { Disqus } from 'gatsby-plugin-disqus';
@@ -10,8 +11,7 @@ import routes from '../routes';
 
 import Layout from './layout';
 import Meta from './meta';
-
-import moment from 'moment';
+import { humanizeTimeToRead } from '../utils';
 
 const Title = styled.div`
   font-size: 2em;
@@ -47,43 +47,6 @@ const Content = styled.div`
   }
 `;
 
-export default ({ data: { markdownRemark } }) => {
-  const disqusConfig = {
-    url: `${settings.siteDomain}${routes.dynamic.blogPost.getPath(
-      markdownRemark.fields.slug
-    )}`,
-    identifier: `Blog/${markdownRemark.fields.slug}`,
-    title: markdownRemark.frontmatter.title
-  };
-
-  return (
-    <Layout>
-      <Meta
-        title={markdownRemark.frontmatter.title}
-        description={markdownRemark.excerpt}
-      />
-
-      <Title>{markdownRemark.frontmatter.title}</Title>
-
-      <MetadataContainer>
-        <span>
-          <Icon path={mdiCalendar} /> {markdownRemark.frontmatter.date}
-        </span>
-
-        <span>
-          <Icon path={mdiClockOutline} />{' '}
-          {moment.duration(markdownRemark.timeToRead, 'minutes').humanize()} to
-          read
-        </span>
-      </MetadataContainer>
-
-      <Content dangerouslySetInnerHTML={{ __html: markdownRemark.html }} />
-
-      <Disqus config={disqusConfig} />
-    </Layout>
-  );
-};
-
 export const query = graphql`
   query($slug: String!) {
     markdownRemark(fields: { slug: { eq: $slug } }) {
@@ -100,3 +63,40 @@ export const query = graphql`
     }
   }
 `;
+
+export default ({ data }) => {
+  const disqusConfig = {
+    url: `${settings.siteDomain}${routes.dynamic.blogPost.getPath(
+      data.markdownRemark.fields.slug
+    )}`,
+    identifier: `Blog/${data.markdownRemark.fields.slug}`,
+    title: data.markdownRemark.frontmatter.title
+  };
+
+  return (
+    <Layout>
+      <Meta
+        title={data.markdownRemark.frontmatter.title}
+        description={data.markdownRemark.excerpt}
+      />
+
+      <Title>{data.markdownRemark.frontmatter.title}</Title>
+
+      <MetadataContainer>
+        <span>
+          <Icon path={mdiCalendar} /> {data.markdownRemark.frontmatter.date}
+        </span>
+
+        <span>
+          <Icon path={mdiClockOutline} />
+          {` `}
+          {humanizeTimeToRead(data.markdownRemark.timeToRead)}
+        </span>
+      </MetadataContainer>
+
+      <Content dangerouslySetInnerHTML={{ __html: data.markdownRemark.html }} />
+
+      <Disqus config={disqusConfig} />
+    </Layout>
+  );
+};

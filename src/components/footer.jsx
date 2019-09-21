@@ -1,4 +1,5 @@
 import React from 'react';
+
 import styled from '@emotion/styled';
 import Icon from '@mdi/react';
 import {
@@ -9,6 +10,7 @@ import {
 } from '@mdi/js';
 
 import theme from '../theme';
+import useSiteMetadata from './hooks/useSiteMetadata';
 
 const Container = styled.footer`
   margin-top: 2em;
@@ -33,22 +35,26 @@ const SocialLink = styled.a`
   }
 `;
 
-export default () => (
-  <Container>
-    <SocialLink href="mailto:tyrrrz@gmail.com">
-      <Icon path={mdiAt} />
-    </SocialLink>
+export default () => {
+  const siteMetadata = useSiteMetadata();
 
-    <SocialLink href="https://github.com/tyrrrz">
-      <Icon path={mdiGithubCircle} />
-    </SocialLink>
+  return (
+    <Container>
+      <SocialLink href={`mailto:${siteMetadata.email}`}>
+        <Icon path={mdiAt} />
+      </SocialLink>
 
-    <SocialLink href="https://twitter.com/tyrrrz">
-      <Icon path={mdiTwitterCircle} />
-    </SocialLink>
+      <SocialLink href={`https://github.com/${siteMetadata.github}`}>
+        <Icon path={mdiGithubCircle} />
+      </SocialLink>
 
-    <SocialLink href="https://instagram.com/tyrrrz">
-      <Icon path={mdiInstagram} />
-    </SocialLink>
-  </Container>
-);
+      <SocialLink href={`https://twitter.com/${siteMetadata.twitter}`}>
+        <Icon path={mdiTwitterCircle} />
+      </SocialLink>
+
+      <SocialLink href={`https://instagram.com/${siteMetadata.instagram}`}>
+        <Icon path={mdiInstagram} />
+      </SocialLink>
+    </Container>
+  );
+};
