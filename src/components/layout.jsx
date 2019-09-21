@@ -25,12 +25,10 @@ const GlobalStyle = css`
 
   a {
     color: inherit;
-    text-decoration: none;
   }
 
   a:hover {
     color: ${theme.accentColor};
-    text-decoration: underline;
   }
 `;
 

@@ -15,6 +15,10 @@ const Container = styled.div`
 
 const Name = styled.div`
   font-size: 1.5em;
+
+  a {
+    text-decoration: none;
+  }
 `;
 
 const MetadataContainer = styled.div`

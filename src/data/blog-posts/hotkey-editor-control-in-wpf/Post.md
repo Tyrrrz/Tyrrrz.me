@@ -150,6 +150,6 @@ Input processing happens in the `HotkeyTextBox_PreviewKeyDown` method:
 
 ## Preview
 
-Finally, here's how the control looks in [one of my applications](/Projects/LightBulb):
+Finally, here's how the control looks in [one of my applications](https://github.com/Tyrrrz/LightBulb):
 
 ![example usage](1.png)

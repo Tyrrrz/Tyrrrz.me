@@ -122,4 +122,4 @@ I implemented the WordPress plugin using shortcode pattern which is convenient f
 [steam_market_excerpt game="753" name="203160-A Survivor Is Born (Foil Trading Card)" displayname="A Survivor Is Born (Foil)"]
 ```
 
-More info and source code can be found [here](/Projects/WPSteamMarketExcerpt).
+More info and source code can be found [here](https://github.com/Tyrrrz/WPSteamMarketExcerpt).

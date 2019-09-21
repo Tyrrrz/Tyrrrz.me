@@ -16,6 +16,10 @@ const Container = styled.div`
 
 const Title = styled.div`
   font-size: 1.5em;
+
+  a {
+    text-decoration: none;
+  }
 `;
 
 const MetadataContainer = styled.div`
@@ -36,10 +40,6 @@ const MetadataContainer = styled.div`
 
 const Excerpt = styled.div`
   margin-top: 0.3em;
-
-  a {
-    font-weight: 600;
-  }
 `;
 
 export const query = graphql`

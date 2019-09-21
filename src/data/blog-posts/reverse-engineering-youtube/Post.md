@@ -3,7 +3,7 @@ title: Reverse-engineering YouTube
 date: 2017-12-15
 ---
 
-Almost a year ago, I started developing [YoutubeExplode](/Projects/YoutubeExplode), a library that scraps information on YouTube videos and lets you download them. Originally, my main motivation for developing it was simply gaining experience since this task involved a lot of research and reverse-engineering. Nowadays, YoutubeExplode is arguably the most consistent and robust .NET library for doing this.
+Almost a year ago, I started developing [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode), a library that scraps information on YouTube videos and lets you download them. Originally, my main motivation for developing it was simply gaining experience since this task involved a lot of research and reverse-engineering. Nowadays, YoutubeExplode is arguably the most consistent and robust .NET library for doing this.
 
 Since this is a relatively popular discussion topic among many beginner developers, I thought that I could help out by sharing the knowledge I found by spending dozens of hours staring at Chrome Developer Tools.
 
@@ -445,4 +445,4 @@ Here's a recap of all required steps you need to take in order to download a vid
 11. Use `itag` to classify streams by their properties.
 12. Choose a stream and download it in segments.
 
-If you have any issues, you can always refer to the source code of [YoutubeExplode](/Projects/YoutubeExplode) or ask me questions in the comments.
+If you have any issues, you can always refer to the source code of [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) or ask me questions in the comments.
