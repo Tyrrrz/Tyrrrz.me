@@ -3,7 +3,13 @@ const path = require('path');
 const settings = require('./src/settings');
 const theme = require('./src/theme');
 
-const siteMetadata = {
+// Gatsby's default syntax for defining plugins is awful so I wrote this
+const resolvePlugin = (plugin, options) => ({
+  resolve: plugin,
+  options: options
+});
+
+exports.siteMetadata = {
   siteUrl: settings.siteDomain,
   title: `Alexey Golub`,
   description: `Alexey Golub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker`,
@@ -12,14 +18,6 @@ const siteMetadata = {
   github: `Tyrrrz`,
   instagram: `Tyrrrz`
 };
-
-// Gatsby's default syntax for defining plugins is awful so I wrote this
-const resolvePlugin = (plugin, options) => ({
-  resolve: plugin,
-  options: options
-});
-
-exports.siteMetadata = siteMetadata;
 
 exports.plugins = [
   // Source: file system

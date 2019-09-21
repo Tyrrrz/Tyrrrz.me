@@ -7,10 +7,7 @@ export default ({ title, description }) => {
   const siteMetadata = useSiteMetadata();
 
   // Append site title to page title
-  title =
-    title !== null && title !== undefined
-      ? `${title} | ${siteMetadata.title}`
-      : siteMetadata.title;
+  title = title ? `${title} | ${siteMetadata.title}` : siteMetadata.title;
 
   // Use fallback description if it's not set
   description = description || siteMetadata.description;
