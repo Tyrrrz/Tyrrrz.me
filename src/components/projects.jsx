@@ -7,11 +7,9 @@ import ProjectListing from './projectListing';
 
 export const query = graphql`
   query {
-    githubUser {
-      repositories {
-        nodes {
-          ...ProjectListingFragment
-        }
+    allProjectsJson(sort: { fields: stars, order: DESC }) {
+      nodes {
+        ...ProjectListingFragment
       }
     }
   }
@@ -21,10 +19,8 @@ export default ({ data }) => (
   <Layout>
     <Meta title="Projects" />
 
-    {data.githubUser.repositories.nodes
-      .filter(node => node.stargazers.totalCount >= 35)
-      .map(node => (
-        <ProjectListing node={node} />
-      ))}
+    {data.allProjectsJson.nodes.map(node => (
+      <ProjectListing node={node} />
+    ))}
   </Layout>
 );

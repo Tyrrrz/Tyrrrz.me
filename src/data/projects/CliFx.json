@@ -1,0 +1,7 @@
+{
+  "name": "CliFx",
+  "url": "https://github.com/Tyrrrz/CliFx",
+  "description": "Declarative framework for building command line interfaces",
+  "stars": 298,
+  "language": "C#"
+}

@@ -3,7 +3,7 @@ import { graphql } from 'gatsby';
 
 import styled from '@emotion/styled';
 import Icon from '@mdi/react';
-import { mdiStar, mdiCheckboxBlankCircle } from '@mdi/js';
+import { mdiStar, mdiCodeTags } from '@mdi/js';
 
 import theme from '../theme';
 
@@ -38,24 +38,12 @@ const Description = styled.div`
 `;
 
 export const query = graphql`
-  fragment ProjectListingFragment on GithubUserRepositoriesNodes {
-    url
+  fragment ProjectListingFragment on ProjectsJson {
     name
+    url
     description
-    usesCustomOpenGraphImage
-    openGraphImageUrl
-    primaryLanguage {
-      name
-      color
-    }
-    stargazers {
-      totalCount
-    }
-    isArchived
-    isPrivate
-    isDisabled
-    isLocked
-    isMirror
+    stars
+    language
   }
 `;
 
@@ -69,16 +57,13 @@ export default ({ node }) => (
       <span>
         <Icon path={mdiStar} color={theme.accentColor} />
         {` `}
-        {node.stargazers.totalCount}
+        {node.stars}
       </span>
 
       <span>
-        <Icon
-          path={mdiCheckboxBlankCircle}
-          color={node.primaryLanguage.color}
-        />
+        <Icon path={mdiCodeTags} />
         {` `}
-        {node.primaryLanguage.name}
+        {node.language}
       </span>
     </MetadataContainer>
 
