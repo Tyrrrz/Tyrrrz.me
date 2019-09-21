@@ -93,7 +93,7 @@ module.exports = {
       background_color: theme.mainColor,
       icon: `src/static/favicon.png`,
       start_url: `/`,
-      display: `standalone`
+      display: `browser`
     }),
 
     // Inject canonical URLs into meta tags
