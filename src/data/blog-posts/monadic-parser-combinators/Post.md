@@ -466,6 +466,6 @@ Parsing doesn't have to be a daunting and unapproachable task. Functional progra
 
 If you're still thirsty for knowledge and want to see a slightly more complex example, check out [LtGt](https://github.com/Tyrrrz/LtGt), an HTML processor (with CSS selectors!) that I've written using Sprache. Should you wish to learn more about parsing in general, I recommend reading ["Parsing in C#"](https://tomassetti.me/parsing-in-csharp), an article by Gabriele Tomassetti.
 
-There are also other monadic parser combinator libraries in .NET that you can check out, most notably [Superpower](https://github.com/datalust/superpower), [Pidgin](https://github.com/benjamin-hodgson/Pidgin) and [FParsec (F#)](https://github.com/stephan-tolksdorf/fparsec).
+There are also other monadic parser combinator libraries in .NET that you can check out, most notably [Superpower](https://github.com/datalust/superpower), [Pidgin](https://github.com/benjamin-hodgson/Pidgin), [Parsley](https://github.com/plioi/parsley), and [FParsec (F#)](https://github.com/stephan-tolksdorf/fparsec).
 
 This article is largely based on my talk from .NET Fest 2019, "Monadic parser combinators in C#". You can find the original presentation and full source code for the JSON parser [here](https://github.com/Tyrrrz/DotNetFest2019).
