@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'gatsby';
 
 import styled from '@emotion/styled';
 import Icon from '@mdi/react';
@@ -6,10 +7,12 @@ import {
   mdiAt,
   mdiGithubCircle,
   mdiTwitterCircle,
-  mdiInstagram
+  mdiInstagram,
+  mdiCoinOutline
 } from '@mdi/js';
 
 import theme from '../theme';
+import routes from '../routes';
 import useSiteMetadata from './hooks/useSiteMetadata';
 
 const Container = styled.footer`
@@ -19,6 +22,23 @@ const Container = styled.footer`
 `;
 
 const SocialLink = styled.a`
+  margin-left: 0.15em;
+  margin-right: 0.15em;
+
+  svg {
+    width: 1.4em;
+  }
+
+  &:hover {
+    svg {
+      path {
+        fill: ${theme.accentColor};
+      }
+    }
+  }
+`;
+
+const InternalLink = styled(Link)`
   margin-left: 0.15em;
   margin-right: 0.15em;
 
@@ -55,6 +75,10 @@ export default () => {
       <SocialLink href={`https://instagram.com/${siteMetadata.instagram}`}>
         <Icon path={mdiInstagram} />
       </SocialLink>
+
+      <InternalLink to={routes.static.donate.path}>
+        <Icon path={mdiCoinOutline} />
+      </InternalLink>
     </Container>
   );
 };

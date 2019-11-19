@@ -13,6 +13,10 @@ export default () => {
             github
             twitter
             instagram
+            patreon
+            buymeacoffee
+            bitcoin
+            ethereum
           }
         }
       }

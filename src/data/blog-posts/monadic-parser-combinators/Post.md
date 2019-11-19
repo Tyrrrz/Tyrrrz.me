@@ -60,13 +60,13 @@ Whether an input is considered valid or not is decided by a set of grammar rules
 
 Parsing numbers isn't rocket science and you wouldn't be reading this article if that was what you were after. Everyone can write a quick regular expression to split text like that into syntactic components.
 
-Speaking of regular expressions, do you know why is it that they are called *regular*?
+Speaking of regular expressions, do you know why is it that they are called _regular_?
 
-There's an area in computer science called *the formal language theory* that specifically deals with languages. Essentially, it's a set of abstractions that help us understand languages from a more formal standpoint.
+There's an area in computer science called _the formal language theory_ that specifically deals with languages. Essentially, it's a set of abstractions that help us understand languages from a more formal standpoint.
 
 A formal language itself builds mainly upon the concept of grammar, which is a set of rules that dictate how to produce valid symbols in a given language. When we talk about valid and invalid inputs, we refer to grammar.
 
-Based on the complexity of these rules, grammars are separated into different types according to the [Chomsky hierarchy](https://en.wikipedia.org/wiki/Chomsky_hierarchy). At the lowest level you will find the two most common grammar types, the *regular* and *context-free* grammars.
+Based on the complexity of these rules, grammars are separated into different types according to the [Chomsky hierarchy](https://en.wikipedia.org/wiki/Chomsky_hierarchy). At the lowest level you will find the two most common grammar types, the _regular_ and _context-free_ grammars.
 
 ```plaintext
 +---------------------------------+

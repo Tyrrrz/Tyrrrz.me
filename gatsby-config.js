@@ -16,7 +16,11 @@ exports.siteMetadata = {
   email: `tyrrrz@gmail.com`,
   twitter: `Tyrrrz`,
   github: `Tyrrrz`,
-  instagram: `Tyrrrz`
+  instagram: `Tyrrrz`,
+  patreon: `Tyrrrz`,
+  buymeacoffee: `Tyrrrz`,
+  bitcoin: `bc1qa3jkft6uckysrxrlc2sygguxshf7gufy0zm692`,
+  ethereum: `0x00E6B59BAD5F0c887E0eBD1b7bBd7b024d0796c9`
 };
 
 exports.plugins = [
