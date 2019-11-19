@@ -17,7 +17,7 @@ export default () => {
       <p>
         If you found any of my projects useful and want to support me, please
         consider donating. This will put a smile on my face and motivate me to
-        continue :)
+        continue 😊
       </p>
 
       <ul>
@@ -35,6 +35,16 @@ export default () => {
         <li>
           Ethereum (ETH): <code>{siteMetadata.ethereum}</code>
         </li>
+      </ul>
+
+      <br />
+
+      <p>I want to thank the following people for their amazing support ❤️</p>
+      <ul>
+        <li>Mark Ledwich</li>
+        <li>BouncingWalrus</li>
+        <li>Peter Wesselius</li>
+        <li>Thomas C</li>
       </ul>
     </Layout>
   );
