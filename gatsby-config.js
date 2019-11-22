@@ -86,6 +86,11 @@ exports.plugins = [
     siteSpeedSampleRate: 10
   }),
 
+  // Clicky Analytics integration
+  resolvePlugin(`gatsby-plugin-clicky`, {
+    siteId: settings.clickyId
+  }),
+
   // Netlify platform integration
   resolvePlugin(`gatsby-plugin-netlify`),
 
