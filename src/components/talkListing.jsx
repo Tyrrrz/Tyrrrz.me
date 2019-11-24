@@ -3,9 +3,7 @@ import { graphql } from 'gatsby';
 
 import styled from '@emotion/styled';
 import MdiIcon from '@mdi/react';
-import { mdiStar, mdiCodeTags } from '@mdi/js';
-
-import theme from '../theme';
+import { mdiCalendar, mdiTranslate } from '@mdi/js';
 
 const Icon = styled(MdiIcon)`
   margin-top: 0.06em;
@@ -19,7 +17,7 @@ const Container = styled.div`
   }
 `;
 
-const Name = styled.div`
+const Title = styled.div`
   font-size: 1.5em;
 
   a {
@@ -41,36 +39,48 @@ const Description = styled.div`
   margin-top: 0.3em;
 `;
 
+const Links = styled.div`
+  margin-top: 0.3em;
+
+  a + a {
+    margin-left: 0.85em;
+  }
+`;
+
 export const query = graphql`
-  fragment ProjectListingFragment on ProjectsJson {
-    name
-    url
+  fragment TalkListingFragment on TalksJson {
+    title
     description
-    stars
+    event
+    date(formatString: "DD MMMM YYYY")
     language
+    eventUrl
+    presentationUrl
+    recordingUrl
   }
 `;
 
 export default ({ node }) => (
   <Container>
-    <Name>
-      <a href={node.url}>{node.name}</a>
-    </Name>
+    <Title>
+      <a href={node.eventUrl}>{node.title}</a>
+    </Title>
 
     <MetadataContainer>
       <span>
-        <Icon path={mdiStar} color={theme.accentColor} />
-        {` `}
-        {node.stars}
+        <Icon path={mdiCalendar} /> {node.event} ({node.date})
       </span>
 
       <span>
-        <Icon path={mdiCodeTags} />
-        {` `}
-        {node.language}
+        <Icon path={mdiTranslate} /> {node.language}
       </span>
     </MetadataContainer>
 
     <Description>{node.description}</Description>
+
+    <Links>
+      {node.presentationUrl && <a href={node.presentationUrl}>Presentation</a>}
+      {node.recordingUrl && <a href={node.recordingUrl}>Recording</a>}
+    </Links>
   </Container>
 );

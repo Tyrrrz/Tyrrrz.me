@@ -17,6 +17,10 @@ const staticRoutes = {
     path: `/blog`,
     component: path.resolve(__dirname, `components`, `blog.jsx`)
   },
+  talks: {
+    path: `/talks`,
+    component: path.resolve(__dirname, `components`, `talks.jsx`)
+  },
   donate: {
     path: `/donate`,
     component: path.resolve(__dirname, `components`, `donate.jsx`)

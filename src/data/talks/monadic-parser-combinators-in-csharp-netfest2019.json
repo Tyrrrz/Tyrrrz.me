@@ -1,0 +1,10 @@
+{
+  "title": "Monadic parser combinators in C#",
+  "description": "Writing parsers for complex recursive grammars using monads in C#",
+  "event": ".NET Fest 2019",
+  "date": "2019-10-25",
+  "language": "Russian",
+  "eventUrl": "http://dotnetfest.com/indexe.html",
+  "presentationUrl": "https://github.com/Tyrrrz/DotNetFest2019",
+  "recordingUrl": null
+}

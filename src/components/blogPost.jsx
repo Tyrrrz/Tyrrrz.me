@@ -2,7 +2,7 @@ import React from 'react';
 import { graphql } from 'gatsby';
 
 import styled from '@emotion/styled';
-import Icon from '@mdi/react';
+import MdiIcon from '@mdi/react';
 import { mdiCalendar, mdiClockOutline } from '@mdi/js';
 import { Disqus } from 'gatsby-plugin-disqus';
 
@@ -13,6 +13,12 @@ import Layout from './layout';
 import Meta from './meta';
 import { humanizeTimeToRead } from '../utils';
 
+const Icon = styled(MdiIcon)`
+  margin-top: 0.06em;
+  vertical-align: top;
+  width: 1em;
+`;
+
 const Title = styled.div`
   font-size: 2em;
 `;
@@ -21,12 +27,6 @@ const MetadataContainer = styled.div`
   margin-top: 0.5em;
   opacity: 0.65;
   font-size: 0.85em;
-
-  svg {
-    margin-top: 0.06em;
-    vertical-align: top;
-    width: 1em;
-  }
 
   span + span {
     margin-left: 1em;

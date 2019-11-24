@@ -2,11 +2,17 @@ import React from 'react';
 import { graphql, Link } from 'gatsby';
 
 import styled from '@emotion/styled';
-import Icon from '@mdi/react';
+import MdiIcon from '@mdi/react';
 import { mdiCalendar, mdiClockOutline } from '@mdi/js';
 
 import routes from '../routes';
 import { humanizeTimeToRead } from '../utils';
+
+const Icon = styled(MdiIcon)`
+  margin-top: 0.06em;
+  vertical-align: top;
+  width: 1em;
+`;
 
 const Container = styled.div`
   &:not(:last-child) {
@@ -26,12 +32,6 @@ const MetadataContainer = styled.div`
   margin-top: 0.3em;
   opacity: 0.65;
   font-size: 0.8em;
-
-  svg {
-    margin-top: 0.06em;
-    vertical-align: top;
-    width: 1em;
-  }
 
   span + span {
     margin-left: 1em;

@@ -87,6 +87,7 @@ export default () => {
               home
             </Link>
           </MenuItem>
+
           <MenuItem>
             <Link
               activeStyle={ActiveMenuItemLinkStyle}
@@ -96,6 +97,7 @@ export default () => {
               projects
             </Link>
           </MenuItem>
+
           <MenuItem>
             <Link
               activeStyle={ActiveMenuItemLinkStyle}
@@ -103,6 +105,16 @@ export default () => {
               to={routes.static.blog.path}
             >
               blog
+            </Link>
+          </MenuItem>
+
+          <MenuItem>
+            <Link
+              activeStyle={ActiveMenuItemLinkStyle}
+              partiallyActive={true}
+              to={routes.static.talks.path}
+            >
+              talks
             </Link>
           </MenuItem>
         </Menu>
