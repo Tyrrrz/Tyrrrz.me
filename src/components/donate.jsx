@@ -17,7 +17,10 @@ export default () => {
       <p>
         If you found any of my projects useful and want to support me, please
         consider donating. This will put a smile on my face and motivate me to
-        continue 😊
+        continue{' '}
+        <span role="img" aria-label="Smile">
+          😊
+        </span>
       </p>
 
       <ul>
@@ -37,9 +40,12 @@ export default () => {
         </li>
       </ul>
 
-      <br />
-
-      <p>I want to thank the following people for their amazing support ❤️</p>
+      <p>
+        I want to thank the following people for their amazing support{' '}
+        <span role="img" aria-label="Heart">
+          ❤️
+        </span>
+      </p>
       <ul>
         <li>Mark Ledwich</li>
         <li>BouncingWalrus</li>
