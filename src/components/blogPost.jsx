@@ -52,6 +52,13 @@ export const query = graphql`
       frontmatter {
         title
         date(formatString: "DD MMMM YYYY")
+        cover {
+          childImageSharp {
+            original {
+              src
+            }
+          }
+        }
       }
       fields {
         slug
@@ -64,10 +71,12 @@ export const query = graphql`
 `;
 
 export default ({ data }) => {
+  const coverImageUrl =
+    data.markdownRemark.frontmatter.cover &&
+    new URL(data.markdownRemark.frontmatter.cover.childImageSharp.original.src, settings.siteDomain);
+
   const disqusConfig = {
-    url: `${settings.siteDomain}${routes.dynamic.blogPost.getPath(
-      data.markdownRemark.fields.slug
-    )}`,
+    url: new URL(routes.dynamic.blogPost.getPath(data.markdownRemark.fields.slug), settings.siteDomain),
     identifier: `Blog/${data.markdownRemark.fields.slug}`,
     title: data.markdownRemark.frontmatter.title
   };
@@ -77,6 +86,7 @@ export default ({ data }) => {
       <Meta
         title={data.markdownRemark.frontmatter.title}
         description={data.markdownRemark.excerpt}
+        image={coverImageUrl}
       />
 
       <Title>{data.markdownRemark.frontmatter.title}</Title>

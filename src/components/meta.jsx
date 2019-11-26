@@ -3,7 +3,7 @@ import Helmet from 'react-helmet';
 
 import useSiteMetadata from './hooks/useSiteMetadata';
 
-export default ({ title, description }) => {
+export default ({ title, description, image }) => {
   const siteMetadata = useSiteMetadata();
 
   // Append site title to page title
@@ -29,6 +29,8 @@ export default ({ title, description }) => {
       <meta name="description" content={description} />
       <meta property="og:description" content={description} />
       <meta name="twitter:description" content={description} />
+
+      {image && <meta property="og:image" content={image} />}
     </Helmet>
   );
 };

@@ -1,6 +1,7 @@
 ---
 title: Monadic parser combinators in C#
 date: 2019-11-10
+cover: Cover.png
 ---
 
 The concept of parsing has always seemed very complicated to me. I thought that to work in this area you had to have access to some secret knowledge brought by an alien race or something.
