@@ -68,11 +68,15 @@ export default ({ node }) => (
 
     <MetadataContainer>
       <span>
-        <Icon path={mdiCalendar} /> {node.event} ({node.date})
+        <Icon path={mdiCalendar} />
+        {` `}
+        {node.event} ({node.date})
       </span>
 
       <span>
-        <Icon path={mdiTranslate} /> {node.language}
+        <Icon path={mdiTranslate} />
+        {` `}
+        {node.language}
       </span>
     </MetadataContainer>
 

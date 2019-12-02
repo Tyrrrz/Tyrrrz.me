@@ -73,10 +73,16 @@ export const query = graphql`
 export default ({ data }) => {
   const coverImageUrl =
     data.markdownRemark.frontmatter.cover &&
-    new URL(data.markdownRemark.frontmatter.cover.childImageSharp.original.src, settings.siteDomain);
+    new URL(
+      data.markdownRemark.frontmatter.cover.childImageSharp.original.src,
+      settings.siteDomain
+    );
 
   const disqusConfig = {
-    url: new URL(routes.dynamic.blogPost.getPath(data.markdownRemark.fields.slug), settings.siteDomain),
+    url: new URL(
+      routes.dynamic.blogPost.getPath(data.markdownRemark.fields.slug),
+      settings.siteDomain
+    ),
     identifier: `Blog/${data.markdownRemark.fields.slug}`,
     title: data.markdownRemark.frontmatter.title
   };
@@ -93,7 +99,9 @@ export default ({ data }) => {
 
       <MetadataContainer>
         <span>
-          <Icon path={mdiCalendar} /> {data.markdownRemark.frontmatter.date}
+          <Icon path={mdiCalendar} />
+          {` `}
+          {data.markdownRemark.frontmatter.date}
         </span>
 
         <span>

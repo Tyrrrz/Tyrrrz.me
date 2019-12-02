@@ -66,7 +66,9 @@ export default ({ node }) => (
 
     <MetadataContainer>
       <span>
-        <Icon path={mdiCalendar} /> {node.frontmatter.date}
+        <Icon path={mdiCalendar} />
+        {` `}
+        {node.frontmatter.date}
       </span>
 
       <span>
