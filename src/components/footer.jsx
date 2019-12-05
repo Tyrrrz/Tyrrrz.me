@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'gatsby';
 
+import { OutboundLink } from 'gatsby-plugin-google-analytics'
+
 import styled from '@emotion/styled';
 import Icon from '@mdi/react';
 import {
@@ -21,7 +23,7 @@ const Container = styled.footer`
   text-align: center;
 `;
 
-const SocialLink = styled.a`
+const SocialLink = styled(OutboundLink)`
   margin-left: 0.15em;
   margin-right: 0.15em;
 

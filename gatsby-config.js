@@ -83,7 +83,8 @@ exports.plugins = [
     anonymize: false,
     respectDNT: false,
     sampleRate: 100,
-    siteSpeedSampleRate: 10
+    siteSpeedSampleRate: 10,
+    alwaysSendReferrer: true
   }),
 
   // Clicky Analytics integration

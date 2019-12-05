@@ -1,6 +1,8 @@
 import React from 'react';
 import { graphql } from 'gatsby';
 
+import { OutboundLink } from 'gatsby-plugin-google-analytics'
+
 import styled from '@emotion/styled';
 import MdiIcon from '@mdi/react';
 import { mdiCalendar, mdiTranslate } from '@mdi/js';
@@ -63,7 +65,7 @@ export const query = graphql`
 export default ({ node }) => (
   <Container>
     <Title>
-      <a href={node.eventUrl}>{node.title}</a>
+      <OutboundLink href={node.eventUrl}>{node.title}</OutboundLink>
     </Title>
 
     <MetadataContainer>
@@ -83,8 +85,8 @@ export default ({ node }) => (
     <Description>{node.description}</Description>
 
     <Links>
-      {node.presentationUrl && <a href={node.presentationUrl}>Presentation</a>}
-      {node.recordingUrl && <a href={node.recordingUrl}>Recording</a>}
+      {node.presentationUrl && <OutboundLink href={node.presentationUrl}>Presentation</OutboundLink>}
+      {node.recordingUrl && <OutboundLink href={node.recordingUrl}>Recording</OutboundLink>}
     </Links>
   </Container>
 );
