@@ -465,7 +465,7 @@ That's it, we have a working JSON processor! We can now call `JsonEntity.Parse` 
 
 Parsing doesn't have to be a daunting and unapproachable task. Functional programming is notorious for its simplicity and elegance and there's no task that can't be solved by throwing monads at it -- parsing being no exception. And luckily, we can do it in C# as well!
 
-If you're still thirsty for knowledge and want to see a slightly more complex example, check out [LtGt](https://github.com/Tyrrrz/LtGt), an HTML processor (with CSS selectors!) that I've written using Sprache. Should you wish to learn more about parsing in general, I recommend reading ["Parsing in C#"](https://tomassetti.me/parsing-in-csharp), an article by Gabriele Tomassetti.
+If you're still thirsty for knowledge and want to see a slightly more complex example, check out [LtGt](https://github.com/Tyrrrz/LtGt/tree/csharp-sprache), an HTML processor (with CSS selectors!) that I've written using Sprache. Should you wish to learn more about parsing in general, I recommend reading ["Parsing in C#"](https://tomassetti.me/parsing-in-csharp), an article by Gabriele Tomassetti.
 
 There are also other monadic parser combinator libraries in .NET that you can check out, most notably [Superpower](https://github.com/datalust/superpower), [Pidgin](https://github.com/benjamin-hodgson/Pidgin), [Parsley](https://github.com/plioi/parsley), and [FParsec (F#)](https://github.com/stephan-tolksdorf/fparsec).
 
