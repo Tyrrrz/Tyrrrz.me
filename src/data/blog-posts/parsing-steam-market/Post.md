@@ -6,7 +6,7 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
-At some point I was contracted to make a WordPress plugin that displays some basic information on an item from Steam Market: its name, image, and price. I was initially hoping that there would be some sort of API for this but unfortunately there wasn't, probably because it would make developing bots a bit too easy.
+At some point I was contracted to make a WordPress plugin that displays some basic information on an item from Steam Market: its name, image, and price. I was initially hoping that there would be some sort of API for this but unfortunately there isn't, probably because it would make developing bots a bit too easy.
 
 Having spent some time inspecting the listing pages with Chrome's developer console, I've discovered that all of the pricing information is pulled using a single AJAX request which can be easily reverse-engineered. Let's take a look at how it works.
 
@@ -32,7 +32,7 @@ You can get the values for the first two parameters straight from the item's URL
 
 ![example listing](Example.png)
 
-This leaves us without only the final required parameter, `currency`. I'm not sure what is the full list of supported currencies and their IDs, but the value of `1` seems to correspond to USD so we'll use that.
+We still need to set the value for the third required parameter, `currency`. I'm not sure what is the full list of supported currencies and their IDs, but the value of `1` seems to correspond to USD so we'll use that.
 
 Our final URL with all the parameters set should look like this:
 
@@ -78,13 +78,13 @@ $url =
 
 It's a bit different than the previous one but it takes the same parameters. In fact, the base of this request is the item's listing URL we've inspected earlier.
 
-By setting `start` to `0` and `count` to `1` we are limiting the response to only one listing since we are only interested in the image, which is the same for all listings anyway.
+By setting `start` to `0` and `count` to `1` we are limiting the response to one listing since we are only interested in the image which is the same for all listings anyway.
 
 Finally, the fully-formed URL should look something like this:
 
 `http://steamcommunity.com/market/listings/730/AK-47%20%7C%20Redline%20%28Field-Tested%29/render?start=0&count=1&currency=1&format=json`
 
-A GET request with this URL will return a rather large JSON response that contains raw HTML inside:
+A GET request with this URL will return a rather large JSON response that contains raw HTML inside (I truncated most of it for brevity):
 
 ```json
 {
@@ -92,10 +92,7 @@ A GET request with this URL will return a rather large JSON response that contai
   "start": 0,
   "pagesize": "1",
   "total_count": 2302,
-  "results_html": "<div class=\"market_listing_table_header\">\r\n\t<div class=\"market_listing_price_listings_block\">\r\n\t\t<span class=\"market_listing_right_cell market_listing_action_buttons\"></span>\r\n\t\t<span class=\"market_listing_right_cell market_listing_their_price\">PRICE</span>\r\n\t</div>\r\n\t<span class=\"market_listing_right_cell market_listing_seller\">SELLER</span>\r\n\t<div><span class=\"market_listing_header_namespacer\"></span>NAME</div>\r\n</div>\r\n\r\n<div class=\"market_listing_row market_recent_listing_row listing_2428992060878056432\" id=\"listing_2428992060878056432\">\r\n\t\r\n\t<div class=\"market_listing_item_img_container\">\t\t<img id=\"listing_2428992060878056432_image\" src=\"http://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpKKqPrxN7LEmyVQ7MEpiLuSrYmnjQO3-UdsZGHyd4_Bd1RvNQ7T_FDrw-_ng5Pu75iY1zI97bhLsvQz/62fx62f\" srcset=\"http://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpKKqPrxN7LEmyVQ7MEpiLuSrYmnjQO3-UdsZGHyd4_Bd1RvNQ7T_FDrw-_ng5Pu75iY1zI97bhLsvQz/62fx62f 1x, http://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpKKqPrxN7LEmyVQ7MEpiLuSrYmnjQO3-UdsZGHyd4_Bd1RvNQ7T_FDrw-_ng5Pu75iY1zI97bhLsvQz/62fx62fdpx2x 2x\" style=\"border-color: #D2D2D2;\" class=\"market_listing_item_img\" alt=\"\" />\t</div>\r\n\t\t<div class=\"market_listing_price_listings_block\">\r\n\t\t\t\t\t<div class=\"market_listing_right_cell market_listing_action_buttons\">\r\n\t\t\t\t\t\t\t\t\t<div class=\"market_listing_buy_button\">\r\n\t\t\t\t\t\t\t\t\t\t\t\t\t<a href=\"javascript:BuyMarketListing('listing', '2428992060878056432', 730, '2', '12735545843')\" class=\"item_market_action_button btn_green_white_innerfade btn_small\">\r\n\t\t\t\t\t\t\t\t<span>\r\n\t\t\t\t\t\t\t\t\tBuy Now\t\t\t\t\t\t\t\t</span>\r\n\t\t\t\t\t\t\t</a>\r\n\t\t\t\t\t\t\t\t\t\t\t</div>\r\n\t\t\t\t\t\t\t</div>\r\n\t\t\t\t<div class=\"market_listing_right_cell market_listing_their_price\">\r\n\t\t\t<span class=\"market_table_value\">\r\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t<span class=\"market_listing_price market_listing_price_with_fee\">\r\n\t\t\t\t\t\t$6.72\t\t\t\t\t</span>\r\n\t\t\t\t\t<span class=\"market_listing_price market_listing_price_with_publisher_fee_only\">\r\n\t\t\t\t\t\t$6.43\t\t\t\t\t</span>\r\n\t\t\t\t\t<span class=\"market_listing_price market_listing_price_without_fee\">\r\n\t\t\t\t\t\t$5.85\t\t\t\t\t</span>\r\n\t\t\t\t\t\t\t\t<br/>\r\n\t\t\t\t\t\t\t</span>\r\n\t\t</div>\r\n\t</div>\r\n\t<div class=\"market_listing_right_cell market_listing_seller\">\r\n\t\t<span class=\"market_listing_owner_avatar\">\r\n\t\t\t<span class=\"playerAvatar in-game\" >\r\n\t\t\t\t<img src=\"http://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/a5/a5892c64e3ed5736e538699a44651f4e987c5a22.jpg\" alt=\"\">\r\n\t\t\t</span>\r\n\t\t</span>\r\n\t</div>\r\n\r\n\t\t<div class=\"market_listing_item_name_block\">\r\n\t\t<span id=\"listing_2428992060878056432_name\" class=\"market_listing_item_name\" style=\"color: #D2D2D2;\">AK-47 | Redline (Field-Tested)</span>\r\n\t\t<br/>\r\n\t\t<span class=\"market_listing_game_name\">Counter-Strike: Global Offensive</span>\r\n\t</div>\r\n\t<div style=\"clear: both;\"></div>\r\n</div>\r\n"
-
-  // The rest is removed for brevity because the response is actually quite big
-  // ...
+  "results_html": "<div class=\"market_listing_table_header\">...</div>"
 }
 ```
 
@@ -103,9 +100,9 @@ To get the image, we need to parse the HTML inside `results_html` and find an `<
 
 `http://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpKKqPrxN7LEmyVQ7MEpiLuSrYmnjQO3-UdsZGHyd4_Bd1RvNQ7T_FDrw-_ng5Pu75iY1zI97bhLsvQz/62fx62f/`
 
-![AK 47 | Redline](http://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpKKqPrxN7LEmyVQ7MEpiLuSrYmnjQO3-UdsZGHyd4_Bd1RvNQ7T_FDrw-_ng5Pu75iY1zI97bhLsvQz/256fx128f/)
+![AK 47 | Redline](https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpKKqPrxN7LEmyVQ7MEpiLuSrYmnjQO3-UdsZGHyd4_Bd1RvNQ7T_FDrw-_ng5Pu75iY1zI97bhLsvQz/256fx128f/)
 
-If you look at the end of the URL, you can see the portion where it specifies desired image dimensions, which is set to `62fx62f` in this case. We can change these to anything we want and the server will return an image of that size. If you specify a size which is too big, the generated image will remain centered at its maximum size while the remaining canvas will be transparent.
+If you take a look at the end of the URL, you can see the portion where it specifies desired image dimensions, which is set to `62fx62f` in this case. We can change these to anything we want and the server will return an image of that size. However, if you specify a size which is too big, the image will be centered and remain at its maximum size while the rest of the canvas will be transparent.
 
 ## Source code
 
