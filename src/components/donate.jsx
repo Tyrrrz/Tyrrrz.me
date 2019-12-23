@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { OutboundLink } from 'gatsby-plugin-google-analytics'
+import { OutboundLink } from 'gatsby-plugin-google-analytics';
 
 import Layout from '../components/layout';
 import Meta from '../components/meta';
@@ -26,12 +26,15 @@ export default () => {
 
       <ul>
         <li>
-          <OutboundLink href={`https://patreon.com/${siteMetadata.patreon}`}>
+          <OutboundLink
+            href={`https://patreon.com/${siteMetadata.patreon}`}>
             Patreon
           </OutboundLink>
         </li>
         <li>
-          <OutboundLink href={`https://buymeacoffee.com/${siteMetadata.buymeacoffee}`}>
+          <OutboundLink
+            href={`https://buymeacoffee.com/${siteMetadata.buymeacoffee}`}
+          >
             Buy me a coffee
           </OutboundLink>
         </li>

@@ -1,7 +1,10 @@
 ---
 title: Creative use of extension methods
 date: 2019-01-26
+cover: Cover.png
 ---
+
+![cover](Cover.png)
 
 I'm sure everyone with at least some background in C# is aware of extension methods -- a nice feature that lets developers extend existing classes with new methods.
 

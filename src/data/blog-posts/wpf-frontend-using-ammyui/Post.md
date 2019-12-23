@@ -1,7 +1,10 @@
 ---
 title: WPF frontend using AmmyUI
 date: 2017-11-18
+cover: Cover.png
 ---
+
+![cover](Cover.png)
 
 Quite a long time ago I've stumbled upon a very interesting open source project called [AmmyUI](https://github.com/AmmyUI/AmmyUI). Its main goal is to make designing XAML apps a lot more fluid by... removing XAML and replacing it with a custom JSON-like layout language with additional features. I've never been a big fan of XAML, so it got me interested and I decided to use it for one of my projects, [DiscordChatExporter](https://github.com/Tyrrrz/DiscordChatExporter).
 

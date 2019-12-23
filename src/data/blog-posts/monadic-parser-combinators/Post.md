@@ -4,6 +4,8 @@ date: 2019-11-10
 cover: Cover.png
 ---
 
+![cover](Cover.png)
+
 The concept of parsing has always seemed very complicated to me. I thought that to work in this area you had to have access to some secret knowledge brought by an alien race or something.
 
 Some time ago, I had to implement proper markdown parsing in [DiscordChatExporter](https://github.com/Tyrrrz/DiscordChatExporter) so that I could replace the ineffective regular expressions I had been using. I had no idea how to approach this problem, so I spent days researching into this, eventually learning about parser combinators. This concept introduced me to a whole new paradigm of writing parsers that actually makes it a fun and enjoyable experience.

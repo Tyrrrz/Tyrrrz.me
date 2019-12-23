@@ -1,7 +1,7 @@
 import React from 'react';
 import { graphql } from 'gatsby';
 
-import { OutboundLink } from 'gatsby-plugin-google-analytics'
+import { OutboundLink } from 'gatsby-plugin-google-analytics';
 
 import styled from '@emotion/styled';
 import MdiIcon from '@mdi/react';
@@ -85,8 +85,12 @@ export default ({ node }) => (
     <Description>{node.description}</Description>
 
     <Links>
-      {node.presentationUrl && <OutboundLink href={node.presentationUrl}>Presentation</OutboundLink>}
-      {node.recordingUrl && <OutboundLink href={node.recordingUrl}>Recording</OutboundLink>}
+      {node.presentationUrl && (
+        <OutboundLink href={node.presentationUrl}>Presentation</OutboundLink>
+      )}
+      {node.recordingUrl && (
+        <OutboundLink href={node.recordingUrl}>Recording</OutboundLink>
+      )}
     </Links>
   </Container>
 );

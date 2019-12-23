@@ -1,7 +1,10 @@
 ---
 title: IIS idle timeout workaround
 date: 2017-11-16
+cover: Cover.png
 ---
+
+![cover](Cover.png)
 
 Web applications hosted in IIS adhere to the _Idle Timeout_ setting, which defines a time period of inactivity after which an application is shut down. Subsequent requests will trigger the application to start up again, but it usually takes a while -- this rather small ASP.net Core website takes around 10 seconds to start and respond to first request.
 
@@ -21,14 +24,14 @@ Application Insights offers a very useful feature called _Availability_ -- it le
 
 Go to [Azure Portal](https://portal.azure.com/) and add a new Application Insights resource.
 
-![create new resource](1.png)
+![create new resource](Step1.png)
 
 Navigate to **Availability** under **Investigate** section. Find the **Add test** button to create a new test.
 
-![add test](2.png)
+![add test](Step2.png)
 
 Configure the test with your URL and click **Create**.
 
-![configure test](3.png)
+![configure test](Step3.png)
 
 Once it's set up, Azure will poll your website every few minutes, keeping it alive and sending you alerts if it goes down.

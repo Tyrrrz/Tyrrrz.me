@@ -1,7 +1,10 @@
 ---
 title: Hotkey editor control in WPF
 date: 2017-02-02
+cover: Cover.png
 ---
+
+![cover](Cover.png)
 
 GUI applications often offer a way for users to configure hotkeys, typically using a textbox that records combination of key presses inside of it. Such control doesn't come out of the box with WPF so you'll have to implement it yourself.
 
@@ -152,4 +155,4 @@ Input processing happens in the `HotkeyTextBox_PreviewKeyDown` method:
 
 Finally, here's how the control looks in [one of my applications](https://github.com/Tyrrrz/LightBulb):
 
-![example usage](1.png)
+![example usage](Example.png)

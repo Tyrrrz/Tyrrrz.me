@@ -1,7 +1,10 @@
 ---
 title: Cognitive biases in software development
 date: 2018-02-18
+cover: Cover.png
 ---
+
+![cover](Cover.png)
 
 Cognitive biases impact our perception of reality, driving us into making incorrect conclusions and irrational decisions. The topic's relevancy to software development has already been covered in many places ([one](https://medium.com/@Mareks_082/biases-in-software-development-1f79ba840cc1), [two](https://hackernoon.com/cognitive-biases-in-programming-5e937707c27b), [three](http://www.jonathanklein.net/2013/06/cognitive-biases-in-software-engineering.html)) but I would like to add on by discussing a few cases that haven't been mentioned before.
 

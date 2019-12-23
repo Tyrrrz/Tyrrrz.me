@@ -1,7 +1,10 @@
 ---
 title: Parsing Steam Market
 date: 2015-09-26
+cover: Cover.png
 ---
+
+![cover](Cover.png)
 
 At some point I was contracted to make a WordPress plugin that displays some basic Steam Market information on an item -- its name, image, price, etc. It turned out a bit less trivial than I thought because the Steam API doesn't offer any endpoints related to the Steam Market, probably to make developing bots slightly harder.
 
@@ -33,7 +36,7 @@ It has 3 required parameters:
 
 The values for two main parameters, `appid` and `market_hash_name` can be extracted directly from the URL of any existing item listing, as shown in the following screenshot:
 
-![example listing](1.png)
+![example listing](Example.png)
 
 In this case the values are:
 

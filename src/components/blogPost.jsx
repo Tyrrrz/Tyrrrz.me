@@ -8,6 +8,7 @@ import { Disqus } from 'gatsby-plugin-disqus';
 
 import settings from '../settings';
 import routes from '../routes';
+import theme from '../theme';
 
 import Layout from './layout';
 import Meta from './meta';
@@ -43,6 +44,12 @@ const Content = styled.div`
 
   code:not(.hljs) {
     background-color: #f0f0f0;
+  }
+
+  blockquote p {
+    border-left: solid 2px ${theme.accentColor};
+    border-radius: 2px;
+    padding-left: 0.5em;
   }
 `;
 
