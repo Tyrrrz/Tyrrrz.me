@@ -6,87 +6,85 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
-At some point I was contracted to make a WordPress plugin that displays some basic Steam Market information on an item -- its name, image, price, etc. It turned out a bit less trivial than I thought because the Steam API doesn't offer any endpoints related to the Steam Market, probably to make developing bots slightly harder.
+At some point I was contracted to make a WordPress plugin that displays some basic information on an item from Steam Market: its name, image, and price. I was initially hoping that there would be some sort of API for this but unfortunately there wasn't, probably because it would make developing bots a bit too easy.
 
-After inspecting the listing pages with Chrome Developer Console, I found that all of the pricing information is pulled using an AJAX request, which is very helpful as it can be easily reverse-engineered.
+Having spent some time inspecting the listing pages with Chrome's developer console, I've discovered that all of the pricing information is pulled using a single AJAX request which can be easily reverse-engineered. Let's take a look at how it works.
 
-Things are more difficult when it comes to getting item image -- there is no obvious pattern to determine the image URL from the item's name or anything like that. However, there is another AJAX request used to render chunks of HTML for other listings of the same item, which also includes images.
+## Getting pricing info
 
-## Getting general listing info
-
-### Request format
-
-Steam's frontend uses the following AJAX request to get basic listing information:
+Here's the request that Steam's frontend uses to get latest pricing info:
 
 ```php
 $url =
     'http://steamcommunity.com/market/priceoverview/'.
-    '?appid='.$game.
-    '&currency='.$currency.
-    '&market_hash_name='.rawurlencode($name);
+    '?market_hash_name='.rawurlencode($name).
+    '&appid='.$game.
+    '&currency='.$currency;
 ```
 
 It has 3 required parameters:
 
-- `appid` -- ID of the Steam game, to which the item belongs.
-- `currency` -- ID of the currency, in which the prices are shown.
-- `market_hash_name` -- URL-encoded full name of the item.
+- `market_hash_name`, full name of the item as it appears on the market (URL-encoded).
+- `appid`, ID of the app (game) where this item can be found.
+- `currency`, ID of the currency in which we want our prices to be shown.
 
-### Parameter values
-
-The values for two main parameters, `appid` and `market_hash_name` can be extracted directly from the URL of any existing item listing, as shown in the following screenshot:
+You can get the values for the first two parameters straight from the item's URL. For example, if we were interested in [AK-47 | Redline](https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Redline%20%28Field-Tested%29), we'd be able to inspect the URL and see that the value of `appid` is `730` while `market_hash_name` is equal to `AK-47%20%7C%20Redline%20%28Field-Tested%29`.
 
 ![example listing](Example.png)
 
-In this case the values are:
+This leaves us without only the final required parameter, `currency`. I'm not sure what is the full list of supported currencies and their IDs, but the value of `1` seems to correspond to USD so we'll use that.
 
-- `appid` is equal to `730`.
-- `market_hash_name` is equal to `AK-47%20%7C%20Redline%20%28Field-Tested%29`.
+Our final URL with all the parameters set should look like this:
 
-I'm not sure what is the full list of valid `currency` values, however US dollar has the ID of `1`.
+`http://steamcommunity.com/market/priceoverview/?market_hash_name=AK-47%20%7C%20Redline%20%28Field-Tested%29&appid=730&currency=1`
 
-Having put the correct parameter values, this is how the request URL should look for this example: <http://steamcommunity.com/market/priceoverview/?appid=730&currency=1&market_hash_name=AK-47%20%7C%20Redline%20%28Field-Tested%29>
-
-### Response
-
-Executing that request will yield the following JSON response:
+If we send a GET request with this URL we will get a response such as this one:
 
 ```json
 {
   "success": true,
-  "volume": "434",
-  "median_price": "$26.50",
-  "lowest_price": "$26.39"
+  "lowest_price": "$13.07",
+  "volume": "710",
+  "median_price": "$12.74"
 }
 ```
 
-It can contain up to 4 values:
+As you can see, it doesn't provide very much but it contains aggregated pricing information, which is exactly what we need.
 
-- `success` -- whether the request was successful.
-- `volume` -- total number of listings for this item.
-- `median_price` -- the median price of this item.
-- `lowest_price` -- the lowest price of this item.
+It's also worth noting that sometimes the response may not contain `median_price` and `volume`. I'm not sure why it happens but make sure to handle such cases too.
 
-If `success` is not equal to `true`, it usually means that the parameters were not set correctly.
+Besides that, I've found that Steam may start throttling you if you send too many requests, so it's a good idea to cache responses for at least 10 minutes.
 
-It's also worth noting that `median_price` and `volume` are sometimes not present in the response, I'm not sure why.
+## Getting the image
 
-## Getting item image
+So far we were able to get the price of an item but not its image. Unfortunately, it seems that there's no obvious correlation between `market_hash_name` and image URL so we won't be able to guess it.
 
-### Request format
+To make matters worse, a big portion of the page including the image is rendered server-side so there's no way to reverse-engineer it.
 
-This request also uses the same set of parameters as the last one:
+Luckily, the listings at the bottom of the page also contain the image and they are rendered asynchronously using another AJAX request.
+
+![listings](Listings.png)
+
+The aforementioned request looks like this:
 
 ```php
-$market_page_url = 'http://steamcommunity.com/market/listings/'.$game.'/'.rawurlencode($name);
-$url = $market_page_url.'/render?start=0&count=1&currency='.$currency.'&format=json';
+$url =
+    'http://steamcommunity.com/market/listings/'.$game.'/'.rawurlencode($name).'/render'.
+    '?start=0'.
+    '&count=1'.
+    '&currency='.$currency.
+    '&format=json';
 ```
 
-Setting `count` to `1` in the request makes it return results for only one listing, reducing the content length of the response.
+It's a bit different than the previous one but it takes the same parameters. In fact, the base of this request is the item's listing URL we've inspected earlier.
 
-Request URL for the item in question looks like this: http://steamcommunity.com/market/listings/730/AK-47%20%7C%20Redline%20%28Field-Tested%29/render?start=0&count=1&currency=1&format=json
+By setting `start` to `0` and `count` to `1` we are limiting the response to only one listing since we are only interested in the image, which is the same for all listings anyway.
 
-### Response
+Finally, the fully-formed URL should look something like this:
+
+`http://steamcommunity.com/market/listings/730/AK-47%20%7C%20Redline%20%28Field-Tested%29/render?start=0&count=1&currency=1&format=json`
+
+A GET request with this URL will return a rather large JSON response that contains raw HTML inside:
 
 ```json
 {
@@ -101,28 +99,16 @@ Request URL for the item in question looks like this: http://steamcommunity.com/
 }
 ```
 
-This JSON object has a `results_html` node which contains the full formatted HTML code used to render item listings. Inside of it, there should be an `<img>` node with class `market_listing_item_img`, the value of its `src` attribute is the item's image URL.
+To get the image, we need to parse the HTML inside `results_html` and find an `<img>` element with `class="market_listing_item_img"`. We can do that by querying the DOM with a CSS selector `img.market_listing_item_img`. The URL, which is the value of `src` attribute, should look like this:
 
-### Image resolution
+`http://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpKKqPrxN7LEmyVQ7MEpiLuSrYmnjQO3-UdsZGHyd4_Bd1RvNQ7T_FDrw-_ng5Pu75iY1zI97bhLsvQz/62fx62f/`
 
-Typical image URL will look like this:
+![AK 47 | Redline](http://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpKKqPrxN7LEmyVQ7MEpiLuSrYmnjQO3-UdsZGHyd4_Bd1RvNQ7T_FDrw-_ng5Pu75iY1zI97bhLsvQz/256fx128f/)
 
-http://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpKKqPrxN7LEmyVQ7MEpiLuSrYmnjQO3-UdsZGHyd4_Bd1RvNQ7T_FDrw-_ng5Pu75iY1zI97bhLsvQz/62fx62f/
+If you look at the end of the URL, you can see the portion where it specifies desired image dimensions, which is set to `62fx62f` in this case. We can change these to anything we want and the server will return an image of that size. If you specify a size which is too big, the generated image will remain centered at its maximum size while the remaining canvas will be transparent.
 
-In the end of that URL the requested image dimensions are specified, in this case it's set to `62fx62f`. Changing these values will make the server return images of any given size, however the image will always remain proportional and will not scale above its maximum size -- the empty space will be transparent and the actual image will be centered.
+## Source code
 
-## Notes
+The WordPress plugin I wrote is open source and you can [check it out here](https://github.com/Tyrrrz/WPSteamMarketExcerpt). Here's how it looks in action:
 
-If too many requests are made in a short time span, Steam will start returning `null` instead of a proper response. I'm not sure what the actual limits are, but I'm handling this in my plugin by caching all responses for 15 minutes.
-
-## My implementation
-
-I implemented the WordPress plugin using shortcode pattern which is convenient for passing parameters and specifying options.
-
-```php
-[steam_market_excerpt game="440" name="Mann Co. Supply Crate Key"]
-[steam_market_excerpt game="730" name="AK-47 | Elite Build (Factory New)"]
-[steam_market_excerpt game="753" name="203160-A Survivor Is Born (Foil Trading Card)" displayname="A Survivor Is Born (Foil)"]
-```
-
-More info and source code can be found [here](https://github.com/Tyrrrz/WPSteamMarketExcerpt).
+![WPSteamMarketExcerpt](WPSME.png)
