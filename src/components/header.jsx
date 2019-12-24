@@ -16,7 +16,7 @@ const Container = styled.header`
 
 const Grid = styled.div`
   display: grid;
-  max-width: 900px;
+  max-width: 1000px;
   width: 96%;
   min-height: 70px;
   margin-left: auto;

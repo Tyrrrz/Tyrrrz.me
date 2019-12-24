@@ -120,11 +120,8 @@ This really calls for a helper method of some sorts which can be implemented eit
 ```csharp
 public static class ClosedCaptionTrackExtensions
 {
-    public static ClosedCaption GetByTime(this ClosedCaptionTrack self, TimeSpan time)
-    {
-        return self.Captions
-            .FirstOrDefault(cc => cc.Offset <= time && cc.Offset + cc.Duration >= time);
-    }
+    public static ClosedCaption GetByTime(this ClosedCaptionTrack self, TimeSpan time) =>
+        self.Captions.FirstOrDefault(cc => cc.Offset <= time && cc.Offset + cc.Duration >= time);
 }
 ```
 

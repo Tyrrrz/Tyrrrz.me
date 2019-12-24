@@ -33,7 +33,7 @@ const GlobalStyle = css`
 `;
 
 const Content = styled.main`
-  max-width: 900px;
+  max-width: 1000px;
   margin-left: auto;
   margin-right: auto;
   padding: 1em;
