@@ -5,17 +5,27 @@ date: 2016-10-30
 
 The longer I work with WPF, the more I notice how many things it's missing. Recently I realized that `TreeView.SelectedItem` property is read-only and non-bindable. I think there's no point explaining why binding `SelectedItem` would be useful, so there should be no surprise in my disappointment.
 
-I googled the problem and every resource I've found was guiding me into either handling it in code-behind or adding `IsSelected` property to my model class. Both of these approaches suffer from a common important issue -- the item wouldn't get selected if its parents are not expanded. This was a deal-breaker for me because I wanted the treeview to navigate to the newly selected item, even if it wasn't immediately visible.
+I googled the problem and every resource I've found was guiding me into either handling it in code-behind or adding `IsSelected` property to my model class. Both of these approaches suffer from the same problem -- an item won't get selected if its parents are not yet expanded. This was a deal-breaker for me because I wanted the tree view to navigate to the newly selected item, even if it wasn't immediately visible.
 
-## Solution
+I solved this problem by writing a small behavior that takes care of this for me.
 
-I realized that to solve this I would have to traverse the entire hierarchy, but there was another problem I've encountered -- to access `IsSelected` and `IsExpanded` properties I needed to resolve reference to an instance of `TreeViewItem` -- a container that wraps around the data template. This in itself can be accomplished by using the `TreeViewItem.ItemContainerGenerator.ContainerFromItem(…)` method, however if the node is not visible the container is also not initialized, making the method return `null`. I solved this by looking for the parent nodes of the item I needed to select and expanding them one by one. However, even after the node is expanded, the dispatcher still needs to process it, which is why I resorted to handling the `Loaded` event of the `TreeViewItem` to know when it's safe to continue.
+## Custom behavior
 
-To determine if a a node is a child of another node I defined a delegate signature for users to implement -- `IsChildOfPredicate`.
+I realized that to solve this I would have to traverse the entire hierarchy of tree nodes, but that wasn't the only problem. To access `IsSelected` and `IsExpanded` properties I needed to resolve a reference to an instance of `TreeViewItem`, which is a container that wraps around the data template.
 
-### Behavior implementation
+This in itself can be accomplished by using the `TreeViewItem.ItemContainerGenerator.ContainerFromItem(…)` method. However, if the node is not visible yet then the container is also not initialized, making the method return `null`.
 
-To make the solution re-usable, I implemented it as an interaction behavior.
+In order to make our target node visible, we need to expand all of its ancestor nodes one by one, starting from the very top. I naively assumed that by expanding the node from code, its children's item containers will immediately become available but this is not the case because that's handled asynchronously. We can, however, subscribe to the `Loaded` event of each data item which will trigger once the control has been loaded.
+
+Generally, the approach looks like this:
+
+- Subscribe to `Loaded` events of all data items using a style.
+- When `SelectedItem` changes, go through all loaded tree nodes and try to locate the target node.
+- If we manage to find it, select it and exit early.
+- If we instead find its parent, expand it so that we can continue the search once it's loaded.
+- When one of the nodes we expanded is loaded, it triggers an event and we start again from the top.
+
+Here's the behavior I've implemented:
 
 ```csharp
 public class TreeViewSelectionBehavior : Behavior<TreeView>
@@ -25,7 +35,8 @@ public class TreeViewSelectionBehavior : Behavior<TreeView>
     public static readonly DependencyProperty SelectedItemProperty =
         DependencyProperty.Register(nameof(SelectedItem), typeof(object),
             typeof(TreeViewSelectionBehavior),
-            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+            new FrameworkPropertyMetadata(null,
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                 OnSelectedItemChanged));
 
     public static readonly DependencyProperty HierarchyPredicateProperty =
@@ -77,33 +88,35 @@ public class TreeViewSelectionBehavior : Behavior<TreeView>
 
     public TreeViewSelectionBehavior()
     {
-        _treeViewItemEventSetter = new EventSetter(
-            FrameworkElement.LoadedEvent,
+        _treeViewItemEventSetter = new EventSetter(FrameworkElement.LoadedEvent,
             new RoutedEventHandler(OnTreeViewItemLoaded));
     }
 
     // Update state of all items starting with given, with optional recursion
     private void UpdateTreeViewItem(TreeViewItem item, bool recurse)
     {
-        if (SelectedItem == null) return;
+        if (SelectedItem == null)
+            return;
+
         var model = item.DataContext;
 
-        // If the selected item is this model and is not yet selected - select and return
+        // If we find the item we're looking for - select it
         if (SelectedItem == model && !item.IsSelected)
         {
             item.IsSelected = true;
             if (ExpandSelected)
                 item.IsExpanded = true;
         }
-        // If the selected item is a parent of this model - expand
+        // If we find the item's parent instead - expand it
         else
         {
+            // If HierarchyPredicate is not set, this will always be true
             bool isParentOfModel = HierarchyPredicate?.Invoke(SelectedItem, model) ?? true;
             if (isParentOfModel)
                 item.IsExpanded = true;
         }
 
-        // Recurse into children
+        // Recurse into children in case some of them are already loaded
         if (recurse)
         {
             foreach (var subitem in item.Items)
@@ -131,16 +144,18 @@ public class TreeViewSelectionBehavior : Behavior<TreeView>
     private void UpdateTreeViewItemStyle()
     {
         if (AssociatedObject.ItemContainerStyle == null)
-            AssociatedObject.ItemContainerStyle = new Style(
-                typeof(TreeViewItem),
+        {
+            var style = new Style(typeof(TreeViewItem),
                 Application.Current.TryFindResource(typeof(TreeViewItem)) as Style);
+
+            AssociatedObject.ItemContainerStyle = style;
+        }
 
         if (!AssociatedObject.ItemContainerStyle.Setters.Contains(_treeViewItemEventSetter))
             AssociatedObject.ItemContainerStyle.Setters.Add(_treeViewItemEventSetter);
     }
 
-    private void OnTreeViewItemsChanged(object sender,
-        NotifyCollectionChangedEventArgs args)
+    private void OnTreeViewItemsChanged(object sender, NotifyCollectionChangedEventArgs args)
     {
         UpdateAllTreeViewItems();
     }
@@ -149,6 +164,7 @@ public class TreeViewSelectionBehavior : Behavior<TreeView>
     {
         if (_modelHandled) return;
         if (AssociatedObject.Items.SourceCollection == null) return;
+
         SelectedItem = args.NewValue;
     }
 
@@ -184,19 +200,15 @@ public class TreeViewSelectionBehavior : Behavior<TreeView>
 }
 ```
 
-Once this behavior is attached, it calls `UpdateTreeViewItemStyle()` to inject an event handler for `Loaded` event of `ItemContainerStyle`. We need to listen to this event to handle nodes that just got expanded. To ensure maximum compatibility, it looks for a style if there is one already or creates a new one if there isn't.
+To make it easier to check if a node is a child of another node, I defined a property called `HierarchyPredicate`. If it's not set, the behavior will just blindly expand all nodes until it finds the item we're looking for. The predicate can help optimize this process.
 
-It also calls `UpdateAllTreeViewItems()` straight away. This goes through all children of treeview and in turn calls `UpdateTreeViewItem(…)` on them.
+Once this behavior is attached, it calls `UpdateTreeViewItemStyle()` to inject an event handler for `Loaded` event of `ItemContainerStyle`. We need to listen to this event to handle nodes that were expanded. To ensure maximum compatibility, it extends an existing style if it can find one or creates a new one otherwise.
 
-The method `UpdateTreeViewItem(…)` itself works as follows:
+It also calls `UpdateAllTreeViewItems()` after attaching. This goes through all of tree view's children and in turn calls `UpdateTreeViewItem(…)` on them.
 
-- It checks if the given node's `DataContext` is equal to the selected model. If it is, it means we found the item we're looking for, so we can select it.
-- If not, it checks if the `DataContext` is a parent of the selected model, using the `IsChildOfPredicate` delegate. If so, it expands it.
-- If `recurse` is set, it also repeats the same process for all available children.
+## Usage
 
-Because some of the nodes might not be expanded beforehand, we have to expand them and wait until `Loaded` event fires, which signifies us that the node is ready. Once the node is visible, we can call `UpdateTreeViewItem(…)` on it.
-
-### Usage
+You can attach this behavior to a tree view like this:
 
 ```xml
 <TreeView ItemsSource="{Binding Items}">
@@ -211,6 +223,6 @@ Because some of the nodes might not be expanded beforehand, we have to expand th
 </TreeView>
 ```
 
-When `SelectedItem` is changed from model, the behavior traverses the hierarchy while utilizing `HierarchyPredicate` to find the correct node, finally selecting it. An optional parameter `ExpandSelected` dictates whether the selected item should be expanded as well.
+When `SelectedItem` is changed from the view model, the behavior traverses the hierarchy while utilizing `HierarchyPredicate` to find the correct node, ultimately selecting it. An optional parameter `ExpandSelected` dictates whether the selected item should be expanded as well.
 
-It's also worth noting that if `HierarchyPredicate` is not set, the behavior will still get the job done -- it will blindly open all available nodes until it finds the one it's looking for.
+If the user changes `SelectedItem` from the UI, it works like you would expect and propagates the new value to the view model.

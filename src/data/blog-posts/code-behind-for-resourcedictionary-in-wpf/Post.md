@@ -3,17 +3,17 @@ title: Code-behind for ResourceDictionary in WPF
 date: 2016-10-29
 ---
 
-As any WPF developer knows, XAML can get messy due to all the nested elements and tabulation. One common problematic area is data templates -- they are naturally decoupled from the surrounding layout but typically nested quite deep in the hierarchy.
+As any WPF developer knows, XAML can get messy due to all the nested elements and indentation. One common problematic area is data templates -- they are naturally decoupled from the surrounding layout but are still nested quite deep in the hierarchy.
 
 To deal with it, you can refactor some of the commonly used objects as resources into a `ResourceDictionary`, which can also be self-contained in its own separate XAML file. Dictionaries can later be referenced using the `Source` property or by including them in a `MergedDictionary`.
 
-Sometimes the XAML you want to refactor out can also contain some logic in code-behind, such as event handlers. Turns out resource dictionary, just like everything else, can actually have its own code-behind class as well.
+Sometimes the XAML you want to refactor can also contain some logic in code-behind, such as event handlers. By default, when you create a new resource dictionary, it comes without a code-behind class, but it's possible to add it. Let's see how we can do it.
 
-## Step 1: create a partial C# class
+## Linking a resource dictionary to a class
 
-To create a code-behind class, you just need to add any class to the project and link it with the XAML file. Conventionally, the code-behind file should be in the same namespace as the dictionary and have the same file name, ending with _.cs_ -- _MyResourceDictionary.xaml.cs_.
+Let's assume we already have a resource dictionary created and it's in a file called `MyResourceDictionary.xaml`.
 
-The only requirement is that the class is declared as partial:
+To add some code-behind to it, we just need to create a new *partial* class. Conventionally, the code-behind file should be in the same namespace as the dictionary and have the same file name. For that reason we will name this class `MyResourceDictionary` and save it as `MyResourceDictionary.xaml.cs`.
 
 ```csharp
 namespace MyProject
@@ -25,9 +25,7 @@ namespace MyProject
 }
 ```
 
-## Step 2: reference the code-behind class
-
-To link the XAML definition to code-behind, use the `x:Class` attribute, just like so:
+Now, in order to link the XAML to our newly-created code-behind, we simply need to add the `x:Class` attribute, like so:
 
 ```xml
 <ResourceDictionary x:Class="MyProject.MyResourceDictionary"
@@ -38,4 +36,4 @@ To link the XAML definition to code-behind, use the `x:Class` attribute, just li
 </ResourceDictionary>
 ```
 
-The value in `x:Class` should be equal to the fully-qualified name of the code-behind class that you've just created. Once you set it up, Visual Studio will be able to register event handlers directly in your code-behind, the same way it does for Windows, Pages, etc.
+The value in `x:Class` should be equal to the fully-qualified name of the code-behind class that we've just created. Once you set it up, Visual Studio will be able to register event handlers directly in your code-behind, the same way it does for Windows, Pages, etc.

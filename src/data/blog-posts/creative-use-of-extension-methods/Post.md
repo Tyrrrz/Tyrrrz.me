@@ -6,9 +6,9 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
-I'm sure everyone with at least some background in C# is aware of extension methods -- a nice feature that lets developers extend existing classes with new methods.
+I'm sure everyone with at least some background in C# is aware of extension methods -- a nice feature that lets developers extend existing types with new methods.
 
-This is extremely convenient in cases where you want to add functionality to types you don't have control over -- I think everyone at some point authored extensions for the base class library just to make some things more accessible.
+This is extremely convenient in cases where you want to add functionality to types you don't have control over. In fact, I think everyone at some point authored extensions for the base class library just to make some things more accessible.
 
 But besides the more obvious use cases, there are a few interesting patterns that directly rely on extension methods, showing how they can used in a slightly less conventional way.
 
@@ -36,24 +36,25 @@ Since each file format can also be represented by its file extension, it would b
 ```csharp
 public static class FileFormatExtensions
 {
-    public static string GetFileExtension(this FileFormat fileFormat)
+    public static string GetFileExtension(this FileFormat self)
     {
-        if (fileFormat == FileFormat.PlainText)
+        if (self == FileFormat.PlainText)
             return "txt";
 
-        if (fileFormat == FileFormat.OfficeWord)
+        if (self == FileFormat.OfficeWord)
             return "docx";
 
-        if (fileFormat == FileFormat.Markdown)
+        if (self == FileFormat.Markdown)
             return "md";
 
-        // This will be thrown if we add a new file format but forget to add corresponding file extension
-        throw new ArgumentOutOfRangeException(nameof(fileFormat));
+        // This will be thrown if we add a new file format
+        // but forget to add corresponding file extension
+        throw new ArgumentOutOfRangeException(nameof(self));
     }
 }
 ```
 
-Which makes it possible to do the following:
+Which in turn allows us to do the following:
 
 ```csharp
 var format = FileFormat.Markdown;
@@ -63,11 +64,11 @@ var fileName = $"output.{fileExt}"; // "output.md"
 
 ## Refactoring model classes
 
-There are cases where you may not want to add a method directly to a class, for example when it's a model.
+There are cases where you may not want to add a method directly to a class, for example when it's an [anemic model](https://en.wikipedia.org/wiki/Anemic_domain_model).
 
-Models typically represent a set of public get-only immutable properties, so adding methods to a model class may make it look impure or may give off a suspicion that the methods are accessing some private state. Extension methods don't have that problem because they can't access model's private members and, by nature, aren't part of the model itself.
+Anemic models are typically represented by a set of public get-only immutable properties, so adding methods to a model class may make it look impure or may give off a suspicion that the methods are accessing some private state. Extension methods don't have that problem because they can't access model's private members and, by nature, aren't part of the model itself.
 
-So consider this example of two models -- one represents a closed caption track for a video, and another represents an individual caption:
+So consider this example of two models -- one represents a closed caption track for a video and another represents an individual caption:
 
 ```csharp
 public class ClosedCaption
@@ -78,7 +79,7 @@ public class ClosedCaption
     // When it gets displayed relative to beginning of the track
     public TimeSpan Offset { get; }
 
-    // For how long does it get displayed
+    // How long it stays on the screen
     public TimeSpan Duration { get; }
 
     public ClosedCaption(string text, TimeSpan offset, TimeSpan duration)
@@ -109,16 +110,21 @@ In the current state, if someone wanted to get a closed caption displayed at spe
 
 ```csharp
 var time = TimeSpan.FromSeconds(67); // 1:07
-var caption = track.Captions.FirstOrDefault(cc => cc.Offset <= time && cc.Offset + cc.Duration >= time);
+
+var caption = track.Captions
+    .FirstOrDefault(cc => cc.Offset <= time && cc.Offset + cc.Duration >= time);
 ```
 
-This is error-prone and really calls for a helper method of some sorts -- it can be implemented either as a member method or an extension method, but I personally prefer the latter.
+This really calls for a helper method of some sorts which can be implemented either as a member method or an extension method. I personally prefer the latter.
 
 ```csharp
 public static class ClosedCaptionTrackExtensions
 {
-    public static ClosedCaption GetByTime(this ClosedCaptionTrack track, TimeSpan time)
-        => track.Captions.FirstOrDefault(cc => cc.Offset <= time && cc.Offset + cc.Duration >= time);
+    public static ClosedCaption GetByTime(this ClosedCaptionTrack self, TimeSpan time)
+    {
+        return self.Captions
+            .FirstOrDefault(cc => cc.Offset <= time && cc.Offset + cc.Duration >= time);
+    }
 }
 ```
 
@@ -126,9 +132,9 @@ An extension method here achieves the same thing as a normal method, but it prov
 
 1. It's clear that this method only works with public members of the class and doesn't mutate its private state in some obscure way.
 2. It's obvious that this method simply provides a shortcut and it's there only for convenience.
-3. The method is part of an entirely separate class (or even assembly) which helps keep the code cleaner.
+3. The method is part of an entirely separate class (or even assembly) which helps us separate data from logic.
 
-Overall, using an extension method approach here helps draw a line between what's _necessary_ and what's _helpful_.
+Overall, using an extension method approach here helps draw a line between what's *necessary* and what's *helpful*.
 
 ## Making interfaces more versatile
 
@@ -145,7 +151,7 @@ public interface IExportService
 
 It works just fine, but a few weeks later you come back to it with a new requirement -- classes implementing `IExportService`, on top of exporting to a file, should now also be able to write to memory.
 
-In order to satisfy that requirement, you need to add a new method to the contract:
+So in order to satisfy that requirement, you add a new method to the contract:
 
 ```csharp
 public interface IExportService
@@ -156,7 +162,7 @@ public interface IExportService
 }
 ```
 
-This change just made all existing implementations of `IExportService` invalid and now all of them have to be updated to support writing to memory as well.
+This change just broke all existing implementations of `IExportService` and now all of them have to be updated to support writing to memory as well.
 
 Instead of doing all that, we could have designed the initial version of the interface slightly differently:
 
@@ -171,31 +177,31 @@ This way, the interface enforces writing to the most generic destination -- `Str
 
 The only downside of this approach is that the more basic operations are not as straightforward as they used to be -- now you need to set up a concrete instance of a `Stream`, wrap it in a `using` statement, and pass it as a parameter.
 
-Fortunately, this downside can be completely eliminated with the use of extension methods:
+Fortunately, this downside can be completely negated with the use of extension methods:
 
 ```csharp
 public static class ExportServiceExtensions
 {
-    public static FileInfo SaveToFile(this IExportService exportService, Model model, string filePath)
+    public static FileInfo SaveToFile(this IExportService self, Model model, string filePath)
     {
         using (var output = File.Create(filePath))
         {
-            exportService.Save(model, output);
+            self.Save(model, output);
             return new FileInfo(filePath);
         }
     }
 
-    public static byte[] SaveToMemory(this IExportService exportService, Model model)
+    public static byte[] SaveToMemory(this IExportService self, Model model)
     {
         using (var output = new MemoryStream())
         {
-            exportService.Save(model, output);
+            self.Save(model, output);
             return output.ToArray();
         }
     }
 }
 ```
 
-By refactoring the initial interface we made it a lot more versatile and maintainable, and, thanks to extension methods, we didn't have to sacrifice usability in any way.
+By refactoring the initial interface we've made it a lot more versatile and maintainable, and, thanks to extension methods, we didn't have to sacrifice usability in any way.
 
-I believe this is a good example of [Alan Kay's](https://en.wikiquote.org/wiki/Alan_Kay) famous quote -- "Simple things should be simple, complex things should be possible".
+All in all, I think extension methods are an invaluable tool that can help us make [simple things simple and complex things possible](https://en.wikiquote.org/wiki/Alan_Kay).

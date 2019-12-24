@@ -6,9 +6,11 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
-At some point I was contracted to make a WordPress plugin that displays some basic information on an item from Steam Market: its name, image, and price. I was initially hoping that there would be some sort of API for this but unfortunately there isn't, probably because it would make developing bots a bit too easy.
+At some point, I was contracted to make a WordPress plugin that displays some basic information on an item from Steam Market. It had to show its name, image and the current lowest price.
 
-Having spent some time inspecting the listing pages with Chrome's developer console, I've discovered that all of the pricing information is pulled using a single AJAX request which can be easily reverse-engineered. Let's take a look at how it works.
+I was initially hoping that there would be some sort of API for this but unfortunately there isn't. Probably because it would make developing bots a bit too easy.
+
+Having spent some time inspecting the listing pages with Chrome’s developer console, I’ve discovered that all of the pricing information is pulled using a single AJAX request which can be easily reverse-engineered. Let’s take a look at how it works.
 
 ## Getting pricing info
 
@@ -24,9 +26,9 @@ $url =
 
 It has 3 required parameters:
 
-- `market_hash_name`, full name of the item as it appears on the market (URL-encoded).
-- `appid`, ID of the app (game) where this item can be found.
-- `currency`, ID of the currency in which we want our prices to be shown.
+- `market_hash_name` -- full name of the item as it appears on the market (URL-encoded).
+- `appid` -- ID of the app (game) where this item can be found.
+- `currency` -- ID of the currency in which we want our prices to be shown.
 
 You can get the values for the first two parameters straight from the item's URL. For example, if we were interested in [AK-47 | Redline](https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Redline%20%28Field-Tested%29), we'd be able to inspect the URL and see that the value of `appid` is `730` while `market_hash_name` is equal to `AK-47%20%7C%20Redline%20%28Field-Tested%29`.
 

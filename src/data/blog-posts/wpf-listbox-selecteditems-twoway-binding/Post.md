@@ -3,14 +3,16 @@ title: WPF ListBox SelectedItems TwoWay binding
 date: 2016-11-01
 ---
 
-For some unclear reasons, WPF's `ListBox` control does not allow two-way binding on `SelectedItems` property the way it does with `SelectedItem`. This could have been very useful when using multiselect to bind the whole list of selected items to the model.
+For some unclear reasons, WPF's `ListBox` control does not allow two-way binding on `SelectedItems` property the way it does with `SelectedItem`. This could have been very useful when using multi-select to bind the whole list of selected items to the view model.
 
-Interestingly, you can still call `Add()`, `Remove()`, `Clear()` methods on `ListBox.SelectedItems` which updates the selected items correctly, so it just comes down to implementing a behavior that makes the property bindable.
+Interestingly, you can still call `Add()`, `Remove()`, `Clear()` methods on `ListBox.SelectedItems` which updates the selection correctly, so it just comes down to implementing a behavior that makes the property bindable.
 
 ## Behavior implementation
 
+Here's the behavior that allows two-way binding on `SelectedItems`:
+
 ```csharp
-public class ListBoxSelectionBehavior : Behavior<ListBox>
+public class ListBoxSelectionBehavior<T> : Behavior<ListBox>
 {
     public static readonly DependencyProperty SelectedItemsProperty =
         DependencyProperty.Register(nameof(SelectedItems), typeof(IList),
@@ -58,7 +60,8 @@ public class ListBoxSelectionBehavior : Behavior<ListBox>
     {
         if (_viewHandled) return;
         if (AssociatedObject.Items.SourceCollection == null) return;
-        SelectedItems = AssociatedObject.SelectedItems.Cast<object>().ToArray();
+
+        SelectedItems = AssociatedObject.SelectedItems.Cast<T>().ToArray();
     }
 
     // Re-select items when the set of items changes
@@ -66,6 +69,7 @@ public class ListBoxSelectionBehavior : Behavior<ListBox>
     {
         if (_viewHandled) return;
         if (AssociatedObject.Items.SourceCollection == null) return;
+
         SelectItems();
     }
 
@@ -93,9 +97,17 @@ public class ListBoxSelectionBehavior : Behavior<ListBox>
 
 The behavior above defines its own `SelectedItems` property, identical to the one in `ListBox`, except it can be bound to and is not read-only.
 
-When the property is changed from model, the `OnSelectedItemsChanged(…)` method is called which is where the changes are propagated to the view. We do that in the `SelectItems()` method where we just clear and add new items to the `ListBox.SelectedItems` collection.
+When the property is changed from the view model, the `OnSelectedItemsChanged(…)` method is called, which is where the changes are propagated to the view. We do that in the `SelectItems()` method where we just clear and add new items to the `ListBox.SelectedItems` collection.
 
-When the change is triggered by view, `OnListBoxSelectionChanged(…)` method is called, where the changes are propagated to the model. This is simple, because all we need to do is copy the items from `ListBox.SelectedItems` to our own `SelectedItems` collection.
+When the change is triggered by the view, we call the `OnListBoxSelectionChanged(…)` method. To update the selected items on the view model, we copy the items from `ListBox.SelectedItems` to our own `SelectedItems` collection.
+
+Note, however, that this behavior is generic because we expect to work with a collection like `IReadOnlyList<T>` on the view model side. WPF doesn't support generic behaviors so we have to subtype this class for each specific data type:
+
+```c#
+public class MyObjectListBoxSelectionBehavior : ListBoxSelectionBehavior<MyObject>
+{
+}
+```
 
 ## Usage
 
@@ -104,7 +116,7 @@ We can now use this behavior by initializing it in XAML, like this:
 ```xml
 <ListBox ItemsSource="{Binding Items}" SelectionMode="Multiple">
     <i:Interaction.Behaviors>
-        <behaviors:ListBoxSelectionBehavior SelectedItems="{Binding SelectedItems}" />
+        <behaviors:MyObjectListBoxSelectionBehavior SelectedItems="{Binding SelectedItems}" />
     </i:Interaction.Behaviors>
     <ListBox.ItemTemplate>
         <!-- ... -->
@@ -114,12 +126,14 @@ We can now use this behavior by initializing it in XAML, like this:
 
 ## Adding support for SelectedValuePath
 
-Another useful feature of `ListBox` is that you can make a binding proxy using `SelectedValuePath` and `SelectedValue`. Setting `SelectedValuePath` lets you specify a member path to be evaluated by `SelectedValue`. The great part about it is that it also works the other way around -- changing `SelectedValue` will use the member path in `SelectedValuePath` to update `SelectedItem` with new reference.
+Another useful feature of `ListBox` is that you can make a binding proxy using `SelectedValuePath` and `SelectedValue`. Setting `SelectedValuePath` lets you specify a member path to be evaluated by `SelectedValue`.
 
-This could also be very useful for multiselect, but unfortunately `SelectedValues` does not exist. Let's extend our behavior to support it.
+The great part about it is that it also works the other way around -- changing `SelectedValue` will use the member path in `SelectedValuePath` to update `SelectedItem` with a new reference.
+
+This could also be very useful for multi-select, but unfortunately the plural version, `SelectedValues`, does not exist. Let's extend our behavior to add support for it.
 
 ```csharp
-public class ListBoxSelectionBehavior : Behavior<ListBox>
+public class ListBoxSelectionBehavior<T> : Behavior<ListBox>
 {
     public static readonly DependencyProperty SelectedItemsProperty =
         DependencyProperty.Register(nameof(SelectedItems), typeof(IList),
@@ -216,7 +230,7 @@ public class ListBoxSelectionBehavior : Behavior<ListBox>
         else
         {
             SelectedItems =
-                AssociatedObject.Items.Cast<object>()
+                AssociatedObject.Items.Cast<T>()
                     .Where(i => SelectedValues.Contains(GetDeepPropertyValue(i, AssociatedObject.SelectedValuePath)))
                     .ToArray();
         }
@@ -232,7 +246,7 @@ public class ListBoxSelectionBehavior : Behavior<ListBox>
         else
         {
             SelectedValues =
-                SelectedItems.Cast<object>()
+                SelectedItems.Cast<T>()
                     .Select(i => GetDeepPropertyValue(i, AssociatedObject.SelectedValuePath))
                     .ToArray();
         }
@@ -243,6 +257,7 @@ public class ListBoxSelectionBehavior : Behavior<ListBox>
     {
         if (_viewHandled) return;
         if (AssociatedObject.Items.SourceCollection == null) return;
+
         SelectedItems = AssociatedObject.SelectedItems.Cast<object>().ToArray();
     }
 
@@ -251,6 +266,7 @@ public class ListBoxSelectionBehavior : Behavior<ListBox>
     {
         if (_viewHandled) return;
         if (AssociatedObject.Items.SourceCollection == null) return;
+
         SelectItems();
     }
 
@@ -281,7 +297,9 @@ public class ListBoxSelectionBehavior : Behavior<ListBox>
 }
 ```
 
-I added another dependency property for `SelectedValues` and a few new methods. `SelectedValuesToItems()` and `SelectedItemsToValues()` convert between `SelectedItems` and `SelectedValues`, depending on which property was updated. `GetDeepPropertyValue(…)` is used to extract value of a property using an object and member path -- it's used to establish conformity between items and values.
+I added another dependency property for `SelectedValues` and a few new methods.
+
+`SelectedValuesToItems()` and `SelectedItemsToValues()` convert between `SelectedItems` and `SelectedValues`, depending on which property was updated. `GetDeepPropertyValue(…)` is used to extract value of a property using an object and member path -- it's used to establish conformity between items and values.
 
 ## Usage with SelectedValuePath
 
@@ -290,7 +308,7 @@ Now we can specify `SelectedValuePath` in `ListBox` and our behavior will allow 
 ```xml
 <ListBox ItemsSource="{Binding Items}" SelectedValuePath="ID" SelectionMode="Multiple">
     <i:Interaction.Behaviors>
-        <behaviors:ListBoxSelectionBehavior SelectedValues="{Binding SelectedValues}" />
+        <behaviors:MyObjectListBoxSelectionBehavior SelectedValues="{Binding SelectedValues}" />
     </i:Interaction.Behaviors>
     <ListBox.ItemTemplate>
         <!-- ... -->

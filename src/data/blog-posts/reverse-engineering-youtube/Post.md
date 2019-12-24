@@ -62,16 +62,16 @@ As you can see, there is quite a lot of information that can be extracted straig
 
 Let's also look at some important optional parameters that this request can take:
 
-- `hl` -- name of the culture used to localize some strings. If not set, it defaults to culture deduced from your IP. Use `hl=en` to force English language on all strings.
-- `el` -- type of YouTube page from where the request was made. This decides what kind of information will be available in the response, as well as if the response will contain an error. Defaults to `embedded`.
+- `hl` -- name of the culture used to localize some strings. If not set, it defaults to culture inferred from your IP. Use `hl=en` to force English language on all strings.
+- `el` -- type of YouTube page from where the request was made. This decides what kind of information will be available in the response. In some cases, you will need to set this parameter to a certain value depending on the type of the video, in order to avoid errors. Defaults to `embedded`.
 - `sts` -- some kind of session identifier, used to synchronize information between requests. Defaults to empty.
 
 ### The "el" parameter
 
 The `el` request parameter can take multiple values and it affects what kind of data you will receive as a response. There are only a few that actually matter though, so I'll list them here:
 
-- `embedded` -- default value, YouTube uses this when requesting information for embedded videos. Doesn't work with videos that aren't embeddable. Works with age-restricted videos.
-- `detailpage` -- alternative value, contains a bit more info. Works with videos that aren't embeddable. Does not work with age-restricted videos.
+- `embedded`, the default value. YouTube uses this when requesting information for embedded videos. Doesn't work with videos that aren't embeddable, but works with age-restricted videos.
+- `detailpage`, alternative value, contains a bit more info. Conversely, works with videos that aren't embeddable, but doesn't work with age-restricted videos.
 
 YoutubeExplode uses `el=embedded` for the first query. If it fails because the video cannot be embedded, it then retries with `el=detailpage`.
 
@@ -79,18 +79,18 @@ YoutubeExplode uses `el=embedded` for the first query. If it fails because the v
 
 When the request fails, the response will contain only a few fields:
 
-- `status` -- equal to `fail`.
-- `errorcode` -- integer code that identifies the error.
+- `status` -- which is equal to `fail`.
+- `errorcode` -- an integer code that identifies the error.
 - `reason` -- text message that explains why the video is not available.
 
-Error codes seem to be very generic and most of the time it's either `100` or `150` so it's difficult to determine what actually went wrong using it.
+Error codes seem to be very generic and most of the time it's either `100` or `150` so they aren't very useful at determining what went wrong.
 
 ### Paid videos
 
 Some videos need to be purchased before they can be watched. In such cases, there will be:
 
-- `requires_purchase` -- equal to `1` when the video requires purchase.
-- `ypc_vid` -- ID of a preview video which can be watched for free.
+- `requires_purchase`, which equal to `1`.
+- `ypc_vid`, ID of a preview video which can be watched for free.
 
 ## Resolving media streams
 
@@ -124,9 +124,9 @@ Note: I've encountered cases when [some of the muxed streams were removed](https
 
 ### Adaptive streams
 
-YouTube also offers video-only and audio-only streams. These come at highest available qualities, with no limitations.
+YouTube also uses video-only and audio-only streams. These come at highest available qualities, with no limitations.
 
-Similarly to muxed streams, metadata for these streams can be extracted from `adaptive_fmts` parameter. Here's how the metadata for each of them looks:
+Similarly to muxed streams, metadata for these streams can be extracted from `adaptive_fmts` parameter. Here's how it looks:
 
 ```ini
 itag=134
@@ -190,13 +190,13 @@ Note: don't be tempted to extract content length from the `contentLength` attrib
 
 ## Protected videos and cipher signatures
 
-You may notice that some videos, mostly ones uploaded by verified members, are protected -- their media streams and DASH manifests cannot be directly accessed by URL -- a 403 error code is returned instead. To be able to access them, you need to decipher their signatures and then modify the URL appropriately.
+You may notice that some videos, mostly the ones uploaded by verified channels, are protected. This means that their media streams and DASH manifests cannot be directly accessed by URL -- a 403 error code is returned instead. To be able to access them, you need to decipher their signatures and then modify the URL appropriately.
 
 For muxed and adaptive streams, the signatures are part of the extracted metadata. DASH streams themselves are never protected, but the actual manifest may be -- the signature is stored as part of the URL.
 
 A signature is a string made out of two sequences of uppercase letters and numbers, separated by period. Here's an example: `537513BBC517D8643EBF25887256DAACD7521090.AE6A48F177E7B0E8CD85D077E5170BFD83BEDE6BE6C6C`.
 
-When your browser opens a YouTube video, it transforms stream signatures using a set of operations defined in the player source code, putting the result as an additional parameter inside URLs. To repeat the same process from code, you need to locate the JavaScript source of the player used by the video and parse it.
+When your browser opens a YouTube video, it transforms these signatures using a set of operations defined in the player source code, putting the result as an additional parameter inside URLs. To repeat the same process from code, you need to locate the JavaScript source of the player used by the video and parse it.
 
 ### Downloading and parsing player source code
 
@@ -296,7 +296,7 @@ private async Task<IReadOnlyList<ICipherOperation>> GetCipherOperationsAsync(str
 }
 ```
 
-Output of this method is a `PlayerSource` instance which contains a list of identified `ICipherOperation` objects. At this point in time, there can be up to 3 kind of cipher operations:
+Output of this method is a collection of `ICipherOperation`s. At this point in time, there can be up to 3 kind of cipher operations:
 
 - Swap -- swaps the first character in the signature with given, identified by position.
 - Slice -- truncates leading characters in signature which come before given position.
@@ -308,9 +308,9 @@ Once you successfully extract the type and order of the used operations, you nee
 
 After parsing the player source code, you can get the deciphered signatures and update the URL accordingly.
 
-For muxed and adaptive streams, transform the signature extracted from metadata and add it as a query parameter called `signature` -- `...&signature=212CD2793C2E9224A40014A56BB8189AF3D591E3.523508F8A49EC4A3425C6E4484EF9F59FBEF9066`
+For muxed and adaptive streams, transform the signature extracted from metadata and add it as a *query* parameter called `signature` -- `...&signature=212CD2793C2E9224A40014A56BB8189AF3D591E3.523508F8A49EC4A3425C6E4484EF9F59FBEF9066`
 
-For DASH manifest, transform the signature extracted from URL and add it as a route parameter called `signature` -- `.../signature/212CD2793C2E9224A40014A56BB8189AF3D591E3.523508F8A49EC4A3425C6E4484EF9F59FBEF9066/`
+For DASH manifest, transform the signature extracted from URL and add it as a *route* parameter called `signature` -- `.../signature/212CD2793C2E9224A40014A56BB8189AF3D591E3.523508F8A49EC4A3425C6E4484EF9F59FBEF9066/`
 
 ## Identifying media stream's content properties
 

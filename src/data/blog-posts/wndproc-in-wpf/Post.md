@@ -3,13 +3,15 @@ title: WndProc in WPF
 date: 2017-02-02
 ---
 
-WndProc is a callback function implemented by all windows that takes care of system messages sent from the operating system. In WPF, it's not directly exposed as it's hidden by abstraction, however there are times when you may want to process the events yourself -- global hotkeys being a common use case.
+WndProc is a callback function that takes care of system messages sent from the operating system.
 
-Contrary to what many people seem to think (according to StackOverflow answers, at least), being able to process window messages in WPF is both required and is definitely possible.
+Unlike WinForms, in WPF, it's not directly exposed to you as it's hidden by the framework's layer of abstraction. There are times, however, when you need to process these messages manually, for example when dealing with WinAPI.
+
+Let's look at some ways how we can do it.
 
 ## Non-MVVM way
 
-You can use special helper functions to get the handle of one of the windows, and then add a hook to it.
+We can use these special helper methods to get the handle of one of the windows, and then add a hook to it:
 
 ```csharp
 var window = Application.Current.MainWindow;
@@ -24,17 +26,17 @@ private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref b
 }
 ```
 
-This will use the application's main window as the host, as it's typically the window that stays open for as long as the application is running. You can specify a different window as a parameter to `FromVisual(…)` method, but then make sure to call `source.RemoveHook(…)` and `source.Dispose()` after you're done.
+In the example above we use the application's main window as the host, as it typically stays open for as long as the application is running. You can specify a different window as a parameter to `FromVisual(…)` method, but then make sure to call `source.RemoveHook(…)` and `source.Dispose()` after you're done.
 
-The above approach suffers from not being MVVM-compliant -- the WndProc code, which will most likely be defined in the model layer, is actually tied to a window. As a result, it can introduce a circular dependency between view and model, where one will wait on the other to initialize.
+The above approach suffers from not being MVVM-friendly -- the `WndProc` method, which will most likely be defined in the model layer, is actually coupled to a window. As a result, it can introduce a circular dependency between the view and the model, where one will wait on the other to initialize.
 
-## MVVM-compliant way
+## MVVM way
 
-You can decouple message processing from the view layer by creating a specialized invisible "sponge" window which will be used in the model layer to consume and process messages. Conveniently, `System.Windows.Forms.NativeWindow` fits exactly this purpose -- it's a low level window class that does nothing else but listen to system messages.
+As an alternative, we can decouple message processing from the view layer by creating a specialized invisible "sponge" window.
 
-### Implementing a message sponge
+Conveniently, `System.Windows.Forms.NativeWindow` fits exactly this purpose -- it's a low level window class that does nothing else but listen to system messages. We can use it be adding a reference to `System.Windows.Forms`.
 
-To define a low-level sponge window you can extend the `NativeWindow` class. You need to reference `System.Windows.Forms` to use it.
+Here is how I defined my sponge window:
 
 ```csharp
 public sealed class SpongeWindow : NativeWindow
@@ -54,9 +56,9 @@ public sealed class SpongeWindow : NativeWindow
 }
 ```
 
-It's important to not forget the `base.WndProc(ref m)` line, because one of the first messages the sponge will have to process is the message informing of its own creation. Basically, if you forget to add the `base` call, nothing will work.
+Make sure you don't forget to call `base.WndProc(ref m)`, otherwise the window will not initialize correctly.
 
-### Usage
+Now, assuming we have some sort of `WndProcService`, we can use our sponge window like so:
 
 ```csharp
 public class WndProcService : IDisposable
@@ -89,9 +91,9 @@ public class WndProcService : IDisposable
 }
 ```
 
-By subscribing to `WndProcCalled` event you can listen to incoming messages. You can also register to additional window messages by passing sponge's handle as parameter to specific WinAPI methods.
+By handling the `WndProcCalled` event you can listen to incoming messages. Typically, you would want to call some WinAPI method that subscribes a window to additional WndProc messages using its handle, e.g. [RegisterPowerSettingNotification](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerpowersettingnotification) or [RegisterHotKey](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey).
 
-For example, to register and listen to global hotkey events you can do:
+For example, if we were interested in registering a global hotkey and listening to its events, we could do it in such way:
 
 ```csharp
 public class GlobalHotkeyService : IDisposable

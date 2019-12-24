@@ -5,11 +5,15 @@ date: 2017-11-05
 
 [New csproj format](https://docs.microsoft.com/en-us/dotnet/core/tools/csproj), among other things, has an option to generate a NuGet package on every successful build. It resolves dependencies, target frameworks and documentation automatically and doesn't require a predefined nuspec file as all metadata is now also part of the csproj file.
 
-Sometimes NuGet packages may require additional files to work -- a native library or a CLI executable, for example. These dependencies are not resolved automatically but still need to be somehow included in the package. When defining a nuspec file manually, you can include such files by listing them in the `<Files>` section. To instruct the referencing project to copy these files to output folder, you can add a targets file which will extend the project file with additional build steps.
+Sometimes NuGet packages may require additional files to work -- a native library or a CLI executable, for example. These dependencies are not resolved automatically but still need to be somehow included in the package.
+
+When defining a nuspec file manually, you can include such files by listing them in the `<Files>` section. To instruct the referencing project to copy these files to the output folder, you can add a `.targets` file which will extend the build with additional steps.
 
 You can still resort to using a manually defined nuspec file in the new csproj format by setting the `<NuspecFile>` property, however that's not very fun.
 
-At the time of writing, this topic is barely covered in documentation and searching yields scarce results, if any. My challenge-driven friend and coworker **Ihor Nechyporuk** spent multiple hours scavenging internet for clues and finally found a way to get it properly working.
+At the time of writing, the new csproj format is barely covered in documentation. My challenge-driven friend and coworker **Ihor Nechyporuk** spent multiple hours scavenging internet for clues and finally found a way to get it properly working.
+
+Let's take look at some of the solutions.
 
 ## Solution for new project formats only
 
@@ -28,11 +32,15 @@ The problem is really easy to solve if you, for some reason, don't intend to sup
 
 This will make sure the file is copied to the output directory when building or when referencing this project either directly or as a package.
 
+It will, however, not work if your package is referenced by a project using the older format.
+
 ## Solution for all project formats
 
-### Step 1: create a targets file
+To make it work for both old and new project formats, we can use an alternative approach that involves a custom `.targets` file that links the additional dependencies.
 
-You need to create a targets file that links your additional dependencies. This file should have the same name as the NuGet package. Let's pretend our project and package are both named _Example_, which means the targets file should be named _Example.targets_.
+This file should have the same name as the NuGet package. Let's pretend our project and package are both named _Example_, which means the targets file should be named _Example.targets_.
+
+The content of the file should look like this:
 
 ```xml
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -45,9 +53,7 @@ You need to create a targets file that links your additional dependencies. This 
 </Project>
 ```
 
-### Step 2: reference targets file in project
-
-To include this targets file in the project, you need to add an `<Import>` element to the `<Project>` node.
+We can include the targets file in our project by simply adding an `<Import>` element to the `<Project>` node:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -57,7 +63,9 @@ To include this targets file in the project, you need to add an `<Import>` eleme
 </Project>
 ```
 
-This will cause MSBuild to copy _SOME_NATIVE_LIBRARY.dll_ to output directory on every build. However, to make sure the external file and targets are added into the NuGet package you also need to add an additional item group:
+This will cause MSBuild to copy `SOME_NATIVE_LIBRARY.dll` to output directory on every build.
+
+However, to make sure the external file and targets are added into the NuGet package we also need to add an additional item group:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">

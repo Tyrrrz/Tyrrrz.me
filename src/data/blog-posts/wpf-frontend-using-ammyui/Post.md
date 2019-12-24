@@ -6,17 +6,21 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
-Quite a long time ago I've stumbled upon a very interesting open source project called [AmmyUI](https://github.com/AmmyUI/AmmyUI). Its main goal is to make designing XAML apps a lot more fluid by... removing XAML and replacing it with a custom JSON-like layout language with additional features. I've never been a big fan of XAML, so it got me interested and I decided to use it for one of my projects, [DiscordChatExporter](https://github.com/Tyrrrz/DiscordChatExporter).
+Quite a long time ago I've stumbled upon a very interesting open source project called [AmmyUI](https://github.com/AmmyUI/AmmyUI). Its main goal is to make designing XAML apps a lot better by... removing XAML from the equation.
+
+Ammy is a JSON-like layout language which compiles to XAML and also has some cool extra features.
+
+I've never been a big fan of XAML, so it got me interested and I decided to use it when starting one of my projects [DiscordChatExporter](https://github.com/Tyrrrz/DiscordChatExporter).
 
 ## Installation
 
-To use AmmyUI, you will need to add its NuGet package -- `Ammy.WPF` or `Ammy.UWP` or `Ammy.XamarinForms`.
+To use AmmyUI, you will need to add its NuGet package to your project -- either `Ammy.WPF`, `Ammy.UWP`, or `Ammy.XamarinForms`, depending on your platform.
 
-Although technically not required, you will definitely want to also install the [Visual Studio extension](https://marketplace.visualstudio.com/items?itemName=ionoy.Ammy) as it provides syntax highlighting, Intellisense support and other things.
+Although technically not required, you will definitely want to also install the [Visual Studio extension](https://marketplace.visualstudio.com/items?itemName=ionoy.Ammy) as it provides syntax highlighting and Intellisense support.
 
 ## Syntax
 
-Ammy works by letting you define your views in its custom language, and then converting them to XAML at build time. The syntax looks a lot like JSON but with some nuances and shortcuts, as you can see here:
+AmmyUI works by letting you define your views in its custom language, and then converting them to XAML at build time. The syntax looks a lot like JSON but with some nuances and shortcuts, as you can see here:
 
 ```js
 Window "MainWindow" {
@@ -28,13 +32,21 @@ Window "MainWindow" {
 }
 ```
 
-In the above statement, we declare a window, set its name and size, and add a textblock child to it.
+In the above statement, we declare a window, set its name and size, and add a text block child to it.
 
-Although on its own this already looks cleaner than an equivalent snippet in XAML, Ammy's true power lies in its extended set of features.
+Compare this to an equivalent in XAML:
+
+```xml
+<Window x:Name="MainWindow" Width="100" Height="100">
+  <TextBlock Text="Hello, World!" />
+</Window>
+```
+
+Although on its own this already looks a bit cleaner, Ammy's true power lies in its extensive set of features.
 
 ### Names and resource keys
 
-Names and keys have a high level treatment and can be defined really quickly using shortcuts:
+Names and keys are first-class citizens and can be defined really quickly using shortcuts:
 
 ```js
 // Grid with a name
@@ -48,7 +60,9 @@ Grid Key="MyGrid" {
 
 ### Using statements
 
-Instead of defining aliases for XML namespaces, Ammy is using an approach identical to C# -- `using` directives. This means you can import an entire CLR namespace without the need to prefix nodes with an alias.
+Instead of defining aliases for XML namespaces, Ammy is using an approach identical to C# -- `using` directives.
+
+This means you can import an entire CLR namespace and stop worrying about prefixing nodes with namespace aliases.
 
 For example, if you are using [MaterialDesignInXamlToolkit](https://github.com/ButchersBoy/MaterialDesignInXamlToolkit) and want to use a `Card` control in your layout, you can simply do this:
 
@@ -94,7 +108,7 @@ TextBlock {
 }
 ```
 
-There are many other things you can put after `from` -- `$this`, `$template`, `$ancestor<TextBlock>(3)`, `$previous`, `SomeType.StaticProperty`, `$resource SomeResource` -- each of them replace a normally rather lengthy binding declaration in XAML.
+There are many other things you can use with `from`, namely `$this`, `$template`, `$ancestor<TextBlock>(3)`, `$previous`, `SomeType.StaticProperty`, `$resource SomeResource` -- each of them replaces a normally rather lengthy binding declaration in XAML.
 
 ### Resource shortcuts
 
@@ -109,7 +123,9 @@ TextBlock {
 
 ### Inline binding converters
 
-This is easily my most favorite feature, something that lets you forget about `BoolToVisibilityConverter`, `InvertBoolToVisibilityConverter` and the likes. In Ammy you can specify a converter right inside your binding declaration:
+This is easily my most favorite feature, something that lets you forget about `BoolToVisibilityConverter`, `InvertBoolToVisibilityConverter` and the likes.
+
+In Ammy you can specify a converter right inside your binding declaration:
 
 ```js
 TextBlock {
@@ -122,7 +138,7 @@ You can write most C# code inside a converter, invoke your own methods, use your
 
 ### Variables
 
-This framework also offers some features to help you keep your code DRY. For example, you can declare variables and use them in a variety of ways:
+This framework also offers some features to help you keep your code DRY. For example, you can declare variables and use them in different ways:
 
 ```js
 $primaryColor = "#343838"
@@ -136,7 +152,7 @@ TextBlock {
 
 ### Mixins
 
-You can also define a re-usable set of properties to be included in some controls, called mixin:
+You can also define mixins, which are reusable sets of properties that can be included in your controls:
 
 ```js
 mixin Centered() for TextBlock {
@@ -164,11 +180,11 @@ TextBlock {
 }
 ```
 
-The AmmyUI NuGet package also comes with quite a few pre-defined mixins that you can quickly start using in your code.
+The AmmyUI NuGet package also comes with quite a few pre-defined mixins that can help you develop your app more rapidly.
 
 ### Aliases
 
-Alias is sort of similar to a mixin, except that it's used to create re-usable elements rather than a set of properties.
+Alias is sort of similar to a mixin, except that it's used to essentially create templates for your UI elements.
 
 ```js
 alias BigCenteredTextBlock(text) {
@@ -188,6 +204,6 @@ Grid {
 
 ## My experience
 
-Overall I was very pleased working with AmmyUI to develop one of my apps, however I don't feel confident using it for anything relatively large scale. My main issues included rather poor Intellisense support, lack of automatic formatting and refactoring, and lackluster Visual Studio integration. I've also encountered some bugs, most of which I was able to work around though.
+I think AmmyUI is a very interesting project and highlights how much better WPF could've been if it didn't involve XAML.
 
-I made sure to report all [the issues I've found on GitHub](https://github.com/AmmyUI/AmmyUI/issues?utf8=%E2%9C%93&q=is%3Aissue%20author%3ATyrrrz) so hopefully eventually either the author, me or someone else will get them fixed.
+Ultimately, I don't think Ammy is production ready yet but I recommend trying it out in one of your side projects.

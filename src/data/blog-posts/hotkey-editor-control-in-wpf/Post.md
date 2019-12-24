@@ -6,11 +6,11 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
-GUI applications often offer a way for users to configure hotkeys, typically using a textbox that records combination of key presses inside of it. Such control doesn't come out of the box with WPF so you'll have to implement it yourself.
+GUI applications sometimes offer a way for users to configure hotkeys, typically using a textbox that records combination of key presses inside of it. Such control doesn't come out of the box with WPF but we can implement it ourselves.
 
 ## Hotkey class
 
-WPF has two useful enumerations for this task -- `System.Windows.Input.Key` and `System.Windows.Input.ModifierKeys`. You'll want to make a class that encapsulates values of those enums and call it `Hotkey`.
+WPF has two useful enumerations for this task -- `System.Windows.Input.Key` and `System.Windows.Input.ModifierKeys`. Let's make a class that encapsulates the values of those enums and call it `Hotkey`.
 
 ```csharp
 public class Hotkey
@@ -51,12 +51,10 @@ An instance of this class is created by specifying a key along with a combinatio
 
 ## WPF user control
 
-### View layer
+To make the actual WPF control, you can either derive from `TextBox` or make your own `UserControl`. I chose the latter, mainly for two reasons:
 
-For making the actual WPF control you can either derive from `TextBox` or make your own `UserControl`. I chose the latter, mainly for two reasons:
-
-- I can hide all the inherent textbox properties that aren't applicable for my control.
-- I have less limitations in case I need to replace textbox with a different control or add something on top of it.
+- I can hide all of the inherent textbox properties that aren't applicable for my control.
+- I have fewer limitations in case I need to replace textbox with a different control or add something on top of it.
 
 ```xml
 <UserControl x:Class="Your.Namespace.HotkeyEditorControl"
@@ -83,18 +81,28 @@ For making the actual WPF control you can either derive from `TextBox` or make y
 </UserControl>
 ```
 
-When configuring the internal `TextBox`, there are a few important things to mention straight away. First of all, it shouldn't allow manual text input, so I set `IsReadOnly` to `true`. Second of all, it'd be best to remove the caret since it isn't useful in any way -- setting `IsReadOnlyCaretVisible` to `false` takes cares of that. We also don't want it to keep the undo/redo history so let's disable `IsUndoEnabled` as well. Finally, WPF textboxes have an inherent context menu with buttons like copy, cut, paste, etc -- that's not needed either. The only way to disable the context menu however is to hide it -- setting it to `null` doesn't seem to do anything.
+There are a few important things we need to configure in our internal `TextBox`.
 
-### Code-behind
+First of all, it shouldn't allow manual text input, so I set `IsReadOnly` to `true`.
 
-To capture keystrokes I'm processing the `PreviewKeyDown` event because it also lets us disable standard textbox shortcuts such as copy, cut, paste, etc. The text property is bound to the `Hotkey` property using `OneWay` mode. The latter is important because we are setting the value of `Hotkey` from code-behind, the binding is only used to update the text inside the textbox.
+Second of all, it'd be best to remove the caret since it isn't useful in any way. Setting `IsReadOnlyCaretVisible` to `false` takes cares of that.
+
+We also don't want it to keep the undo/redo history so let's disable `IsUndoEnabled` as well.
+
+Finally, WPF textboxes have a default context menu with buttons like copy, cut, paste, etc. which we don't need either. We can disable it by setting its visibility to `Collapsed`.
+
+The text property is bound to the `Hotkey` property using `OneWay` mode. The latter is important because we are setting the value of `Hotkey` from code-behind. This binding is only used to update the text inside the textbox.
+
+As for the code-behind, it looks like this:
 
 ```csharp
 public partial class HotkeyEditorControl
 {
     public static readonly DependencyProperty HotkeyProperty =
-        DependencyProperty.Register(nameof(Hotkey), typeof(Hotkey), typeof(HotkeyEditorControl),
-            new FrameworkPropertyMetadata(default(Hotkey), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+        DependencyProperty.Register(nameof(Hotkey), typeof(Hotkey),
+            typeof(HotkeyEditorControl),
+            new FrameworkPropertyMetadata(default(Hotkey),
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
     public Hotkey Hotkey
     {
@@ -124,35 +132,41 @@ public partial class HotkeyEditorControl
         }
 
         // Pressing delete, backspace or escape without modifiers clears the current value
-        if (modifiers == ModifierKeys.None && key.IsEither(Key.Delete, Key.Back, Key.Escape))
+        if (modifiers == ModifierKeys.None &&
+            (key == Key.Delete || key == Key.Back || key == Key.Escape))
         {
             Hotkey = null;
             return;
         }
 
         // If no actual key was pressed - return
-        if (key.IsEither(
-            Key.LeftCtrl, Key.RightCtrl, Key.LeftAlt, Key.RightAlt,
-            Key.LeftShift, Key.RightShift, Key.LWin, Key.RWin,
-            Key.Clear, Key.OemClear, Key.Apps))
+        if (key == Key.LeftCtrl ||
+            key == Key.RightCtrl ||
+            key == Key.LeftAlt ||
+            key == Key.RightAlt ||
+            key == Key.LeftShift ||
+            key == Key.RightShift ||
+            key == Key.LWin ||
+            key == Key.RWin ||
+            key == Key.Clear ||
+            key == Key.OemClear ||
+            key == Key.Apps))
         {
             return;
         }
 
-        // Set values
+        // Update the value
         Hotkey = new Hotkey(key, modifiers);
     }
 }
 ```
 
-Input processing happens in the `HotkeyTextBox_PreviewKeyDown` method:
+To capture keystrokes we're processing the `PreviewKeyDown` event because it also lets us disable standard textbox shortcuts such as copy, cut, paste, etc.
 
 1. It sets `e.Handled` to `true` so that the events don't pass further down the chain.
 2. It extracts information about what key is pressed, along with what modifiers. Due to the role of the Alt key in Windows, when it's the only modifier, the actual key will have to be extracted from `SystemKey` property instead.
-3. It checks if either Delete, Backspace or Escape was pressed and clears the input if so.
+3. It checks if either Delete, Backspace or Escape were pressed and clears the input if so.
 
-## Preview
+Finally, here's how the control looks in my app [LightBulb](https://github.com/Tyrrrz/LightBulb):
 
-Finally, here's how the control looks in [one of my applications](https://github.com/Tyrrrz/LightBulb):
-
-![example usage](Example.png)
+![example](Example.png)
