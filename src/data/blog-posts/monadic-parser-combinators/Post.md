@@ -47,7 +47,7 @@ new SyntacticComponents[]
 
 This is what parsers do. They take an input, usually in the form of text, and formalize it using domain objects. In case of an invalid input, a parser rejects it with an informative error message.
 
-```plaintext
+```text
 [Input] ------ <Parser>
                /      \
             ✓ /        \ X
@@ -71,7 +71,7 @@ A formal language itself builds mainly upon the concept of grammar, which is a s
 
 Based on the complexity of these rules, grammars are separated into different types according to the [Chomsky hierarchy](https://en.wikipedia.org/wiki/Chomsky_hierarchy). At the lowest level you will find the two most common grammar types, the _regular_ and _context-free_ grammars.
 
-```plaintext
+```text
 +---------------------------------+
 |                                 |
 |      CONTEXT-FREE GRAMMARS      |
@@ -91,7 +91,7 @@ HTML is a good example of a context-free language, because an element in HTML ca
 
 As a result, while an input that adheres to a regular grammar can be represented using a sequence of syntactic components, context-free grammar is represented using a higher-level structure -- a syntax tree:
 
-```plaintext
+```text
        [ HTML document ]
           |        \
           |         \
@@ -110,13 +110,13 @@ There are many approaches for writing parsers for context-free languages. Most l
 
 Parser combinators, as a concept, revolves around representing each parser as a modular function that takes on some input and produces either a successful result or an error:
 
-```plaintext
+```text
 f(input) -> (result, inputRemainder) | (error)
 ```
 
 These parsers can be transformed or combined to form more complex parsers by wrapping the function in another function. Generally speaking, combinators are just another class of functions that take other parser functions and produce more intricate ones.
 
-```plaintext
+```text
 F(f(input)) -> g(input)
 ```
 
@@ -311,7 +311,7 @@ The `Or` combinator is an extension method that takes two parsers of the same ty
 
 One of the coolest things about using parser combinators is how expressive your code is. It can be read quite literally, in fact:
 
-```plaintext
+```text
 JsonBoolean is either TrueJsonBoolean or FalseJsonBoolean.
 TrueJsonBoolean is a string "true" which produces a `JsonBoolean` whose value is `true`.
 FalseJsonBoolean is a string "false" which produces a `JsonBoolean` whose value is `false`.
@@ -467,7 +467,9 @@ That's it, we have a working JSON processor! We can now call `JsonEntity.Parse` 
 
 Parsing doesn't have to be a daunting and unapproachable task. Functional programming helps us model complex grammars as a composition of smaller functions which are fairly easy to reason about. And luckily we can do it in C# as well!
 
-If you're still thirsty for knowledge and want to see a slightly more complex example, check out [LtGt](https://github.com/Tyrrrz/LtGt/tree/csharp-sprache), an HTML processor (with CSS selectors!) that I've originally written using Sprache. Should you wish to learn more about parsing in general, I recommend reading ["Parsing in C#"](https://tomassetti.me/parsing-in-csharp), an article by Gabriele Tomassetti.
+If you're still thirsty for knowledge and want to see a slightly more complex example, check out [LtGt](https://github.com/Tyrrrz/LtGt/tree/csharp-sprache), an HTML processor (with CSS selectors!) that I've originally written using Sprache.
+
+Should you wish to learn more about parsing in general, I recommend reading ["Parsing in C#"](https://tomassetti.me/parsing-in-csharp), an article by Gabriele Tomassetti.
 
 There are also other monadic parser combinator libraries in .NET that you can check out, most notably [Superpower](https://github.com/datalust/superpower), [Pidgin](https://github.com/benjamin-hodgson/Pidgin), [Parsley](https://github.com/plioi/parsley), and [FParsec (F#)](https://github.com/stephan-tolksdorf/fparsec).
 

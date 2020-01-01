@@ -36,14 +36,19 @@ const MetadataContainer = styled.div`
 
 const Content = styled.div`
   code {
-    font-family: 'Fira Code', 'Consolas', 'Courier New', 'Courier', monospace;
+    font-family: 'Fira Code', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
     font-size: 0.8em;
-    font-weight: 300;
-    line-height: 1.2em;
   }
 
-  code:not(.hljs) {
+  *:not(pre) > code {
+    padding: 0.2em;
+    border-radius: 2px;
     background-color: #f0f0f0;
+  }
+
+  pre {
+    font-weight: 300;
+    line-height: 1;
   }
 
   blockquote p {

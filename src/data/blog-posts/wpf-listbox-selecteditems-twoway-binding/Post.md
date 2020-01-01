@@ -103,7 +103,7 @@ When the change is triggered by the view, we call the `OnListBoxSelectionChanged
 
 Note, however, that this behavior is generic because we expect to work with a collection like `IReadOnlyList<T>` on the view model side. WPF doesn't support generic behaviors so we have to subtype this class for each specific data type:
 
-```c#
+```csharp
 public class MyObjectListBoxSelectionBehavior : ListBoxSelectionBehavior<MyObject>
 {
 }

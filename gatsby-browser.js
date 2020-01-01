@@ -3,4 +3,4 @@ require('typeface-maven-pro');
 require('@openfonts/fira-code_all');
 
 // Syntax highlighting
-require('highlight.js/styles/obsidian.css');
+require("prismjs/themes/prism-tomorrow.css");

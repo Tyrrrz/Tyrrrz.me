@@ -49,7 +49,10 @@ exports.plugins = [
       resolvePlugin(`gatsby-remark-images-medium-zoom`),
 
       // Syntax highlighting
-      resolvePlugin(`gatsby-remark-highlight.js`),
+      resolvePlugin(`gatsby-remark-prismjs`, {
+        classPrefix: "language-",
+        noInlineHighlight: true
+      }),
 
       // Markdown extensions
       resolvePlugin(`gatsby-remark-smartypants`)
