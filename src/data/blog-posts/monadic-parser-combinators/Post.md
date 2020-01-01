@@ -144,16 +144,13 @@ Here is the corresponding code for them, condensed into one snippet for brevity:
 public abstract class JsonEntity
 {
     public virtual JsonEntity this[string name] =>
-        throw new InvalidOperationException(
-            $"{GetType().Name} doesn't support this operation.");
+        throw new InvalidOperationException($"{GetType().Name} doesn't support this operation.");
 
     public virtual JsonEntity this[int index] =>
-        throw new InvalidOperationException(
-            $"{GetType().Name} doesn't support this operation.");
+        throw new InvalidOperationException($"{GetType().Name} doesn't support this operation.");
 
     public virtual T GetValue<T>() =>
-        throw new InvalidOperationException(
-            $"{GetType().Name} doesn't support this operation.");
+        throw new InvalidOperationException($"{GetType().Name} doesn't support this operation.");
 
     public static JsonEntity Parse(string json) =>
         throw new NotImplementedException("Not implemented yet!");
@@ -333,7 +330,7 @@ internal static class JsonGrammar
 }
 ```
 
-As you can see, Sprache already provides `Parse.DecimalInvariant` out of the box, which we can use to match a number. Since that returns `Parser<string>` as it matches the text that represents the number, we need to transform it to `double` first and then to our `JsonNumber` object.
+As you can see, Sprache already provides `Parse.DecimalInvariant` out of the box, which we can use to match a number. Since that returns `Parser<string>` as it parses the text that represents the number, we need to transform it to `double` first and then to our `JsonNumber` object.
 
 The `Select` method here works quite similarly to LINQ's `Select` -- it lazily transforms the underlying value of the container into a different shape. This lets us map raw character sequences into more complex higher-level domain objects.
 
@@ -465,7 +462,7 @@ That's it, we have a working JSON processor! We can now call `JsonEntity.Parse` 
 
 ## Wrapping up
 
-Parsing doesn't have to be a daunting and unapproachable task. Functional programming helps us model complex grammars as a composition of smaller functions which are fairly easy to reason about. And luckily we can do it in C# as well!
+Parsing doesn't have to be a daunting and unapproachable task. Functional programming helps us model complex grammar as a composition of smaller functions which are fairly easy to reason about. And luckily we can do it in C# as well!
 
 If you're still thirsty for knowledge and want to see a slightly more complex example, check out [LtGt](https://github.com/Tyrrrz/LtGt/tree/csharp-sprache), an HTML processor (with CSS selectors!) that I've originally written using Sprache.
 
