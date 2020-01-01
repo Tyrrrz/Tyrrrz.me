@@ -47,12 +47,12 @@ new SyntacticComponents[]
 
 This is what parsers do. They take an input, usually in the form of text, and formalize it using domain objects. In case of an invalid input, a parser rejects it with an informative error message.
 
-```text
-[Input] ------ <Parser>
+```ini
+[Input] ------ (Parser)
                /      \
             ✓ /        \ X
              /          \
-    [Domain objects]   [Error message]
+    [Domain objects]  [Error message]
 ```
 
 Of course, it's a fairly basic example, there are much more complicated languages and inputs out there. But generally speaking, we can say that a parser is a piece of code that can help build syntactic structure of input text, effectively helping the computer "understand" it.
@@ -71,7 +71,7 @@ A formal language itself builds mainly upon the concept of grammar, which is a s
 
 Based on the complexity of these rules, grammars are separated into different types according to the [Chomsky hierarchy](https://en.wikipedia.org/wiki/Chomsky_hierarchy). At the lowest level you will find the two most common grammar types, the _regular_ and _context-free_ grammars.
 
-```text
+```r
 +---------------------------------+
 |                                 |
 |      CONTEXT-FREE GRAMMARS      |
@@ -91,7 +91,7 @@ HTML is a good example of a context-free language, because an element in HTML ca
 
 As a result, while an input that adheres to a regular grammar can be represented using a sequence of syntactic components, context-free grammar is represented using a higher-level structure -- a syntax tree:
 
-```text
+```html
        [ HTML document ]
           |        \
           |         \
@@ -110,13 +110,13 @@ There are many approaches for writing parsers for context-free languages. Most l
 
 Parser combinators, as a concept, revolves around representing each parser as a modular function that takes on some input and produces either a successful result or an error:
 
-```text
+```js
 f(input) -> (result, inputRemainder) | (error)
 ```
 
 These parsers can be transformed or combined to form more complex parsers by wrapping the function in another function. Generally speaking, combinators are just another class of functions that take other parser functions and produce more intricate ones.
 
-```text
+```js
 F(f(input)) -> g(input)
 ```
 
@@ -311,7 +311,7 @@ The `Or` combinator is an extension method that takes two parsers of the same ty
 
 One of the coolest things about using parser combinators is how expressive your code is. It can be read quite literally, in fact:
 
-```text
+```js
 JsonBoolean is either TrueJsonBoolean or FalseJsonBoolean.
 TrueJsonBoolean is a string "true" which produces a `JsonBoolean` whose value is `true`.
 FalseJsonBoolean is a string "false" which produces a `JsonBoolean` whose value is `false`.
