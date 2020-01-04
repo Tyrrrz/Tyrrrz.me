@@ -13,7 +13,7 @@ Sometimes the XAML you want to refactor can also contain some logic in code-behi
 
 Let's assume we already have a resource dictionary created and it's in a file called `MyResourceDictionary.xaml`.
 
-To add some code-behind to it, we just need to create a new *partial* class. Conventionally, the code-behind file should be in the same namespace as the dictionary and have the same file name. For that reason we will name this class `MyResourceDictionary` and save it as `MyResourceDictionary.xaml.cs`.
+To add some code-behind to it, we just need to create a new _partial_ class. Conventionally, the code-behind file should be in the same namespace as the dictionary and have the same file name. For that reason we will name this class `MyResourceDictionary` and save it as `MyResourceDictionary.xaml.cs`.
 
 ```csharp
 namespace MyProject

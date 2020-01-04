@@ -6,9 +6,9 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
-I have always been trying to be a well-organized person, but for the most part I was doing it wrong. I was lacking in ability to plan and stay focused, which made it seem like I was productive, despite not having any tangible progress towards the goals that *really* matter.
+I have always been trying to be a well-organized person, but for the most part I was doing it wrong. I was lacking in ability to plan and stay focused, which made it seem like I was productive, despite not having any tangible progress towards the goals that _really_ matter.
 
-It can be very difficult to stay on top of things and have a clearly defined path. I've struggled for some time to find an optimal routine that would not only help me get things done, but also get the *right* things done.
+It can be very difficult to stay on top of things and have a clearly defined path. I've struggled for some time to find an optimal routine that would not only help me get things done, but also get the _right_ things done.
 
 Through trying out many mediums and approaches -- from to-do apps to bullet journals -- I eventually developed a workflow that helps me separate planning from execution, in a way that lets me effectively focus on a smaller subset of tasks at a time. To implement it, I'm using Evernote which is a productivity app I like for the customizability it offers.
 
@@ -34,10 +34,10 @@ To make my notes even more informative at a glance, I make use of tags. They can
 
 Unlike notebooks, tags are used to categorize notes based on one or multiple traits. Currently, I'm using the following 5 tags I created:
 
-- **Task** -- something that can be done if acted upon. Example: "*Buy a new camera*".
-- **Event** -- something that can only be acted upon on a specific date and time, not sooner or later. Example: "*Dentist appointment at 2pm on Monday*".
-- **Idea** -- something that is too vague to be acted upon, but can be a source of new tasks. Example: "*List of books I want to read*".
-- **Blocked** -- something that cannot be acted upon until the blocker is cleared. Example: "*Buy a new camera*" cannot be acted upon until *salary day*.
+- **Task** -- something that can be done if acted upon. Example: "_Buy a new camera_".
+- **Event** -- something that can only be acted upon on a specific date and time, not sooner or later. Example: "_Dentist appointment at 2pm on Monday_".
+- **Idea** -- something that is too vague to be acted upon, but can be a source of new tasks. Example: "_List of books I want to read_".
+- **Blocked** -- something that cannot be acted upon until the blocker is cleared. Example: "_Buy a new camera_" cannot be acted upon until _salary day_.
 - **Important** -- something marginally more important than everything else and should be considered first when planning.
 
 ![Tags](Tags.png)
@@ -52,9 +52,9 @@ Before the start of a new week, usually on a Sunday, I make a plan for the upcom
 
 ![The planning notebook](Planning-notebook.png)
 
-When making a week plan, I begin by creating a note and naming it in accordance with the week number, e.g. "*Week plan #50*". It doesn't make sense to assign any tags to it, so I just leave it as it is. I also write down the starting and ending dates of the week inside the note for a bit of extra context, e.g. "Dec 10 - Dec 16".
+When making a week plan, I begin by creating a note and naming it in accordance with the week number, e.g. "_Week plan #50_". It doesn't make sense to assign any tags to it, so I just leave it as it is. I also write down the starting and ending dates of the week inside the note for a bit of extra context, e.g. "Dec 10 - Dec 16".
 
-Then, to fill it with items, I start with events because it's the simplest. I look through all events that are planned for that week and insert them into the plan by copy-pasting their links. This can be done by right-clicking on each note and selecting "*Copy internal link*". It also helps if the events inside the plan are listed in a chronological order, with date/time displayed next to them for convenience.
+Then, to fill it with items, I start with events because it's the simplest. I look through all events that are planned for that week and insert them into the plan by copy-pasting their links. This can be done by right-clicking on each note and selecting "_Copy internal link_". It also helps if the events inside the plan are listed in a chronological order, with date/time displayed next to them for convenience.
 
 To make it easier to find events based on their dates, I always configure reminders for this type of notes -- this adds an extra field that I can use to filter and search by. For example, I have a couple of saved search queries that are very useful when planning events:
 

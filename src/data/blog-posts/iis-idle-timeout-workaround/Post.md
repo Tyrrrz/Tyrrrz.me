@@ -12,13 +12,13 @@ If you have access to the IIS Manager, it's possible to change the timeout or di
 
 The workaround seems pretty obvious -- we just need to keep sending requests to prevent IIS from killing our application. Default idle timeout is 20 minutes so you would need to send requests at least this often, although some hosting providers might have different settings.
 
-Problem is, however, simply pinging the host is not enough to keep it alive, we need to send actual HTTP requests. I've tried many uptime monitors and the only one that satisfied this criteria was Application Insight and its *Availability* feature.
+Problem is, however, simply pinging the host is not enough to keep it alive, we need to send actual HTTP requests. I've tried many uptime monitors and the only one that satisfied this criteria was Application Insight and its _Availability_ feature.
 
 ## Using Application Insights to poll a website
 
-Application Insights offers a very useful feature called *Availability* -- it lets you create tests that check your web app's availability and have them run as often as every 5 minutes. Unlike other uptime monitors, these tests actually send `GET` requests to your app instead of simply pinging the host.
+Application Insights offers a very useful feature called _Availability_ -- it lets you create tests that check your web app's availability and have them run as often as every 5 minutes. Unlike other uptime monitors, these tests actually send `GET` requests to your app instead of simply pinging the host.
 
-The best part is that you can create an Application Insights resource on a free Azure account, and you don't even need to have it properly configured. In fact, we won't even be using the rest of Application Insights, only the *Availability* feature.
+The best part is that you can create an Application Insights resource on a free Azure account, and you don't even need to have it properly configured. In fact, we won't even be using the rest of Application Insights, only the _Availability_ feature.
 
 To set up availability tests, go to [Azure Portal](https://portal.azure.com/) and add a new Application Insights resource.
 

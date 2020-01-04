@@ -308,9 +308,9 @@ Once you successfully extract the type and order of the used operations, you nee
 
 After parsing the player source code, you can get the deciphered signatures and update the URL accordingly.
 
-For muxed and adaptive streams, transform the signature extracted from metadata and add it as a *query* parameter called `signature` -- `...&signature=212CD2793C2E9224A40014A56BB8189AF3D591E3.523508F8A49EC4A3425C6E4484EF9F59FBEF9066`
+For muxed and adaptive streams, transform the signature extracted from metadata and add it as a _query_ parameter called `signature` -- `...&signature=212CD2793C2E9224A40014A56BB8189AF3D591E3.523508F8A49EC4A3425C6E4484EF9F59FBEF9066`
 
-For DASH manifest, transform the signature extracted from URL and add it as a *route* parameter called `signature` -- `.../signature/212CD2793C2E9224A40014A56BB8189AF3D591E3.523508F8A49EC4A3425C6E4484EF9F59FBEF9066/`
+For DASH manifest, transform the signature extracted from URL and add it as a _route_ parameter called `signature` -- `.../signature/212CD2793C2E9224A40014A56BB8189AF3D591E3.523508F8A49EC4A3425C6E4484EF9F59FBEF9066/`
 
 ## Identifying media stream's content properties
 

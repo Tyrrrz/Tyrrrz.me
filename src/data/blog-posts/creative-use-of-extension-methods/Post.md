@@ -131,7 +131,7 @@ An extension method here achieves the same thing as a normal method, but it prov
 2. It's obvious that this method simply provides a shortcut and it's there only for convenience.
 3. The method is part of an entirely separate class (or even assembly) which helps us separate data from logic.
 
-Overall, using an extension method approach here helps draw a line between what's *necessary* and what's *helpful*.
+Overall, using an extension method approach here helps draw a line between what's _necessary_ and what's _helpful_.
 
 ## Making interfaces more versatile
 
