@@ -332,7 +332,7 @@ type JsonNode =
 
 These will represent the individual nodes in the tree and later we're going to add some logic to navigate through the hierarchy.
 
-Let's add a new module called `JsonGrammar` to keep the parsers separate from the rest of the project. The functions in this module will represent individual grammar rules so their names will match those of the actual data types but with camel case instead.
+Let's create a new module called `JsonGrammar` in the same file. The functions in this module will represent individual grammar rules so their names will match those of the actual data types but with camel case instead.
 
 The first parser that we'll write is going to be `jsonNull`, which is really easy:
 
@@ -673,10 +673,10 @@ let main _ =
     """
 
     // Get the value of quiz.sport.q1.options[2]
-    let json = Json.tryParse str
-
-    match json with
-    | Error err -> printfn "Parsing failed: %s" err; 1
+    match Json.tryParse str with
+    | Error err ->
+        printfn "Parsing failed: %s" err
+        1
     | Ok result ->
         result
         |> Json.tryChild "quiz"
@@ -690,7 +690,7 @@ let main _ =
         0
 ```
 
-If we run this piece of code, we should end up seeing `Value: Golden State Warriors`. Awesome, we've verified that our parser works and made a pretty simple but useful API around it.
+Once we run this piece of code, we should see `Value: Golden State Warriors`. Awesome, we've verified that our parser works and made a pretty simple but useful API around it.
 
 _The finished project is also available as a gist [here](https://gist.github.com/Tyrrrz/eb68660903c9c6e4dd231eeee20113a4)._
 
@@ -751,7 +751,7 @@ let htmlElement = parse {
 }
 ```
 
-Writing the same thing using binds may not be very pleasant.
+Writing the same thing using binds may not be as pleasant.
 
 ## Summary
 
