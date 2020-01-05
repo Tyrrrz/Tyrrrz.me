@@ -609,22 +609,22 @@ module Json =
     let tryInt (node : JsonNode) =
         node |> tryFloat |> Option.map int
 
+    /// Tries to get an item by its index.
+    let tryItem (i : int) (node : JsonNode) =
+        match node with
+        | JsonArray a -> a |> List.tryItem i
+        | _ -> None
+
     /// Tries to get a child node by its name.
     let tryChild (name : string) (node : JsonNode) =
         match node with
         | JsonObject o -> o |> Map.tryFind name
         | _ -> None
-
-    /// Lists all child nodes on an array.
-    let items (node : JsonNode) =
-        match node with
-        | JsonArray a -> a
-        | _ -> List.empty
 ```
 
 By defining our own `tryParse` function, we hide FParsec's API behind a layer of abstraction so that our library is slightly easier to use. We also wrap the original `jsonNode` in a parser that will discard leading whitespace and ensure that the end of the stream has been reached -- the latter is important because we don't want to only partially parse the input.
 
-Functions `tryBool`, `tryString`, `tryFloat`, `tryInt` make it easier to extract values without having to do pattern matching yourself. To make it simpler to work with objects and arrays, there's also `tryChild` which will get an object child by its name and `items` which will enumerate children in an array.
+Functions `tryBool`, `tryString`, `tryFloat`, `tryInt` make it easier to extract values without having to do pattern matching yourself. To make it simpler to work with objects and arrays, there's also `tryChild` which will get an object child by its name and `tryItem` which will get an array item by its index.
 
 Let's put it all together and test it on some real input:
 
@@ -674,20 +674,19 @@ let main _ =
 
     // Get the value of quiz.sport.q1.options[2]
     match Json.tryParse str with
-    | Error err ->
-        printfn "Parsing failed: %s" err
-        1
-    | Ok result ->
-        result
-        |> Json.tryChild "quiz"
-        |> Option.bind (Json.tryChild "sport")
-        |> Option.bind (Json.tryChild "q1")
-        |> Option.bind (Json.tryChild "options")
-        |> Option.map (Json.items)
-        |> Option.bind (List.tryItem 2)
-        |> Option.bind (Json.tryString)
-        |> Option.iter (printfn "Value: %s")
-        0
+        | Ok result ->
+            result
+            |> Json.tryChild "quiz"
+            |> Option.bind (Json.tryChild "sport")
+            |> Option.bind (Json.tryChild "q1")
+            |> Option.bind (Json.tryChild "options")
+            |> Option.bind (Json.tryItem 2)
+            |> Option.bind (Json.tryString)
+            |> Option.iter (printfn "Value: %s")
+            0
+        | Error err ->
+            printfn "Parsing failed: %s" err
+            1
 ```
 
 Once we run this piece of code, we should see `Value: Golden State Warriors`. Awesome, we've verified that our parser works and made a pretty simple but useful API around it.
