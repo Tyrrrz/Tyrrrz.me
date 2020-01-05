@@ -152,6 +152,8 @@ export default ({ data }) => {
 
       <Footnote />
 
+      <Separator />
+
       <Comments />
     </Layout>
   );
