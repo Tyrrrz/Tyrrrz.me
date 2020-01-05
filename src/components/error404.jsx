@@ -1,8 +1,6 @@
 import React from 'react';
 import { Link } from 'gatsby';
-
 import routes from '../routes';
-
 import Layout from '../components/layout';
 import Meta from '../components/meta';
 

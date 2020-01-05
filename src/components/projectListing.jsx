@@ -1,47 +1,9 @@
 import React from 'react';
 import { graphql } from 'gatsby';
-
 import { OutboundLink } from 'gatsby-plugin-google-analytics';
-
-import styled from '@emotion/styled';
 import MdiIcon from '@mdi/react';
 import { mdiStar, mdiCodeTags } from '@mdi/js';
-
 import theme from '../theme';
-
-const Icon = styled(MdiIcon)`
-  margin-top: 0.06em;
-  vertical-align: top;
-  width: 1em;
-`;
-
-const Container = styled.div`
-  &:not(:last-child) {
-    margin-bottom: 1.5em;
-  }
-`;
-
-const Name = styled.div`
-  font-size: 1.5em;
-
-  a {
-    text-decoration: none;
-  }
-`;
-
-const MetadataContainer = styled.div`
-  margin-top: 0.3em;
-  opacity: 0.65;
-  font-size: 0.8em;
-
-  span + span {
-    margin-left: 1em;
-  }
-`;
-
-const Description = styled.div`
-  margin-top: 0.3em;
-`;
 
 export const query = graphql`
   fragment ProjectListingFragment on ProjectsJson {
@@ -53,26 +15,59 @@ export const query = graphql`
   }
 `;
 
-export default ({ node }) => (
-  <Container>
-    <Name>
-      <OutboundLink href={node.url}>{node.name}</OutboundLink>
-    </Name>
+export default ({ node }) => {
+  const Icon = ({ ...props }) => (
+    <MdiIcon
+      size={'1em'}
+      css={{
+        marginTop: '0.06em',
+        verticalAlign: 'top',
+        width: '1em'
+      }}
+      {...props}
+    />
+  );
 
-    <MetadataContainer>
-      <span>
-        <Icon path={mdiStar} color={theme.accentColor} />
-        {` `}
-        {node.stars}
-      </span>
+  return (
+    <div
+      css={{
+        '&:not(:last-child)': {
+          marginBottom: '1.5em'
+        }
+      }}>
+      {/* Title */}
+      <div css={{ fontSize: '1.5em' }}>
+        <OutboundLink href={node.url} css={{ textDecoration: 'none' }}>
+          {node.name}
+        </OutboundLink>
+      </div>
 
-      <span>
-        <Icon path={mdiCodeTags} />
-        {` `}
-        {node.language}
-      </span>
-    </MetadataContainer>
+      {/* Meta */}
+      <div
+        css={{
+          marginTop: '0.3em',
+          opacity: '0.65',
+          fontSize: '0.8em',
 
-    <Description>{node.description}</Description>
-  </Container>
-);
+          'span + span': {
+            marginLeft: '1em'
+          }
+        }}>
+        <span>
+          <Icon path={mdiStar} color={theme.accentColor} />
+          {` `}
+          {node.stars}
+        </span>
+
+        <span>
+          <Icon path={mdiCodeTags} />
+          {` `}
+          {node.language}
+        </span>
+      </div>
+
+      {/* Description */}
+      <div css={{ marginTop: '0.3em' }}>{node.description}</div>
+    </div>
+  );
+};

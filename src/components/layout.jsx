@@ -1,50 +1,50 @@
 import React from 'react';
-
 import { Global, css } from '@emotion/core';
-import styled from '@emotion/styled';
 import emotionNormalize from 'emotion-normalize';
-
 import theme from '../theme';
-
 import Header from './header';
-import Footer from './footer';
 
-const GlobalStyle = css`
-  ${emotionNormalize}
+export default ({ children }) => {
+  const normalize = css`
+    ${emotionNormalize}
+  `;
 
-  html {
-    color: ${theme.textColor};
-    font-family: 'Maven Pro', 'Tahoma', 'Arial', sans-serif;
-    font-size: 20px;
-    word-wrap: break-word;
+  const globalStyles = {
+    html: {
+      color: theme.textColor,
+      fontFamily: "'Maven Pro', 'Tahoma', 'Arial', sans-serif",
+      fontSize: '20px',
+      wordWrap: 'break-word',
 
-    @media only screen and (max-width: 640px) {
-      font-size: 18px;
+      '@media only screen and (max-width: 640px)': {
+        fontsize: '18px'
+      }
+    },
+    a: {
+      color: 'inherit',
+      textDecorationColor: theme.dimColor,
+
+      ':hover': {
+        color: theme.accentColor,
+        textDecorationColor: 'initial'
+      }
     }
-  }
+  };
 
-  a {
-    color: inherit;
-  }
+  return (
+    <>
+      <Global styles={[normalize, globalStyles]} />
 
-  a:hover {
-    color: ${theme.accentColor};
-  }
-`;
+      <Header />
 
-const Content = styled.main`
-  max-width: 1000px;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 1em;
-`;
-
-export default ({ children }) => (
-  <>
-    <Global styles={GlobalStyle} />
-
-    <Header />
-    <Content>{children}</Content>
-    <Footer />
-  </>
-);
+      <main
+        css={{
+          maxWidth: '1000px',
+          margin: '0 auto 2em auto',
+          padding: '1em'
+        }}>
+        {children}
+      </main>
+    </>
+  );
+};

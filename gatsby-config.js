@@ -50,7 +50,7 @@ exports.plugins = [
 
       // Syntax highlighting
       resolvePlugin(`gatsby-remark-prismjs`, {
-        classPrefix: "language-",
+        classPrefix: `language-`,
         noInlineHighlight: true
       }),
 

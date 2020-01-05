@@ -3,9 +3,7 @@ const routes = require('./src/routes');
 
 exports.createPages = async ({ actions, graphql }) => {
   // Generate pages for static routes
-  Object.keys(routes.static).forEach(routeName =>
-    actions.createPage(routes.static[routeName])
-  );
+  Object.keys(routes.static).forEach(routeName => actions.createPage(routes.static[routeName]));
 
   // Generate pages for blog posts
   const queryResult = await graphql(`

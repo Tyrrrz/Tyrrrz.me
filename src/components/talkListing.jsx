@@ -1,53 +1,8 @@
 import React from 'react';
 import { graphql } from 'gatsby';
-
 import { OutboundLink } from 'gatsby-plugin-google-analytics';
-
-import styled from '@emotion/styled';
 import MdiIcon from '@mdi/react';
 import { mdiCalendar, mdiTranslate } from '@mdi/js';
-
-const Icon = styled(MdiIcon)`
-  margin-top: 0.06em;
-  vertical-align: top;
-  width: 1em;
-`;
-
-const Container = styled.div`
-  &:not(:last-child) {
-    margin-bottom: 1.5em;
-  }
-`;
-
-const Title = styled.div`
-  font-size: 1.5em;
-
-  a {
-    text-decoration: none;
-  }
-`;
-
-const MetadataContainer = styled.div`
-  margin-top: 0.3em;
-  opacity: 0.65;
-  font-size: 0.8em;
-
-  span + span {
-    margin-left: 1em;
-  }
-`;
-
-const Description = styled.div`
-  margin-top: 0.3em;
-`;
-
-const Links = styled.div`
-  margin-top: 0.3em;
-
-  a + a {
-    margin-left: 0.85em;
-  }
-`;
 
 export const query = graphql`
   fragment TalkListingFragment on TalksJson {
@@ -62,35 +17,70 @@ export const query = graphql`
   }
 `;
 
-export default ({ node }) => (
-  <Container>
-    <Title>
-      <OutboundLink href={node.eventUrl}>{node.title}</OutboundLink>
-    </Title>
+export default ({ node }) => {
+  const Icon = ({ ...props }) => (
+    <MdiIcon
+      size={'1em'}
+      css={{
+        marginTop: '0.06em',
+        verticalAlign: 'top',
+        width: '1em'
+      }}
+      {...props}
+    />
+  );
 
-    <MetadataContainer>
-      <span>
-        <Icon path={mdiCalendar} />
-        {` `}
-        {node.event} ({node.date})
-      </span>
+  return (
+    <div
+      css={{
+        '&:not(:last-child)': {
+          marginBottom: '1.5em'
+        }
+      }}>
+      {/* Title */}
+      <div css={{ fontSize: '1.5em' }}>
+        <OutboundLink href={node.eventUrl} css={{ textDecoration: 'none' }}>
+          {node.title}
+        </OutboundLink>
+      </div>
 
-      <span>
-        <Icon path={mdiTranslate} />
-        {` `}
-        {node.language}
-      </span>
-    </MetadataContainer>
+      {/* Meta */}
+      <div
+        css={{
+          marginTop: '0.3em',
+          opacity: '0.65',
+          fontSize: '0.8em',
 
-    <Description>{node.description}</Description>
+          'span + span': {
+            marginLeft: '1em'
+          }
+        }}>
+        <span>
+          <Icon path={mdiCalendar} /> {node.event} ({node.date})
+        </span>
 
-    <Links>
-      {node.presentationUrl && (
-        <OutboundLink href={node.presentationUrl}>Presentation</OutboundLink>
-      )}
-      {node.recordingUrl && (
-        <OutboundLink href={node.recordingUrl}>Recording</OutboundLink>
-      )}
-    </Links>
-  </Container>
-);
+        <span>
+          <Icon path={mdiTranslate} />
+          {` `}
+          {node.language}
+        </span>
+      </div>
+
+      {/* Description */}
+      <div css={{ marginTop: '0.3em' }}>{node.description}</div>
+
+      {/* Links */}
+      <div
+        css={{
+          marginTop: '0.3em',
+
+          'a + a': {
+            marginLeft: '0.85em'
+          }
+        }}>
+        {node.presentationUrl && <OutboundLink href={node.presentationUrl}>Presentation</OutboundLink>}
+        {node.recordingUrl && <OutboundLink href={node.recordingUrl}>Recording</OutboundLink>}
+      </div>
+    </div>
+  );
+};

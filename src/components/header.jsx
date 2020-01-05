@@ -1,124 +1,82 @@
 import React from 'react';
 import { Link } from 'gatsby';
-
-import styled from '@emotion/styled';
-
 import theme from '../theme';
 import routes from '../routes';
 import useSiteMetadata from './hooks/useSiteMetadata';
 
-const Container = styled.header`
-  padding-top: 0.3em;
-  padding-bottom: 0.3em;
-  background-color: ${theme.mainColor};
-  color: ${theme.inverseTextColor};
-`;
-
-const Grid = styled.div`
-  display: grid;
-  max-width: 1000px;
-  width: 96%;
-  min-height: 70px;
-  margin-left: auto;
-  margin-right: auto;
-  grid-template-columns: auto 1fr auto;
-  grid-template-rows: auto;
-  grid-template-areas: 'title . menu';
-  align-items: center;
-
-  @media only screen and (max-width: 640px) {
-    display: block;
-    text-align: center;
-  }
-`;
-
-const Title = styled.div`
-  grid-area: title;
-  font-size: 2.3em;
-
-  a {
-    text-decoration: none;
-  }
-`;
-
-const Menu = styled.div`
-  grid-area: menu;
-  font-size: 1.3em;
-`;
-
-const MenuItem = styled.span`
-  &:not(:last-child) {
-    margin-right: 0.4em;
-  }
-
-  a {
-    border-width: 0 0 2px 0;
-    border-style: solid;
-    border-color: transparent;
-    text-decoration: none;
-  }
-
-  a:hover {
-    color: ${theme.accentColor};
-  }
-`;
-
-const ActiveMenuItemLinkStyle = {
-  borderColor: theme.accentColor
-};
-
 export default () => {
   const siteMetadata = useSiteMetadata();
 
+  const MenuLink = ({ name, ...props }) => (
+    <Link
+      activeStyle={{ borderColor: theme.accentColor }}
+      css={{
+        borderStyle: 'solid',
+        borderColor: 'transparent',
+        borderWidth: '0 0 2px 0',
+        textDecoration: 'none',
+
+        ':hover': {
+          color: theme.accent
+        },
+
+        '&:not(:last-child)': {
+          marginRight: '0.4em'
+        }
+      }}
+      {...props}>
+      {name}
+    </Link>
+  );
+
   return (
-    <Container>
-      <Grid>
-        <Title>
-          <Link to={routes.static.home.path}>{siteMetadata.title}</Link>
-        </Title>
+    <header
+      css={{
+        padding: '0.3em 0',
+        backgroundColor: theme.mainColor,
+        color: theme.inverseTextColor
+      }}>
+      <div
+        css={{
+          display: 'grid',
+          maxWidth: '1000px',
+          width: '96%',
+          minHeight: '70px',
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          gridTemplateColumns: 'auto 1fr auto',
+          gridTemplateRows: 'auto',
+          gridTemplateAreas: '"title . menu"',
+          alignItems: 'center',
 
-        <Menu>
-          <MenuItem>
-            <Link
-              activeStyle={ActiveMenuItemLinkStyle}
-              partiallyActive={false}
-              to={routes.static.home.path}
-            >
-              home
-            </Link>
-          </MenuItem>
+          '@media only screen and (max-width: 640px)': {
+            display: 'block',
+            textAlign: 'center'
+          }
+        }}>
+        {/* Title */}
+        <div
+          css={{
+            gridArea: 'title',
+            fontSize: '2.3em'
+          }}>
+          <Link to={routes.static.home.path} css={{ textDecoration: 'none' }}>
+            {siteMetadata.title}
+          </Link>
+        </div>
 
-          <MenuItem>
-            <Link
-              activeStyle={ActiveMenuItemLinkStyle}
-              partiallyActive={true}
-              to={routes.static.projects.path}
-            >
-              projects
-            </Link>
-          </MenuItem>
-
-          <MenuItem>
-            <Link
-              activeStyle={ActiveMenuItemLinkStyle}
-              partiallyActive={true}
-              to={routes.static.blog.path}
-            >
-              blog
-            </Link>
-          </MenuItem>
-
-          <MenuItem>
-            <Link
-              activeStyle={ActiveMenuItemLinkStyle}
-              partiallyActive={true}
-              to={routes.static.talks.path}
-            >
-              talks
-            </Link>
-          </MenuItem>
-        </Menu>
-      </Grid>
-    </Container>
+        {/* Menu */}
+        <div
+          css={{
+            gridArea: 'menu',
+            fontSize: '1.3em'
+          }}>
+          <MenuLink name={'home'} to={routes.static.home.path} partiallyActive={false} />
+          <MenuLink name={'projects'} to={routes.static.projects.path} partiallyActive={true} />
+          <MenuLink name={'blog'} to={routes.static.blog.path} partiallyActive={true} />
+          <MenuLink name={'talks'} to={routes.static.talks.path} partiallyActive={true} />
+        </div>
+      </div>
+    </header>
   );
 };

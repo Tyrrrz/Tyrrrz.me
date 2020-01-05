@@ -1,46 +1,9 @@
 import React from 'react';
 import { graphql, Link } from 'gatsby';
-
-import styled from '@emotion/styled';
 import MdiIcon from '@mdi/react';
 import { mdiCalendar, mdiClockOutline } from '@mdi/js';
-
 import routes from '../routes';
 import { humanizeTimeToRead } from '../utils';
-
-const Icon = styled(MdiIcon)`
-  margin-top: 0.06em;
-  vertical-align: top;
-  width: 1em;
-`;
-
-const Container = styled.div`
-  &:not(:last-child) {
-    margin-bottom: 1.5em;
-  }
-`;
-
-const Title = styled.div`
-  font-size: 1.5em;
-
-  a {
-    text-decoration: none;
-  }
-`;
-
-const MetadataContainer = styled.div`
-  margin-top: 0.3em;
-  opacity: 0.65;
-  font-size: 0.8em;
-
-  span + span {
-    margin-left: 1em;
-  }
-`;
-
-const Excerpt = styled.div`
-  margin-top: 0.3em;
-`;
 
 export const query = graphql`
   fragment BlogPostListingFragment on MarkdownRemark {
@@ -56,34 +19,61 @@ export const query = graphql`
   }
 `;
 
-export default ({ node }) => (
-  <Container>
-    <Title>
-      <Link to={routes.dynamic.blogPost.getPath(node.fields.slug)}>
-        {node.frontmatter.title}
-      </Link>
-    </Title>
+export default ({ node }) => {
+  const Icon = ({ ...props }) => (
+    <MdiIcon
+      size={'1em'}
+      css={{
+        marginTop: '0.06em',
+        verticalAlign: 'top',
+        width: '1em'
+      }}
+      {...props}
+    />
+  );
 
-    <MetadataContainer>
-      <span>
-        <Icon path={mdiCalendar} />
+  return (
+    <div
+      css={{
+        '&:not(:last-child)': {
+          marginBottom: '1.5em'
+        }
+      }}>
+      {/* Title */}
+      <div css={{ fontSize: '1.5em' }}>
+        <Link to={routes.dynamic.blogPost.getPath(node.fields.slug)} css={{ textDecoration: 'none' }}>
+          {node.frontmatter.title}
+        </Link>
+      </div>
+
+      {/* Meta */}
+      <div
+        css={{
+          marginTop: '0.3em',
+          opacity: '0.65',
+          fontSize: '0.8em',
+
+          'span + span': {
+            marginLeft: '1em'
+          }
+        }}>
+        <span>
+          <Icon path={mdiCalendar} /> {node.frontmatter.date}
+        </span>
+
+        <span>
+          <Icon path={mdiClockOutline} />
+          {` `}
+          {humanizeTimeToRead(node.timeToRead)}
+        </span>
+      </div>
+
+      {/* Excerpt */}
+      <div css={{ marginTop: '0.3em' }}>
+        {node.excerpt}
         {` `}
-        {node.frontmatter.date}
-      </span>
-
-      <span>
-        <Icon path={mdiClockOutline} />
-        {` `}
-        {humanizeTimeToRead(node.timeToRead)}
-      </span>
-    </MetadataContainer>
-
-    <Excerpt>
-      {node.excerpt}
-      {` `}
-      <Link to={routes.dynamic.blogPost.getPath(node.fields.slug)}>
-        continue reading
-      </Link>
-    </Excerpt>
-  </Container>
-);
+        <Link to={routes.dynamic.blogPost.getPath(node.fields.slug)}>continue reading</Link>
+      </div>
+    </div>
+  );
+};
