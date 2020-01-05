@@ -2,6 +2,6 @@
   "name": "CliWrap",
   "url": "https://github.com/Tyrrrz/CliWrap",
   "description": "Wrapper for command line interfaces",
-  "stars": 400,
+  "stars": 405,
   "language": "C#"
 }
