@@ -49,8 +49,7 @@ export default ({ data }) => {
       size={'1em'}
       css={{
         marginTop: '0.06em',
-        verticalAlign: 'top',
-        width: '1em'
+        verticalAlign: 'top'
       }}
       {...props}
     />
