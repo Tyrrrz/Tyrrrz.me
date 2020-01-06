@@ -38,11 +38,17 @@ export const query = graphql`
 `;
 
 export default ({ data }) => {
-  const siteMetadata = useSiteMetadata();
+  const slug = data.markdownRemark.fields.slug;
+  const url = routes.dynamic.blogPost.getPath(slug);
+  const title = data.markdownRemark.frontmatter.title;
+  const coverImage = data.markdownRemark.frontmatter.cover;
+  const coverImageUrl = coverImage && new URL(coverImage.childImageSharp.original.src, settings.siteDomain);
+  const date = data.markdownRemark.frontmatter.date;
+  const html = data.markdownRemark.html;
+  const excerpt = data.markdownRemark.excerpt;
+  const timeToRead = humanizeTimeToRead(data.markdownRemark.timeToRead);
 
-  const coverImageUrl =
-    data.markdownRemark.frontmatter.cover &&
-    new URL(data.markdownRemark.frontmatter.cover.childImageSharp.original.src, settings.siteDomain);
+  const siteMetadata = useSiteMetadata();
 
   const Icon = ({ ...props }) => (
     <MdiIcon
@@ -79,9 +85,9 @@ export default ({ data }) => {
   const Comments = ({ ...props }) => (
     <Disqus
       config={{
-        url: new URL(routes.dynamic.blogPost.getPath(data.markdownRemark.fields.slug), settings.siteDomain),
-        identifier: `Blog/${data.markdownRemark.fields.slug}`,
-        title: data.markdownRemark.frontmatter.title
+        url: new URL(url, settings.siteDomain),
+        identifier: `Blog/${slug}`,
+        title: title
       }}
       {...props}
     />
@@ -89,10 +95,10 @@ export default ({ data }) => {
 
   return (
     <Layout>
-      <Meta title={data.markdownRemark.frontmatter.title} description={data.markdownRemark.excerpt} image={coverImageUrl} />
+      <Meta title={title} description={excerpt} image={coverImageUrl} />
 
       {/* Title */}
-      <div css={{ fontSize: '2em' }}>{data.markdownRemark.frontmatter.title}</div>
+      <div css={{ fontSize: '2em' }}>{title}</div>
 
       {/* Meta */}
       <div
@@ -108,13 +114,13 @@ export default ({ data }) => {
         <span>
           <Icon path={mdiCalendar} />
           {` `}
-          {data.markdownRemark.frontmatter.date}
+          {date}
         </span>
 
         <span>
           <Icon path={mdiClockOutline} />
           {` `}
-          {humanizeTimeToRead(data.markdownRemark.timeToRead)}
+          {timeToRead}
         </span>
       </div>
 
@@ -143,7 +149,7 @@ export default ({ data }) => {
             paddingLeft: '0.5em'
           }
         }}
-        dangerouslySetInnerHTML={{ __html: data.markdownRemark.html }}
+        dangerouslySetInnerHTML={{ __html: html }}
       />
 
       <Separator />
