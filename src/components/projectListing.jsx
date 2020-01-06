@@ -1,9 +1,9 @@
 import React from 'react';
 import { graphql } from 'gatsby';
-import { OutboundLink } from 'gatsby-plugin-google-analytics';
 import MdiIcon from '@mdi/react';
 import { mdiStar, mdiCodeTags } from '@mdi/js';
 import theme from '../theme';
+import Link from './link';
 
 export const query = graphql`
   fragment ProjectListingFragment on ProjectsJson {
@@ -36,9 +36,9 @@ export default ({ node }) => {
       }}>
       {/* Title */}
       <div css={{ fontSize: '1.5em' }}>
-        <OutboundLink href={node.url} css={{ textDecoration: 'none' }}>
+        <Link to={node.url} css={{ textDecoration: 'none' }}>
           {node.name}
-        </OutboundLink>
+        </Link>
       </div>
 
       {/* Meta */}

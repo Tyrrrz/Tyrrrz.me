@@ -1,9 +1,10 @@
 import React from 'react';
-import { graphql, Link } from 'gatsby';
+import { graphql } from 'gatsby';
 import MdiIcon from '@mdi/react';
 import { mdiCalendar, mdiClockOutline } from '@mdi/js';
 import routes from '../routes';
 import { humanizeTimeToRead } from '../utils';
+import Link from './link';
 
 export const query = graphql`
   fragment BlogPostListingFragment on MarkdownRemark {

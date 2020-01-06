@@ -1,8 +1,8 @@
 import React from 'react';
-import { OutboundLink } from 'gatsby-plugin-google-analytics';
 import useSiteMetadata from './hooks/useSiteMetadata';
-import Layout from '../components/layout';
-import Meta from '../components/meta';
+import Link from './link';
+import Layout from './layout';
+import Meta from './meta';
 
 export default () => {
   const siteMetadata = useSiteMetadata();
@@ -20,10 +20,10 @@ export default () => {
 
       <ul>
         <li>
-          <OutboundLink href={`https://patreon.com/${siteMetadata.patreon}`}>Patreon</OutboundLink>
+          <Link to={`https://patreon.com/${siteMetadata.patreon}`}>Patreon</Link>
         </li>
         <li>
-          <OutboundLink href={`https://buymeacoffee.com/${siteMetadata.buymeacoffee}`}>Buy me a coffee</OutboundLink>
+          <Link to={`https://buymeacoffee.com/${siteMetadata.buymeacoffee}`}>Buy me a coffee</Link>
         </li>
         <li>
           Bitcoin (BTC): <code>{siteMetadata.bitcoin}</code>

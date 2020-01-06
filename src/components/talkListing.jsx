@@ -1,8 +1,8 @@
 import React from 'react';
 import { graphql } from 'gatsby';
-import { OutboundLink } from 'gatsby-plugin-google-analytics';
 import MdiIcon from '@mdi/react';
 import { mdiCalendar, mdiTranslate } from '@mdi/js';
+import Link from './link';
 
 export const query = graphql`
   fragment TalkListingFragment on TalksJson {
@@ -38,9 +38,9 @@ export default ({ node }) => {
       }}>
       {/* Title */}
       <div css={{ fontSize: '1.5em' }}>
-        <OutboundLink href={node.eventUrl} css={{ textDecoration: 'none' }}>
+        <Link to={node.eventUrl} css={{ textDecoration: 'none' }}>
           {node.title}
-        </OutboundLink>
+        </Link>
       </div>
 
       {/* Meta */}
@@ -77,8 +77,8 @@ export default ({ node }) => {
             marginLeft: '0.85em'
           }
         }}>
-        {node.presentationUrl && <OutboundLink href={node.presentationUrl}>Presentation</OutboundLink>}
-        {node.recordingUrl && <OutboundLink href={node.recordingUrl}>Recording</OutboundLink>}
+        {node.presentationUrl && <Link to={node.presentationUrl}>Presentation</Link>}
+        {node.recordingUrl && <Link to={node.recordingUrl}>Recording</Link>}
       </div>
     </div>
   );

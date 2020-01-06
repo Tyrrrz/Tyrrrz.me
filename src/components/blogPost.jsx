@@ -1,6 +1,5 @@
 import React from 'react';
 import { graphql } from 'gatsby';
-import { OutboundLink } from 'gatsby-plugin-google-analytics';
 import MdiIcon from '@mdi/react';
 import { mdiCalendar, mdiClockOutline, mdiTwitterCircle } from '@mdi/js';
 import { Disqus } from 'gatsby-plugin-disqus';
@@ -8,6 +7,7 @@ import settings from '../settings';
 import routes from '../routes';
 import theme from '../theme';
 import useSiteMetadata from './hooks/useSiteMetadata';
+import Link from './link';
 import Layout from './layout';
 import Meta from './meta';
 import Separator from './separator';
@@ -71,8 +71,7 @@ export default ({ data }) => {
           alignSelf: 'center',
           marginLeft: '1.5em'
         }}>
-        <OutboundLink href={`https://twitter.com/${siteMetadata.twitter}`}>Follow me on Twitter</OutboundLink> to get notified when I post a
-        new article ✨
+        <Link to={`https://twitter.com/${siteMetadata.twitter}`}>Follow me on Twitter</Link> to get notified when I post a new article ✨
       </div>
     </div>
   );

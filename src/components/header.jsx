@@ -1,8 +1,8 @@
 import React from 'react';
-import { Link } from 'gatsby';
 import theme from '../theme';
 import routes from '../routes';
 import useSiteMetadata from './hooks/useSiteMetadata';
+import Link from './link';
 
 export default () => {
   const siteMetadata = useSiteMetadata();

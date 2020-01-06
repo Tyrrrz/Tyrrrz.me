@@ -1,15 +1,15 @@
 import React from 'react';
 import { graphql } from 'gatsby';
-import { OutboundLink } from 'gatsby-plugin-google-analytics';
 import MdiIcon from '@mdi/react';
 import { mdiAt, mdiGithubCircle, mdiTwitterCircle, mdiInstagram } from '@mdi/js';
 import Img from 'gatsby-image';
 import moment from 'moment';
 import theme from '../theme';
 import useSiteMetadata from './hooks/useSiteMetadata';
+import Link from './link';
+import Separator from './separator';
 import Layout from './layout';
 import Meta from './meta';
-import Separator from './separator';
 
 export const query = graphql`
   query {
@@ -28,9 +28,8 @@ export default ({ data }) => {
 
   const myAge = moment().diff(moment('1995-04-28'), 'years');
 
-  const SocialLink = ({ iconPath, href, ...props }) => (
-    <OutboundLink
-      href={href}
+  const SocialLink = ({ iconPath, ...props }) => (
+    <Link
       css={{
         '&:hover': {
           svg: {
@@ -46,7 +45,7 @@ export default ({ data }) => {
       }}
       {...props}>
       <MdiIcon path={iconPath} size={'1.4em'} />
-    </OutboundLink>
+    </Link>
   );
 
   return (
@@ -81,10 +80,10 @@ export default ({ data }) => {
 
       {/* Socials */}
       <div css={{ textAlign: 'center' }}>
-        <SocialLink iconPath={mdiAt} href={`mailto:${siteMetadata.email}`} alt={`Email`} />
-        <SocialLink iconPath={mdiGithubCircle} href={`https://github.com/${siteMetadata.github}`} alt={`GitHub`} />
-        <SocialLink iconPath={mdiTwitterCircle} href={`https://twitter.com/${siteMetadata.twitter}`} alt={`Twitter`} />
-        <SocialLink iconPath={mdiInstagram} href={`https://instagram.com/${siteMetadata.instagram}`} alt={`Instagram`} />
+        <SocialLink iconPath={mdiAt} to={`mailto:${siteMetadata.email}`} alt={`Email`} />
+        <SocialLink iconPath={mdiGithubCircle} to={`https://github.com/${siteMetadata.github}`} alt={`GitHub`} />
+        <SocialLink iconPath={mdiTwitterCircle} to={`https://twitter.com/${siteMetadata.twitter}`} alt={`Twitter`} />
+        <SocialLink iconPath={mdiInstagram} to={`https://instagram.com/${siteMetadata.instagram}`} alt={`Instagram`} />
       </div>
     </Layout>
   );
