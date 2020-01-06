@@ -2,8 +2,10 @@ import React from 'react';
 import { graphql } from 'gatsby';
 import MdiIcon from '@mdi/react';
 import { mdiStar, mdiCodeTags } from '@mdi/js';
+import routes from '../routes';
 import theme from '../theme';
 import Link from './link';
+import Separator from './separator';
 import Layout from './layout';
 import Meta from './meta';
 
@@ -91,6 +93,12 @@ export default ({ data }) => {
       {data.allProjectsJson.nodes.map(node => (
         <Listing node={node} />
       ))}
+
+      <Separator />
+
+      <div>
+        Want to support development of my open source projects? <Link to={routes.static.donate.path}>Consider donating</Link> 💛
+      </div>
     </Layout>
   );
 };
