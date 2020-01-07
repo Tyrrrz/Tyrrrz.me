@@ -3,8 +3,7 @@ import { Link as InternalLink } from 'gatsby';
 import { OutboundLink as ExternalLink } from 'gatsby-plugin-google-analytics';
 
 export default ({ to, ...props }) => {
-  const isExternal = /^.*?:/.test(to);
+  const isAbsolute = /^[a-z][a-z\d\+\-\.]*:/i.test(to);
 
-  if (isExternal) return <ExternalLink href={to} {...props} />;
-  else return <InternalLink to={to} {...props} />;
+  return isAbsolute ? <ExternalLink href={to} {...props} /> : <InternalLink to={to} {...props} />;
 };
