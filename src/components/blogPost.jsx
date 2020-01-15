@@ -147,6 +147,13 @@ export default ({ data }) => {
             borderLeft: `solid 2px ${theme.accentColor}`,
             borderRadius: '2px',
             paddingLeft: '0.5em'
+          },
+
+          hr: {
+            opacity: '0.4',
+            margin: '1em auto',
+            width: '20%',
+            borderTop: `1px solid ${theme.dimColor}`
           }
         }}
         dangerouslySetInnerHTML={{ __html: html }}
