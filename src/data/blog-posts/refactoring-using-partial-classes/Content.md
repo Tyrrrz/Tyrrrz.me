@@ -38,6 +38,8 @@ public partial class PartitionedTextWriter : TextWriter
     private TextWriter _innerWriter;
     private long _partitionCharCount;
 
+    public override Encoding Encoding { get; } = Encoding.UTF8;
+
     public PartitionedTextWriter(string baseFilePath, long partitionLimit)
     {
         _baseFilePath = baseFilePath;
@@ -122,7 +124,7 @@ Again, let's see how it looks when we split out the static methods:
 
 ```csharp
 // Resource management concerns
-public partial sealed class NativeDeviceContext : IDisposable
+public sealed partial class NativeDeviceContext : IDisposable
 {
     public IntPtr Handle { get; }
 
@@ -150,7 +152,7 @@ public partial sealed class NativeDeviceContext : IDisposable
 }
 
 // Resource acquisition concerns
-public partial sealed class NativeDeviceContext
+public partial class NativeDeviceContext
 {
     public static NativeDeviceContext? FromDeviceName(string deviceName)
     {
@@ -205,7 +207,7 @@ public partial class HtmlElement : HtmlNode
 // Implementation of IEnumerable<T>
 public partial class HtmlElement : IEnumerable<HtmlNode>
 {
-    public IEnumerator<string> GetEnumerator() => Attributes.GetEnumerator();
+    public IEnumerator<HtmlNode> GetEnumerator() => Attributes.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
@@ -234,7 +236,7 @@ public partial class SegmentedHttpStream : Stream
 
     private Stream? _currentStream;
 
-    public class SegmentedHttpStream(HttpClient httpClient,
+    public SegmentedHttpStream(HttpClient httpClient,
         string url, long length, long segmentSize)
     {
         /* ... */
@@ -255,7 +257,7 @@ public partial class SegmentedHttpStream : Stream
 public partial class SegmentedHttpStream
 {
     // This method is not available in earlier versions of the standard
-    protected override async ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
         if (_currentStream != null)
             await _currentStream.DisposeAsync();
@@ -293,7 +295,8 @@ public partial class HtmlRenderer
 
         var model = new ScriptObject();
         model.SetValue("report", report, true);
-        context.PushGlobal(model);
+
+        templateContext.PushGlobal(model);
 
         return await template.RenderAsync(templateContext);
     }
