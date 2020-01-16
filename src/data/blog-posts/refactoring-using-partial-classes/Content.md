@@ -281,7 +281,7 @@ Seeing as our custom loader is only going to be used within this class, it makes
 Using partial classes, though, we can clean it up like this:
 
 ```csharp
-public partial class HtmlRenderer
+public partial class HtmlReportRenderer : IReportRenderer
 {
     public async ValueTask<string> RenderReportAsync(SalesReport report, string templateCode)
     {
@@ -302,13 +302,13 @@ public partial class HtmlRenderer
     }
 }
 
-public partial class HtmlRenderer
+public partial class HtmlReportRenderer
 {
-    // This type is only used within HtmlRenderer
+    // This type is only used within HtmlReportRenderer
     private class CustomTemplateLoader : ITemplateLoader
     {
         private static readonly string ResourceRootNamespace =
-            $"{typeof(HtmlRenderer).Namespace}.Templates";
+            $"{typeof(HtmlReportRenderer).Namespace}.Templates";
 
         private static StreamReader GetTemplateReader(string templatePath)
         {
