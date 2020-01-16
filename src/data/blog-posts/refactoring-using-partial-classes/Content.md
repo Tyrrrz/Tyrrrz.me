@@ -10,20 +10,23 @@ As our code grows, we regularly find ourselves seeking new ways to keep it well 
 
 One of the challenges we often face is deciding how to group different parts of a bigger class together. Even with a good degree of separation, sometimes we end up with classes that might be a bit too much to reason about.
 
-From the earliest version of the language, C# provided a construct called [regions](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/preprocessor-directives/preprocessor-region). Although it can be helpful when trying to organize code, most seem to agree that using regions is [generally an anti-pattern](https://softwareengineering.stackexchange.com/questions/53086/are-regions-an-antipattern-or-code-smell). Even if the use of regions can be justified, the seemingly foreign syntax and code folding often tends to make readability worse.
+From the earliest versions of the language, C# provided a construct called [regions](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/preprocessor-directives/preprocessor-region). Although it can be helpful when trying to organize code, most seem to agree that using regions is [generally an anti-pattern](https://softwareengineering.stackexchange.com/questions/53086/are-regions-an-antipattern-or-code-smell). Even if their usage can be justified, their benefits often come at a rather steep cost in terms of readability.
 
-I do believe that being able to group code to form logical blocks is a good thing, however I agree that regions cause more problems than they solve. For that reason, I've been actively using _partial classes_ instead, which in many ways offer similar benefits without suffering from the same drawbacks.
+I do believe that being able to group code to form logical blocks is useful, however I agree that regions cause more problems than they solve. For that reason, I've been actively using _partial classes_ instead, which in many ways can be used for a similar purpose without suffering from the same drawbacks.
 
 [Partial classes](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/partial-classes-and-methods) is a C# feature that lets you split the definition of a type into multiple parts, each potentially in its own file. During build, the compiler collects all of the parts and combines them together to produce a single  class as if it was defined in one place. It's enabled by adding the `partial` keyword in the definition.
 
-In this article I will show you how I typically utilize partial classes when refactoring my own code.
+In this article I will show you how I typically utilize partial classes when refactoring my own code. Hopefully, the examples here will entice you to try them out as well.
 
 ## Extracting static members
 
-One thing that I like to do nearly all the time is separate static properties and methods from the rest of the class. That might seem like an arbitrary criteria to base upon, but I find it makes sense because we do reason about static and non-static members in different ways.
+One thing that I like to do nearly all the time is separate static properties and methods from the rest of the class. That might seem like an arbitrary criteria, but I find it makes sense because we do reason about static and non-static members in different ways.
 
+Let's have a look at an example. Imagine we're working on an abstraction called `PartitionedTextWriter` that implements the _rolling file_ concept -- it acts as a streaming text writer that automatically switches to a new file after reaching a certain character threshold in the previous one.
 
-Here's how that would look:
+The class is initialized with a base path and it needs to use that to generate file names for each partition. Because that's pure business logic without side effects, it makes perfect sense to put it into a static helper method.
+
+Usually, mixing static and non-static members can be quite confusing. Let's see how that looks when we use partial classes instead:
 
 ```csharp
 public partial class PartitionedTextWriter : TextWriter
@@ -107,7 +110,7 @@ As a developer reading this code for the first time, you will most likely apprec
 
 One could argue that we could've instead moved our helper method to a different static class. That could work in some cases, especially if that method is going to be reused in other places as well. However, that would also make the method less discoverable and I generally prefer to keep dependencies as close to the source as possible, in order to reduce cognitive overhead.
 
-Note that in this example both partial definitions of the class are placed in the same file. Since our primary goal is to group code rather than shred it to pieces, keeping things close makes more sense. I would only consider moving the partitions to separate files only if they get too big to keep in a single file.
+Note that in this example both partial definitions of the class are placed in the same file. Since our primary goal is to group code rather than shred it to pieces, keeping things close makes more sense. I would consider moving the partitions to separate files only if they get too big to keep in one place.
 
 ___
 
@@ -115,7 +118,7 @@ This idea works especially well when combining with the ["Resource acquisition i
 
 In the following example we have a class called `NativeDeviceContext` which is a wrapper for a device context resource in the Windows operating system. The class can be constructed by providing a handle to the native resource, but the consumers will not be doing this manually. Instead they will be calling one of the available static methods such as `FromDeviceName(...)` that will take care of the initialization for them.
 
-Here's how we can structure it:
+Again, let's see how it looks when we split out the static methods:
 
 ```csharp
 // Resource management concerns
@@ -164,7 +167,7 @@ public partial sealed class NativeDeviceContext
 }
 ```
 
-Similarly to the previous example, this makes the code a lot more readable by visually separating two unrelated, albeit coupled, concerns -- resource initialization and resource management.
+Similarly to the previous example, this makes the code a lot more readable by visually separating two unrelated (albeit coupled) concerns -- resource initialization and resource management.
 
 ## Separating interface implementations
 
@@ -214,15 +217,13 @@ public partial class HtmlElement : ICloneable
 }
 ```
 
-Putting interface implementations in partial classes is a convenient way to hide noise that doesn't contribute to the essence of the class. We are probably not going to be as much interested in how the class implements `IEnumerable<T>`, as opposed to its intrinsic methods. Similar to previous example, partial classes help us draw that visual distinction.
-
-The cool thing is that C# doesn't enforce us to declare the full signature of the class straight away. This lets us split them around as we want to create these "extensions".
+Putting interface implementations in partial classes can help us reduce the "routing noise" caused by methods that forward calls upstream. Additionally, since C# allows us to specify the class signature on each partition separately, we can conveniently group members that belong to the same interface.
 
 ___
 
-This approach is also very useful when combined with conditional compilation. When parts of your class are only available in a certain version of the framework, it can be very convenient to take them out into a partial class.
+This approach is also very useful when combined with conditional compilation. Occasionally, we may want to introduce API that depends on features available in a specific version of the framework. To do that, we have to use the `#if` directive which looks a lot like the region blocks everyone dreads.
 
-Here's an example where we override the `DisposeAsync` method, but only if we're building the assembly against .NET Standard 2.1:
+Partial classes can help us make things tidier. Let's take a look at an example where we override `DisposeAsync` but only if we're building the assembly against .NET Standard 2.1:
 
 ```csharp
 public partial class SegmentedHttpStream : Stream
@@ -265,17 +266,17 @@ public partial class SegmentedHttpStream
 #endif
 ```
 
-The clear benefit of using partial classes here is that the conditional blocks (`#if`/`#endif`) are left on the outside. Ironically, these blocks behave similarly to regions, so we use partial classes to avoid the noise that comes with them.
+The clear benefit of using partial classes in such cases is that we are able to completely mitigate the noise caused by the conditional directives. Code written in such style looks a lot better than one riddled with intermittent conditional blocks.
 
 ## Organizing private classes
 
-Occasionally we may end up defining types that are used from within a single class. Usually it happens when we need to supply a custom implementation of some interface to a framework we're using.
+It's not all that uncommon to have private classes in code. These are convenient when we want to avoid namespace pollution while defining a type that's only used within one class. Typical case for this is when we need to implement a custom interface to override certain behavior in a third party library or framework.
 
-In any case, it's perfectly normal avoid namespace pollution by embedding one class within another. That said, in a language as verbose as C#, class definitions can be quite noisy so, again, it makes sense to separate them.
+As an example, imagine we're exporting a sales report as an HTML document and we're using the [Scriban](https://github.com/lunet-io/scriban) engine to do it. In this particular scenario, we need to configure it so that templates can be resolved from the resources embedded in the assembly rather than file system. In order to do that, the framework expects us to provide a custom implementation of `ITemplateLoader`.
 
-For this example, let's pretend we're exporting a sales report as an HTML document and we're using the [Scriban](https://github.com/lunet-io/scriban) engine to do it. We also want to configure it so that templates can reference each other while being embedded in the assembly as resources instead of relying on file system. In order to do that, the framework expects us to provide a custom implementation of `ITemplateLoader`.
+Seeing as our custom loader is only going to be used within this class, it makes perfect sense to define it as private class. However, with C# being as verbose as it is, private classes may introduce unwanted noise to our code.
 
-Seeing as our custom loader is only going to be used within this class, it makes perfect sense to have it as private class. To make things a bit more clear, we can separate it into a partial class:
+Using partial classes, though, we can clean it up like this:
 
 ```csharp
 public partial class HtmlRenderer
@@ -339,11 +340,11 @@ public partial class HtmlRenderer
 
 ## Grouping arbitrary code
 
-As a matter of fact, we don't need a particular reason to decide to use partial classes. Sometimes it just _feels_ right to separate a class in two or more parts.
+We don't always need a special case to decide to use partial classes. In fact, sometimes it just feels right to split parts of the code into logical blocks.
 
-For example, let's say we're building a class that holds the list of options used in a CLI. There are a lot of options and some seem to be more logically related than others.
+In this example we have a command line application that formats files. Both the options and the command behavior are defined in a single class which may be a little confusing.
 
-We can group them like so:
+By using partial classes, we can split and group different parts of the class like so:
 
 ```csharp
 // Core options
@@ -395,22 +396,8 @@ public partial class FormatCommand : ICommand
 }
 ```
 
-## How is this better than regions?
-
-The most important advantage of partial classes over regions is the fact that they don't employ any additional language constructs. In fact, we're just defining classes like we normally would -- it just happens that they all share the same name.
-
-Furthermore, regions are really noisy and often make the code even harder to read by hiding parts of it into collapsible sections like a Matroska doll. Partial classes are not used to hide code, instead they are meant to separate it into logical groups, making the process of reasoning about it easier.
-
-In many ways, grouping code into partial classes feels somewhat like defining a _private namespace_ for types used within the same module. This is somewhat similar to F# where you can have types declared as private to a particular file.
-
-On top of that, partial classes are also harder to abuse because, unlike regions, they can't be used within methods or other code blocks which can't contain a type declaration.
-
-Finally, partial classes offer a bit more versatility because we can choose to split them into different files as we see fit. We can't do that with regions.
-
 ## Summary
 
 Partial classes can be used for more than just auto-generated code. It's a powerful language feature that enables creative ways to arrange code into smaller logically-independent units. This can be very helpful when we want to reduce cognitive load or to simply keep things a bit more organized.
-
-As an alternative to regions, this approach provides a viable refactoring solution when we can't or simply don't want to extract code into separate classes. Sometimes it's wise to avoid unnecessarily polluting namespaces and keep related code close. Partial classes let us do that while still maintaining a great degree of readability.
 
 Since we're on the topic of refactoring, consider also checking out [a few interesting ways we can use extension methods](/blog/creative-use-of-extension-methods) to write cleaner code. Similarly to partial classes, they might have more uses than you thought.
