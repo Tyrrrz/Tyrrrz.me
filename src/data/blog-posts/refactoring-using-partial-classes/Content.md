@@ -223,7 +223,7 @@ Putting interface implementations in partial classes can help us reduce the "rou
 
 ___
 
-This approach is also very useful when combined with conditional compilation. Occasionally, we may want to introduce API that depends on features available in a specific version of the framework. To do that, we have to use the `#if` directive which looks a lot like the region blocks everyone dreads.
+This approach is also very useful when combined with conditional compilation. Occasionally, we may want to introduce API that depends on features available in a specific version of the framework. To do that, we have to use the `#if` directive which acts similarly to regions, making our code less readable.
 
 Partial classes can help us make things tidier. Let's take a look at an example where we override `DisposeAsync` but only if we're building the assembly against .NET Standard 2.1:
 
@@ -268,15 +268,15 @@ public partial class SegmentedHttpStream
 #endif
 ```
 
-The clear benefit of using partial classes in such cases is that we are able to completely mitigate the noise caused by the conditional directives. Code written in such style looks a lot better than one riddled with intermittent conditional blocks.
+The clear benefit of using partial classes in such cases is that we are able to completely mitigate the noise caused by the conditional blocks. It looks much better when they are pushed outwards instead of being in between code.
 
 ## Organizing private classes
 
-It's not all that uncommon to have private classes in code. These are convenient when we want to avoid namespace pollution while defining a type that's only used within one class. Typical case for this is when we need to implement a custom interface to override certain behavior in a third party library or framework.
+It's not all that uncommon to have private classes. These are convenient when we want to avoid namespace pollution while defining a type that's only used within one place. Typical case for this is when we need to implement a custom interface to override certain behavior in a third party library or a framework.
 
-As an example, imagine we're exporting a sales report as an HTML document and we're using the [Scriban](https://github.com/lunet-io/scriban) engine to do it. In this particular scenario, we need to configure it so that templates can be resolved from the resources embedded in the assembly rather than file system. In order to do that, the framework expects us to provide a custom implementation of `ITemplateLoader`.
+As an example, imagine we're exporting a sales report as an HTML document and we're using the [Scriban](https://github.com/lunet-io/scriban) engine to do it. In this particular scenario, we need to configure it so that templates can be resolved from the resources embedded in the assembly rather than from the file system. In order to do that, the framework expects us to provide a custom implementation of `ITemplateLoader`.
 
-Seeing as our custom loader is only going to be used within this class, it makes perfect sense to define it as private class. However, with C# being as verbose as it is, private classes may introduce unwanted noise to our code.
+Seeing as our custom loader is going to be used only within this class, it makes perfect sense to define it as private class. However, with C# being as verbose as it is, private classes may introduce unwanted noise into our code.
 
 Using partial classes, though, we can clean it up like this:
 
@@ -343,9 +343,9 @@ public partial class HtmlReportRenderer
 
 ## Grouping arbitrary code
 
-We don't always need a special case to decide to use partial classes. In fact, sometimes it just feels right to split parts of the code into logical blocks.
+We don't always need a special case to decide to use partial classes. In fact, sometimes it just feels right to split parts of our code into some logical blocks.
 
-In this example we have a command line application that formats files. Both the options and the command behavior are defined in a single class which may be a little confusing.
+In this example we have a command line application that formats files. Both the options and the command behavior are defined as part of a single class, which may be a little confusing.
 
 By using partial classes, we can split and group different parts of the class like so:
 
