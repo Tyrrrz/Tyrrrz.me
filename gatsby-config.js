@@ -87,12 +87,8 @@ exports.plugins = [
     respectDNT: false,
     sampleRate: 100,
     siteSpeedSampleRate: 10,
-    alwaysSendReferrer: true
-  }),
-
-  // Clicky Analytics integration
-  resolvePlugin(`gatsby-plugin-clicky`, {
-    siteId: settings.clickyId
+    alwaysSendReferrer: true,
+    head: true
   }),
 
   // Netlify platform integration
