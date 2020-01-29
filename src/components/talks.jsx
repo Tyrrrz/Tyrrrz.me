@@ -41,9 +41,9 @@ export default ({ data }) => {
     const event = node.event;
     const date = node.date;
     const language = node.language;
-    const recordingUrl = node.recordingUrl;
-    const presentationUrl = node.presentationUrl;
     const eventUrl = node.eventUrl;
+    const presentationUrl = node.presentationUrl;
+    const recordingUrl = node.recordingUrl;
     const mainUrl = recordingUrl || presentationUrl || eventUrl || '#';
 
     return (
@@ -94,6 +94,7 @@ export default ({ data }) => {
               marginLeft: '0.85em'
             }
           }}>
+          {eventUrl && <Link to={eventUrl}>Event</Link>}
           {presentationUrl && <Link to={presentationUrl}>Presentation</Link>}
           {recordingUrl && <Link to={recordingUrl}>Recording</Link>}
         </div>
