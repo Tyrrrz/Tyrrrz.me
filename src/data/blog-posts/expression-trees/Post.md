@@ -73,7 +73,17 @@ public Func<int, int, int> GetSumFunction()
 }
 ```
 
+Let's digest what happened here.
 
+First, we have to specify the parameters of our function. Using the `Expression.Parameter(...)` method we can construct an expression that identifies a specific parameter and can be used to both resolve its value, as well as to set it.
+
+Then we construct the body of our function. Since this is a simple addition, we simply need to call `Expression.Add(...)` that constructs an expression that represents the plus operator. As a binary operator it requires two values, for which we specify our parameter expressions.
+
+Finally, in order to create an entry point for our expression tree, we need to construct a function definition. To do that, we can use `Expression.Lambda<T>(...)` to build a lambda expression that represents an anonymous function with the body and parameters we created earlier.
+
+Up to this point, we are dealing with expression trees which is nothing more than data. In order to turn this data into interpretable instructions, we have to compile our lambda expression with the `Compile()` method. This dynamically creates a delegate of the specified type based on the expression tree we've constructed.
+
+Having this delegate, we can use it like any other. For example, we can rewrite our original `Sum` function to use the dynamically compiled code instead:
 
 ```csharp
 public int Sum(int a, int b)
@@ -85,18 +95,60 @@ public int Sum(int a, int b)
 // Sum(3, 5) -> 8
 ```
 
+"Ok, but what's the point?" you might ask. After all, we took our statically-implemented function and replaced it with a function generated at runtime that runs slower and has no type safety.
+
+Let's move our simplistic example aside and see where this approach can actually be useful.
+
+## Generic operators
+
+One interesting thing we can do with expression trees is compile code that uses generic operators.
+
+As you know, operators in C# (unlike F#) are not generic. This means that, for example, every numeric type defines its own version of the multiply and divide operators. As a result, code that uses these operators also can't be made generic either.
+
+Let's take a look at an example:
+
 ```csharp
 public int ThreeFourths(int x) => 3 * x / 4;
+
+// ThreeFourths(18) -> 13
 ```
+
+Above we have a simple function that calculates three-fourths of a number, but it only works with numbers of type `int`. If we wanted to extend this routine to support other types, we'd have to add some overloads:
+
+```csharp
+public int ThreeFourths(int x) => 3 * x / 4;
+
+public long ThreeFourths(long x) => 3 * x / 4;
+
+public float ThreeFourths(float x) => 3 * x / 4;
+
+public double ThreeFourths(double x) => 3 * x / 4;
+
+public decimal ThreeFourths(decimal x) => 3 * x / 4;
+```
+
+This is suboptimal. We are introducing a lot of code duplication which only gets worse as we need to test it.
+
+It would've been better if we could just do something like this instead:
+
+```csharp
+public T ThreeFourths<T>(T x) => 3 * x / 4;
+```
+
+But unfortunately that won't compile because not every type has the `*` and `/` operators and there's no constraint we could use to limit the generic argument to numeric types.
+
+However, by generic code dynamically with expression trees we can do this:
 
 ```csharp
 public T ThreeFourths<T>(T x)
 {
     var param = Expression.Parameter(typeof(T));
 
+    // Cast the '3' and '4' to our type
     var three = Expression.Convert(Expression.Constant(3), typeof(T));
     var four = Expression.Convert(Expression.Constant(4), typeof(T));
 
+    // Perform the calculation
     var operation = Expression.Divide(Expression.Multiply(param, three), four);
 
     var lambda = Expression.Lambda<Func<T, T>>(operation, param);
@@ -105,4 +157,82 @@ public T ThreeFourths<T>(T x)
 
     return func(x);
 }
+
+// ThreeFourths(18) -> 13
+// ThreeFourths(6.66) -> 4,995
+// ThreeFourths(100M) -> 75
+// ThreeFourths(DateTimeOffset.Now) -> runtime exception
 ```
+
+Seeing as our generic operation doesn't have type safety, you may be wondering how is this approach any different from just using `dynamic` in our code. Surely, we could just write our code like this and save all the trouble:
+
+```csharp
+public dynamic ThreeFourths(dynamic x) => 3 * x / 4;
+```
+
+Indeed, functionally these two approaches are essentially the same. However, the main difference and the advantage of expression trees is that they are compiled while `dynamic` is evaluated every single time.
+
+That said, in the example above we're not benefitting from this advantage at all because we're recompiling our function every time anyway. Let's try to change our code so that it happens only once.
+
+What I like to do in such cases is create a generic class with a static constructor and define the compiled function as a static property of that class:
+
+```csharp
+public static class ThreeFourths
+{
+    private static class Impl<T>
+    {
+        public static Func<T, T> Of { get; }
+
+        static Impl()
+        {
+            var param = Expression.Parameter(typeof(T));
+
+            var three = Expression.Convert(Expression.Constant(3), typeof(T));
+            var four = Expression.Convert(Expression.Constant(4), typeof(T));
+
+            var operation = Expression.Divide(Expression.Multiply(param, three), four);
+
+            var lambda = Expression.Lambda<Func<T, T>>(operation, param);
+
+            Of = lambda.Compile();
+        }
+    }
+
+    public static T Of<T>(T x) => Impl<T>.Of(x);
+}
+
+// ThreeFourths.Of(18) -> 13
+```
+
+With this little trick, we guarantee that `Impl<T>.On` will be set exactly once, the first time this particular generic version of the class is used. This essentially gives us a thread-safe lazy-evaluated generic delegate. I personally like to call this pattern a "late-compiled expression" because of how it's lazily compiled at runtime.
+
+Now, with the optimizations out of the way, let's compare the performance of different approaches using [Benchmark.NET](https://github.com/dotnet/BenchmarkDotNet):
+
+```csharp
+public class Benchmarks
+{
+    [Benchmark(Description = "Static", Baseline = true)]
+    [Arguments(13.37)]
+    public double Static(double x) => 3 * x / 4;
+
+    [Benchmark(Description = "Dynamic")]
+    [Arguments(13.37)]
+    public dynamic Dynamic(dynamic x) => 3 * x / 4;
+
+    [Benchmark(Description = "Expressions")]
+    [Arguments(13.37)]
+    public double Expr(double x) => ThreeFourths.Of(x);
+
+    public static void Main() => BenchmarkRunner.Run<Benchmarks>();
+}
+```
+
+```r
+|      Method |     x |       Mean |     Error |    StdDev | Ratio | RatioSD |
+|------------ |------ |-----------:|----------:|----------:|------:|--------:|
+|      Static | 13,37 |  0.6164 ns | 0.0552 ns | 0.0516 ns |  1.00 |    0.00 |
+|     Dynamic | 13,37 | 19.4831 ns | 0.3475 ns | 0.3251 ns | 31.80 |    2.47 |
+| Expressions | 13,37 |  2.1350 ns | 0.0754 ns | 0.0705 ns |  3.48 |    0.29 |
+```
+
+As you can see, the expression-based approach performs about 9 times faster than when using `dynamic`. Although, seeing as we're comparing nanoseconds to nanoseconds, it may not be a big deal, it can matter in some specific scenarios.
