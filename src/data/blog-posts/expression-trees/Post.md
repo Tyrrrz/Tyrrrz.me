@@ -144,7 +144,7 @@ public T ThreeFourths<T>(T x)
 {
     var param = Expression.Parameter(typeof(T));
 
-    // Cast the '3' and '4' to our type
+    // Cast the numbers '3' and '4' to our type
     var three = Expression.Convert(Expression.Constant(3), typeof(T));
     var four = Expression.Convert(Expression.Constant(4), typeof(T));
 
@@ -170,7 +170,7 @@ Seeing as our generic operation doesn't have type safety, you may be wondering h
 public dynamic ThreeFourths(dynamic x) => 3 * x / 4;
 ```
 
-Indeed, functionally these two approaches are essentially the same. However, the main difference and the advantage of expression trees is that they are compiled while `dynamic` is evaluated every single time.
+Indeed, functionally these two approaches are essentially the same. However, the main difference and the advantage of expression trees is that they are compiled, while `dynamic` is evaluated every single time.
 
 That said, in the example above we're not benefitting from this advantage at all because we're recompiling our function every time anyway. Let's try to change our code so that it happens only once.
 
@@ -204,7 +204,7 @@ public static class ThreeFourths
 // ThreeFourths.Of(18) -> 13
 ```
 
-With this little trick, we guarantee that `Impl<T>.On` will be set exactly once, the first time this particular generic version of the class is used. This essentially gives us a thread-safe lazy-evaluated generic delegate. I personally like to call this pattern a "late-compiled expression" because of how it's lazily compiled at runtime.
+With this little trick, we guarantee that `Impl<T>.On` will be set exactly once, the first time this particular generic version of the class is used. This essentially gives us a thread-safe lazy-evaluated generic delegate. I personally like to call this pattern a "lazy-compiled expression".
 
 Now, with the optimizations out of the way, let's compare the performance of different approaches using [Benchmark.NET](https://github.com/dotnet/BenchmarkDotNet):
 
@@ -230,9 +230,83 @@ public class Benchmarks
 ```r
 |      Method |     x |       Mean |     Error |    StdDev | Ratio | RatioSD |
 |------------ |------ |-----------:|----------:|----------:|------:|--------:|
-|      Static | 13,37 |  0.6164 ns | 0.0552 ns | 0.0516 ns |  1.00 |    0.00 |
-|     Dynamic | 13,37 | 19.4831 ns | 0.3475 ns | 0.3251 ns | 31.80 |    2.47 |
-| Expressions | 13,37 |  2.1350 ns | 0.0754 ns | 0.0705 ns |  3.48 |    0.29 |
+|      Static | 13.37 |  0.6164 ns | 0.0552 ns | 0.0516 ns |  1.00 |    0.00 |
+|     Dynamic | 13.37 | 19.4831 ns | 0.3475 ns | 0.3251 ns | 31.80 |    2.47 |
+| Expressions | 13.37 |  2.1350 ns | 0.0754 ns | 0.0705 ns |  3.48 |    0.29 |
 ```
 
 As you can see, the expression-based approach performs about 9 times faster than when using `dynamic`. Although, seeing as we're comparing nanoseconds to nanoseconds, it may not be a big deal, it can matter in some specific scenarios.
+
+## Optimizing reflection calls
+
+Compiled expression trees are also useful when we want to speed up some reflection-heavy code. As we all know, reflection can be quite slow because of late binding but with expression trees we can ensure that all of the heavy lifting happens only once.
+
+Let's imagine we have a class and we want to call its private method from the outside:
+
+```csharp
+public class Command
+{
+    private int Execute() => 42;
+}
+```
+
+With the help of reflection, this is quite simple:
+
+```csharp
+public int CallExecute() =>
+    (int) typeof(Command)
+        .GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance)
+        .Invoke(new Command(), null);
+```
+
+Running `CallExecute()` once in a while is completely fine, however if we're going to rely on it in a hot path scenario, we could be better off with expression trees.
+
+Let's use the same lazy-compiled expression pattern to generate a function that executes a method whose handle is resolved using reflection:
+
+```csharp
+public static class CallExecute
+{
+    public static Func<Command, int> On { get; }
+
+    static CallExecute()
+    {
+        var instance = Expression.Parameter(typeof(Command));
+
+        var method = typeof(Command).GetMethod("Execute",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+
+        var call = Expression.Call(instance, method);
+
+        On = Expression.Lambda<Func<Command, int>>(call, instance).Compile();
+    }
+}
+
+// CallExecute.On(command) -> ...
+```
+
+And see how these two approaches compare with each other:
+
+```csharp
+public class Benchmarks
+{
+    [Benchmark(Description = "Expressions", Baseline = true)]
+    public int Expr() => CallExecute.On(new Command());
+
+    [Benchmark(Description = "Reflection")]
+    public int Reflection() =>
+        (int) typeof(Command)
+            .GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance)
+            .Invoke(new Command(), null);
+
+    public static void Main() => BenchmarkRunner.Run<Benchmarks>();
+}
+```
+
+```r
+|      Method |       Mean |     Error |    StdDev | Ratio | RatioSD |
+|------------ |-----------:|----------:|----------:|------:|--------:|
+| Expressions |   4.762 ns | 0.0910 ns | 0.0851 ns |  1.00 |    0.00 |
+|  Reflection | 197.869 ns | 0.7461 ns | 0.6614 ns | 41.49 |    0.74 |
+```
+
+As you can see, compiled expressions are marginally faster than reflection.
