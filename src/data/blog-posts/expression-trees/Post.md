@@ -284,6 +284,29 @@ public static class CallExecute
 // CallExecute.On(command) -> ...
 ```
 
+And let's do the same for reflection:
+
+```csharp
+public static class CallExecuteWithReflection
+{
+    public static MethodInfo Method { get; } =
+        typeof(Command).GetMethod("Execute",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+
+    public static int On(Command command) => (int) Method.Invoke(command, null);
+}
+```
+
+```csharp
+public static class CallExecuteWithReflectionDelegate
+{
+    public static Func<Command, int> On { get; } =
+        (Func<Command, int>) Delegate.CreateDelegate(
+            typeof(Func<Command, int>),
+            typeof(Command).GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance));
+}
+```
+
 And see how these two approaches compare with each other:
 
 ```csharp
@@ -293,23 +316,24 @@ public class Benchmarks
     public int Expr() => CallExecute.On(new Command());
 
     [Benchmark(Description = "Reflection")]
-    public int Reflection() =>
-        (int) typeof(Command)
-            .GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance)
-            .Invoke(new Command(), null);
+    public int Reflection() => CallExecuteWithReflection.On(new Command());
+
+    [Benchmark(Description = "Reflection (delegate)")]
+    public int ReflectionDelegate() => CallExecuteWithReflectionDelegate.On(new Command());
 
     public static void Main() => BenchmarkRunner.Run<Benchmarks>();
 }
 ```
 
 ```r
-|      Method |       Mean |     Error |    StdDev | Ratio | RatioSD |
-|------------ |-----------:|----------:|----------:|------:|--------:|
-| Expressions |   4.762 ns | 0.0910 ns | 0.0851 ns |  1.00 |    0.00 |
-|  Reflection | 197.869 ns | 0.7461 ns | 0.6614 ns | 41.49 |    0.74 |
+|                Method |       Mean |     Error |    StdDev | Ratio | RatioSD |
+|---------------------- |-----------:|----------:|----------:|------:|--------:|
+|           Expressions |   4.565 ns | 0.1261 ns | 0.1295 ns |  1.00 |    0.00 |
+|            Reflection | 126.912 ns | 1.7837 ns | 1.6685 ns | 27.82 |    0.78 |
+| Reflection (delegate) |   5.739 ns | 0.0901 ns | 0.0842 ns |  1.26 |    0.04 |
 ```
 
-As you can see, compiled expressions are marginally faster than reflection.
+As you can see, compiled expressions are significantly faster than reflection, although only slightly faster than the `CreateDelegate` approach.
 
 ## Parsing expressions
 
@@ -367,4 +391,65 @@ You can try it out:
 7.8500000000000005
 ```
 
-Note that this simple calculator doesn't take into account operation precedence or other more complicated things, it's only meant as an example. If you want to see how a full calculator like that would look, check out [Sprache.Calc](https://github.com/yallie/Sprache.Calc/blob/master/Sprache.Calc/SimpleCalculator.cs). Also, if you want to learn more about parsing, check out my blog posts about [parsing in C#](/blog/monadic-parser-combinators) and [parsing in F#](parsing-with-fparsec).
+Note that this simple calculator doesn't take into account operation precedence or other more complicated things, it's only meant as an example. If you want to see how a full calculator like that would look, check out [Sprache.Calc](https://github.com/yallie/Sprache.Calc/blob/master/Sprache.Calc/SimpleCalculator.cs). Also, if you want to learn more about parsing, check out my blog posts about [parsing in C#](/blog/monadic-parser-combinators) and [parsing in F#](/blog/parsing-with-fparsec).
+
+## Generating expression trees from code
+
+So far we've explored how to construct expression trees manually as well as some of the ways that can be useful. The cool thing about expression trees in .NET though is that they can also be created automatically from existing code.
+
+You're definitely familiar with this approach because that's what libraries like Entity Framework use to translate C# code into SQL.
+
+```csharp
+public static void Analyze<T>(Expression<Func<T>> expr)
+{
+    Console.WriteLine(expr);
+}
+
+public static void Main()
+{
+    Analyze(() => 42);
+}
+
+// () => 42
+```
+
+```csharp
+public static void Analyze<T>(Expression<Func<T>> expr)
+{
+    var dump = JsonConvert.SerializeObject(expr, new JsonSerializerSettings
+    {
+        Formatting = Formatting.Indented,
+        TypeNameHandling = TypeNameHandling.Auto,
+        Converters = { new StringEnumConverter() }
+    });
+
+    Console.WriteLine(dump);
+}
+
+public static void Main()
+{
+    Analyze(() => 42);
+}
+
+/*
+{
+  "Type": "System.Func`1[[System.Int32, System.Private.CoreLib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e",
+  "NodeType": "Lambda",
+  "Parameters": {
+    "$type": "System.Runtime.CompilerServices.TrueReadOnlyCollection`1[[System.Linq.Expressions.ParameterExpression, System.Linq.Expressions]], System.Linq.Expressions",
+    "$values": []
+  },
+  "Name": null,
+  "Body": {
+    "$type": "System.Linq.Expressions.ConstantExpression, System.Linq.Expressions",
+    "Type": "System.Int32, System.Private.CoreLib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e",
+    "NodeType": "Constant",
+    "Value": 42,
+    "CanReduce": false
+  },
+  "ReturnType": "System.Int32, System.Private.CoreLib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e",
+  "TailCall": false,
+  "CanReduce": false
+}
+*/
+```
