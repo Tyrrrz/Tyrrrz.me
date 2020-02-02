@@ -1,6 +1,6 @@
 ---
 title: Demystifying .NET expression trees
-date: 2020-02-15
+date: 2020-02-18
 cover: Cover.png
 ---
 
@@ -310,3 +310,61 @@ public class Benchmarks
 ```
 
 As you can see, compiled expressions are marginally faster than reflection.
+
+## Parsing expressions
+
+One other interesting scenario that I'm personally really fond of is parsing. Usually, when dealing with a custom DSL, you will have a parser that produces a syntax tree which gets analyzed by an interpreter and turned into runtime instructions. With expression trees you can parse directly into these runtime instructions and get rid of the interpreter step altogether.
+
+As an example, let's write a simple program that takes a string representation of a mathematical expression and calculates the result. We will use the [Sprache](https://github.com/sprache/Sprache) library to build our parser, just to make things simpler.
+
+```csharp
+public static class ExpressionDsl
+{
+    private static readonly Parser<Expression> Constant =
+        Parse.DecimalInvariant
+            .Select(n => double.Parse(n, CultureInfo.InvariantCulture))
+            .Select(n => Expression.Constant(n, typeof(double)));
+
+    private static readonly Parser<ExpressionType> Operator =
+        Parse.Char('+').Return(ExpressionType.Add)
+            .Or(Parse.Char('-').Return(ExpressionType.Subtract))
+            .Or(Parse.Char('*').Return(ExpressionType.Multiply))
+            .Or(Parse.Char('/').Return(ExpressionType.Divide));
+
+    private static readonly Parser<Expression> Operation =
+        Parse.ChainOperator(Operator, Constant, Expression.MakeBinary);
+
+    private static readonly Parser<Expression> FullExpression =
+        Operation.Or(Constant).End();
+
+    public static object Run(string expression)
+    {
+        var operation = FullExpression.Parse(expression);
+
+        var body = Expression.Convert(operation, typeof(object));
+        var lambda = Expression.Lambda<Func<object>>(body);
+        var func = lambda.Compile();
+
+        return func();
+    }
+
+    public static void Main(string[] args)
+    {
+        var input = string.Concat(args);
+        var result = Run(input);
+
+        Console.WriteLine(result);
+    }
+}
+```
+
+As you can see, the parsers defined above yield an instance of type `Expression` or `ExpressionType` which are both part of `System.Linq.Expressions`. Once we parse the full expression, we already have all the required data we need to generate runtime instructions by compiling them into a lambda.
+
+You can try it out:
+
+```shell
+> interpreter.exe 3.14 * 5 / 2
+7.8500000000000005
+```
+
+Note that this simple calculator doesn't take into account operation precedence or other more complicated things, it's only meant as an example. If you want to see how a full calculator like that would look, check out [Sprache.Calc](https://github.com/yallie/Sprache.Calc/blob/master/Sprache.Calc/SimpleCalculator.cs). Also, if you want to learn more about parsing, check out my blog posts about [parsing in C#](/blog/monadic-parser-combinators) and [parsing in F#](parsing-with-fparsec).
