@@ -14,13 +14,13 @@ In this article we will take a look at some of the different ways we can constru
 
 ## Creating expression trees manually
 
-The most straightforward we can obtain an expression tree is by constructing it manually. The framework offers us with a way to do it through the `Expression` class located in the `System.Linq.Expressions` namespace.
+The most straightforward way we can obtain an expression tree is by constructing it manually. The framework offers us with a way to do it through the [`Expression`](https://docs.microsoft.com/en-us/dotnet/api/system.linq.expressions.expression) class located in the `System.Linq.Expressions` namespace.
 
 Using the static methods provided by this class, we can build expressions that represent familiar language constructs. Some of these are:
 
-- `Expression.Constant(...)` -- an expression that represents an unchangeable value.
+- `Expression.Constant(...)` -- an expression that represents a value.
 - `Expression.Variable(...)` -- an expression that represents a variable.
-- `Expression.New(...)` -- an expression that represents an initialization of a new instance of a type.
+- `Expression.New(...)` -- an expression that represents an initialization of a new instance.
 - `Expression.Assign(...)` -- an expression that represents an assignment operation.
 - `Expression.Equal(...)` -- an expression that represents an equality comparison.
 - `Expression.Call(...)` -- an expression that represents a specific method call.
@@ -28,9 +28,9 @@ Using the static methods provided by this class, we can build expressions that r
 - `Expression.Loop(...)` -- an expression that represents repeating logic.
 - ...
 
-As you can see, there are quite a lot of different builders and, while the simpler ones like `Constant` or `Variable` produce terminal nodes, the more complex ones like `Assign` or `Loop` are built by composing other expressions. It is through this composition that we end up with a data structure that resembles a tree.
+As you can see, there are quite a lot of different factory methods and, while the simpler ones like `Constant` or `Variable` produce terminal nodes, the more complex ones like `Assign` or `Loop` are built by composing other expressions. It is through this composition that we end up with a data structure that resembles a tree.
 
-Let's take a look at a very simple function that calculates the sum of two numbers:
+For example, let's take a look at a very simple function that calculates the sum of two numbers:
 
 ```csharp
 public int Sum(int a, int b) => a + b;
@@ -57,7 +57,7 @@ The hierarchy outlined above can be visualized by the following diagram:
         +-------- parameter 'a' expression
 ```
 
-Now, as an exercise, let's try and recreate this exact function by building and compiling it in runtime using expression trees:
+We can try and recreate this exact function using expression trees:
 
 ```csharp
 public Func<int, int, int> CreateSumFunction()
@@ -85,9 +85,11 @@ public Func<int, int, int> CreateSumFunction()
 }
 ```
 
+Let's digest what's going on here.
+
 First, we have to specify the parameters of our function. Using the `Expression.Parameter(...)` method we can construct an expression that identifies a specific parameter. This expression can be used to both resolve its value, as well as to set it.
 
-Then we construct the body of our function. Since this is a simple addition, we're using `Expression.Add(...)` which constructs an expression that represents the plus operator. As a binary operator it requires two operands, for which we specify our parameter expressions.
+Then we construct the body of the function. Since this is a simple addition, we're using `Expression.Add(...)` which constructs an expression that represents the plus operator. As a binary operator it requires two operands, for which we specify our parameter expressions.
 
 Finally, in order to create an entry point for our expression tree, we need to construct a function definition. To do that, we can use `Expression.Lambda<T>(...)` to build a lambda expression that represents an anonymous function with the body and parameters we defined earlier.
 
@@ -147,7 +149,7 @@ public T ThreeFourths<T>(T x) => 3 * x / 4;
 
 But unfortunately that doesn't compile seeing as the `*` and `/` operators are not available on every type that can be specified in place of `T`. Sadly, there's also no constraint we could use to limit the generic argument to numeric types.
 
-However, by generating code dynamically with expression trees we work around this:
+However, by generating code dynamically with expression trees we can work around this problem:
 
 ```csharp
 public T ThreeFourths<T>(T x)
@@ -173,7 +175,7 @@ public T ThreeFourths<T>(T x)
 // ThreeFourths(100M) -> 75
 ```
 
-That works great and we can reuse this method for numbers of absolutely any type. However, seeing as our generic operation doesn't have type safety, you may be wondering, "How is this approach any different from just using `dynamic`?".
+That works well and we can reuse this method for numbers of any type. However, seeing as our generic operation doesn't have type safety, you may be wondering, "How is this approach any different from just using `dynamic`?".
 
 Surely, we could just write our code like this and avoid all the trouble:
 
@@ -215,11 +217,11 @@ public static class ThreeFourths
 // ThreeFourths.Of(18) -> 13
 ```
 
-Because the compiler generates a version of the `Impl` class for each argument of `T`, we end up with an implementation of three-fourths for each type encapsulated in a separate class. Having a static constructor ensures that the actual delegate will be initialized only once, the first time it is accessed.
+Due to the fact that the compiler generates a version of the `Impl` class for each argument of `T`, we end up with an implementation of three-fourths for each type encapsulated in a separate class. Having a static constructor ensures that the actual delegate will be initialized only once, the first time it is accessed.
 
 This essentially gives us a thread-safe lazy-evaluated dynamic function. I like to call this pattern a "lazy-compiled expression".
 
-Now, with the optimizations out of the way, let's compare the performance of different approaches using [Benchmark.NET](https://github.com/dotnet/BenchmarkDotNet):
+Now, with the optimizations out of the way, let's use [Benchmark.NET](https://github.com/dotnet/BenchmarkDotNet) to compare the different ways we can calculate three-fourths of a value:
 
 ```csharp
 public class Benchmarks
@@ -272,9 +274,9 @@ public int CallExecute() =>
         .Invoke(new Command(), null);
 ```
 
-While using `CallExecute()` scarcely is most likely fine, running it in a tight loop can cause some issues, so we could be better off with expression trees.
+While using `CallExecute()` scarcely is most likely fine, running it in a tight loop can cause performance issues. We could be better off with expression trees.
 
-Let's use the same lazy-compiled expression pattern to generate a function that executes a method which is resolved using reflection:
+Let's use the same lazy-compiled expression pattern to generate a function that executes a method which is resolved through reflection:
 
 ```csharp
 public static class CallExecute
@@ -356,6 +358,136 @@ public class Benchmarks
 
 As you can see, while the `CreateDelegate` approach comes really close, the expressions are still faster.
 
+This approach is used by IOC containers.......
+
+## Fast dictionary
+
+```csharp
+public class CompiledDictionary<TKey, TValue> : IDictionary<TKey, TValue>
+{
+    private readonly List<KeyValuePair<TKey, TValue>> _pairs = new List<KeyValuePair<TKey, TValue>>();
+
+    private Func<TKey, TValue> _lookup;
+
+    public CompiledDictionary()
+    {
+        UpdateLookup();
+    }
+
+    public void UpdateLookup()
+    {
+        var keyParameter = Expression.Parameter(typeof(TKey));
+
+        // Cases for all pairs
+        var switchCases = _pairs
+            .Select(p => Expression.SwitchCase(Expression.Constant(p.Value), Expression.Constant(p.Key.GetHashCode())))
+            .ToArray();
+
+        // Not found case
+        var exceptionCtor = typeof(KeyNotFoundException).GetConstructor(new[] {typeof(string)});
+        var defaultCase = Expression.Throw(Expression.New(exceptionCtor, keyParameter), typeof(TValue));
+
+        // Equality comparer
+        var hashCode = Expression.Call(keyParameter, typeof(object).GetMethod(nameof(GetHashCode)));
+
+        var switchExpr = Expression.Switch(typeof(TValue), hashCode, defaultCase, null, switchCases);
+        var lambda = Expression.Lambda<Func<TKey, TValue>>(switchExpr, keyParameter);
+
+        _lookup = lambda.Compile();
+    }
+
+    public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _pairs.GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    public void Add(KeyValuePair<TKey, TValue> item) => _pairs.Add(item);
+
+    public void Add(TKey key, TValue value) => Add(KeyValuePair.Create(key, value));
+
+    public bool Remove(KeyValuePair<TKey, TValue> item) => _pairs.Remove(item);
+
+    public bool Remove(TKey key)
+    {
+        var pairIndex = _pairs.FindIndex(p => Equals(p.Key, key));
+
+        if (pairIndex >= 0)
+        {
+            Remove(_pairs[pairIndex]);
+            return true;
+        }
+
+        return false;
+    }
+
+    public void Clear() => _pairs.Clear();
+
+    public TValue this[TKey key]
+    {
+        get => _lookup(key);
+        set
+        {
+            Remove(key);
+            Add(key, value);
+        }
+    }
+
+    // The rest of the IDictionary<> implementation is truncated
+}
+```
+
+```csharp
+public class Benchmarks
+{
+    private readonly Dictionary<string, int> _normalDictionary =
+        new Dictionary<string, int>();
+
+    private readonly CompiledDictionary<string, int> _compiledDictionary =
+        new CompiledDictionary<string, int>();
+
+    [Params(10, 1000, 10000)]
+    public int Count { get; set; }
+
+    public string TargetKey { get; set; }
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        foreach (var i in Enumerable.Range(0, Count))
+        {
+            var key = $"key_{i}";
+
+            _normalDictionary[key] = i;
+            _compiledDictionary[key] = i;
+        }
+
+        _compiledDictionary.UpdateLookup();
+
+        TargetKey = $"key_{Count / 2}";
+    }
+
+    [Benchmark(Description = "Standard dictionary", Baseline = true)]
+    public int Normal() => _normalDictionary[TargetKey];
+
+    [Benchmark(Description = "Compiled dictionary")]
+    public int Compiled() => _compiledDictionary[TargetKey];
+
+    public static void Main() => BenchmarkRunner.Run<Benchmarks>();
+}
+```
+
+```r
+|              Method | Count |      Mean |     Error |    StdDev | Ratio |
+|-------------------- |------ |----------:|----------:|----------:|------:|
+| Standard dictionary |    10 | 27.390 ns | 0.3176 ns | 0.2971 ns |  1.00 |
+| Compiled dictionary |    10 |  9.618 ns | 0.0458 ns | 0.0406 ns |  0.35 |
+|                     |       |           |           |           |       |
+| Standard dictionary |  1000 | 26.035 ns | 0.2605 ns | 0.2437 ns |  1.00 |
+| Compiled dictionary |  1000 | 14.897 ns | 0.2369 ns | 0.2216 ns |  0.57 |
+|                     |       |           |           |           |       |
+| Standard dictionary | 10000 | 29.724 ns | 0.1583 ns | 0.1481 ns |  1.00 |
+| Compiled dictionary | 10000 | 18.824 ns | 0.0976 ns | 0.0913 ns |  0.63 |
+```
+
 ## Parsing expressions
 
 One other interesting usage scenario, that I'm personally really fond of, is parsing. The main challenge of writing an interpreter for a custom domain-specific language is turning the syntax tree into runtime instructions. By parsing the grammar constructs directly into expression trees, this becomes a solved problem.
@@ -382,13 +514,10 @@ public static class ExpressionDsl
     private static readonly Parser<Expression> FullExpression =
         Operation.Or(Constant).End();
 
-    public static object Run(string expression)
+    public static double Run(string expression)
     {
         var operation = FullExpression.Parse(expression);
-
-        var body = Expression.Convert(operation, typeof(object));
-        var lambda = Expression.Lambda<Func<object>>(body);
-        var func = lambda.Compile();
+        var func = Expression.Lambda<Func<double>>(operation).Compile();
 
         return func();
     }
@@ -403,20 +532,20 @@ public static class ExpressionDsl
 }
 ```
 
-As you can see, the parsers defined above (`Constant`, `Operator`, `Operation`, `FullExpression`) all yield objects of type `Expression` or `ExpressionType`, which are both defined in `System.Linq.Expressions`. The expression tree is essentially our syntax tree, so once we parse the input we will have all the required information to compile the runtime instructions represented by it.
+As you can see, the parsers defined above (`Constant`, `Operator`, `Operation`, `FullExpression`) all yield objects of type `Expression` and `ExpressionType`, which are both defined in `System.Linq.Expressions`. The expression tree is essentially our syntax tree, so once we parse the input we will have all the required information to compile the runtime instructions represented by it.
 
 You can try it out:
 
 ```shell
-> app 3.14 * 5 + 2
-17.7
+> app 3.15 * 5 + 2
+17.75
 ```
 
 Note that this simple calculator is just an example of what you can do. If you want to see how a proper calculator like that would look, check out [Sprache.Calc](https://github.com/yallie/Sprache.Calc/blob/master/Sprache.Calc/SimpleCalculator.cs). Also, if you want to learn more about parsing, check out my blog posts about [parsing in C#](/blog/monadic-parser-combinators) and [parsing in F#](/blog/parsing-with-fparsec).
 
-## Going even faster with FastExpressionCompiler
+## Going even further beyond
 
-While compiled expressions execute really fast, compiling them is relatively expensive. This is largely due to various verifications the compiler has to perform to ensure that the composed expression tree is valid.
+While compiled expressions execute really fast, compiling them can be relatively expensive.
 
 In most cases that's completely fine, but you may want to take the performance even further by using [FastExpressionCompiler](https://github.com/dadhi/FastExpressionCompiler). This library provides a much faster drop-in replacement for the `Compile` method, called `CompileFast`.
 
@@ -447,7 +576,7 @@ public class Benchmarks
 
 As you can see, the difference is pretty noticeable.
 
-This library (as part of `FastExpressionCompiler.LightExpression`) also offers a drop-in replacement for `Expression` and all of its static builder methods. These alternative implementations construct expressions which may in some cases perform much faster than their default counterparts.
+This library (as part of `FastExpressionCompiler.LightExpression`) also offers a drop-in replacement for `Expression` and all of its static factory methods. These alternative implementations construct expressions which may in some cases perform much faster than their default counterparts.
 
 ## Generating expression trees from code
 
@@ -505,3 +634,166 @@ Binary expression:
 ```
 
 Note how the right operand of this expression is `Sin(1.5707963267948966)` rather than `Sin(Math.PI / 2)`. This is because the division was evaluated into a constant during compilation.
+
+When you know exactly what you're looking for, it may be enough to pattern match. In more complex cases however, you may want to use [`ExpressionVisitor`](https://docs.microsoft.com/en-us/dotnet/api/system.linq.expressions.expressionvisitor) instead.
+
+There are two ways we can traverse an expression tree with `ExpressionVisitor`, either by inheriting from it and overriding visitor methods we are interested in, or by using its static methods with a visitor delegate.
+
+If you're unfamiliar with the [visitor pattern](https://en.wikipedia.org/wiki/Visitor_pattern), you can think of it as an exhaustive pattern matcher where each clause is a separate method.
+
+For example, if we wanted to
+
+```csharp
+public class Visitor : ExpressionVisitor
+{
+    protected override Expression VisitMethodCall(MethodCallExpression node)
+    {
+        var newMethodCall = node.Method == typeof(Math).GetMethod(nameof(Math.Sin))
+            ? typeof(Math).GetMethod(nameof(Math.Log10))
+            : node.Method;
+
+        Console.WriteLine($"Old method call: {node.Method.Name}(...)");
+        Console.WriteLine($"New method call: {newMethodCall.Name}(...)");
+
+        return Expression.Call(newMethodCall, node.Arguments);
+    }
+}
+```
+
+```csharp
+public static void Analyze<T>(Expression<Func<T>> expr)
+{
+    var newExpr = (Expression<Func<T>>) new Visitor().Visit(expr);
+
+    Console.WriteLine($"Old expression: {expr}");
+    Console.WriteLine($"New expression: {newExpr}");
+
+    var oldResult = expr.Compile()();
+    var newResult = newExpr.Compile()();
+
+    Console.WriteLine($"Old result value: {oldResult}");
+    Console.WriteLine($"New result value: {newResult}");
+}
+
+public static void Main()
+{
+    Analyze(() => 2 * Math.Sin(Math.PI / 2));
+}
+```
+
+```x
+Old method call: Sin(...)
+New method call: Log10(...)
+Old expression: () => (2 * Sin(1.5707963267948966))
+New expression: () => (2 * Log10(1.5707963267948966))
+Old result value: 2
+New result value: 0.39223975406030526
+```
+
+## Converting expressions back to code
+
+Even though every expression overrides the `ToString` method, the actual text produced by more complex expressions may not be so readable.
+
+```csharp
+public static void Analyze<T>(Expression<Func<T>> expr)
+{
+    Console.WriteLine(expr);
+}
+
+public static void Main()
+{
+    var a = DateTimeOffset.Now.Year / 13.4;
+    var b = 18 * 4;
+    Analyze(() => Math.Sin(a / b) + Math.Cos(b / a));
+}
+```
+
+Produces:
+
+```c
+() => (Sin((value(Playground.Program+<>c__DisplayClass1_0).a / Convert(value(Playground.Program+<>c__DisplayClass1_0).b, Double))) + Cos((Convert(value(Playground.Program+<>c__DisplayClass1_0).b, Double) / value(Playground.Program+<>c__DisplayClass1_0).a)))
+```
+
+If we use [ExpressionToCode](https://github.com/EamonNerbonne/ExpressionToCode):
+
+```csharp
+public static void Analyze<T>(Expression<Func<T>> expr)
+{
+    Console.WriteLine(ExpressionToCode.ToCode(expr));
+}
+
+public static void Main()
+{
+    var a = DateTimeOffset.Now.Year / 13.4;
+    var b = 18 * 4;
+    Analyze(() => Math.Sin(a / b) + Math.Cos(b / a));
+}
+```
+
+```c
+() => Math.Sin(a / b) + Math.Cos(b / a)
+```
+
+Assertions:
+
+```csharp
+var a = 3;
+var b = 5;
+
+PAssert.That(() => 3 * a + (b - 1) == 12); // actually 13
+```
+
+```r
+Unhandled exception. System.InvalidOperationException: assertion failed
+
+3 * a + (b - 1) == 12
+      false (caused assertion failure)
+
+3 * a + (b - 1)      13
+          3 * a      9
+              a      3
+          b - 1      4
+              b      5
+```
+
+```csharp
+var arr = Enumerable.Range(0, 10).ToArray();
+
+PAssert.That(() => arr.Contains(10));
+```
+
+```r
+arr.Contains(10)
+      false (caused assertion failure)
+
+arr      new[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }
+```
+
+```csharp
+public static void Assert(
+    bool condition,
+    [CallerArgumentExpression("condition")] string expression = "")
+{
+    if (!condition)
+        throw new AssertionFailedException($"The condition `{expression}` is not true");
+}
+```
+
+```csharp
+Assert(2 + 2 == 5);
+
+// Exception:
+// The condition `2 + 2 == 5` is not true
+```
+
+Attribute exists but the functionality is not yet here: https://github.com/dotnet/csharplang/issues/287
+
+## Limitations of automatically-generated expressions
+
+https://github.com/bartdesmet/ExpressionFutures/tree/master/CSharpExpressions#c-30
+
+## Transpile
+
+## Summary
+
+If your task involves dynamic code generation,
