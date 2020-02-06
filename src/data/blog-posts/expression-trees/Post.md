@@ -171,7 +171,7 @@ public T ThreeFourths<T>(T x)
 }
 
 // ThreeFourths(18) -> 13
-// ThreeFourths(6.66) -> 4,995
+// ThreeFourths(6.66) -> 4.995
 // ThreeFourths(100M) -> 75
 ```
 
@@ -250,7 +250,7 @@ public class Benchmarks
 |     Dynamic | 13.37 | 19.4831 ns | 0.3475 ns | 0.3251 ns | 31.80 |    2.47 |
 ```
 
-As you can see, the expression-based approach performs about 9 times faster than when using `dynamic`. Although, seeing as we're comparing nanoseconds to nanoseconds, it may not be a big deal, it can matter in some specific scenarios.
+As you can see, the expression-based approach performs about 9 times faster than when using `dynamic`.
 
 ## Optimizing reflection calls
 
@@ -356,16 +356,57 @@ public class Benchmarks
 | Reflection (delegate) |   5.475 ns | 0.0895 ns | 0.0837 ns |  1.28 |    0.02 |
 ```
 
-As you can see, while the `CreateDelegate` approach comes really close, the expressions are still faster.
+As you can see, compiled expressions outperform reflection across the board, even though the approach with `CreateDelegate` comes really close. Note however that while the execution times are similar, `CreateDelegate` is more limited than compiled expressions -- for example, it cannot be used to call constructor methods.
 
-This approach is used by IOC containers.......
+Compiled dynamic method invocation is commonly used in various software frameworks. Some examples:
 
-## Fast dictionary
+- [AutoMapper](https://github.com/AutoMapper/AutoMapper) uses them to speed up object conversion
+- [NServiceBus](https://github.com/Particular/NServiceBus) uses them to speed up its behavior pipeline
+- [Marten](https://github.com/JasperFx/marten) uses them to speed up entity mapping
+
+## Compiled dictionary
+
+Another fun way we can use expression trees is to create a dictionary with a compiled lookup. Even though the standard .NET `System.Collections.Generic.Dictionary` is insanely fast on its own, it's possible to outperform it in read operations by around a factor of 3.
+
+While a typical dictionary implementation may be pretty complicated, a lookup can be represented in the form of a switch expression:
+
+```csharp
+public TValue Lookup(TKey key) =>
+    key.GetHashCode() switch
+    {
+        // No collisions
+        9254 => value1,
+        -101 => value2,
+
+        // Collision
+        777 => key switch
+        {
+            key3 => value3,
+            key4 => value4
+        },
+
+        // ...
+
+        // Not found
+        _ => throw new KeyNotFoundException(key.ToString())
+    };
+```
+
+The function above attempts to match the hash code of the specified key with the hash code of one of the keys contained within the dictionary. If it's successful, then the corresponding value is returned.
+
+Even though hash codes are designed to be unique, inevitably there will be collisions. In such cases, when the same hash code matches with multiple different values, there is an inner switch expression that compares the actual key and determines which value to return.
+
+Finally, if none of the cases matched, it throws an exception signifying that the dictionary doesn't contain the specified key.
+
+The idea is that, since a switch is faster than a hash table, dynamically compiling all key-value pairs into a switch expression like the one above should result in a faster dictionary lookup.
+
+Let's try it out. Here's how the code for that would look:
 
 ```csharp
 public class CompiledDictionary<TKey, TValue> : IDictionary<TKey, TValue>
 {
-    private readonly List<KeyValuePair<TKey, TValue>> _pairs = new List<KeyValuePair<TKey, TValue>>();
+    private readonly List<KeyValuePair<TKey, TValue>> _pairs =
+        new List<KeyValuePair<TKey, TValue>>();
 
     private Func<TKey, TValue> _lookup;
 
@@ -376,64 +417,81 @@ public class CompiledDictionary<TKey, TValue> : IDictionary<TKey, TValue>
 
     public void UpdateLookup()
     {
+        // Parameter for lookup key
         var keyParameter = Expression.Parameter(typeof(TKey));
 
-        // Cases for all pairs
-        var switchCases = _pairs
-            .Select(p => Expression.SwitchCase(Expression.Constant(p.Value), Expression.Constant(p.Key.GetHashCode())))
-            .ToArray();
+        // Expression that gets the key's hash code
+        var keyGetHashCodeCall = Expression.Call(
+            instance: keyParameter,
+            method: typeof(object).GetMethod(nameof(GetHashCode)));
 
-        // Not found case
-        var exceptionCtor = typeof(KeyNotFoundException).GetConstructor(new[] {typeof(string)});
-        var defaultCase = Expression.Throw(Expression.New(exceptionCtor, keyParameter), typeof(TValue));
+        // Expression that converts the key to string
+        var keyToStringCall = Expression.Call(
+            instance: keyParameter,
+            method: typeof(object).GetMethod(nameof(ToString)));
 
-        // Equality comparer
-        var hashCode = Expression.Call(keyParameter, typeof(object).GetMethod(nameof(GetHashCode)));
+        // Expression that throws 'not found' exception in case of failure
+        var exceptionCtor = typeof(KeyNotFoundException)
+            .GetConstructor(new[] {typeof(string)});
 
-        var switchExpr = Expression.Switch(typeof(TValue), hashCode, defaultCase, null, switchCases);
-        var lambda = Expression.Lambda<Func<TKey, TValue>>(switchExpr, keyParameter);
+        var throwException = Expression.Throw(
+            value: Expression.New(
+                constructor: exceptionCtor,
+                arguments: keyToStringCall),
+            type: typeof(TValue));
+
+        // Switch expression with cases for every hash code
+        var body = Expression.Switch(
+            type: typeof(TValue),
+            switchValue: keyGetHashCodeCall,
+            defaultBody: throwException,
+            comparison: null,
+            cases: _pairs
+                .GroupBy(p => p.Key.GetHashCode())
+                .Select(g =>
+                {
+                    // No collision, construct constant expression
+                    if (g.Count() == 1)
+                        return Expression.SwitchCase(
+                            body: Expression.Constant(g.Single().Value),
+                            testValues: Expression.Constant(g.Key));
+
+                    // Collision, construct inner switch for the key's value
+                    return Expression.SwitchCase(
+                        body: Expression.Switch(
+                            type: typeof(TValue),
+                            switchValue: keyParameter, // switch on actual key
+                            defaultBody: throwException,
+                            comparison: null,
+                            cases: g.Select(p => Expression.SwitchCase(
+                                body: Expression.Constant(p.Value),
+                                testValues: Expression.Constant(p.Key)
+                            ))),
+                        testValues: Expression.Constant(g.Key));
+                }));
+
+        var lambda = Expression.Lambda<Func<TKey, TValue>>(body, keyParameter);
 
         _lookup = lambda.Compile();
     }
-
-    public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _pairs.GetEnumerator();
-
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-    public void Add(KeyValuePair<TKey, TValue> item) => _pairs.Add(item);
-
-    public void Add(TKey key, TValue value) => Add(KeyValuePair.Create(key, value));
-
-    public bool Remove(KeyValuePair<TKey, TValue> item) => _pairs.Remove(item);
-
-    public bool Remove(TKey key)
-    {
-        var pairIndex = _pairs.FindIndex(p => Equals(p.Key, key));
-
-        if (pairIndex >= 0)
-        {
-            Remove(_pairs[pairIndex]);
-            return true;
-        }
-
-        return false;
-    }
-
-    public void Clear() => _pairs.Clear();
 
     public TValue this[TKey key]
     {
         get => _lookup(key);
         set
         {
-            Remove(key);
-            Add(key, value);
+            _pairs.RemoveAll(p => EqualityComparer<TKey>.Default.Equals(p.Key, key));
+            _pairs.Add(KeyValuePair.Create(key, value));
         }
     }
 
-    // The rest of the IDictionary<> implementation is truncated
+    // The rest of interface implementation is omitted for brevity
 }
 ```
+
+The method `UpdateLookup` takes all of the key-value pairs contained within the current dictionary (`_pairs`) and groups them by the hash codes of their keys, which are then transformed into switch cases. If there is no collision for a particular hash code, then the switch case is made up of a single constant expression that produces the corresponding value. Otherwise, it contains an inner switch expression that further evaluates the key to determine which value to return.
+
+Let's see how well this dictionary performs when benchmarked against the standard implementation:
 
 ```csharp
 public class Benchmarks
@@ -452,6 +510,7 @@ public class Benchmarks
     [GlobalSetup]
     public void Setup()
     {
+        // Seed the dictionaries with values
         foreach (var i in Enumerable.Range(0, Count))
         {
             var key = $"key_{i}";
@@ -460,8 +519,10 @@ public class Benchmarks
             _compiledDictionary[key] = i;
         }
 
+        // Recompile lookup
         _compiledDictionary.UpdateLookup();
 
+        // Try to get the middle element
         TargetKey = $"key_{Count / 2}";
     }
 
@@ -487,6 +548,8 @@ public class Benchmarks
 | Standard dictionary | 10000 | 29.724 ns | 0.1583 ns | 0.1481 ns |  1.00 |
 | Compiled dictionary | 10000 | 18.824 ns | 0.0976 ns | 0.0913 ns |  0.63 |
 ```
+
+We can see that the compiled dictionary performs lookups about 1.6-2.8 times faster. While the performance of the hash table is consistent regardless of how many elements are in the dictionary, the expression tree implementation becomes slower as the dictionary gets bigger. This can potentially be further optimized by adding another level of switch expressions for indexing.
 
 ## Parsing expressions
 
@@ -775,7 +838,7 @@ public static void Assert(
     [CallerArgumentExpression("condition")] string expression = "")
 {
     if (!condition)
-        throw new AssertionFailedException($"The condition `{expression}` is not true");
+        throw new AssertionFailedException($"Condition `{expression}` is not true");
 }
 ```
 
@@ -783,17 +846,57 @@ public static void Assert(
 Assert(2 + 2 == 5);
 
 // Exception:
-// The condition `2 + 2 == 5` is not true
+// Condition `2 + 2 == 5` is not true
 ```
 
 Attribute exists but the functionality is not yet here: https://github.com/dotnet/csharplang/issues/287
 
 ## Limitations of automatically-generated expressions
 
-https://github.com/bartdesmet/ExpressionFutures/tree/master/CSharpExpressions#c-30
+Despite how convenient they may be, automatically-inferred expressions haven't really evolved since they were introduced. And while it may be enough for Entity Framework and some other scenarios, they have certain limitations.
+
+The following constructs are not supported in expressions generated from lambdas:
+
+- Multi-dimensional array initializers
+- Named and optional parameters
+- Dynamic
+- Async and await
+- Conditional access operator
+- Index initializers for dictionaries
+- Throw expressions
+- Discard expressions
+
+Also, multi-line lambdas are not supported:
+
+```csharp
+public static void Analyze<T>(Expression<Func<T>> expr)
+{
+    // ...
+}
+
+public static void Main()
+{
+    // Compile error:
+    // A lambda expression with a statement body cannot be converted to an expression tree
+    Analyze(() =>
+    {
+        var a = 3;
+        var b = 5;
+        return a + b;
+    };
+}
+```
+
+Most of the time it's possible to rewrite such statements into one a single expression, either by
 
 ## Transpile
 
 ## Summary
 
-If your task involves dynamic code generation,
+Some other interesting articles about expression trees:
+
+- [Introduction to expression trees (Microsoft Docs)](https://docs.microsoft.com/en-us/dotnet/csharp/expression-trees)
+- [10X faster execution with compiled expression trees (Particular Software)](https://particular.net/blog/10x-faster-execution-with-compiled-expression-trees)
+- [AutoMapper 5.0 speed increases (Jimmy Bogard)](https://lostechies.com/jimmybogard/2016/06/24/automapper-5-0-speed-increases)
+- [How we did (and did not) improve performance and efficiency in Marten 2.0 (Jeremy D. Miller)](https://jeremydmiller.com/2017/08/01/how-we-did-and-did-not-improve-performance-and-efficiency-in-marten-2-0)
+- [Optimizing Just in Time with Expression Trees (Craig Gidney)](http://twistedoakstudios.com/blog/Post2540_optimizing-just-in-time-with-expression-trees)
