@@ -217,7 +217,156 @@ var greetingsForNobody = getGreetings(" ");  // <null>
 
 That's pretty awesome! We've compiled some code dynamically at runtime and were able to execute it like any other function.
 
-## Generic operators
+## Converting expressions to code
+
+We were able to compile our expression into runtime instructions, but what if we wanted to get its textual representation? It could be useful if we wanted to write the expression to file or just to debug and see what's going on.
+
+The good news is that all types that derive from `Expression` override the `ToString` method with a more specific implementation. That means we can do the following:
+
+```csharp
+var s1 = Expression.Constant(42).ToString(); // 42
+var s2 = Expression.Multiply(
+    Expression.Constant(5),
+    Expression.Constant(11)).ToString();     // (5 * 11)
+```
+
+The bad news is that it only works nicely with simple expressions like the ones above. For example, if we try to call `ToString()` on the expression we compiled earlier, we will get:
+
+```csharp
+var s = lambda.ToString();
+
+// personName => IIF(Not(IsNullOrWhiteSpace(personName)), Concat("Greetings, ", personName), null)
+```
+
+While fairly readable, this is probably not the text representation you would expect to see.
+
+Luckily, we can use the [ExpressionToCode](https://github.com/EamonNerbonne/ExpressionToCode) NuGet package to get us what we want. By installing it, we should be able to call `ExpressionToCode.ToCode(expr)` to get the actual C# code that represents the expression:
+
+```csharp
+var code = ExpressionToCode.ToCode(lambda);
+
+// personName => !string.IsNullOrWhiteSpace(personName)
+//    ? string.Concat("Greetings, ", personName)
+//    : default(string)
+
+// (the actual result is single line, I wrapped it to fit the page)
+```
+
+This is much better. I personally find this library can be very helpful if you need some visual aid when constructing large complex expressions.
+
+## Optimizing reflection using compiled expressions
+
+Compiled expression trees are also useful when we want to speed up some reflection-heavy code. As we all know, reflection can be quite slow because of late binding, however with expression trees we can offload all the heavy lifting and ensure it only happens once.
+
+Let's imagine we have a class and we want to call its private method from the outside:
+
+```csharp
+public class Command
+{
+    private int Execute() => 42;
+}
+```
+
+With the help of reflection, this is quite simple:
+
+```csharp
+public int CallExecute() =>
+    (int) typeof(Command)
+        .GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance)
+        .Invoke(new Command(), null);
+```
+
+While using `CallExecute()` scarcely is most likely fine, running it in a tight loop can cause performance issues. We could be better off with expression trees.
+
+Let's use the same lazy-compiled expression pattern to generate a function that executes a method which is resolved through reflection:
+
+```csharp
+public static class CallExecute
+{
+    public static Func<Command, int> On { get; }
+
+    static CallExecute()
+    {
+        var instance = Expression.Parameter(typeof(Command));
+
+        var method = typeof(Command).GetMethod("Execute",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+
+        var call = Expression.Call(instance, method);
+
+        On = Expression.Lambda<Func<Command, int>>(call, instance).Compile();
+    }
+}
+
+// CallExecute.On(command) -> ...
+```
+
+Now, comparing this to the reflection code above isn't exactly fair. If we're going to execute the method multiple times, it makes sense to at least cache the corresponding `MethodInfo` in a similar way:
+
+```csharp
+public static class CallExecuteWithReflectionCached
+{
+    public static MethodInfo Method { get; } =
+        typeof(Command).GetMethod("Execute",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+
+    public static int On(Command command) => (int) Method.Invoke(command, null);
+}
+```
+
+In fact, we can optimize this even further by using `Delegate.CreateDelegate` which turns a dynamic method invocation into a delegate:
+
+```csharp
+public static class CallExecuteWithReflectionDelegate
+{
+    public static Func<Command, int> On { get; } =
+        (Func<Command, int>) Delegate.CreateDelegate(
+            typeof(Func<Command, int>),
+            typeof(Command).GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance));
+}
+```
+
+Let's see how all of these techniques compare in terms of performance:
+
+```csharp
+public class Benchmarks
+{
+    [Benchmark(Description = "Expressions", Baseline = true)]
+    public int Expr() => CallExecute.On(new Command());
+
+    [Benchmark(Description = "Reflection")]
+    public int Reflection() => (int) typeof(Command)
+        .GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance)
+        .Invoke(new Command(), null);
+
+    [Benchmark(Description = "Reflection (cached)")]
+    public int ReflectionCached() => CallExecuteWithReflectionCached.On(new Command());
+
+    [Benchmark(Description = "Reflection (delegate)")]
+    public int ReflectionDelegate() => CallExecuteWithReflectionDelegate.On(new Command());
+
+    public static void Main() => BenchmarkRunner.Run<Benchmarks>();
+}
+```
+
+```r
+|                Method |       Mean |     Error |    StdDev | Ratio | RatioSD |
+|---------------------- |-----------:|----------:|----------:|------:|--------:|
+|           Expressions |   4.270 ns | 0.0478 ns | 0.0448 ns |  1.00 |    0.00 |
+|            Reflection | 196.653 ns | 3.8129 ns | 3.9156 ns | 46.02 |    1.09 |
+|   Reflection (cached) | 124.456 ns | 2.1948 ns | 2.0530 ns | 29.15 |    0.57 |
+| Reflection (delegate) |   5.475 ns | 0.0895 ns | 0.0837 ns |  1.28 |    0.02 |
+```
+
+As you can see, compiled expressions outperform reflection across the board, even though the approach with `CreateDelegate` comes really close. Note however that while the execution times are similar, `CreateDelegate` is more limited than compiled expressions -- for example, it cannot be used to call constructor methods.
+
+Compiled dynamic method invocation is commonly used in various software frameworks. Some examples:
+
+- [AutoMapper](https://github.com/AutoMapper/AutoMapper) uses them to speed up object conversion
+- [NServiceBus](https://github.com/Particular/NServiceBus) uses them to speed up its behavior pipeline
+- [Marten](https://github.com/JasperFx/marten) uses them to speed up entity mapping
+
+## Implementing generic operators
 
 One of the interesting things we can do with runtime-generated code, is implement generic operators.
 
@@ -358,119 +507,7 @@ public class Benchmarks
 
 As you can see, the expression-based approach performs about 9 times faster than when using `dynamic`.
 
-## Optimizing reflection calls
-
-Compiled expression trees are also useful when we want to speed up some reflection-heavy code. As we all know, reflection can be quite slow because of late binding, however with expression trees we can offload all the heavy lifting and ensure it only happens once.
-
-Let's imagine we have a class and we want to call its private method from the outside:
-
-```csharp
-public class Command
-{
-    private int Execute() => 42;
-}
-```
-
-With the help of reflection, this is quite simple:
-
-```csharp
-public int CallExecute() =>
-    (int) typeof(Command)
-        .GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance)
-        .Invoke(new Command(), null);
-```
-
-While using `CallExecute()` scarcely is most likely fine, running it in a tight loop can cause performance issues. We could be better off with expression trees.
-
-Let's use the same lazy-compiled expression pattern to generate a function that executes a method which is resolved through reflection:
-
-```csharp
-public static class CallExecute
-{
-    public static Func<Command, int> On { get; }
-
-    static CallExecute()
-    {
-        var instance = Expression.Parameter(typeof(Command));
-
-        var method = typeof(Command).GetMethod("Execute",
-            BindingFlags.NonPublic | BindingFlags.Instance);
-
-        var call = Expression.Call(instance, method);
-
-        On = Expression.Lambda<Func<Command, int>>(call, instance).Compile();
-    }
-}
-
-// CallExecute.On(command) -> ...
-```
-
-Now, comparing this to the reflection code above isn't exactly fair. If we're going to execute the method multiple times, it makes sense to at least cache the corresponding `MethodInfo` in a similar way:
-
-```csharp
-public static class CallExecuteWithReflectionCached
-{
-    public static MethodInfo Method { get; } =
-        typeof(Command).GetMethod("Execute",
-            BindingFlags.NonPublic | BindingFlags.Instance);
-
-    public static int On(Command command) => (int) Method.Invoke(command, null);
-}
-```
-
-In fact, we can optimize this even further by using `Delegate.CreateDelegate` which turns a dynamic method invocation into a delegate:
-
-```csharp
-public static class CallExecuteWithReflectionDelegate
-{
-    public static Func<Command, int> On { get; } =
-        (Func<Command, int>) Delegate.CreateDelegate(
-            typeof(Func<Command, int>),
-            typeof(Command).GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance));
-}
-```
-
-Let's see how all of these techniques compare in terms of performance:
-
-```csharp
-public class Benchmarks
-{
-    [Benchmark(Description = "Expressions", Baseline = true)]
-    public int Expr() => CallExecute.On(new Command());
-
-    [Benchmark(Description = "Reflection")]
-    public int Reflection() => (int) typeof(Command)
-        .GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance)
-        .Invoke(new Command(), null);
-
-    [Benchmark(Description = "Reflection (cached)")]
-    public int ReflectionCached() => CallExecuteWithReflectionCached.On(new Command());
-
-    [Benchmark(Description = "Reflection (delegate)")]
-    public int ReflectionDelegate() => CallExecuteWithReflectionDelegate.On(new Command());
-
-    public static void Main() => BenchmarkRunner.Run<Benchmarks>();
-}
-```
-
-```r
-|                Method |       Mean |     Error |    StdDev | Ratio | RatioSD |
-|---------------------- |-----------:|----------:|----------:|------:|--------:|
-|           Expressions |   4.270 ns | 0.0478 ns | 0.0448 ns |  1.00 |    0.00 |
-|            Reflection | 196.653 ns | 3.8129 ns | 3.9156 ns | 46.02 |    1.09 |
-|   Reflection (cached) | 124.456 ns | 2.1948 ns | 2.0530 ns | 29.15 |    0.57 |
-| Reflection (delegate) |   5.475 ns | 0.0895 ns | 0.0837 ns |  1.28 |    0.02 |
-```
-
-As you can see, compiled expressions outperform reflection across the board, even though the approach with `CreateDelegate` comes really close. Note however that while the execution times are similar, `CreateDelegate` is more limited than compiled expressions -- for example, it cannot be used to call constructor methods.
-
-Compiled dynamic method invocation is commonly used in various software frameworks. Some examples:
-
-- [AutoMapper](https://github.com/AutoMapper/AutoMapper) uses them to speed up object conversion
-- [NServiceBus](https://github.com/Particular/NServiceBus) uses them to speed up its behavior pipeline
-- [Marten](https://github.com/JasperFx/marten) uses them to speed up entity mapping
-
-## Compiled dictionary
+## Compiling dictionary into a switch expression
 
 Another fun way we can use expression trees is to create a dictionary with a compiled lookup. Even though the standard .NET `System.Collections.Generic.Dictionary` is insanely fast on its own, it's possible to outperform it in read operations by around a factor of 3.
 
@@ -655,7 +692,7 @@ public class Benchmarks
 | Compiled dictionary | 10000 | 18.824 ns | 0.0976 ns | 0.0913 ns |  0.63 |
 ```
 
-We can see that the compiled dictionary performs lookups about 1.6-2.8 times faster. While the performance of the hash table is consistent regardless of how many elements are in the dictionary, the expression tree implementation becomes slower as the dictionary gets bigger. This can potentially be further optimized by adding another level of switch expressions for indexing.
+We can see that the compiled dictionary performs lookups about 1.6-2.8 times faster. While the performance of the hash table is consistent regardless of how many elements are in the dictionary, the expression tree implementation becomes slower as the dictionary gets bigger. This can potentially be further optimized by adding another switch expression layer for indexing.
 
 ## Parsing expressions
 
@@ -997,7 +1034,13 @@ Most of the time it's possible to rewrite such statements into one a single expr
 
 ## Transpile
 
+## Assertions
+
+## PropertyChanged
+
 ## Summary
+
+Expression trees provide us with a formal structure of code that lets us analyze existing expressions or compile entirely new ones directly at runtime. This feature makes it possible to do bunch of cool things, including writing transpilers, interpreters, code generators, optimize reflection calls, provide contextual assertions, and more. I think it's a really powerful tool that deserves a lot more attention.
 
 Some other interesting articles about expression trees:
 
