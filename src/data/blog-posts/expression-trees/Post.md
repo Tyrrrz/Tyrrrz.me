@@ -1,115 +1,221 @@
 ---
-title: Demystifying .NET expression trees
+title: Expression trees in .NET
 date: 2020-02-18
 cover: Cover.png
 ---
 
 ![cover](Cover.png)
 
-Expression trees is an obscure, although very interesting feature in .NET. Most people probably think of it as something synonymous with object-relational mapping frameworks, but despite being one of its most common use cases, it's not the only one.
+Expression trees is an obscure, although very interesting feature in .NET. Most people probably think of it as something synonymous with object-relational mapping frameworks, but despite being its most common use case, it's not the only one.
 
 In essence, an expression tree is a higher-order representation of code that describes its underlying syntactic structure rather than the result it produces. Through the use of expression trees we can analyze existing code or compile entirely new expressions directly at runtime.
 
 In this article we will take a look at some of the different ways we can construct expression trees, as well as potential scenarios where they can be useful.
 
-## Creating expression trees manually
+## What is an expression tree?
 
-The most straightforward way we can obtain an expression tree is by constructing it manually. The framework offers us with a way to do it through the [`Expression`](https://docs.microsoft.com/en-us/dotnet/api/system.linq.expressions.expression) class located in the `System.Linq.Expressions` namespace.
+When it comes to programming languages, an expression describes an operation on data that produces a certain result. It's one of the foundational constructs in any language.
 
-Using the static methods provided by this class, we can build expressions that represent familiar language constructs. Some of these are:
+As an example of a very simple expression, consider `2 + 3`. It constitutes of a constant, a plus operator, and another constant. We can evaluate this expression and get the result, which is `5`.
 
-- `Expression.Constant(...)` -- an expression that represents a value.
-- `Expression.Variable(...)` -- an expression that represents a variable.
-- `Expression.New(...)` -- an expression that represents an initialization of a new instance.
-- `Expression.Assign(...)` -- an expression that represents an assignment operation.
-- `Expression.Equal(...)` -- an expression that represents an equality comparison.
-- `Expression.Call(...)` -- an expression that represents a specific method call.
-- `Expression.Condition(...)` -- an expression that represents branching logic.
-- `Expression.Loop(...)` -- an expression that represents repeating logic.
-- ...
-
-As you can see, there are quite a lot of different factory methods and, while the simpler ones like `Constant` or `Variable` produce terminal nodes, the more complex ones like `Assign` or `Loop` are built by composing other expressions. It is through this composition that we end up with a data structure that resembles a tree.
-
-For example, let's take a look at a very simple function that calculates the sum of two numbers:
+Of course, expressions vary in complexity and can contain different combinations of constants, variables, operators and function calls. For example, the following piece of code is also an expression:
 
 ```csharp
-public int Sum(int a, int b) => a + b;
-
-// Sum(3, 5) -> 8
+!string.IsNullOrWhiteSpace(personName)
+    ? "Greetings, " + personName
+    : null;
 ```
 
-There are two main components in this method definition: the signature which specifies two integer parameters as well as an integer return value, and the method body. The latter is itself comprised of a single binary "add" expression, which in turn operates on the method parameters whose values are resolved using the corresponding expressions.
-
-The hierarchy outlined above can be visualized by the following diagram:
-
-```matlab
-[ Sum(3, 5) ]   <- function call expression
-   |  |  |
-   |  |  +---- constant expression bound to parameter 'b'
-   |  |
-   |  +------- constant expression bound to parameter 'a'
-   |
-   |
-   +--[ a + b ] <- function body expression
-        |   |
-        |   +---- parameter 'b' expression
-        |
-        +-------- parameter 'a' expression
-```
-
-We can try and recreate this exact function using expression trees:
+Looking above, there are two aspects that we can consider: what the expression does and how it does it. As for the former, the answer is pretty simple -- it generates a greeting based on the person's name, or produces `null`. If this expression was returned by a function, that would be the extent of information we could derive from its signature:
 
 ```csharp
-public Func<int, int, int> CreateSumFunction()
+string? GetGreeting(string personName) { /* ... */ }
+```
+
+When it comes to the other aspect, however, the answer is a bit more detailed. That expression consists of a ternary conditional operator, whose condition is evaluated by negating the result of a call to method `string.IsNullOrWhiteSpace` with parameter `personName`, whose positive clause is made up of a "plus" binary operator that works with a constant string expression `"Greetings, "` and the parameter expression, and whose negative clause consist of a sole `null` expression.
+
+The description above may seem like a mouthful, but that syntactic structure is something we, as humans, are able to understand subconsciously. This higher-order representation of code is what computer scientists call a _syntax tree_.
+
+An abstract syntax tree for our expression can be schematically visualized like this:
+
+```csharp
+ { Ternary conditional }
+      |      |     |
+    +-+      |     +-----+
+    |        |           |
+ (true)   (false)   (condition)
+    |        |           |
+    |        |           +---- { (!) }
+    |        +------+             |
+ { (+) }            |             |
+   | |           { null }   { Method call }
+   | |                         |      |
+   | +---------+               |      |
+   |           |               |      +------- { string.IsNullOrWhiteSpace }
+   |           |               |
+   |     { personName }        +-------- { personName }
+   |
+   +---- { "Greetings, " }
+```
+
+Essentially, an expression tree is just a special case of a syntax tree that specifically describes the relational structure of expressions in .NET.
+
+## Constructing expression trees manually
+
+There are different ways we can obtain an expression tree. One of them is to construct it manually at runtime.
+
+The framework offers us with a way to do it through the [`Expression`](https://docs.microsoft.com/en-us/dotnet/api/system.linq.expressions.expression) class located in the `System.Linq.Expressions` namespace. This class exposes various factory methods that can be used to produce different expressions.
+
+Some of these methods are:
+
+- `Expression.Constant(...)` -- creates an expression that represents a value.
+- `Expression.Variable(...)` -- creates an expression that represents a variable.
+- `Expression.New(...)` -- creates an expression that represents an initialization of a new instance.
+- `Expression.Assign(...)` -- creates an expression that represents an assignment operation.
+- `Expression.Equal(...)` -- creates an expression that represents an equality comparison.
+- `Expression.Call(...)` -- creates an expression that represents a specific method call.
+- `Expression.Condition(...)` -- creates an expression that represents branching logic.
+- `Expression.Loop(...)` -- creates an expression that represents repeating logic.
+
+As a simple exercise, we can recreate the expression we've looked into in the previous part of the article:
+
+```csharp
+public Expression ConstructGreetingExpression()
 {
-    // int a, int b
-    // ~~~~~  ~~~~~
-    //   ^------^---- params
+    var personNameParameter = Expression.Parameter(typeof(string), "personName");
 
-    var paramA = Expression.Parameter(typeof(int));
-    var paramB = Expression.Parameter(typeof(int));
+    // Condition
+    var isNullOrWhiteSpaceMethod = typeof(string)
+        .GetMethod(nameof(string.IsNullOrWhiteSpace));
 
-    // a + b
-    // ~~~~~
-    //   ^---- body
+    var condition = Expression.Not(
+        Expression.Call(isNullOrWhiteSpaceMethod, personNameParameter));
 
-    var body = Expression.Add(paramA, paramB);
+    // True clause
+    var trueClause = Expression.Add(
+        Expression.Constant("Greetings, "),
+        personNameParameter);
 
-    // (a, b) => a + b
-    // ~~~~~~~~~~~~~~~
-    //        ^------------ lambda
+    // False clause
+    var falseClause = Expression.Constant(null, typeof(string));
 
-    var lambda = Expression.Lambda<Func<int, int, int>>(body, paramA, paramB);
+    // Ternary conditional
+    return Expression.Condition(condition, trueClause, falseClause);
+}
+```
+
+Let's digest what happened here.
+
+First off, we're calling `Expression.Parameter` in order to construct a parameter expression.
+
+Then we use reflection to resolve a reference to the `string.IsNullOrWhiteSpace` method. We use `Expression.Call` to create a method invocation expression that calls `string.IsNullOrWhiteSpace` with the parameter resolved by the expression we created earlier. To perform a logical "not" operation on the result, we're calling `Expression.Not` to wrap the method call expression. This constitutes the test part of the conditional expression we're building.
+
+To compose the positive clause, we're constructing an "add" operation with the help of `Expression.Add`. As the operands to this binary expression, we're providing a constant expression for string `"Greetings, "` and the parameter expression from earlier.
+
+As for the negative clause, we're using `Expression.Constant` to create a `null` constant expression. To ensure the correct that the `null` value is typed correctly, we explicitly specify the type as the second parameter.
+
+Finally, we're combining all of the above parts together to create our ternary conditional operator.
+
+___
+
+However, this expression isn't particularly useful on its own. Since we created it ourselves, we're not really interested in its structure -- we want to evaluate it instead.
+
+In order to do that, we have to create an entry point by wrapping everything in a lambda expression. To turn it into an actual lambda, we can call `Compile` which will produce a delegate that we can invoke.
+
+Let's update the method accordingly:
+
+```csharp
+public Func<string, string?> ConstructGreetingFunction()
+{
+    var personNameParameter = Expression.Parameter(typeof(string), "personName");
+
+    // Condition
+    var isNullOrWhiteSpaceMethod = typeof(string)
+        .GetMethod(nameof(string.IsNullOrWhiteSpace));
+
+    var condition = Expression.Not(
+        Expression.Call(isNullOrWhiteSpaceMethod, personNameParameter));
+
+    // True clause
+    var trueClause = Expression.Add(
+        Expression.Constant("Greetings, "),
+        personNameParameter);
+
+    // False clause
+    var falseClause = Expression.Constant(null, typeof(string));
+
+    var conditional = Expression.Condition(condition, trueClause, falseClause);
+
+    var lambda = Expression.Lambda<Func<string, string?>>(conditional, personNameParameter);
 
     return lambda.Compile();
 }
 ```
 
-Let's digest what's going on here.
-
-First, we have to specify the parameters of our function. Using the `Expression.Parameter(...)` method we can construct an expression that identifies a specific parameter. This expression can be used to both resolve its value, as well as to set it.
-
-Then we construct the body of the function. Since this is a simple addition, we're using `Expression.Add(...)` which constructs an expression that represents the plus operator. As a binary operator it requires two operands, for which we specify our parameter expressions.
-
-Finally, in order to create an entry point for our expression tree, we need to construct a function definition. To do that, we can use `Expression.Lambda<T>(...)` to build a lambda expression that represents an anonymous function with the body and parameters we defined earlier.
-
-Up to this point, we were dealing with just data. In order to turn this data into interpretable instructions, we have to compile our lambda expression with the `Compile()` method. This dynamically creates a delegate of the specified type based on the expression tree we've constructed.
-
-We can use this delegate like any other. For example, we can rewrite the original `Sum` function to use the dynamically compiled code instead:
+By compiling the expression tree, we converted the code it represents into runtime instructions. We can now use the delegate returned by this method to evaluate the expression we composed:
 
 ```csharp
-public int Sum(int a, int b)
-{
-    var func = CreateSumFunction();
-    return func(a, b);
-}
+var getGreeting = ConstructGreetingFunction();
 
-// Sum(3, 5) -> 8
+var greetingForJohn = getGreeting("John");
 ```
 
-You may be wondering, what's the point of doing that? After all, we took our statically-compiled function and replaced it with a function generated at runtime that runs slower and has no type safety.
+However, if we try to run this, we will get an error:
 
-Let's move our simplistic example aside and see where this approach can actually be useful.
+```ini
+The binary operator Add is not defined for the types 'System.String' and 'System.String'.
+```
+
+Hm, that's weird. I'm pretty sure the `+` operator is defined for strings, otherwise how else would I be able to write `"foo" + "bar"`?
+
+Well, actually the error message is correct, this operator is indeed not defined for `System.String`. Instead what happens is that the C# compiler automatically converts expressions like `"foo" + "bar"` into `string.Concat("foo", "bar")`. In cases with more than two strings this provides better performance because it avoids unnecessary allocations.
+
+When dealing with expression trees, we're essentially writing the "final" version of the code. So instead of `Expression.Add` we need to call `string.Concat` directly.
+
+Let's change our code to accommodate for that:
+
+```csharp
+public Func<string, string?> ConstructGreetingFunction()
+{
+    var personNameParameter = Expression.Parameter(typeof(string), "personName");
+
+    // Condition
+    var isNullOrWhiteSpaceMethod = typeof(string)
+        .GetMethod(nameof(string.IsNullOrWhiteSpace));
+
+    var condition = Expression.Not(
+        Expression.Call(isNullOrWhiteSpaceMethod, personNameParameter));
+
+    // True clause
+    var concatMethod = typeof(string)
+        .GetMethod(nameof(string.Concat), new[] {typeof(string), typeof(string)});
+
+    var trueClause = Expression.Call(
+        concatMethod,
+        Expression.Constant("Greetings, "),
+        personNameParameter);
+
+    // False clause
+    var falseClause = Expression.Constant(null, typeof(string));
+
+    var conditional = Expression.Condition(condition, trueClause, falseClause);
+
+    var lambda = Expression.Lambda<Func<string, string?>>(conditional, personNameParameter);
+
+    return lambda.Compile();
+}
+```
+
+Now, if we try to compile and run our function, it behaves as expected:
+
+```csharp
+var getGreetings = ConstructGreetingFunction();
+
+var greetingsForJohn = getGreetings("John"); // "Greetings, John"
+var greetingsForNobody = getGreetings(" ");  // <null>
+```
+
+That's pretty awesome! We've compiled some code dynamically at runtime and were able to execute it like any other function.
 
 ## Generic operators
 
