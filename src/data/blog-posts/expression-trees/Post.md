@@ -6,17 +6,15 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
-Expression trees is an obscure, although very interesting feature in .NET. Most people probably think of it as something synonymous with object-relational mapping frameworks, but despite being its most common use case, it's not the only one.
+Expression trees is an obscure, although very interesting feature in .NET. Most people probably think of it as something synonymous with object-relational mapping frameworks, but despite being its most common use case, it's not the only one. There are a lot of creative things you can do with expression trees, including code generation, transpilation, metaprogramming, and more.
 
-In essence, an expression tree is a higher-order representation of code that describes its underlying syntactic structure rather than the result it produces. Through the use of expression trees we can analyze existing code or compile entirely new expressions directly at runtime.
-
-In this article we will take a look at some of the different ways we can construct expression trees, as well as potential scenarios where they can be useful.
+In this article I will give an overview of what expression trees are and how to work with them, as well as show some interesting scenarios where I've seen them used to great effect.
 
 ## What is an expression tree?
 
-When it comes to programming languages, an expression describes an operation on data that produces a certain result. It's one of the foundational constructs in any language.
+When it comes to programming languages, an expression describes some operation on data that produces a certain result. It's one of the foundational constructs of any language.
 
-As an example of a very simple expression, consider `2 + 3`. It constitutes of a constant, a plus operator, and another constant. We can evaluate this expression and get the result, which is `5`.
+As an example of a very simple expression, consider `2 + 3`. It consists of a constant, a plus operator, and another constant. We can evaluate this expression and get the result, which is `5`.
 
 Of course, expressions vary in complexity and can contain different combinations of constants, variables, operators and function calls. For example, the following piece of code is also an expression:
 
@@ -26,17 +24,21 @@ Of course, expressions vary in complexity and can contain different combinations
     : null;
 ```
 
-Looking above, there are two aspects that we can consider: what the expression does and how it does it. As for the former, the answer is pretty simple -- it generates a greeting based on the person's name, or produces `null`. If this expression was returned by a function, that would be the extent of information we could derive from its signature:
+Looking at the above expression, we can also consider two of its aspects: **what is does** and **how it does it**.
+
+When it comes to the former, the answer is pretty simple -- it generates a greeting based on the person's name, or produces a `null`. If this expression was returned by a function, that would be the extent of information we could derive from its signature:
 
 ```csharp
 string? GetGreeting(string personName) { /* ... */ }
 ```
 
-When it comes to the other aspect, however, the answer is a bit more detailed. That expression consists of a ternary conditional operator, whose condition is evaluated by negating the result of a call to method `string.IsNullOrWhiteSpace` with parameter `personName`, whose positive clause is made up of a "plus" binary operator that works with a constant string expression `"Greetings, "` and the parameter expression, and whose negative clause consist of a sole `null` expression.
+As for how it does it, however, the answer is a bit more detailed. This expression consists of a ternary conditional operator, whose condition is evaluated by negating the result of a call to method `string.IsNullOrWhiteSpace` with parameter `personName`, whose positive clause is made up of a "plus" binary operator that works with a constant string expression `"Greetings, "` and the parameter expression, and whose negative clause consist of a sole `null` expression.
 
-The description above may seem like a mouthful, but that syntactic structure is something we, as humans, are able to understand subconsciously. This higher-order representation of code is what computer scientists call a _syntax tree_.
+The description above may seem like a mouthful, but it outlines the exact syntactic structure of the expression. It is by this higher-order representation that we're able to tell how it works.
 
-An abstract syntax tree for our expression can be schematically visualized like this:
+Although it's inherently obvious to us as humans, in order to use this representation programmatically, we need a special data structure. This data structure is what we call an _expression tree_.
+
+Here's the visualization of the tree that represents our expression:
 
 ```csharp
  { Ternary conditional }
@@ -58,13 +60,13 @@ An abstract syntax tree for our expression can be schematically visualized like 
    +---- { "Greetings, " }
 ```
 
-Essentially, an expression tree is just a special case of a syntax tree that specifically describes the relational structure of expressions in .NET.
+Now that we know that expression trees represent the logical structure of an expression, what can we do with it? Or, more importantly, how can we obtain it in the first place?
 
 ## Constructing expression trees manually
 
-There are different ways we can obtain an expression tree. One of them is to construct it manually at runtime.
+In C#, expression trees can be used in either of two directions: we can create them directly via an API and then compile them into runtime instructions, or we can disassemble them from supplied lambda expressions and analyze them. We will start by looking at the first one.
 
-The framework offers us with a way to do it through the [`Expression`](https://docs.microsoft.com/en-us/dotnet/api/system.linq.expressions.expression) class located in the `System.Linq.Expressions` namespace. This class exposes various factory methods that can be used to produce different expressions.
+The framework offers us with an API to construct expression trees through the [`Expression`](https://docs.microsoft.com/en-us/dotnet/api/system.linq.expressions.expression) class located in the `System.Linq.Expressions` namespace. It exposes various factory methods that can be used to produce expressions of different types.
 
 Some of these methods are:
 
@@ -77,7 +79,7 @@ Some of these methods are:
 - `Expression.Condition(...)` -- creates an expression that represents branching logic.
 - `Expression.Loop(...)` -- creates an expression that represents repeating logic.
 
-As a simple exercise, we can recreate the expression we've looked into in the previous part of the article:
+As a simple exercise, we can recreate the expression we've looked into in the previous part of the article. Let's do that:
 
 ```csharp
 public Expression ConstructGreetingExpression()
@@ -104,21 +106,17 @@ public Expression ConstructGreetingExpression()
 }
 ```
 
-Let's digest what happened here.
+First off, we're calling `Expression.Parameter` in order to construct a parameter expression. We can use this instance to resolve the value of a particular parameter.
 
-First off, we're calling `Expression.Parameter` in order to construct a parameter expression.
-
-Then we use reflection to resolve a reference to the `string.IsNullOrWhiteSpace` method. We use `Expression.Call` to create a method invocation expression that calls `string.IsNullOrWhiteSpace` with the parameter resolved by the expression we created earlier. To perform a logical "not" operation on the result, we're calling `Expression.Not` to wrap the method call expression. This constitutes the test part of the conditional expression we're building.
+Following that, we are relying on reflection to resolve a reference to the `string.IsNullOrWhiteSpace` method. We use `Expression.Call` to create a method invocation expression that calls `string.IsNullOrWhiteSpace` with the parameter resolved by the expression we created earlier. To perform a logical "not" operation on the result, we're calling `Expression.Not` to wrap the method call. This constitutes the condition part of the ternary expression we're building.
 
 To compose the positive clause, we're constructing an "add" operation with the help of `Expression.Add`. As the operands to this binary expression, we're providing a constant expression for string `"Greetings, "` and the parameter expression from earlier.
 
-As for the negative clause, we're using `Expression.Constant` to create a `null` constant expression. To ensure the correct that the `null` value is typed correctly, we explicitly specify the type as the second parameter.
+As for the negative clause, we're using `Expression.Constant` to create a `null` constant expression. To ensure that the `null` value is typed correctly, we explicitly specify the type as the second parameter.
 
 Finally, we're combining all of the above parts together to create our ternary conditional operator.
 
-___
-
-However, this expression isn't particularly useful on its own. Since we created it ourselves, we're not really interested in its structure -- we want to evaluate it instead.
+However, this expression isn't particularly useful on its own. Since we created it ourselves, we're not really interested in its structure -- we want to be able to evaluate it instead.
 
 In order to do that, we have to create an entry point by wrapping everything in a lambda expression. To turn it into an actual lambda, we can call `Compile` which will produce a delegate that we can invoke.
 
@@ -152,7 +150,9 @@ public Func<string, string?> ConstructGreetingFunction()
 }
 ```
 
-By compiling the expression tree, we converted the code it represents into runtime instructions. We can now use the delegate returned by this method to evaluate the expression we composed:
+As you can see, we were able to construct a lambda expression by specifying its body (which is our conditional expression) and the parameter that we defined earlier. We also indicated the exact type of the function this expression represents by supplying a generic argument.
+
+By compiling an expression tree, we are able to convert the code it represents into runtime instructions. We can now use the delegate returned by this method to evaluate the expression we composed:
 
 ```csharp
 var getGreeting = ConstructGreetingFunction();
@@ -166,7 +166,7 @@ However, if we try to run this, we will get an error:
 The binary operator Add is not defined for the types 'System.String' and 'System.String'.
 ```
 
-Hm, that's weird. I'm pretty sure the `+` operator is defined for strings, otherwise how else would I be able to write `"foo" + "bar"`?
+Hmm, that's weird. I'm pretty sure the `+` operator is defined for strings, otherwise how else would I be able to write `"foo" + "bar"`?
 
 Well, actually the error message is correct, this operator is indeed not defined for `System.String`. Instead what happens is that the C# compiler automatically converts expressions like `"foo" + "bar"` into `string.Concat("foo", "bar")`. In cases with more than two strings this provides better performance because it avoids unnecessary allocations.
 
@@ -217,20 +217,76 @@ var greetingsForNobody = getGreetings(" ");  // <null>
 
 That's pretty awesome! We've compiled some code dynamically at runtime and were able to execute it like any other function.
 
-## Converting expressions to code
+## Constructing statements
 
-We were able to compile our expression into runtime instructions, but what if we wanted to get its textual representation? It could be useful if we wanted to write the expression to file or just to debug and see what's going on.
+So far we've only talked about expressions, but what about statements? Can we dynamically compile code that contains multiple statements or are we limited to expressions?
+
+The main difference between expressions and statements is that statements don't produce results. Instead, they typically facilitate some useful side-effects.
+
+For example, consider the following two statements:
+
+```csharp
+Console.Write("Hello ");
+Console.WriteLine("world!");
+```
+
+We know that these method calls don't produce results because their return type is `void`. Even though these are not expressions, we can still model them using expression trees. To do that, we need to put them inside a `Block` expression.
+
+Here is how it works:
+
+```csharp
+public Expression CreateStatementBlock()
+{
+    var consoleWriteMethod = typeof(Console)
+        .GetMethod(nameof(Console.Write), new[] {typeof(string)});
+
+    var consoleWriteLineMethod = typeof(Console)
+        .GetMethod(nameof(Console.WriteLine), new[] {typeof(string)});
+
+    return Expression.Block(
+        Expression.Call(consoleWriteMethod, Expression.Constant("Hello ")),
+        Expression.Call(consoleWriteLineMethod, Expression.Constant("world!")));
+}
+```
+
+We can similarly compile it to a delegate to invoke it at runtime:
+
+```csharp
+var block = CreateStatementBlock();
+var lambda = Expression.Lambda<Action>(block).Compile();
+
+lambda();
+
+// Hello world!
+```
+
+Now, if we inspect the `block.Type` property, which denotes the result type of the expression, we will see that it's `System.Void`. Essentially the lambda expression we've built is just this:
+
+```csharp
+var lambda = () =>
+{
+    Console.Write("Hello ");
+    Console.WriteLine("world!");
+};
+```
+
+So despite the fact that we are building _expression_ trees, we can still represent blocks of statements just as well.
+
+## Converting expressions to readable code
+
+We know how to compile our expressions into runtime instructions, but what about readable C# code? It could be useful if we wanted to display it or just to have some visual aid while testing or debugging.
 
 The good news is that all types that derive from `Expression` override the `ToString` method with a more specific implementation. That means we can do the following:
 
 ```csharp
 var s1 = Expression.Constant(42).ToString(); // 42
+
 var s2 = Expression.Multiply(
     Expression.Constant(5),
     Expression.Constant(11)).ToString();     // (5 * 11)
 ```
 
-The bad news is that it only works nicely with simple expressions like the ones above. For example, if we try to call `ToString()` on the expression we compiled earlier, we will get:
+The bad news, however, is that it only works nicely with simple expressions like the ones above. For example, if we try to call `ToString` on the ternary expression we compiled earlier, we will get:
 
 ```csharp
 var s = lambda.ToString();
@@ -238,27 +294,25 @@ var s = lambda.ToString();
 // personName => IIF(Not(IsNullOrWhiteSpace(personName)), Concat("Greetings, ", personName), null)
 ```
 
-While fairly readable, this is probably not the text representation you would expect to see.
+While fairly descriptive, this is probably not the text representation you would hope to see.
 
-Luckily, we can use the [ExpressionToCode](https://github.com/EamonNerbonne/ExpressionToCode) NuGet package to get us what we want. By installing it, we should be able to call `ExpressionToCode.ToCode(expr)` to get the actual C# code that represents the expression:
+Luckily, we can use the [ReadableExpressions](https://github.com/agileobjects/ReadableExpressions) NuGet package to get us what we want. By installing it, we should be able to call `ToReadableString` to get the actual C# code that represents the expression:
 
 ```csharp
-var code = ExpressionToCode.ToCode(lambda);
+var code = lambda.ToReadableString();
 
-// personName => !string.IsNullOrWhiteSpace(personName)
-//    ? string.Concat("Greetings, ", personName)
-//    : default(string)
-
-// (the actual result is single line, I wrapped it to fit the page)
+// personName => !string.IsNullOrWhiteSpace(personName) ? "Greetings, " + personName : null
 ```
 
-This is much better. I personally find this library can be very helpful if you need some visual aid when constructing large complex expressions.
+As you can see, it even replaced the `string.Concat` call with the plus operator to make it closer to code that a developer would typically write.
 
-## Optimizing reflection using compiled expressions
+Additionally, if you are using Visual Studio and want to inspect expressions by visualizing them as code, you can also install [this extension](https://marketplace.visualstudio.com/items?itemName=vs-publisher-1232914.ReadableExpressionsVisualizers). It's very helpful when debugging large or really complex expressions.
 
-Compiled expression trees are also useful when we want to speed up some reflection-heavy code. As we all know, reflection can be quite slow because of late binding, however with expression trees we can offload all the heavy lifting and ensure it only happens once.
+## Optimizing reflection calls
 
-Let's imagine we have a class and we want to call its private method from the outside:
+When it comes to compiled expressions, one of the most common usage scenarios is reflection-heavy code. As we all know, reflection can be quite slow because of late binding, however by compiling the code at runtime we can achieve better performance.
+
+Let's imagine we have a class which has a private method that we want to invoke from the outside:
 
 ```csharp
 public class Command
@@ -270,97 +324,99 @@ public class Command
 With the help of reflection, this is quite simple:
 
 ```csharp
-public int CallExecute() =>
+public static int CallExecute(Command command) =>
     (int) typeof(Command)
         .GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance)
-        .Invoke(new Command(), null);
+        .Invoke(command, null);
 ```
 
-While using `CallExecute()` scarcely is most likely fine, running it in a tight loop can cause performance issues. We could be better off with expression trees.
+Of course, calling the method like that can cause significant performance issues if we put it in a tight loop. Let's see if we can optimize it a bit.
 
-Let's use the same lazy-compiled expression pattern to generate a function that executes a method which is resolved through reflection:
+One thing we can do straight away is separate the part that resolves `MethodInfo` from the part that invokes it. If we're going to call this method more than once, we don't have to use `GetMethod` every time:
 
 ```csharp
-public static class CallExecute
+public static class ReflectionCached
 {
-    public static Func<Command, int> On { get; }
+    private static MethodInfo ExecuteMethod { get; } = typeof(Command)
+        .GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance);
 
-    static CallExecute()
+    public static int CallExecute(Command command) => (int) ExecuteMethod.Invoke(command, null);
+}
+```
+
+That should make things better, but we can push it even further by using `Delegate.CreateDelegate`. This way we can create a re-usable delegate and avoid the overhead that comes with `MethodInfo.Invoke`. Let's update our code accordingly:
+
+```csharp
+public static class ReflectionDelegate
+{
+    private static MethodInfo ExecuteMethod { get; } = typeof(Command)
+        .GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance);
+
+    private static Func<Command, int> Impl { get; } =
+        (Func<Command, int>) Delegate.CreateDelegate(typeof(Func<Command, int>), ExecuteMethod);
+
+    public static int CallExecute(Command command) => Impl(command);
+}
+```
+
+Alright, that's probably as good as it can get with reflection. Now let's try to do the same using compiled expressions:
+
+```csharp
+public static class ExpressionTrees
+{
+    private static MethodInfo ExecuteMethod { get; } = typeof(Command)
+        .GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance);
+
+    private static Func<Command, int> Impl { get; }
+
+    static ExpressionTrees()
     {
         var instance = Expression.Parameter(typeof(Command));
-
-        var method = typeof(Command).GetMethod("Execute",
-            BindingFlags.NonPublic | BindingFlags.Instance);
-
-        var call = Expression.Call(instance, method);
-
-        On = Expression.Lambda<Func<Command, int>>(call, instance).Compile();
+        var call = Expression.Call(instance, ExecuteMethod);
+        Impl = Expression.Lambda<Func<Command, int>>(call, instance).Compile();
     }
-}
 
-// CallExecute.On(command) -> ...
-```
-
-Now, comparing this to the reflection code above isn't exactly fair. If we're going to execute the method multiple times, it makes sense to at least cache the corresponding `MethodInfo` in a similar way:
-
-```csharp
-public static class CallExecuteWithReflectionCached
-{
-    public static MethodInfo Method { get; } =
-        typeof(Command).GetMethod("Execute",
-            BindingFlags.NonPublic | BindingFlags.Instance);
-
-    public static int On(Command command) => (int) Method.Invoke(command, null);
+    public static int CallExecute(Command command) => Impl(command);
 }
 ```
 
-In fact, we can optimize this even further by using `Delegate.CreateDelegate` which turns a dynamic method invocation into a delegate:
+In all of these approaches I'm relying on static constructors to initialize the properties in a lazy and thread-safe manner. This ensures that all of the heavy-lifting happens only once, the first time the members of these classes are accessed.
 
-```csharp
-public static class CallExecuteWithReflectionDelegate
-{
-    public static Func<Command, int> On { get; } =
-        (Func<Command, int>) Delegate.CreateDelegate(
-            typeof(Func<Command, int>),
-            typeof(Command).GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance));
-}
-```
-
-Let's see how all of these techniques compare in terms of performance:
+Now let's pit all of these techniques against each other and compare their performance using [Benchmark.NET](https://github.com/dotnet/BenchmarkDotNet):
 
 ```csharp
 public class Benchmarks
 {
-    [Benchmark(Description = "Expressions", Baseline = true)]
-    public int Expr() => CallExecute.On(new Command());
-
-    [Benchmark(Description = "Reflection")]
+    [Benchmark(Description = "Reflection", Baseline = true)]
     public int Reflection() => (int) typeof(Command)
         .GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance)
         .Invoke(new Command(), null);
 
     [Benchmark(Description = "Reflection (cached)")]
-    public int ReflectionCached() => CallExecuteWithReflectionCached.On(new Command());
+    public int Cached() => ReflectionCached.CallExecute(new Command());
 
     [Benchmark(Description = "Reflection (delegate)")]
-    public int ReflectionDelegate() => CallExecuteWithReflectionDelegate.On(new Command());
+    public int Delegate() => ReflectionDelegate.CallExecute(new Command());
+
+    [Benchmark(Description = "Expressions")]
+    public int Expressions() => ExpressionTrees.CallExecute(new Command());
 
     public static void Main() => BenchmarkRunner.Run<Benchmarks>();
 }
 ```
 
 ```r
-|                Method |       Mean |     Error |    StdDev | Ratio | RatioSD |
-|---------------------- |-----------:|----------:|----------:|------:|--------:|
-|           Expressions |   4.270 ns | 0.0478 ns | 0.0448 ns |  1.00 |    0.00 |
-|            Reflection | 196.653 ns | 3.8129 ns | 3.9156 ns | 46.02 |    1.09 |
-|   Reflection (cached) | 124.456 ns | 2.1948 ns | 2.0530 ns | 29.15 |    0.57 |
-| Reflection (delegate) |   5.475 ns | 0.0895 ns | 0.0837 ns |  1.28 |    0.02 |
+|                Method |       Mean |     Error |    StdDev | Ratio |
+|---------------------- |-----------:|----------:|----------:|------:|
+|            Reflection | 197.052 ns | 2.8480 ns | 2.6640 ns |  1.00 |
+|   Reflection (cached) | 125.365 ns | 2.0170 ns | 1.8867 ns |  0.64 |
+| Reflection (delegate) |   6.445 ns | 0.1648 ns | 0.1962 ns |  0.03 |
+|           Expressions |   5.540 ns | 0.2082 ns | 0.2986 ns |  0.03 |
 ```
 
 As you can see, compiled expressions outperform reflection across the board, even though the approach with `CreateDelegate` comes really close. Note however that while the execution times are similar, `CreateDelegate` is more limited than compiled expressions -- for example, it cannot be used to call constructor methods.
 
-Compiled dynamic method invocation is commonly used in various software frameworks. Some examples:
+This approach of using expression trees for dynamic method invocation is commonplace in various frameworks and libraries. For example:
 
 - [AutoMapper](https://github.com/AutoMapper/AutoMapper) uses them to speed up object conversion
 - [NServiceBus](https://github.com/Particular/NServiceBus) uses them to speed up its behavior pipeline
@@ -368,9 +424,9 @@ Compiled dynamic method invocation is commonly used in various software framewor
 
 ## Implementing generic operators
 
-One of the interesting things we can do with runtime-generated code, is implement generic operators.
+Something else you can do with compiled expressions is implement generic operators. These can be pretty useful if you're writing a lot of mathematical code and want to avoid repetition.
 
-As you know, operators in C# (unlike F#) are not generic. This means that, for example, every numeric type defines its own version of the multiply and divide operators. As a result, code that uses these operators also can't be generic either.
+As you know, operators in C# are not generic. This means that every numeric type defines its own version of the, for example, multiply and divide operators. As a result, code that uses these operators also can't be generic either.
 
 Imagine that you had a function that calculates three-fourths of a number:
 
@@ -402,7 +458,7 @@ It would've been better if we could just do something like this instead:
 public T ThreeFourths<T>(T x) => 3 * x / 4;
 ```
 
-But unfortunately that doesn't compile seeing as the `*` and `/` operators are not available on every type that can be specified in place of `T`. Sadly, there's also no constraint we could use to limit the generic argument to numeric types.
+But unfortunately that doesn't compile, seeing as the `*` and `/` operators are not available on every type that can be specified in place of `T`. Sadly, there's also no constraint we could use to limit the generic argument to numeric types.
 
 However, by generating code dynamically with expression trees we can work around this problem:
 
@@ -442,7 +498,7 @@ Indeed, functionally these two approaches are the same. However, the main differ
 
 That said, in the example above we're not benefitting from this advantage at all because we're recompiling our function every time anyway. Let's try to change our code so that it happens only once.
 
-In order to achieve that, we can put the function delegate inside a class and have it initialized from the static constructor. Here's how that looks with generic arguments:
+In order to achieve that, we can apply the same pattern as the last time. Let's put the delegate inside a generic static class and have it initialized from the static constructor. Here's how that would look:
 
 ```csharp
 public static class ThreeFourths
@@ -472,11 +528,9 @@ public static class ThreeFourths
 // ThreeFourths.Of(18) -> 13
 ```
 
-Due to the fact that the compiler generates a version of the `Impl` class for each argument of `T`, we end up with an implementation of three-fourths for each type encapsulated in a separate class. Having a static constructor ensures that the actual delegate will be initialized only once, the first time it is accessed.
+Due to the fact that the compiler generates a version of the `Impl` class for each argument of `T`, we end up with an implementation of three-fourths for each type encapsulated in a separate class. This approach gives us a thread-safe lazy-evaluated generic dynamic function.
 
-This essentially gives us a thread-safe lazy-evaluated dynamic function. I like to call this pattern a "lazy-compiled expression".
-
-Now, with the optimizations out of the way, let's use [Benchmark.NET](https://github.com/dotnet/BenchmarkDotNet) to compare the different ways we can calculate three-fourths of a value:
+Now, with the optimizations out of the way, let's again use Benchmark.NET to compare the different ways we can calculate three-fourths of a value:
 
 ```csharp
 public class Benchmarks
@@ -487,7 +541,7 @@ public class Benchmarks
 
     [Benchmark(Description = "Expressions")]
     [Arguments(13.37)]
-    public double Expr(double x) => ThreeFourths.Of(x);
+    public double Expressions(double x) => ThreeFourths.Of(x);
 
     [Benchmark(Description = "Dynamic")]
     [Arguments(13.37)]
@@ -509,11 +563,12 @@ As you can see, the expression-based approach performs about 9 times faster than
 
 ## Compiling dictionary into a switch expression
 
-Another fun way we can use expression trees is to create a dictionary with a compiled lookup. Even though the standard .NET `System.Collections.Generic.Dictionary` is insanely fast on its own, it's possible to outperform it in read operations by around a factor of 3.
+Another fun way we can use expression trees is to create a dictionary with a compiled lookup. Even though the standard .NET `System.Collections.Generic.Dictionary` is insanely fast on its own, it's possible to outperform it in read operations by around three times.
 
-While a typical dictionary implementation may be pretty complicated, a lookup can be represented in the form of a switch expression:
+While a typical dictionary implementation may be pretty complicated, a lookup can be represented in a form of a simple switch expression:
 
 ```csharp
+// Pseudo-code
 public TValue Lookup(TKey key) =>
     key.GetHashCode() switch
     {
@@ -565,52 +620,50 @@ public class CompiledDictionary<TKey, TValue> : IDictionary<TKey, TValue>
 
         // Expression that gets the key's hash code
         var keyGetHashCodeCall = Expression.Call(
-            instance: keyParameter,
-            method: typeof(object).GetMethod(nameof(GetHashCode)));
+            keyParameter,
+            typeof(object).GetMethod(nameof(GetHashCode)));
 
         // Expression that converts the key to string
         var keyToStringCall = Expression.Call(
-            instance: keyParameter,
-            method: typeof(object).GetMethod(nameof(ToString)));
+            keyParameter,
+            typeof(object).GetMethod(nameof(ToString)));
 
         // Expression that throws 'not found' exception in case of failure
         var exceptionCtor = typeof(KeyNotFoundException)
             .GetConstructor(new[] {typeof(string)});
 
         var throwException = Expression.Throw(
-            value: Expression.New(
-                constructor: exceptionCtor,
-                arguments: keyToStringCall),
-            type: typeof(TValue));
+            Expression.New(exceptionCtor, keyToStringCall),
+            typeof(TValue));
 
         // Switch expression with cases for every hash code
         var body = Expression.Switch(
-            type: typeof(TValue),
-            switchValue: keyGetHashCodeCall,
-            defaultBody: throwException,
-            comparison: null,
-            cases: _pairs
+            typeof(TValue), // expression type
+            keyGetHashCodeCall, // switch condition
+            throwException, // default case
+            null, // use default comparer
+            _pairs // switch cases
                 .GroupBy(p => p.Key.GetHashCode())
                 .Select(g =>
                 {
                     // No collision, construct constant expression
                     if (g.Count() == 1)
                         return Expression.SwitchCase(
-                            body: Expression.Constant(g.Single().Value),
-                            testValues: Expression.Constant(g.Key));
+                            Expression.Constant(g.Single().Value), // body
+                            Expression.Constant(g.Key)); // test values
 
                     // Collision, construct inner switch for the key's value
                     return Expression.SwitchCase(
-                        body: Expression.Switch(
-                            type: typeof(TValue),
-                            switchValue: keyParameter, // switch on actual key
-                            defaultBody: throwException,
-                            comparison: null,
-                            cases: g.Select(p => Expression.SwitchCase(
-                                body: Expression.Constant(p.Value),
-                                testValues: Expression.Constant(p.Key)
+                        Expression.Switch(
+                            typeof(TValue),
+                            keyParameter, // switch on actual key
+                            throwException,
+                            null,
+                            g.Select(p => Expression.SwitchCase(
+                                Expression.Constant(p.Value),
+                                Expression.Constant(p.Key)
                             ))),
-                        testValues: Expression.Constant(g.Key));
+                        Expression.Constant(g.Key));
                 }));
 
         var lambda = Expression.Lambda<Func<TKey, TValue>>(body, keyParameter);
@@ -628,7 +681,7 @@ public class CompiledDictionary<TKey, TValue> : IDictionary<TKey, TValue>
         }
     }
 
-    // The rest of interface implementation is omitted for brevity
+    // The rest of the interface implementation is omitted for brevity
 }
 ```
 
@@ -692,7 +745,7 @@ public class Benchmarks
 | Compiled dictionary | 10000 | 18.824 ns | 0.0976 ns | 0.0913 ns |  0.63 |
 ```
 
-We can see that the compiled dictionary performs lookups about 1.6-2.8 times faster. While the performance of the hash table is consistent regardless of how many elements are in the dictionary, the expression tree implementation becomes slower as the dictionary gets bigger. This can potentially be further optimized by adding another switch expression layer for indexing.
+We can see that the compiled dictionary performs lookups about 1.6-2.8 times faster. While the performance of the hash table is consistent regardless of how many elements are in the dictionary, the expression tree implementation becomes slower as the dictionary gets bigger. This can potentially be remedied by adding another switch layer for indexing.
 
 ## Parsing expressions
 
@@ -738,9 +791,9 @@ public static class ExpressionDsl
 }
 ```
 
-As you can see, the parsers defined above (`Constant`, `Operator`, `Operation`, `FullExpression`) all yield objects of type `Expression` and `ExpressionType`, which are both defined in `System.Linq.Expressions`. The expression tree is essentially our syntax tree, so once we parse the input we will have all the required information to compile the runtime instructions represented by it.
+As you can see, the parsers defined above (`Constant`, `Operator`, `Operation`, `FullExpression`) all yield objects of type `Expression` and `ExpressionType`, which are both defined in `System.Linq.Expressions`. The expression tree is essentially our syntax tree, so once we parse the input we have all the required information to compile the runtime instructions represented by it.
 
-You can try it out:
+You can try it out by running the application:
 
 ```shell
 > app 3.15 * 5 + 2
@@ -749,11 +802,11 @@ You can try it out:
 
 Note that this simple calculator is just an example of what you can do. If you want to see how a proper calculator like that would look, check out [Sprache.Calc](https://github.com/yallie/Sprache.Calc/blob/master/Sprache.Calc/SimpleCalculator.cs). Also, if you want to learn more about parsing, check out my blog posts about [parsing in C#](/blog/monadic-parser-combinators) and [parsing in F#](/blog/parsing-with-fparsec).
 
-## Going even further beyond
+## Making things even faster
 
 While compiled expressions execute really fast, compiling them can be relatively expensive.
 
-In most cases that's completely fine, but you may want to take the performance even further by using [FastExpressionCompiler](https://github.com/dadhi/FastExpressionCompiler). This library provides a much faster drop-in replacement for the `Compile` method, called `CompileFast`.
+In most cases that's completely fine, but you may want to take the performance even further by using [FastExpressionCompiler](https://github.com/dadhi/FastExpressionCompiler). This library provides a drop-in replacement for the `Compile` method called `CompileFast`, which executes much faster.
 
 For example, here's a simple benchmark that shows the difference:
 
@@ -780,13 +833,29 @@ public class Benchmarks
 |   Compile (fast) |  4.791 us | 0.0693 us | 0.0614 us |  0.13 |
 ```
 
-As you can see, the difference is pretty noticeable.
+As you can see, the performance improvement is pretty noticeable. The reason it runs so fast is because the `CompileFast` version skips all the verifications that normal `Compile` does to ensure that the expression tree is valid.
 
-This library (as part of `FastExpressionCompiler.LightExpression`) also offers a drop-in replacement for `Expression` and all of its static factory methods. These alternative implementations construct expressions which may in some cases perform much faster than their default counterparts.
+This library (as part of `FastExpressionCompiler.LightExpression`) also offers a drop-in replacement for `Expression` and all of its static factory methods. These alternative implementations construct expressions which may in some cases perform much faster than their default counterparts. I still recommend to benchmark it on your particular use cases to ensure that it actually provides an improvement.
 
 ## Generating expression trees from code
 
 So far we've explored how to construct expression trees manually. The cool thing about expression trees in .NET though is that they can also be created automatically from a lambda. You're definitely familiar with this approach because that's what libraries like Entity Framework use to translate C# expressions into SQL queries.
+
+The way this works is that you can simply specify a lambda expression like you would if you were to define a delegate. C# compiler will instead disassemble the lambda into an expression tree.
+
+Consider this snippet of code:
+
+```csharp
+Func<int, int, int> div =
+    (a, b) => a / b;
+
+Expression<Func<int, int, int>> divExpr =
+    (a, b) => a / b;
+```
+
+Both of these assignments look exactly the same, it's just that the actual value is different. While in the first case we will get a delegate which can be executed directly, the second will provide us with an expression tree that represents the structure of the supplied lambda expression.
+
+
 
 The way this works is that you can define a method with a parameter of type `Expression<TDelegate>` and supply it an instance of `TDelegate` instead. Even though it will look like you're defining a lambda of type `TDelegate`, it will get automatically cast to `Expression<TDelegate>` which contains all the information about the expression contained within the lambda. This feature is facilitated by the compiler, which means that the expression tree is created during build instead of runtime.
 
