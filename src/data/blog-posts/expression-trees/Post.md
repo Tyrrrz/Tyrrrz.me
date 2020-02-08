@@ -853,68 +853,68 @@ Expression<Func<int, int, int>> divExpr =
     (a, b) => a / b;
 ```
 
-Both of these assignments look exactly the same, it's just that the actual value is different. While in the first case we will get a delegate which can be executed directly, the second will provide us with an expression tree that represents the structure of the supplied lambda expression.
+Both of these assignments look exactly the same, it's just that the actual value is different. While in the first case we will get a delegate which can be executed directly, the second will provide us with an expression tree that represents the structure of the supplied lambda expression. This is essentially the same `LambdaExpression` that we were creating earlier, only now it represents code written statically as opposed to dynamically.
 
-
-
-The way this works is that you can define a method with a parameter of type `Expression<TDelegate>` and supply it an instance of `TDelegate` instead. Even though it will look like you're defining a lambda of type `TDelegate`, it will get automatically cast to `Expression<TDelegate>` which contains all the information about the expression contained within the lambda. This feature is facilitated by the compiler, which means that the expression tree is created during build instead of runtime.
-
-Let's take a look at an example:
+Note, however, while the assignment above works, you can't do this:
 
 ```csharp
-public static void Analyze<T>(Expression<Func<T>> expr)
-{
-    // Inspect the expression...
-}
+Func<int, int, int> div = (a, b) => a / b;
 
-public static void Main()
-{
-    Analyze(() => 2 * Math.Sin(Math.PI / 2));
-}
+// Compile error
+Expression<Func<int, int, int>> divExpr = div;
 ```
 
-As you can see, we're simply passing a lambda expression which gets magically decompiled into an expression tree. The `Analyze` method can inspect the expression that describes the supplied lambda.
+The expression must be defined in-place in order to work. Because the disassembly happens during compile time, not runtime, the compiler needs to know exactly what it's dealing with.
 
-One thing we can do, for example, is analyze the function body:
+Although this approach is incredibly useful, it has certain limitations. In order for this to work, the lambda expression must not contain any of the following:
+
+- Null-coalescing operator (`obj?.Prop`)
+- Dynamic variables (`dynamic`)
+- Asynchronous code (`async`/`await`)
+- Default or named parameters (`func(a, b: 5)`, `func(a)`)
+- Parameters passed by reference (`int.TryParse("123", out var i)`)
+- Multi-dimensional array initializers (`new int[2, 2] { { 1, 2 }, { 3, 4 } }`)
+- Assignment operations (`a = 5`)
+- Increment and decrement (`a++`, `a--`, `--a`, `++a`)
+- Base access (`base.Prop`)
+- Dictionary initialization (`new Dictionary<string, int> { ["foo"] = 100 }`)
+- Unsafe code (via `unsafe`)
+- Throw expressions (`throw new Exception()`)
+- Tuple literals (`(a, b)`)
+
+On top of all that, you cannot use this method to construct expression trees from multi-line lambdas. That means this won't compile:
 
 ```csharp
-public static void Analyze<T>(Expression<Func<T>> expr)
+// Compile error
+Expression<Func<int, int, int>> divExpr = (a, b) =>
 {
-    if (expr.Body is BinaryExpression binaryExpression)
-    {
-        Console.WriteLine("Binary expression:");
-        Console.WriteLine($"  Type: {binaryExpression.NodeType}");
-        Console.WriteLine($"  Left: {binaryExpression.Left}");
-        Console.WriteLine($"  Right: {binaryExpression.Right}");
-    }
-    else
-    {
-        Console.WriteLine("Function body is not a binary expression");
-    }
-}
-
-public static void Main()
-{
-    Analyze(() => 2 * Math.Sin(Math.PI / 2));
-}
+    var result = a / b;
+    return result;
+};
 ```
 
-This produces the following output:
+And, most importantly, this won't work either:
 
-```c
-Binary expression:
-  Type: Multiply
-  Left: 2
-  Right: Sin(1.5707963267948966)
+```csharp
+// Compile error
+Expression<Action> writeToConsole = () =>
+{
+    Console.Write("Hello ");
+    Console.WriteLine("world!");
+};
 ```
 
-Note how the right operand of this expression is `Sin(1.5707963267948966)` rather than `Sin(Math.PI / 2)`. This is because the division was evaluated into a constant during compilation.
+Most of these limitations come from the fact that this feature was designed with `IQueryable` in mind and the fact that some of the language constructs listed above don't really make sense when it comes to querying data. That said, there are a lot of other scenarios where they can be useful.
 
-When you know exactly what you're looking for, it may be enough to pattern match. In more complex cases however, you may want to use [`ExpressionVisitor`](https://docs.microsoft.com/en-us/dotnet/api/system.linq.expressions.expressionvisitor) instead.
+There is a suggestion to extend compile-time expression trees and it's tracked [by this issue on GitHub](https://github.com/dotnet/csharplang/issues/158). We'll see where it goes.
 
-There are two ways we can traverse an expression tree with `ExpressionVisitor`, either by inheriting from it and overriding visitor methods we are interested in, or by using its static methods with a visitor delegate.
+For now, let's move these limitations aside and explore some of the ways we can use expression trees constructed with this approach.
 
-If you're unfamiliar with the [visitor pattern](https://en.wikipedia.org/wiki/Visitor_pattern), you can think of it as an exhaustive pattern matcher where each clause is a separate method.
+## Traversing expression trees
+
+When analyzing expression trees, we often need to be able to traverse its hierarchy. Fortunately, we don't have to implement something like this ourselves because the framework already provides a special class called [`ExpressionVisitor`](https://docs.microsoft.com/en-us/dotnet/api/system.linq.expressions.expressionvisitor).
+
+It's an abstract class that you can inherit from. It contains methods that "visit" expressions of every type, all of which are virtual and can be overridden. Essentially this class allows you to do recursive pattern matching on an entire expression tree.
 
 For example, if we wanted to
 
@@ -965,84 +965,99 @@ Old result value: 2
 New result value: 0.39223975406030526
 ```
 
-## Converting expressions back to code
+## Providing context to assertions
 
-Even though every expression overrides the `ToString` method, the actual text produced by more complex expressions may not be so readable.
-
-```csharp
-public static void Analyze<T>(Expression<Func<T>> expr)
-{
-    Console.WriteLine(expr);
-}
-
-public static void Main()
-{
-    var a = DateTimeOffset.Now.Year / 13.4;
-    var b = 18 * 4;
-    Analyze(() => Math.Sin(a / b) + Math.Cos(b / a));
-}
-```
-
-Produces:
-
-```c
-() => (Sin((value(Playground.Program+<>c__DisplayClass1_0).a / Convert(value(Playground.Program+<>c__DisplayClass1_0).b, Double))) + Cos((Convert(value(Playground.Program+<>c__DisplayClass1_0).b, Double) / value(Playground.Program+<>c__DisplayClass1_0).a)))
-```
-
-If we use [ExpressionToCode](https://github.com/EamonNerbonne/ExpressionToCode):
+Often when I'm writing test suites for my projects, I find myself spending time decorating my assertions with informational error messages. For example:
 
 ```csharp
-public static void Analyze<T>(Expression<Func<T>> expr)
+[Test]
+public void IntTryParse_Test()
 {
-    Console.WriteLine(ExpressionToCode.ToCode(expr));
-}
+    // Arrange
+    const string s = "123";
 
-public static void Main()
-{
-    var a = DateTimeOffset.Now.Year / 13.4;
-    var b = 18 * 4;
-    Analyze(() => Math.Sin(a / b) + Math.Cos(b / a));
+    // Act
+    var result = int.TryParse(s, out var value);
+
+    // Assert
+    Assert.That(result, Is.True, "Parsing was unsuccessful");
+    Assert.That(value, Is.EqualTo(124), "Parsed value is incorrect");
 }
 ```
 
-```c
-() => Math.Sin(a / b) + Math.Cos(b / a)
+If the assertion fails, I will get a more descriptive error message. After all, this is better than not having any idea what went wrong:
+
+```ini
+X IntTryParse_Test [60ms]
+  Error Message:
+    Parsed value is incorrect
+  Expected: 124
+  But was:  123
 ```
 
-Assertions:
+In a perfect world, however, it would be nice if the error message simply contained the code that specifies the assertion. Luckily, this is something we can do using expressions.
+
+To do that, we can create a helper method that will wrap the assertion in an expression:
 
 ```csharp
-var a = 3;
-var b = 5;
+public static class AssertEx
+{
+    public static void Express(Expression<Action> expression)
+    {
+        var act = expression.Compile();
 
-PAssert.That(() => 3 * a + (b - 1) == 12); // actually 13
+        try
+        {
+            act();
+        }
+        catch (Exception ex)
+        {
+            throw new AssertionException(
+                expression.Body.ToReadableString() +
+                Environment.NewLine +
+                ex.Message);
+        }
+    }
+}
 ```
 
-```r
-Unhandled exception. System.InvalidOperationException: assertion failed
+The extension method `ToReadableString` comes from the NuGet package [ReadableExpressions](https://github.com/agileobjects/ReadableExpressions) that I've talked about earlier in the article. This converts the expression to string that matches the C# code used to produce it.
 
-3 * a + (b - 1) == 12
-      false (caused assertion failure)
-
-3 * a + (b - 1)      13
-          3 * a      9
-              a      3
-          b - 1      4
-              b      5
-```
+So now we can wrap our assertions in this helper method like this:
 
 ```csharp
-var arr = Enumerable.Range(0, 10).ToArray();
+[Test]
+public void IntTryParse_Test()
+{
+    // Arrange
+    const string s = "123";
 
-PAssert.That(() => arr.Contains(10));
+    // Act
+    var result = int.TryParse(s, out var value);
+
+    // Assert
+    AssertEx.Express(() => Assert.That(result, Is.True));
+    AssertEx.Express(() => Assert.That(value, Is.EqualTo(124)));
+}
 ```
 
-```r
-arr.Contains(10)
-      false (caused assertion failure)
+If we try to run this test, we will get the following error message:
 
-arr      new[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }
+```ini
+X IntTryParse_Test [99ms]
+  Error Message:
+    Assert.That(value, Is.EqualTo(124))
+  Expected: 124
+  But was:  123
 ```
+
+As you can see, the error message now specifies the exact assertion that failed. This gives us more context to determine what exactly went wrong.
+
+___
+
+With the advent of .NET Core 3.0, the .NET team has also added a new attribute, `CallerArgumentExpression`. This attribute was meant to be supported by a [language feature](https://github.com/dotnet/csharplang/issues/287) that was planned for C# 8 but didn't make it. Currently, the attribute doesn't do anything because the compiler doesn't support it yet, but we will hopefully see this change in a future version of the language.
+
+The goal of this attribute is to provide the ability to "sniff" the expression passed to the specified parameter. For example, we should be able to define a method like this:
 
 ```csharp
 public static void Assert(
@@ -1054,6 +1069,8 @@ public static void Assert(
 }
 ```
 
+Which will then produce a detailed exception message if the assertion fails:
+
 ```csharp
 Assert(2 + 2 == 5);
 
@@ -1061,57 +1078,19 @@ Assert(2 + 2 == 5);
 // Condition `2 + 2 == 5` is not true
 ```
 
-Attribute exists but the functionality is not yet here: https://github.com/dotnet/csharplang/issues/287
-
-## Limitations of automatically-generated expressions
-
-Despite how convenient they may be, automatically-inferred expressions haven't really evolved since they were introduced. And while it may be enough for Entity Framework and some other scenarios, they have certain limitations.
-
-The following constructs are not supported in expressions generated from lambdas:
-
-- Multi-dimensional array initializers
-- Named and optional parameters
-- Dynamic
-- Async and await
-- Conditional access operator
-- Index initializers for dictionaries
-- Throw expressions
-- Discard expressions
-
-Also, multi-line lambdas are not supported:
-
-```csharp
-public static void Analyze<T>(Expression<Func<T>> expr)
-{
-    // ...
-}
-
-public static void Main()
-{
-    // Compile error:
-    // A lambda expression with a statement body cannot be converted to an expression tree
-    Analyze(() =>
-    {
-        var a = 3;
-        var b = 5;
-        return a + b;
-    };
-}
-```
-
-Most of the time it's possible to rewrite such statements into one a single expression, either by
+Note that with this approach we will only be able to obtain the expression as string, which will be the same expression specified in the source code. This can be used to provide similar experience as described above.
 
 ## Transpile
-
-## Assertions
 
 ## PropertyChanged
 
 ## Summary
 
-Expression trees provide us with a formal structure of code that lets us analyze existing expressions or compile entirely new ones directly at runtime. This feature makes it possible to do bunch of cool things, including writing transpilers, interpreters, code generators, optimize reflection calls, provide contextual assertions, and more. I think it's a really powerful tool that deserves a lot more attention.
+Expression trees provide us with a formal structure of code that lets us analyze existing expressions or compile entirely new ones directly at runtime. This feature makes it possible to do a bunch of cool things, including writing transpilers, interpreters, code generators, optimize reflection calls, provide contextual assertions, and more. I think it's a really powerful tool that deserves a lot more attention.
 
-Some other interesting articles about expression trees:
+Have you had an experience using expression trees in a way that made your life better? Share it with me in the comments or [on Twitter](https://twitter.com/tyrrrz).
+
+Some other interesting articles on the topic:
 
 - [Introduction to expression trees (Microsoft Docs)](https://docs.microsoft.com/en-us/dotnet/csharp/expression-trees)
 - [10X faster execution with compiled expression trees (Particular Software)](https://particular.net/blog/10x-faster-execution-with-compiled-expression-trees)
