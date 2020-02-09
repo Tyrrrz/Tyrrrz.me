@@ -35,10 +35,15 @@ export default () => {
 
       <p>I want to thank the following people for their amazing support ❤️</p>
       <ul>
+        <li>Peter Wesselius</li>
         <li>Mark Ledwich</li>
         <li>BouncingWalrus</li>
-        <li>Peter Wesselius</li>
         <li>Thomas C</li>
+        <li>Dominic Maas</li>
+        <li>lupus</li>
+        <li>Richard</li>
+        <li>Foritus</li>
+        <li>Michael Dayah</li>
       </ul>
     </Layout>
   );
