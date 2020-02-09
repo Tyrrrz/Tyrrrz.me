@@ -1,5 +1,5 @@
 ---
-title: Expression trees in .NET
+title: Working with expression trees in .NET
 date: 2020-02-18
 cover: Cover.png
 ---
@@ -24,7 +24,7 @@ Of course, expressions vary in complexity and can contain different combinations
     : null;
 ```
 
-Looking at the above expression, we can also consider two of its aspects: **what is does** and **how it does it**.
+Looking at the above expression, we can also consider two of its aspects: **what it does** and **how it does it**.
 
 When it comes to the former, the answer is pretty simple -- it generates a greeting based on the person's name, or produces a `null`. If this expression was returned by a function, that would be the extent of information we could derive from its signature:
 
@@ -106,13 +106,13 @@ public Expression ConstructGreetingExpression()
 }
 ```
 
-First off, we're calling `Expression.Parameter` in order to construct a parameter expression. We can use this instance to resolve the value of a particular parameter.
+First of all, we're calling `Expression.Parameter` in order to construct a parameter expression. We will be able to use it to resolve the value of a particular parameter.
 
-Following that, we are relying on reflection to resolve a reference to the `string.IsNullOrWhiteSpace` method. We use `Expression.Call` to create a method invocation expression that calls `string.IsNullOrWhiteSpace` with the parameter resolved by the expression we created earlier. To perform a logical "not" operation on the result, we're calling `Expression.Not` to wrap the method call. This constitutes the condition part of the ternary expression we're building.
+Following that, we are relying on reflection to resolve a reference to the `string.IsNullOrWhiteSpace` method. We use `Expression.Call` to create a method invocation expression that represents a call to `string.IsNullOrWhiteSpace` with the parameter resolved by the expression we created earlier. To perform a logical "not" operation on the result, we're calling `Expression.Not` to wrap the method call. Incidentally, this expression constitutes the condition part of the ternary expression we're building.
 
-To compose the positive clause, we're constructing an "add" operation with the help of `Expression.Add`. As the operands to this binary expression, we're providing a constant expression for string `"Greetings, "` and the parameter expression from earlier.
+To compose the positive clause, we're constructing an "add" operation with the help of `Expression.Add`. As the operands, we're providing a constant expression for string `"Greetings, "` and the parameter expression from earlier.
 
-As for the negative clause, we're using `Expression.Constant` to create a `null` constant expression. To ensure that the `null` value is typed correctly, we explicitly specify the type as the second parameter.
+Then, for the negative clause, we're using `Expression.Constant` to create a `null` constant expression. To ensure that the `null` value is typed correctly, we explicitly specify the type as the second parameter.
 
 Finally, we're combining all of the above parts together to create our ternary conditional operator.
 
@@ -152,7 +152,7 @@ public Func<string, string?> ConstructGreetingFunction()
 
 As you can see, we were able to construct a lambda expression by specifying its body (which is our conditional expression) and the parameter that we defined earlier. We also indicated the exact type of the function this expression represents by supplying a generic argument.
 
-By compiling an expression tree, we are able to convert the code it represents into runtime instructions. We can now use the delegate returned by this method to evaluate the expression we composed:
+By compiling the expression tree, we are able to convert the code it represents into runtime instructions. We can now use the delegate returned by this method to evaluate it:
 
 ```csharp
 var getGreeting = ConstructGreetingFunction();
@@ -215,7 +215,7 @@ var greetingsForJohn = getGreetings("John"); // "Greetings, John"
 var greetingsForNobody = getGreetings(" ");  // <null>
 ```
 
-That's pretty awesome! We've compiled some code dynamically at runtime and were able to execute it like any other function.
+That's pretty awesome! We compiled some code at runtime and were able to execute it like any other function.
 
 ## Constructing statements
 
@@ -230,7 +230,7 @@ Console.Write("Hello ");
 Console.WriteLine("world!");
 ```
 
-We know that these method calls don't produce results because their return type is `void`. Even though these are not expressions, we can still model them using expression trees. To do that, we need to put them inside a `Block` expression.
+We know that these method calls don't produce results because their return type is `void`. However, even though these are not expressions, we can still model them using expression trees. To do that, we need to put them inside a `Block` expression.
 
 Here is how it works:
 
@@ -270,7 +270,46 @@ var lambda = () =>
 };
 ```
 
-So despite the fact that we are building _expression_ trees, we can still represent blocks of statements just as well.
+For more complex use cases, we may even reference variables from inside the block expression:
+
+```csharp
+public Expression CreateStatementBlock()
+{
+    var consoleWriteMethod = typeof(Console)
+        .GetMethod(nameof(Console.Write), new[] {typeof(string)});
+
+    var consoleWriteLineMethod = typeof(Console)
+        .GetMethod(nameof(Console.WriteLine), new[] {typeof(string)});
+
+    var variableA = Expression.Variable(typeof(string), "a");
+    var variableB = Expression.Variable(typeof(string), "b");
+
+    return Expression.Block(
+        // Declare variables in scope
+        new[] {variableA, variableB},
+
+        // Assign values to variables
+        Expression.Assign(variableA, Expression.Constant("Foo ")),
+        Expression.Assign(variableB, Expression.Constant("bar")),
+
+        // Call methods
+        Expression.Call(consoleWriteMethod, variableA),
+        Expression.Call(consoleWriteLineMethod, variableB));
+}
+```
+
+If we compile and evaluate this expression, we will see the following output in the console:
+
+```csharp
+var block = CreateStatementBlock();
+var lambda = Expression.Lambda<Action>(block).Compile();
+
+lambda();
+
+// Foo bar
+```
+
+So despite the fact that we are building _expression_ trees, it's important to know that we can still represent blocks of statements just as well.
 
 ## Converting expressions to readable code
 
@@ -294,7 +333,7 @@ var s = lambda.ToString();
 // personName => IIF(Not(IsNullOrWhiteSpace(personName)), Concat("Greetings, ", personName), null)
 ```
 
-While fairly descriptive, this is probably not the text representation you would hope to see.
+While fairly descriptive, this is probably not the text representation one would hope to see.
 
 Luckily, we can use the [ReadableExpressions](https://github.com/agileobjects/ReadableExpressions) NuGet package to get us what we want. By installing it, we should be able to call `ToReadableString` to get the actual C# code that represents the expression:
 
@@ -306,7 +345,7 @@ var code = lambda.ToReadableString();
 
 As you can see, it even replaced the `string.Concat` call with the plus operator to make it closer to code that a developer would typically write.
 
-Additionally, if you are using Visual Studio and want to inspect expressions by visualizing them as code, you can also install [this extension](https://marketplace.visualstudio.com/items?itemName=vs-publisher-1232914.ReadableExpressionsVisualizers). It's very helpful when debugging large or really complex expressions.
+Additionally, if you are using Visual Studio and want to inspect expressions by visualizing them as code, you can install [this extension](https://marketplace.visualstudio.com/items?itemName=vs-publisher-1232914.ReadableExpressionsVisualizers). It's very helpful when debugging large or really complex expressions.
 
 ## Optimizing reflection calls
 
@@ -424,9 +463,9 @@ This approach of using expression trees for dynamic method invocation is commonp
 
 ## Implementing generic operators
 
-Something else you can do with compiled expressions is implement generic operators. These can be pretty useful if you're writing a lot of mathematical code and want to avoid repetition.
+Something else we can do with compiled expressions is implement generic operators. These can be pretty useful if you're writing a lot of mathematical code and want to avoid duplication.
 
-As you know, operators in C# are not generic. This means that every numeric type defines its own version of the, for example, multiply and divide operators. As a result, code that uses these operators also can't be generic either.
+As you know, operators in C# are not generic. This means that every numeric type defines its own version of the multiply and divide operators, among other things. As a result, code that uses these operators also can't be generic either.
 
 Imagine that you had a function that calculates three-fourths of a number:
 
@@ -486,7 +525,7 @@ public T ThreeFourths<T>(T x)
 // ThreeFourths(100M) -> 75
 ```
 
-That works well and we can reuse this method for numbers of any type. However, seeing as our generic operation doesn't have type safety, you may be wondering, "How is this approach any different from just using `dynamic`?".
+That works well and we can reuse this method for numbers of any type. Although, seeing as our generic operation doesn't have type safety, you may be wondering how is this approach any different from just using `dynamic`?
 
 Surely, we could just write our code like this and avoid all the trouble:
 
@@ -559,7 +598,7 @@ public class Benchmarks
 |     Dynamic | 13.37 | 19.4831 ns | 0.3475 ns | 0.3251 ns | 31.80 |    2.47 |
 ```
 
-As you can see, the expression-based approach performs about 9 times faster than when using `dynamic`.
+As you can see, the expression-based approach performs about nine times faster than when using `dynamic`. Considering that these are the only two options we can use to implement generic operators, this is a pretty good case for compiled expression trees.
 
 ## Compiling dictionary into a switch expression
 
@@ -747,7 +786,7 @@ public class Benchmarks
 
 We can see that the compiled dictionary performs lookups about 1.6-2.8 times faster. While the performance of the hash table is consistent regardless of how many elements are in the dictionary, the expression tree implementation becomes slower as the dictionary gets bigger. This can potentially be remedied by adding another switch layer for indexing.
 
-## Parsing expressions
+## Parsing DSLs into expressions
 
 One other interesting usage scenario, that I'm personally really fond of, is parsing. The main challenge of writing an interpreter for a custom domain-specific language is turning the syntax tree into runtime instructions. By parsing the grammar constructs directly into expression trees, this becomes a solved problem.
 
@@ -835,13 +874,13 @@ public class Benchmarks
 
 As you can see, the performance improvement is pretty noticeable. The reason it runs so fast is because the `CompileFast` version skips all the verifications that normal `Compile` does to ensure that the expression tree is valid.
 
-This library (as part of `FastExpressionCompiler.LightExpression`) also offers a drop-in replacement for `Expression` and all of its static factory methods. These alternative implementations construct expressions which may in some cases perform much faster than their default counterparts. I still recommend to benchmark it on your particular use cases to ensure that it actually provides an improvement.
+This library (as part of `FastExpressionCompiler.LightExpression`) also offers a drop-in replacement for `Expression` and all of its static factory methods. These alternative implementations construct expressions which may in some cases perform much faster than their default counterparts. However, I still recommend to benchmark it on your particular use cases to ensure that it actually provides an improvement.
 
-## Generating expression trees from code
+## Inferring expression trees from code
 
 So far we've explored how to construct expression trees manually. The cool thing about expression trees in .NET though is that they can also be created automatically from a lambda. You're definitely familiar with this approach because that's what libraries like Entity Framework use to translate C# expressions into SQL queries.
 
-The way this works is that you can simply specify a lambda expression like you would if you were to define a delegate. C# compiler will instead disassemble the lambda into an expression tree.
+The way this works is that you can infer an expression tree by simply specifying a lambda expression like you would if you were to define a delegate. C# compiler will take care of the rest.
 
 Consider this snippet of code:
 
@@ -853,9 +892,35 @@ Expression<Func<int, int, int>> divExpr =
     (a, b) => a / b;
 ```
 
-Both of these assignments look exactly the same, it's just that the actual value is different. While in the first case we will get a delegate which can be executed directly, the second will provide us with an expression tree that represents the structure of the supplied lambda expression. This is essentially the same `LambdaExpression` that we were creating earlier, only now it represents code written statically as opposed to dynamically.
+Both of these assignments look exactly the same, it's just that the actual value is different. While in the first case we will get a delegate which can be executed directly, the second will provide us with an expression tree that represents the structure of the supplied lambda expression. This is essentially the same `LambdaExpression` that we were creating when compiling code ourselves, only now it represents code written statically as opposed to dynamically.
 
-Note, however, while the assignment above works, you can't do this:
+For example, we can inspect the expression tree produced by the compiler:
+
+```csharp
+Expression<Func<int, int, int>> divExpr =
+    (a, b) => a / b;
+
+foreach (var param in divExpr.Parameters)
+    Console.WriteLine($"Param: {param.Name} ({param.Type.Name})");
+
+// Param: a (Int32)
+// Param: b (Int32)
+```
+
+And, just like with expression trees created manually, we can compile it into a delegate:
+
+```csharp
+Expression<Func<int, int, int>> divExpr =
+    (a, b) => a / b;
+
+var div = divExpr.Compile();
+
+var c = div(10, 2); // 5
+```
+
+Essentially, in this context, you can think of `divExpr` as a recipe that contains the ingredients needed to create `div`, the final product.
+
+Note, however, that while direct assignment shown previously works, you can't do something like this:
 
 ```csharp
 Func<int, int, int> div = (a, b) => a / b;
@@ -866,7 +931,7 @@ Expression<Func<int, int, int>> divExpr = div;
 
 The expression must be defined in-place in order to work. Because the disassembly happens during compile time, not runtime, the compiler needs to know exactly what it's dealing with.
 
-Although this approach is incredibly useful, it has certain limitations. In order for this to work, the lambda expression must not contain any of the following:
+Although this approach is incredibly useful, it has certain limitations. Specifically, the supplied lambda expression must not contain any of the following:
 
 - Null-coalescing operator (`obj?.Prop`)
 - Dynamic variables (`dynamic`)
@@ -876,11 +941,11 @@ Although this approach is incredibly useful, it has certain limitations. In orde
 - Multi-dimensional array initializers (`new int[2, 2] { { 1, 2 }, { 3, 4 } }`)
 - Assignment operations (`a = 5`)
 - Increment and decrement (`a++`, `a--`, `--a`, `++a`)
-- Base access (`base.Prop`)
+- Base type access (`base.Prop`)
 - Dictionary initialization (`new Dictionary<string, int> { ["foo"] = 100 }`)
 - Unsafe code (via `unsafe`)
 - Throw expressions (`throw new Exception()`)
-- Tuple literals (`(a, b)`)
+- Tuple literals (`(5, x)`)
 
 On top of all that, you cannot use this method to construct expression trees from multi-line lambdas. That means this won't compile:
 
@@ -893,7 +958,7 @@ Expression<Func<int, int, int>> divExpr = (a, b) =>
 };
 ```
 
-And, most importantly, this won't work either:
+And, more importantly, this won't work either:
 
 ```csharp
 // Compile error
@@ -904,70 +969,120 @@ Expression<Action> writeToConsole = () =>
 };
 ```
 
-Most of these limitations come from the fact that this feature was designed with `IQueryable` in mind and the fact that some of the language constructs listed above don't really make sense when it comes to querying data. That said, there are a lot of other scenarios where they can be useful.
+Most of these limitations come from the fact that this feature was designed with `IQueryable` in mind and many of the language constructs listed above don't really make sense when it comes to querying data. That said, there are a lot of other scenarios where they can be useful.
 
 There is a suggestion to extend compile-time expression trees and it's tracked [by this issue on GitHub](https://github.com/dotnet/csharplang/issues/158). We'll see where it goes.
 
 For now, let's move these limitations aside and explore some of the ways we can use expression trees constructed with this approach.
 
-## Traversing expression trees
+## Identifying members
 
-When analyzing expression trees, we often need to be able to traverse its hierarchy. Fortunately, we don't have to implement something like this ourselves because the framework already provides a special class called [`ExpressionVisitor`](https://docs.microsoft.com/en-us/dotnet/api/system.linq.expressions.expressionvisitor).
+The most common use case for expression trees obtained in such manner is to identify type members. This approach allows us to extract information on fields, properties, or methods that belong to a particular type.
 
-It's an abstract class that you can inherit from. It contains methods that "visit" expressions of every type, all of which are virtual and can be overridden. Essentially this class allows you to do recursive pattern matching on an entire expression tree.
-
-For example, if we wanted to
+For example, assume we have the following class:
 
 ```csharp
-public class Visitor : ExpressionVisitor
+public class Dto
 {
-    protected override Expression VisitMethodCall(MethodCallExpression node)
+    public Guid Id { get; set; }
+
+    public string Name { get; set; }
+}
+```
+
+If we wanted to get the `PropertyInfo` that represents its `Id` property, we could use reflection to do it like this:
+
+```csharp
+var idProperty = typeof(Dto).GetProperty(nameof(Dto.Id));
+
+Console.WriteLine($"Type: {idProperty.DeclaringType.Name}");
+Console.WriteLine($"Property: {idProperty.Name} ({idProperty.PropertyType.Name})");
+
+// Type: Dto
+// Property: Id (Guid)
+```
+
+That works completely fine. For example, if we were designing an API for a validation library, it could look like this:
+
+```csharp
+public class Validator<T>
+{
+    // Add validation predicate to the list
+    public void AddValidation<TProp>(string propertyName, Func<TProp, bool> predicate)
     {
-        var newMethodCall = node.Method == typeof(Math).GetMethod(nameof(Math.Sin))
-            ? typeof(Math).GetMethod(nameof(Math.Log10))
-            : node.Method;
+        var propertyInfo = typeof(T).GetProperty(propertyName);
 
-        Console.WriteLine($"Old method call: {node.Method.Name}(...)");
-        Console.WriteLine($"New method call: {newMethodCall.Name}(...)");
+        if (propertyInfo is null)
+            throw new InvalidOperationException("Please provide a valid property name.");
 
-        return Expression.Call(newMethodCall, node.Arguments);
+        // ...
     }
+
+    // Evalute all predicates
+    public bool Validate(T obj) { /* ... */ }
+
+    /* ... */
 }
 ```
+
+Which we would be able to use like this:
 
 ```csharp
-public static void Analyze<T>(Expression<Func<T>> expr)
+var validator = new Validator<Dto>();
+validator.AddValidation<Guid>(nameof(Dto.Id), id => id != Guid.Empty);
+validator.AddValidation<string>(nameof(Dto.Name), name => !string.IsNullOrWhiteSpace(name));
+
+var isValid = validator.Validate(new Dto { Id = Guid.NewGuid() }); // false
+```
+
+However, the problem here is that all of our validators are effectively untyped. We have to specify the generic argument in `AddValidation` so that our predicates are aware of what they're working with, but this setup is very volatile.
+
+If we were to, for example, change the type of `Dto.Id` from `Guid` to `int`, everything will still compile but the code will no longer work correctly because our predicate expects the type to be `Guid`. Also, we'd be lucky if our users were to provide the property names using `nameof`, in reality there will probably be magic strings instead. All in all, this code is not refactor-safe.
+
+With expressions we can completely remedy this:
+
+```csharp
+public class Validator<T>
 {
-    var newExpr = (Expression<Func<T>>) new Visitor().Visit(expr);
+    public void AddValidation<TProp>(
+        Expression<Func<T, TProp>> propertyExpression,
+        Func<TProp, bool> predicate)
+    {
+        var propertyInfo = (propertyExpression.Body as MemberExpression)?.Member as PropertyInfo;
 
-    Console.WriteLine($"Old expression: {expr}");
-    Console.WriteLine($"New expression: {newExpr}");
+        if (propertyInfo is null)
+            throw new InvalidOperationException("Please provide a valid property expression.");
 
-    var oldResult = expr.Compile()();
-    var newResult = newExpr.Compile()();
+        // ...
+    }
 
-    Console.WriteLine($"Old result value: {oldResult}");
-    Console.WriteLine($"New result value: {newResult}");
-}
+    public bool Validate(T obj) { /* ... */ }
 
-public static void Main()
-{
-    Analyze(() => 2 * Math.Sin(Math.PI / 2));
+    /* ... */
 }
 ```
 
-```x
-Old method call: Sin(...)
-New method call: Log10(...)
-Old expression: () => (2 * Sin(1.5707963267948966))
-New expression: () => (2 * Log10(1.5707963267948966))
-Old result value: 2
-New result value: 0.39223975406030526
+So now we can write our code like this instead:
+
+```csharp
+var validator = new Validator<Dto>();
+validator.AddValidation(dto => dto.Id, id => id != Guid.Empty);
+validator.AddValidation(dto => dto.Name, name => !string.IsNullOrWhiteSpace(name));
+
+var isValid = validator.Validate(new Dto { Id = Guid.NewGuid() }); // false
 ```
+
+This works exactly the same, except that now we don't need to specify generic arguments manually, there are no magic strings, and the code is completely safe to refactor. If we change the type of `Dto.Id` from `Guid` to `int`, our code will no longer compile.
+
+Many existing libraries are using expression trees for this purpose, including:
+
+- [FluentValidation](https://github.com/JeremySkinner/FluentValidation) uses it to setup validation rules
+- [EntityFramework](https://github.com/dotnet/efcore) uses it for entity configuration
+- [Moq](https://github.com/moq/moq4) uses it to build mocks
 
 ## Providing context to assertions
 
-Often when I'm writing test suites for my projects, I find myself spending time decorating my assertions with informational error messages. For example:
+Often when I'm writing test suites for my projects, I find myself spending time decorating assertions with informational error messages. For example:
 
 ```csharp
 [Test]
@@ -985,7 +1100,7 @@ public void IntTryParse_Test()
 }
 ```
 
-If the assertion fails, I will get a more descriptive error message. After all, this is better than not having any idea what went wrong:
+By doing that, the errors produced by failed assertions become more descriptive. This makes it easier to understand what went wrong without having to look inside the test implementation:
 
 ```ini
 X IntTryParse_Test [60ms]
@@ -995,9 +1110,9 @@ X IntTryParse_Test [60ms]
   But was:  123
 ```
 
-In a perfect world, however, it would be nice if the error message simply contained the code that specifies the assertion. Luckily, this is something we can do using expressions.
+In a perfect world, however, it would be nice if the error message simply contained the code of the assertion. That way I would know which exact check failed and why.
 
-To do that, we can create a helper method that will wrap the assertion in an expression:
+Luckily, this is something we can do with the help of expressions. To facilitate that, we can create a helper method that will wrap the assertion in an expression:
 
 ```csharp
 public static class AssertEx
@@ -1010,7 +1125,7 @@ public static class AssertEx
         {
             act();
         }
-        catch (Exception ex)
+        catch (AssertionException ex)
         {
             throw new AssertionException(
                 expression.Body.ToReadableString() +
@@ -1021,9 +1136,9 @@ public static class AssertEx
 }
 ```
 
-The extension method `ToReadableString` comes from the NuGet package [ReadableExpressions](https://github.com/agileobjects/ReadableExpressions) that I've talked about earlier in the article. This converts the expression to string that matches the C# code used to produce it.
+This method is really simple. All it does is try to run the delegate represented by the expression and, if the underlying assertion fails, it prints the expression along with the error.
 
-So now we can wrap our assertions in this helper method like this:
+Let's update our test code to make use of this method:
 
 ```csharp
 [Test]
@@ -1041,7 +1156,7 @@ public void IntTryParse_Test()
 }
 ```
 
-If we try to run this test, we will get the following error message:
+Now, if we try to run this test, we will get the following error message:
 
 ```ini
 X IntTryParse_Test [99ms]
@@ -1051,11 +1166,11 @@ X IntTryParse_Test [99ms]
   But was:  123
 ```
 
-As you can see, the error message now specifies the exact assertion that failed. This gives us more context to determine what exactly went wrong.
+As you can see, the error message now specifies the exact assertion that failed. This gives us more context which helps determine what actually went wrong.
 
 ___
 
-With the advent of .NET Core 3.0, the .NET team has also added a new attribute, `CallerArgumentExpression`. This attribute was meant to be supported by a [language feature](https://github.com/dotnet/csharplang/issues/287) that was planned for C# 8 but didn't make it. Currently, the attribute doesn't do anything because the compiler doesn't support it yet, but we will hopefully see this change in a future version of the language.
+With the advent of .NET Core 3.0, the .NET team has also added a new attribute, `CallerArgumentExpression`. This attribute was meant to be supported by a [language feature](https://github.com/dotnet/csharplang/issues/287) that was planned for C# 8 but unfortunately it didn't make it. Currently, the attribute doesn't do anything, but we should see this change in one of the future versions of the language.
 
 The goal of this attribute is to provide the ability to "sniff" the expression passed to the specified parameter. For example, we should be able to define a method like this:
 
@@ -1078,17 +1193,213 @@ Assert(2 + 2 == 5);
 // Condition `2 + 2 == 5` is not true
 ```
 
-Note that with this approach we will only be able to obtain the expression as string, which will be the same expression specified in the source code. This can be used to provide similar experience as described above.
+Note that with this approach we will only be able to obtain the expression as a string, which will be the same expression specified in the source code. This can be used to provide a somewhat similar experience as shown with `AssertEx.Express` above.
 
-## Transpile
+## Traversing and rewriting expression trees
 
-## PropertyChanged
+In order to analyze expression trees, we need to be able to traverse them in a recursive descent manner, starting from the body of the lambda expression and going down to every expression it's made out of. This could be done manually with a large switch expression that calls into itself.
+
+Fortunately, we don't have to reinvent the wheel because the framework already provides a special class for this purpose called [`ExpressionVisitor`](https://docs.microsoft.com/en-us/dotnet/api/system.linq.expressions.expressionvisitor). It's an abstract class that has a visitor method for every expression type so you can simply inherit from it and override the methods you're interested in.
+
+For example, we can implement a visitor that prints out all the binary and method call expressions it encounters:
+
+```csharp
+public class Visitor : ExpressionVisitor
+{
+    protected override Expression VisitMethodCall(MethodCallExpression node)
+    {
+        Console.WriteLine($"Visited method call: {node}");
+
+        return base.VisitMethodCall(node);
+    }
+
+    protected override Expression VisitBinary(BinaryExpression node)
+    {
+        Console.WriteLine($"Visited binary expression: {node}");
+
+        return base.VisitBinary(node);
+    }
+}
+```
+
+```csharp
+Expression<Func<double>> expr = () => Math.Sin(Guid.NewGuid().GetHashCode()) / 10;
+
+new Visitor().Visit(expr);
+
+// Visited binary expression: (Sin(Convert(NewGuid().GetHashCode(), Double)) / 10)
+// Visited method call: Sin(Convert(NewGuid().GetHashCode(), Double))
+// Visited method call: NewGuid().GetHashCode()
+// Visited method call: NewGuid()
+```
+
+As you can see by the order of the logs, the visitor first encounters the binary expression that makes up the lambda body, then digs inside, revealing a call to `Math.Sin` whose parameter is also expressed as a call to `GetHashCode` on the result of `NewGuid`.
+
+You may have noticed that the visit methods on `ExpressionVisitor` all return `Expression`. That means that besides inspecting the expression tree, the visitor can choose to rewrite or completely replace them with entirely different expressions.
+
+Let's change our visitor so that it rewrites all calls to method `Math.Sin` into `Math.Cos`:
+
+```csharp
+public class Visitor : ExpressionVisitor
+{
+    protected override Expression VisitMethodCall(MethodCallExpression node)
+    {
+        var newMethodCall = node.Method == typeof(Math).GetMethod(nameof(Math.Sin))
+            ? typeof(Math).GetMethod(nameof(Math.Cos))
+            : node.Method;
+
+        return Expression.Call(newMethodCall, node.Arguments);
+    }
+}
+```
+
+```csharp
+Expression<Func<double>> expr = () => Math.Sin(Guid.NewGuid().GetHashCode()) / 10;
+var result = expr.Compile()();
+
+Console.WriteLine($"Old expression: {expr.ToReadableString()}");
+Console.WriteLine($"Old result: {result}");
+
+var newExpr = (Expression<Func<double>>) new Visitor().Visit(expr);
+var newResult = newExpr.Compile()();
+
+Console.WriteLine($"New expression: {newExpr.ToReadableString()}");
+Console.WriteLine($"New result value: {newResult}");
+
+// Old expression: () => Math.Sin((double)Guid.NewGuid().GetHashCode()) / 10d
+// Old result: 0.09489518488876232
+// New expression: () => Math.Cos((double)Guid.NewGuid().GetHashCode()) / 10d
+// New result value: 0.07306426748550407
+```
+
+As you can see, we manipulated the expression tree by rewriting all calls from `Math.Sin` to `Math.Cos` while retaining the overall tree structure. This approach, among other things, can be useful for creating runtime proxies.
+
+## Transpiling code into a different language
+
+Now that we know that we can use `ExpressionVisitor` to analyze and rewrite expression trees, it's not too hard to guess that we can also use it to transpile expressions into another language. The goal of such a tool would be to convert code from one language to another, while retaining its functional behavior.
+
+Let's imagine we're building a library that allows users to convert C# expressions to their equivalent F# representations. For example, we want to be able to do this:
+
+```csharp
+Expression<Action<int, int>> expr = (a, b) => Console.WriteLine("a + b = {0}", a + b));
+
+var fsharpCode = FSharpTranspiler.Convert(expr);
+```
+
+To facilitate that, we can create a class called `FSharpTranspiler` which will internally use a special `ExpressionVisitor` to traverse the expression tree and write valid F# code. It could look something like this:
+
+```csharp
+public static class FSharpTranspiler
+{
+    private class Visitor : ExpressionVisitor
+    {
+        private readonly StringBuilder _buffer;
+
+        public Visitor(StringBuilder buffer)
+        {
+            _buffer = buffer;
+        }
+
+        // ...
+    }
+
+    public static string Convert<T>(Expression<T> expression)
+    {
+        var buffer = new StringBuilder();
+        new Visitor(buffer).Visit(expression);
+
+        return buffer.ToString();
+    }
+}
+```
+
+With this setup, we can inject a `StringBuilder` into our visitor and use that as the output buffer. While the visitor takes care of navigating the tree, we need to make sure we're emitting valid code on each expression type.
+
+Writing a full C# to F# transpiler would be too complicated and way outside of the scope of this article. For the sake of simplicity let's limit our job to support expressions similar to the one we've seen in the initial example. To handle these, we will need to translate `Console.WriteLine` into correct usage of `printfn`.
+
+Here's how we can do it:
+
+```csharp
+public static class FSharpTranspiler
+{
+    private class Visitor : ExpressionVisitor
+    {
+        private readonly StringBuilder _buffer;
+
+        public Visitor(StringBuilder buffer)
+        {
+            _buffer = buffer;
+        }
+
+        protected override Expression VisitLambda<T>(Expression<T> node)
+        {
+            _buffer.Append("fun (");
+            _buffer.AppendJoin(", ", node.Parameters.Select(p => p.Name));
+            _buffer.Append(") ->");
+
+            return base.VisitLambda(node);
+        }
+
+        protected override Expression VisitMethodCall(MethodCallExpression node)
+        {
+            if (node.Method.DeclaringType == typeof(Console) &&
+                node.Method.Name == nameof(Console.WriteLine))
+            {
+                _buffer.Append("printfn ");
+
+                if (node.Arguments.Count > 1)
+                {
+                    // For simplicity, assume the first argument is a string (don't do this)
+                    var format = (string) ((ConstantExpression) node.Arguments[0]).Value;
+                    var formatValues = node.Arguments.Skip(1).ToArray();
+
+                    _buffer.Append("\"");
+                    _buffer.Append(Regex.Replace(format, @"\{\d+\}", "%O"));
+                    _buffer.Append("\" ");
+
+                    _buffer.AppendJoin(" ", formatValues.Select(v => $"({v.ToReadableString()})"));
+                }
+            }
+
+            return base.VisitMethodCall(node);
+        }
+    }
+
+    public static string Convert<T>(Expression<T> expression)
+    {
+        var buffer = new StringBuilder();
+        new Visitor(buffer).Visit(expression);
+
+        return buffer.ToString();
+    }
+}
+```
+
+So now we can try to convert our expression from earlier and see what it returns:
+
+```csharp
+var fsharpCode = FSharpTranspiler.Convert<Action<int, int>>(
+    (a, b) => Console.WriteLine("a + b = {0}", a + b));
+
+// fun (a, b) -> printfn "a + b = %O" (a + b)
+```
+
+This produces a string that contains valid F# code which should compile into an equivalent anonymous function. Let's run it in F# interactive to make sure it works correctly:
+
+```fsharp
+> let foo = fun (a, b) -> printfn "a + b = %O" (a + b)
+val foo : a:int * b:int -> unit
+
+> foo (3, 5)
+a + b = 8
+val it : unit = ()
+```
+
+Translating code from one language to another is definitely not a simple task, but it can be incredibly useful in certain scenarios. One example could be sharing validation rules between backend and frontend by converting C# predicate expressions into JavaScript code.
 
 ## Summary
 
 Expression trees provide us with a formal structure of code that lets us analyze existing expressions or compile entirely new ones directly at runtime. This feature makes it possible to do a bunch of cool things, including writing transpilers, interpreters, code generators, optimize reflection calls, provide contextual assertions, and more. I think it's a really powerful tool that deserves a lot more attention.
-
-Have you had an experience using expression trees in a way that made your life better? Share it with me in the comments or [on Twitter](https://twitter.com/tyrrrz).
 
 Some other interesting articles on the topic:
 
@@ -1097,3 +1408,5 @@ Some other interesting articles on the topic:
 - [AutoMapper 5.0 speed increases (Jimmy Bogard)](https://lostechies.com/jimmybogard/2016/06/24/automapper-5-0-speed-increases)
 - [How we did (and did not) improve performance and efficiency in Marten 2.0 (Jeremy D. Miller)](https://jeremydmiller.com/2017/08/01/how-we-did-and-did-not-improve-performance-and-efficiency-in-marten-2-0)
 - [Optimizing Just in Time with Expression Trees (Craig Gidney)](http://twistedoakstudios.com/blog/Post2540_optimizing-just-in-time-with-expression-trees)
+
+I also recommend reading about [code quotations in F#](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/code-quotations) which is a similar feature to expression trees but with more powerful language support.
