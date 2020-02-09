@@ -1,6 +1,6 @@
 ---
 title: Working with expression trees in .NET
-date: 2020-02-18
+date: 2020-02-17
 cover: Cover.png
 ---
 
