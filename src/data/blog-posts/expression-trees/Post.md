@@ -434,7 +434,6 @@ In all of these approaches we're relying on static constructors to initialize th
 Now let's pit all of these techniques against each other and compare their performance using [Benchmark.NET](https://github.com/dotnet/BenchmarkDotNet):
 
 ```csharp
-[MemoryDiagnoser]
 public class Benchmarks
 {
     [Benchmark(Description = "Reflection", Baseline = true)]
@@ -456,12 +455,12 @@ public class Benchmarks
 ```
 
 ```r
-|                Method |       Mean |     Error |    StdDev | Ratio |  Gen 0 | Gen 1 | Gen 2 | Allocated |
-|---------------------- |-----------:|----------:|----------:|------:|-------:|------:|------:|----------:|
-|            Reflection | 192.975 ns | 1.6802 ns | 1.4895 ns |  1.00 | 0.0153 |     - |     - |      48 B |
-|   Reflection (cached) | 123.762 ns | 1.1063 ns | 1.0349 ns |  0.64 | 0.0153 |     - |     - |      48 B |
-| Reflection (delegate) |   6.419 ns | 0.0646 ns | 0.0605 ns |  0.03 | 0.0076 |     - |     - |      24 B |
-|           Expressions |   5.383 ns | 0.0433 ns | 0.0383 ns |  0.03 | 0.0077 |     - |     - |      24 B |
+|                Method |       Mean |     Error |    StdDev | Ratio |
+|---------------------- |-----------:|----------:|----------:|------:|
+|            Reflection | 192.975 ns | 1.6802 ns | 1.4895 ns |  1.00 |
+|   Reflection (cached) | 123.762 ns | 1.1063 ns | 1.0349 ns |  0.64 |
+| Reflection (delegate) |   6.419 ns | 0.0646 ns | 0.0605 ns |  0.03 |
+|           Expressions |   5.383 ns | 0.0433 ns | 0.0383 ns |  0.03 |
 ```
 
 As you can see, compiled expressions outperform reflection across the board, even though the approach with `CreateDelegate` comes really close. Note however that while the execution times are similar, `CreateDelegate` is more limited than compiled expressions -- for example, it cannot be used to call constructor methods.
@@ -583,7 +582,6 @@ Due to the fact that the compiler generates a version of the `Impl` class for ea
 Now, with the optimizations out of the way, let's again use Benchmark.NET to compare the different ways we can calculate three-fourths of a value:
 
 ```csharp
-[MemoryDiagnoser]
 public class Benchmarks
 {
     [Benchmark(Description = "Static", Baseline = true)]
@@ -603,11 +601,11 @@ public class Benchmarks
 ```
 
 ```r
-|      Method |     x |       Mean |     Error |    StdDev | Ratio | RatioSD |  Gen 0 | Gen 1 | Gen 2 | Allocated |
-|------------ |------ |-----------:|----------:|----------:|------:|--------:|-------:|------:|------:|----------:|
-|      Static | 13.37 |  0.6077 ns | 0.0176 ns | 0.0147 ns |  1.00 |    0.00 |      - |     - |     - |         - |
-|     Dynamic | 13.37 | 19.3267 ns | 0.1512 ns | 0.1340 ns | 31.82 |    0.78 | 0.0153 |     - |     - |      48 B |
-| Expressions | 13.37 |  1.9510 ns | 0.0163 ns | 0.0145 ns |  3.21 |    0.08 |      - |     - |     - |         - |
+|      Method |     x |       Mean |     Error |    StdDev | Ratio | RatioSD |
+|------------ |------ |-----------:|----------:|----------:|------:|--------:|
+|      Static | 13.37 |  0.6077 ns | 0.0176 ns | 0.0147 ns |  1.00 |    0.00 |
+|     Dynamic | 13.37 | 19.3267 ns | 0.1512 ns | 0.1340 ns | 31.82 |    0.78 |
+| Expressions | 13.37 |  1.9510 ns | 0.0163 ns | 0.0145 ns |  3.21 |    0.08 |
 ```
 
 As you can see, the expression-based approach performs about nine times faster than when using `dynamic`. Considering that these are the only two options we can use to implement generic operators, this is a pretty good case for compiled expression trees.
@@ -740,7 +738,6 @@ The method `UpdateLookup` takes all of the key-value pairs contained within the 
 Let's see how well this dictionary performs when benchmarked against the standard implementation:
 
 ```csharp
-[MemoryDiagnoser]
 public class Benchmarks
 {
     private readonly Dictionary<string, int> _normalDictionary =
@@ -784,16 +781,16 @@ public class Benchmarks
 ```
 
 ```r
-|              Method | Count |      Mean |     Error |    StdDev | Ratio | Gen 0 | Gen 1 | Gen 2 | Allocated |
-|-------------------- |------ |----------:|----------:|----------:|------:|------:|------:|------:|----------:|
-| Standard dictionary |    10 | 24.995 ns | 0.1821 ns | 0.1704 ns |  1.00 |     - |     - |     - |         - |
-| Compiled dictionary |    10 |  9.366 ns | 0.0511 ns | 0.0478 ns |  0.37 |     - |     - |     - |         - |
-|                     |       |           |           |           |       |       |       |       |           |
-| Standard dictionary |  1000 | 25.105 ns | 0.0665 ns | 0.0622 ns |  1.00 |     - |     - |     - |         - |
-| Compiled dictionary |  1000 | 14.819 ns | 0.1138 ns | 0.1065 ns |  0.59 |     - |     - |     - |         - |
-|                     |       |           |           |           |       |       |       |       |           |
-| Standard dictionary | 10000 | 29.047 ns | 0.1201 ns | 0.1123 ns |  1.00 |     - |     - |     - |         - |
-| Compiled dictionary | 10000 | 17.903 ns | 0.0635 ns | 0.0530 ns |  0.62 |     - |     - |     - |         - |
+|              Method | Count |      Mean |     Error |    StdDev | Ratio |
+|-------------------- |------ |----------:|----------:|----------:|------:|
+| Standard dictionary |    10 | 24.995 ns | 0.1821 ns | 0.1704 ns |  1.00 |
+| Compiled dictionary |    10 |  9.366 ns | 0.0511 ns | 0.0478 ns |  0.37 |
+|                     |       |           |           |           |       |
+| Standard dictionary |  1000 | 25.105 ns | 0.0665 ns | 0.0622 ns |  1.00 |
+| Compiled dictionary |  1000 | 14.819 ns | 0.1138 ns | 0.1065 ns |  0.59 |
+|                     |       |           |           |           |       |
+| Standard dictionary | 10000 | 29.047 ns | 0.1201 ns | 0.1123 ns |  1.00 |
+| Compiled dictionary | 10000 | 17.903 ns | 0.0635 ns | 0.0530 ns |  0.62 |
 ```
 
 We can see that the compiled dictionary performs lookups about 1.6-2.8 times faster. While the performance of the hash table is consistent regardless of how many elements are in the dictionary, the expression tree implementation becomes slower as the dictionary gets bigger. This can potentially be remedied by adding another switch layer for indexing.
@@ -862,7 +859,6 @@ In most cases that's completely fine, but you may want to take the performance e
 For example, here's a simple benchmark that shows the difference:
 
 ```csharp
-[MemoryDiagnoser]
 public class Benchmarks
 {
     private static Expression Body { get; } =
@@ -879,10 +875,10 @@ public class Benchmarks
 ```
 
 ```r
-|         Method |      Mean |     Error |    StdDev | Ratio |  Gen 0 |  Gen 1 |  Gen 2 | Allocated |
-|--------------- |----------:|----------:|----------:|------:|-------:|-------:|-------:|----------:|
-|        Compile | 38.435 us | 0.2131 us | 0.1889 us |  1.00 | 1.0986 | 0.5493 |      - |   3.53 KB |
-| Compile (fast) |  4.497 us | 0.0662 us | 0.0619 us |  0.12 | 0.3891 | 0.1907 | 0.0305 |   1.21 KB |
+|         Method |      Mean |     Error |    StdDev | Ratio | Allocated |
+|--------------- |----------:|----------:|----------:|------:|----------:|
+|        Compile | 38.435 us | 0.2131 us | 0.1889 us |  1.00 |   3.53 KB |
+| Compile (fast) |  4.497 us | 0.0662 us | 0.0619 us |  0.12 |   1.21 KB |
 ```
 
 As you can see, the performance improvement is pretty noticeable. The reason it runs so fast is because the `CompileFast` version skips all the verifications that normal `Compile` does to ensure that the expression tree is valid.
