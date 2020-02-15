@@ -620,25 +620,24 @@ While a typical dictionary implementation may be pretty complicated, a lookup ca
 
 ```csharp
 // Pseudo-code
-public TValue Lookup(TKey key) =>
-    key.GetHashCode() switch
+public TValue Lookup(TKey key) => key.GetHashCode() switch
+{
+    // No collisions
+    9254 => value1,
+    -101 => value2,
+
+    // Collision
+    777 => key switch
     {
-        // No collisions
-        9254 => value1,
-        -101 => value2,
+        key3 => value3,
+        key4 => value4
+    },
 
-        // Collision
-        777 => key switch
-        {
-            key3 => value3,
-            key4 => value4
-        },
+    // ...
 
-        // ...
-
-        // Not found
-        _ => throw new KeyNotFoundException(key.ToString())
-    };
+    // Not found
+    _ => throw new KeyNotFoundException(key.ToString())
+};
 ```
 
 The function above attempts to match the hash code of the specified key with the hash code of one of the keys contained within the dictionary. If it's successful, then the corresponding value is returned.
