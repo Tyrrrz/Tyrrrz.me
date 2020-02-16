@@ -651,15 +651,11 @@ Let's try it out. Here's how the code for that would look:
 ```csharp
 public class CompiledDictionary<TKey, TValue> : IDictionary<TKey, TValue>
 {
-    private readonly List<KeyValuePair<TKey, TValue>> _pairs =
-        new List<KeyValuePair<TKey, TValue>>();
+    private readonly IDictionary<TKey, TValue> _inner = new Dictionary<TKey, TValue>();
 
     private Func<TKey, TValue> _lookup;
 
-    public CompiledDictionary()
-    {
-        UpdateLookup();
-    }
+    public CompiledDictionary() => UpdateLookup();
 
     public void UpdateLookup()
     {
@@ -690,7 +686,7 @@ public class CompiledDictionary<TKey, TValue> : IDictionary<TKey, TValue>
             keyGetHashCodeCall, // switch condition
             throwException, // default case
             null, // use default comparer
-            _pairs // switch cases
+            _inner // switch cases
                 .GroupBy(p => p.Key.GetHashCode())
                 .Select(g =>
                 {
@@ -722,18 +718,14 @@ public class CompiledDictionary<TKey, TValue> : IDictionary<TKey, TValue>
     public TValue this[TKey key]
     {
         get => _lookup(key);
-        set
-        {
-            _pairs.RemoveAll(p => EqualityComparer<TKey>.Default.Equals(p.Key, key));
-            _pairs.Add(KeyValuePair.Create(key, value));
-        }
+        set => _inner[key] = value;
     }
 
     // The rest of the interface implementation is omitted for brevity
 }
 ```
 
-The method `UpdateLookup` takes all of the key-value pairs contained within the current dictionary (`_pairs`) and groups them by the hash codes of their keys, which are then transformed into switch cases. If there is no collision for a particular hash code, then the switch case is made up of a single constant expression that produces the corresponding value. Otherwise, it contains an inner switch expression that further evaluates the key to determine which value to return.
+The method `UpdateLookup` takes all of the key-value pairs contained within the inner dictionary and groups them by the hash codes of their keys, which are then transformed into switch cases. If there is no collision for a particular hash code, then the switch case is made up of a single constant expression that produces the corresponding value. Otherwise, it contains an inner switch expression that further evaluates the key to determine which value to return.
 
 Let's see how well this dictionary performs when benchmarked against the standard implementation:
 
