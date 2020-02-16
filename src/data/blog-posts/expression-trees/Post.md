@@ -794,12 +794,13 @@ One other interesting usage scenario, that I'm personally really fond of, is par
 As an example, let's write a simple program that takes a string representation of a mathematical expression and evaluates its result. To implement the parser, we will use the [Sprache](https://github.com/sprache/Sprache) library.
 
 ```csharp
-public static class ExpressionDsl
+public static class SimpleCalculator
 {
     private static readonly Parser<Expression> Constant =
         Parse.DecimalInvariant
             .Select(n => double.Parse(n, CultureInfo.InvariantCulture))
-            .Select(n => Expression.Constant(n, typeof(double)));
+            .Select(n => Expression.Constant(n, typeof(double)))
+            .Token();
 
     private static readonly Parser<ExpressionType> Operator =
         Parse.Char('+').Return(ExpressionType.Add)
@@ -820,27 +821,20 @@ public static class ExpressionDsl
 
         return func();
     }
-
-    public static void Main(string[] args)
-    {
-        var input = string.Concat(args);
-        var result = Run(input);
-
-        Console.WriteLine(result);
-    }
 }
 ```
 
 As you can see, the parsers defined above (`Constant`, `Operator`, `Operation`, `FullExpression`) all yield objects of type `Expression` and `ExpressionType`, which are both defined in `System.Linq.Expressions`. The expression tree is essentially our syntax tree, so once we parse the input we have all the required information to compile the runtime instructions represented by it.
 
-You can try it out by running the application:
+You can try it out by calling `Run`:
 
-```shell
-> app 3.15 * 5 + 2
-17.75
+```csharp
+var a = SimpleCalculator.Run("2 + 2");        // 4
+var b = SimpleCalculator.Run("3.15 * 5 + 2"); // 17.75
+var c = SimpleCalculator.Run("1 / 2 * 3");    // 1.5
 ```
 
-Note that this simple calculator is just an example of what you can do. If you want to see how a proper calculator like that would look, check out [Sprache.Calc](https://github.com/yallie/Sprache.Calc/blob/master/Sprache.Calc/SimpleCalculator.cs). Also, if you want to learn more about parsing, check out my blog posts about [parsing in C#](/blog/monadic-parser-combinators) and [parsing in F#](/blog/parsing-with-fparsec).
+Note that this simple calculator is just an example of what you can do, it doesn't respect operator precedence and doesn't understand nested expressions. Implementing a parser for that would be out of scope of covering expression trees, but if you want to see how a proper calculator like that would look, check out [Sprache.Calc](https://github.com/yallie/Sprache.Calc/blob/master/Sprache.Calc/SimpleCalculator.cs). Also, if you want to learn more about parsing, check out my blog posts about [parsing in C#](/blog/monadic-parser-combinators) and [parsing in F#](/blog/parsing-with-fparsec).
 
 ## Making things even faster
 
