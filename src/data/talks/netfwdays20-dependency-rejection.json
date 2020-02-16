@@ -1,9 +1,9 @@
 {
   "title": "Dependency rejection: functional architecture",
   "description": "Designing applications using functional architecture, utilizing pure-impure segregation for cleaner code, writing tests without mocks",
-  "event": ".NET fwdays 2020",
+  "event": ".NET fwdays'20",
   "date": "2020-04-11",
-  "language": "English",
+  "language": "Russian",
   "eventUrl": "https://fwdays.com/en/event/dotnet-fwdays-2020",
   "presentationUrl": null,
   "recordingUrl": null
