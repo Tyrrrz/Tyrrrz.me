@@ -1,5 +1,5 @@
 ---
-title: Working with expression trees in .NET
+title: Working with expression trees in C#
 date: 2020-02-17
 cover: Cover.png
 ---
