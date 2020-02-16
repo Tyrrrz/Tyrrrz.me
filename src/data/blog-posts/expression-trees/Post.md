@@ -920,7 +920,7 @@ Note, however, that while direct assignment shown previously works, you can't do
 ```csharp
 Func<int, int, int> div = (a, b) => a / b;
 
-// Compile error
+// Compilation error
 Expression<Func<int, int, int>> divExpr = div;
 ```
 
@@ -945,7 +945,7 @@ Although this approach is incredibly useful, it has certain limitations. Specifi
 On top of all that, you cannot use this method to construct expression trees from multi-line lambdas. That means this won't compile:
 
 ```csharp
-// Compile error
+// Compilation error
 Expression<Func<int, int, int>> divExpr = (a, b) =>
 {
     var result = a / b;
@@ -956,7 +956,7 @@ Expression<Func<int, int, int>> divExpr = (a, b) =>
 And, more importantly, this won't work either:
 
 ```csharp
-// Compile error
+// Compilation error
 Expression<Action> writeToConsole = () =>
 {
     Console.Write("Hello ");
