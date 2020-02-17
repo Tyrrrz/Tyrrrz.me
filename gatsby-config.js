@@ -46,7 +46,7 @@ exports.plugins = [
       }),
 
       // Zoom for images
-      resolvePlugin(`gatsby-remark-images-medium-zoom`),
+      //resolvePlugin(`gatsby-remark-images-medium-zoom`),
 
       // Syntax highlighting
       resolvePlugin(`gatsby-remark-prismjs`, {
