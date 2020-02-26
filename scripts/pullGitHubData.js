@@ -5,6 +5,7 @@ const axios = require('axios');
 const outputDirPath = path.resolve(__dirname, `..`, `src`, `data`, `projects`);
 
 const run = async () => {
+
   // Fetch GitHub API to get my repos
   const result = await axios.get(`https://api.github.com/users/Tyrrrz/repos?visibility=public&per_page=100&sort=pushed`);
 
