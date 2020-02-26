@@ -1,6 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-const axios = require('axios');
+const fs = require(`fs`);
+const path = require(`path`);
+const axios = require(`axios`);
 
 const outputDirPath = path.resolve(__dirname, `..`, `src`, `data`, `projects`);
 
@@ -21,12 +21,10 @@ const run = async () => {
 
   // Store in files
   projects.forEach(project => {
-    const json = JSON.stringify(project, null, 2) + '\n';
+    const json = `${JSON.stringify(project, null, 2)}\n`;
     const filePath = path.resolve(outputDirPath, `${project.name}.json`);
-    fs.writeFileSync(filePath, json);
+    fs.writeFile(filePath, json, () => console.log(`Pulled ${project.name}`));
   });
-
-  console.log(`Pulled ${projects.length} projects.`);
 };
 
 run();

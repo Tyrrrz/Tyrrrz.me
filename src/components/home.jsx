@@ -26,25 +26,17 @@ export const query = graphql`
 export default ({ data }) => {
   const siteMetadata = useSiteMetadata();
 
-  const myAge = moment().diff(moment('1995-04-28'), 'years');
+  const myAge = moment().diff(moment(`1995-04-28`), `years`);
 
   const SocialLink = ({ iconPath, ...props }) => (
     <Link
       css={{
-        '&:hover': {
-          svg: {
-            path: {
-              fill: theme.accentColor
-            }
-          }
-        },
+        '&:hover': { svg: { path: { fill: theme.accentColor } } },
 
-        '&:not(:last-child)': {
-          marginRight: '0.4em'
-        }
+        '&:not(:last-child)': { marginRight: `0.4em` }
       }}
       {...props}>
-      <MdiIcon path={iconPath} size={'1.4em'} />
+      <MdiIcon path={iconPath} size={`1.4em`} />
     </Link>
   );
 
@@ -55,31 +47,31 @@ export default ({ data }) => {
       {/* Photo */}
       <div
         css={{
-          marginTop: '1em',
-          textAlign: 'center'
+          marginTop: `1em`,
+          textAlign: `center`
         }}>
-        <Img fixed={data.file.childImageSharp.fixed} alt="my photo" css={{ borderRadius: '40%' }} />
+        <Img fixed={data.file.childImageSharp.fixed} alt="my photo" css={{ borderRadius: `40%` }} />
       </div>
 
       <Separator />
 
       {/* Bio */}
       <div>
-        <p>Hello! My name is Alexey, also known online as Tyrrrz. I'm a {myAge} y/o software developer based in Kyiv, Ukraine.</p>
+        <p>Hello! My name is Alexey, also known online as Tyrrrz. I&apos;m a {myAge} y/o software developer based in Kyiv, Ukraine.</p>
         <p>
-          I'm mostly experienced in C#/.NET, Azure/AWS, cloud-native applications and related technologies. At the moment I'm working as a
-          senior software developer for Svitla Systems, an outstaffing company.
+          I&apos;m mostly experienced in C#/.NET, Azure/AWS, cloud-native applications and related technologies.
+          At the moment I&apos;m working as a senior software developer for Svitla Systems, an outstaffing company.
         </p>
         <p>
-          In my spare time, I'm developing and maintaining a number of open-source projects. I also sometimes speak at conferences and blog
-          on technical topics.
+          In my spare time, I&apos;m developing and maintaining a number of open-source projects.
+          I also sometimes speak at conferences and blog on technical topics.
         </p>
       </div>
 
       <Separator />
 
       {/* Socials */}
-      <div css={{ textAlign: 'center' }}>
+      <div css={{ textAlign: `center` }}>
         <SocialLink iconPath={mdiAt} to={`mailto:${siteMetadata.email}`} alt={`Email`} />
         <SocialLink iconPath={mdiGithubCircle} to={`https://github.com/${siteMetadata.github}`} alt={`GitHub`} />
         <SocialLink iconPath={mdiTwitterCircle} to={`https://twitter.com/${siteMetadata.twitter}`} alt={`Twitter`} />

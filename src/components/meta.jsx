@@ -6,28 +6,30 @@ export default ({ title, description, image }) => {
   const siteMetadata = useSiteMetadata();
 
   // Append site title to page title
-  title = title ? `${title} | ${siteMetadata.title}` : siteMetadata.title;
+  const actualTitle = title
+    ? `${title} | ${siteMetadata.title}`
+    : siteMetadata.title;
 
   // Use fallback description if it's not set
-  description = description || siteMetadata.description;
+  const actualDescription = description || siteMetadata.description;
 
   return (
     <Helmet>
       <html lang="en" />
 
-      <title>{title}</title>
+      <title>{actualTitle}</title>
 
       <meta property="og:type" content="website" />
 
-      <meta property="og:title" content={title} />
-      <meta name="twitter:title" content={title} />
+      <meta property="og:title" content={actualTitle} />
+      <meta name="twitter:title" content={actualTitle} />
 
       <meta name="twitter:creator" content={`@${siteMetadata.twitter}`} />
       <meta name="twitter:card" content="summary" />
 
-      <meta name="description" content={description} />
-      <meta property="og:description" content={description} />
-      <meta name="twitter:description" content={description} />
+      <meta name="description" content={actualDescription} />
+      <meta property="og:description" content={actualDescription} />
+      <meta name="twitter:description" content={actualDescription} />
 
       {image && <meta property="og:image" content={image} />}
     </Helmet>

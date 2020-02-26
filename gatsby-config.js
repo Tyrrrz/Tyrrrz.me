@@ -1,7 +1,7 @@
-const path = require('path');
+const path = require(`path`);
 
-const settings = require('./src/settings');
-const theme = require('./src/theme');
+const settings = require(`./src/settings`);
+const theme = require(`./src/theme`);
 
 // Gatsby's default syntax for defining plugins is awful so I wrote this
 const resolvePlugin = (plugin, options) => ({
@@ -24,6 +24,9 @@ exports.siteMetadata = {
 };
 
 exports.plugins = [
+  // Linting during development
+  resolvePlugin(`gatsby-plugin-eslint`),
+
   // Source: file system
   resolvePlugin(`gatsby-source-filesystem`, {
     name: `content`,
@@ -71,14 +74,10 @@ exports.plugins = [
   }),
 
   // Inject canonical URLs into meta tags
-  resolvePlugin(`gatsby-plugin-canonical-urls`, {
-    siteUrl: settings.siteDomain
-  }),
+  resolvePlugin(`gatsby-plugin-canonical-urls`, { siteUrl: settings.siteDomain }),
 
   // Disqus integration
-  resolvePlugin(`gatsby-plugin-disqus`, {
-    shortname: settings.disqusId
-  }),
+  resolvePlugin(`gatsby-plugin-disqus`, { shortname: settings.disqusId }),
 
   // Google Analytics integration
   resolvePlugin(`gatsby-plugin-google-analytics`, {
@@ -100,6 +99,6 @@ exports.plugins = [
   resolvePlugin(`gatsby-plugin-emotion`),
   resolvePlugin(`gatsby-plugin-catch-links`),
   resolvePlugin(`gatsby-plugin-sitemap`),
-  resolvePlugin('gatsby-plugin-robots-txt'),
+  resolvePlugin(`gatsby-plugin-robots-txt`),
   resolvePlugin(`gatsby-plugin-offline`)
 ];

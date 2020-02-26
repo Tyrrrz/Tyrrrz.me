@@ -1,7 +1,7 @@
 import React from 'react';
 import { graphql } from 'gatsby';
 import MdiIcon from '@mdi/react';
-import { mdiStar, mdiCodeTags } from '@mdi/js';
+import { mdiCodeTags, mdiStar } from '@mdi/js';
 import routes from '../routes';
 import theme from '../theme';
 import Link from './link';
@@ -26,10 +26,10 @@ export const query = graphql`
 export default ({ data }) => {
   const Icon = ({ ...props }) => (
     <MdiIcon
-      size={'1em'}
+      size={`1em`}
       css={{
-        marginTop: '0.06em',
-        verticalAlign: 'top'
+        marginTop: `0.06em`,
+        verticalAlign: `top`
       }}
       {...props}
     />
@@ -44,14 +44,10 @@ export default ({ data }) => {
 
     return (
       <div
-        css={{
-          '&:not(:last-child)': {
-            marginBottom: '1.5em'
-          }
-        }}>
+        css={{ '&:not(:last-child)': { marginBottom: `1.5em` } }}>
         {/* Title */}
-        <div css={{ fontSize: '1.5em' }}>
-          <Link to={url} css={{ textDecoration: 'none' }}>
+        <div css={{ fontSize: `1.5em` }}>
+          <Link to={url} css={{ textDecoration: `none` }}>
             {name}
           </Link>
         </div>
@@ -59,13 +55,11 @@ export default ({ data }) => {
         {/* Meta */}
         <div
           css={{
-            marginTop: '0.3em',
-            opacity: '0.65',
-            fontSize: '0.8em',
+            marginTop: `0.3em`,
+            opacity: `0.65`,
+            fontSize: `0.8em`,
 
-            'span + span': {
-              marginLeft: '1em'
-            }
+            'span + span': { marginLeft: `1em` }
           }}>
           <span>
             <Icon path={mdiStar} color={theme.accentColor} />
@@ -81,7 +75,7 @@ export default ({ data }) => {
         </div>
 
         {/* Description */}
-        <div css={{ marginTop: '0.3em' }}>{description}</div>
+        <div css={{ marginTop: `0.3em` }}>{description}</div>
       </div>
     );
   };
@@ -90,9 +84,7 @@ export default ({ data }) => {
     <Layout>
       <Meta title="Projects" />
 
-      {data.allProjectsJson.nodes.map(node => (
-        <Listing node={node} />
-      ))}
+      {data.allProjectsJson.nodes.map(node => <Listing key={node.name} node={node} />)}
 
       <Separator />
 

@@ -1163,7 +1163,7 @@ X IntTryParse_Test [99ms]
 
 As you can see, the error message now specifies the exact assertion that failed. This gives us more context which helps determine what actually went wrong.
 
-___
+---
 
 With the advent of .NET Core 3.0, the .NET team has also added a new attribute, `CallerArgumentExpression`. This attribute was meant to be supported by a [language feature](https://github.com/dotnet/csharplang/issues/287) that was planned for C# 8 but unfortunately it didn't make it. Currently, the attribute doesn't do anything, but we should see this change in one of the future versions of the language.
 

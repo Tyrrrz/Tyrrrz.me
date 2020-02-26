@@ -52,10 +52,10 @@ export default ({ data }) => {
 
   const Icon = ({ ...props }) => (
     <MdiIcon
-      size={'1em'}
+      size={`1em`}
       css={{
-        marginTop: '0.06em',
-        verticalAlign: 'top'
+        marginTop: `0.06em`,
+        verticalAlign: `top`
       }}
       {...props}
     />
@@ -64,18 +64,18 @@ export default ({ data }) => {
   const Footnote = ({ ...props }) => (
     <div
       css={{
-        display: 'grid',
-        gridTemplateColumns: 'auto 1fr'
+        display: `grid`,
+        gridTemplateColumns: `auto 1fr`
       }}
       {...props}>
       <div css={{ gridColumn: 1 }}>
-        <Icon path={mdiTwitterCircle} size={'3em'} color="#1da1f2" />
+        <Icon path={mdiTwitterCircle} size={`3em`} color="#1da1f2" />
       </div>
       <div
         css={{
           gridColumn: 2,
-          alignSelf: 'center',
-          marginLeft: '1.5em'
+          alignSelf: `center`,
+          marginLeft: `1.5em`
         }}>
         <Link to={`https://twitter.com/${siteMetadata.twitter}`}>Follow me on Twitter</Link> to get notified when I post a new article ✨
       </div>
@@ -98,18 +98,16 @@ export default ({ data }) => {
       <Meta title={title} description={excerpt} image={coverImageUrl} />
 
       {/* Title */}
-      <div css={{ fontSize: '2em' }}>{title}</div>
+      <div css={{ fontSize: `2em` }}>{title}</div>
 
       {/* Meta */}
       <div
         css={{
-          marginTop: '0.3em',
-          opacity: '0.65',
-          fontSize: '0.8em',
+          marginTop: `0.3em`,
+          opacity: `0.65`,
+          fontSize: `0.8em`,
 
-          'span + span': {
-            marginLeft: '1em'
-          }
+          'span + span': { marginLeft: `1em` }
         }}>
         <span>
           <Icon path={mdiCalendar} />
@@ -128,31 +126,31 @@ export default ({ data }) => {
       <div
         css={{
           code: {
-            fontFamily: "'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace",
-            fontSize: '0.8em'
+            fontFamily: `'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace`,
+            fontSize: `0.8em`
           },
 
           '*:not(pre) > code': {
-            padding: '0.2em',
-            borderRadius: '2px',
-            backgroundColor: '#f0f0f0'
+            padding: `0.2em`,
+            borderRadius: `2px`,
+            backgroundColor: `#f0f0f0`
           },
 
           pre: {
-            fontWeight: '300',
-            lineHeight: '1'
+            fontWeight: `300`,
+            lineHeight: `1`
           },
 
           'blockquote p': {
             borderLeft: `solid 2px ${theme.accentColor}`,
-            borderRadius: '2px',
-            paddingLeft: '0.5em'
+            borderRadius: `2px`,
+            paddingLeft: `0.5em`
           },
 
           hr: {
-            opacity: '0.4',
-            margin: '1em auto',
-            width: '20%',
+            opacity: `0.4`,
+            margin: `1em auto`,
+            width: `20%`,
             borderTop: `1px solid ${theme.dimColor}`
           }
         }}
