@@ -1,8 +1,10 @@
 ---
 title: Simulating return type inference in C#
 date: 2020-02-17
-#cover: Cover.png
+cover: Cover.png
 ---
+
+![cover](Cover.png)
 
 I really like building frameworks that enable other developers to make something cool. Sometimes, when chasing down the perfect API you have in mind, you may need to push the language to the very limit.
 
@@ -188,9 +190,11 @@ public readonly struct Result<TResult, TError>
 
 public static class Result
 {
-    public static Result<TResult, TError> Ok<TResult, TError>(TResult result) => new Result<TResult, TError>(result);
+    public static Result<TResult, TError> Ok<TResult, TError>(TResult result) =>
+        new Result<TResult, TError>(result);
 
-    public static Result<TResult, TError> Error<TResult, TError>(TError error) => new Result<TResult, TError>(error);
+    public static Result<TResult, TError> Error<TResult, TError>(TError error) =>
+        new Result<TResult, TError>(error);
 }
 ```
 
@@ -227,9 +231,11 @@ public readonly struct Result<TResult, TError>
     {
     }
 
-    public static implicit operator Result<TResult, TError>(DelayedResult<TResult> ok) => new Result<TResult, TError>(ok.Value);
+    public static implicit operator Result<TResult, TError>(DelayedResult<TResult> ok) =>
+        new Result<TResult, TError>(ok.Value);
 
-    public static implicit operator Result<TResult, TError>(DelayedResult<TError> error) => new Result<TResult, TError>(error.Value);
+    public static implicit operator Result<TResult, TError>(DelayedResult<TError> error) =>
+        new Result<TResult, TError>(error.Value);
 }
 
 public readonly struct DelayedResult<T>
@@ -244,9 +250,11 @@ public readonly struct DelayedResult<T>
 
 public static class Result
 {
-    public static DelayedResult<TResult> Ok<TResult>(TResult result) => new DelayedResult<TResult>(result);
+    public static DelayedResult<TResult> Ok<TResult>(TResult result) =>
+        new DelayedResult<TResult>(result);
 
-    public static DelayedResult<TError> Error<TError>(TError error) => new DelayedResult<TError>(error);
+    public static DelayedResult<TError> Error<TError>(TError error) =>
+        new DelayedResult<TError>(error);
 }
 ```
 
@@ -298,7 +306,7 @@ public class Translator
 ```
 
 ```ini
-Cannot convert expression type 'Playground.DelayedResult<string>' to return type 'Playground.Result<string,string>'
+Cannot convert expression type 'DelayedResult<string>' to return type 'Result<string,string>'
 ```
 
 ```csharp
@@ -325,9 +333,11 @@ public readonly struct Result<TResult, TError>
     {
     }
 
-    public static implicit operator Result<TResult, TError>(DelayedOk<TResult> ok) => new Result<TResult, TError>(ok.Value);
+    public static implicit operator Result<TResult, TError>(DelayedOk<TResult> ok) =>
+        new Result<TResult, TError>(ok.Value);
 
-    public static implicit operator Result<TResult, TError>(DelayedError<TError> error) => new Result<TResult, TError>(error.Value);
+    public static implicit operator Result<TResult, TError>(DelayedError<TError> error) =>
+        new Result<TResult, TError>(error.Value);
 }
 
 public readonly struct DelayedOk<T>
@@ -352,9 +362,11 @@ public readonly struct DelayedError<T>
 
 public static class Result
 {
-    public static DelayedOk<TResult> Ok<TResult>(TResult result) => new DelayedOk<TResult>(result);
+    public static DelayedOk<TResult> Ok<TResult>(TResult result) =>
+        new DelayedOk<TResult>(result);
 
-    public static DelayedError<TError> Error<TError>(TError error) => new DelayedError<TError>(error);
+    public static DelayedError<TError> Error<TError>(TError error) =>
+        new DelayedError<TError>(error);
 }
 ```
 
@@ -399,7 +411,8 @@ public class Store<TState, TAction>
 
 public static class Store
 {
-    public static Store<TState, TAction> Create<TState, TAction>(TState initial, Func<TState, TAction, TState> reduce) =>
+    public static Store<TState, TAction> Create<TState, TAction>(
+        TState initial, Func<TState, TAction, TState> reduce) =>
         new Store<TState, TAction>(reduce, initial);
 }
 ```
@@ -435,8 +448,9 @@ public static void Init()
 ```
 
 ```ini
-The type arguments for method 'Store<TState,TAction> Xedux.Store.Create<TState,TAction>(TState, Func<TState,TAction,TState>)' cannot be inferred from the usage.
-Try specifying the type arguments explicitly.
+The type arguments for method
+  'Store<TState,TAction> Store.Create<TState,TAction>(TState, Func<TState,TAction,TState>)'
+  cannot be inferred from the usage. Try specifying the type arguments explicitly.
 ```
 
 ```csharp
@@ -455,7 +469,8 @@ public class StoreRecipe<TState>
 
 public static class Store
 {
-    public static StoreRecipe<TState> Initial<TState>(TState initial) => new StoreRecipe<TState>(initial);
+    public static StoreRecipe<TState> Initial<TState>(TState initial) =>
+        new StoreRecipe<TState>(initial);
 }
 ```
 
