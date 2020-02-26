@@ -14,7 +14,7 @@ From the earliest versions of the language, C# provided a construct called [regi
 
 I do believe that being able to group code to form logical blocks is useful, however I agree that regions cause more problems than they solve. For that reason, I've been actively using _partial classes_ instead, which in many ways can be used for a similar purpose without suffering from the same drawbacks.
 
-[Partial classes](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/partial-classes-and-methods) is a C# feature that lets you split the definition of a type into multiple parts, each potentially in its own file. During the build, compiler collects all of the parts and combines them together to produce a single  class, as if it was defined in one place. It's enabled by adding the `partial` keyword in the definition.
+[Partial classes](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/partial-classes-and-methods) is a C# feature that lets you split the definition of a type into multiple parts, each potentially in its own file. During the build, compiler collects all of the parts and combines them together to produce a single class, as if it was defined in one place. It's enabled by adding the `partial` keyword in the definition.
 
 In this article I will show you how I typically utilize partial classes when refactoring my own code. Hopefully, the examples here will entice you to try this approach as well.
 
@@ -114,7 +114,7 @@ One could argue that we could've instead moved our helper method to a different 
 
 Note that in this example both partial definitions of the class are placed in the same file. Since our primary goal is to group code rather than shred it to pieces, keeping things close makes more sense. I would consider moving the partitions to separate files only if they get too big to keep in one place.
 
-___
+---
 
 This idea works especially well when combining with the ["Resource acquisition is initialization"](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization) pattern. Using partial classes we can group methods responsible for initialization and separate them from the rest of the class.
 
@@ -221,7 +221,7 @@ public partial class HtmlElement : ICloneable
 
 Putting interface implementations in partial classes can help us reduce the "routing noise" caused by methods that forward calls upstream. Additionally, since C# allows us to specify the class signature on each partition separately, we can conveniently group members that belong to the same interface.
 
-___
+---
 
 This approach is also very useful when combined with conditional compilation. Occasionally, we may want to introduce API that depends on features available in a specific version of the framework. To do that, we have to use the `#if` directive which acts similarly to regions, making our code less readable.
 

@@ -57,7 +57,7 @@
     "develop": "gatsby develop",
     "start": "npm run develop",
     "serve": "gatsby serve",
-    "format": "prettier **/*.{json,md} --write --ignore-path .gitignore && eslint **/*.{js,jsx} --fix --ignore-path .gitignore",
+    "clean": "prettier **/*.{json,md} --write --ignore-path .gitignore && eslint **/*.{js,jsx} --fix --ignore-path .gitignore && echo Clean finished.",
     "pull-github-data": "node ./scripts/pullGitHubData.js"
   },
   "repository": {

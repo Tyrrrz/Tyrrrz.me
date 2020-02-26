@@ -29,10 +29,10 @@ export const query = graphql`
 export default ({ data }) => {
   const Icon = ({ ...props }) => (
     <MdiIcon
-      size={'1em'}
+      size={`1em`}
       css={{
-        marginTop: '0.06em',
-        verticalAlign: 'top'
+        marginTop: `0.06em`,
+        verticalAlign: `top`
       }}
       {...props}
     />
@@ -48,14 +48,10 @@ export default ({ data }) => {
 
     return (
       <div
-        css={{
-          '&:not(:last-child)': {
-            marginBottom: '1.5em'
-          }
-        }}>
+        css={{ '&:not(:last-child)': { marginBottom: `1.5em` } }}>
         {/* Title */}
-        <div css={{ fontSize: '1.5em' }}>
-          <Link to={url} css={{ textDecoration: 'none' }}>
+        <div css={{ fontSize: `1.5em` }}>
+          <Link to={url} css={{ textDecoration: `none` }}>
             {title}
           </Link>
         </div>
@@ -63,13 +59,11 @@ export default ({ data }) => {
         {/* Meta */}
         <div
           css={{
-            marginTop: '0.3em',
-            opacity: '0.65',
-            fontSize: '0.8em',
+            marginTop: `0.3em`,
+            opacity: `0.65`,
+            fontSize: `0.8em`,
 
-            'span + span': {
-              marginLeft: '1em'
-            }
+            'span + span': { marginLeft: `1em` }
           }}>
           <span>
             <Icon path={mdiCalendar} /> {date}
@@ -83,7 +77,7 @@ export default ({ data }) => {
         </div>
 
         {/* Excerpt */}
-        <div css={{ marginTop: '0.3em' }}>
+        <div css={{ marginTop: `0.3em` }}>
           {excerpt}
           {` `}
           <Link to={url}>continue reading</Link>
@@ -96,9 +90,7 @@ export default ({ data }) => {
     <Layout>
       <Meta title="Blog" />
 
-      {data.allMarkdownRemark.nodes.map(node => (
-        <Listing node={node} />
-      ))}
+      {data.allMarkdownRemark.nodes.map(node => <Listing key={node.slug} node={node} />)}
     </Layout>
   );
 };

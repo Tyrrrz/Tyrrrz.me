@@ -1,5 +1,5 @@
-const path = require('path');
-const routes = require('./src/routes');
+const path = require(`path`);
+const routes = require(`./src/routes`);
 
 exports.createPages = async ({ actions, graphql }) => {
   // Generate pages for static routes
