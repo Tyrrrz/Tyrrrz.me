@@ -1,5 +1,5 @@
 ---
-title: WPF TreeView SelectedItem TwoWay binding
+title: WPF TreeView SelectedItem TwoWay Binding
 date: 2016-10-30
 ---
 

@@ -1,5 +1,5 @@
 ---
-title: Code-behind for ResourceDictionary in WPF
+title: Code-Behind for ResourceDictionary in WPF
 date: 2016-10-29
 ---
 

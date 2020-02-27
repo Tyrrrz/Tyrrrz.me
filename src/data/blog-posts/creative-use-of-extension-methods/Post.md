@@ -1,5 +1,5 @@
 ---
-title: Creative use of extension methods
+title: Creative Use of Extension Methods
 date: 2019-01-26
 cover: Cover.png
 ---

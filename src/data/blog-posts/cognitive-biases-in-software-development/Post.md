@@ -1,5 +1,5 @@
 ---
-title: Cognitive biases in software development
+title: Cognitive Biases in Software Development
 date: 2018-02-18
 cover: Cover.png
 ---

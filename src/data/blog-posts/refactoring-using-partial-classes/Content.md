@@ -1,5 +1,5 @@
 ---
-title: Refactoring C# code using partial classes
+title: Refactoring C# Code Using Partial Classes
 date: 2020-02-03
 cover: Cover.png
 ---

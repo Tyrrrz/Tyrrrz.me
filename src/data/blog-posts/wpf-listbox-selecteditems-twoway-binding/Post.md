@@ -1,5 +1,5 @@
 ---
-title: WPF ListBox SelectedItems TwoWay binding
+title: WPF ListBox SelectedItems TwoWay Binding
 date: 2016-11-01
 ---
 

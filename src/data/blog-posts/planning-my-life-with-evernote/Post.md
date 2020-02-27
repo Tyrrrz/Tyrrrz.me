@@ -1,5 +1,5 @@
 ---
-title: Planning my life with Evernote
+title: Planning My Life With Evernote
 date: 2018-12-23
 cover: Cover.png
 ---

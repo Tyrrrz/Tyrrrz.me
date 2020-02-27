@@ -1,5 +1,5 @@
 ---
-title: Conditional content presenting via WPF ContentPresenter
+title: Conditional Content Presenting via WPF ContentPresenter
 date: 2016-10-28
 ---
 

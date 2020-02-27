@@ -1,5 +1,5 @@
 ---
-title: Monadic parser combinators in C#
+title: Monadic Parser Combinators in C#
 date: 2019-11-10
 cover: Cover.png
 ---

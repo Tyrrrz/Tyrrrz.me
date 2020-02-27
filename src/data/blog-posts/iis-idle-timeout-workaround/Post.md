@@ -1,5 +1,5 @@
 ---
-title: IIS idle timeout workaround
+title: IIS Idle Timeout Workaround
 date: 2017-11-16
 cover: Cover.png
 ---

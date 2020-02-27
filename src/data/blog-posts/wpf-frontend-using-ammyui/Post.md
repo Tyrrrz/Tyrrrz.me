@@ -1,5 +1,5 @@
 ---
-title: WPF frontend using AmmyUI
+title: WPF Frontend Using AmmyUI
 date: 2017-11-18
 cover: Cover.png
 ---

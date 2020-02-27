@@ -1,5 +1,5 @@
 ---
-title: Hotkey editor control in WPF
+title: Hotkey Editor Control in WPF
 date: 2017-02-02
 cover: Cover.png
 ---

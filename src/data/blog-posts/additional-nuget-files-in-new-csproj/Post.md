@@ -1,5 +1,5 @@
 ---
-title: Additional NuGet files in new csproj
+title: Additional NuGet Files in New Project Format
 date: 2017-11-05
 ---
 

@@ -1,5 +1,5 @@
 ---
-title: Reverse-engineering YouTube
+title: Reverse-Engineering YouTube
 date: 2017-12-15
 cover: Cover.png
 ---

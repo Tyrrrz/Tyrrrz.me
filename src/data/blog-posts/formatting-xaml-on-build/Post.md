@@ -1,5 +1,5 @@
 ---
-title: Formatting XAML files on build with XAMLStyler
+title: Formatting XAML Files on Build with XAMLStyler
 date: 2020-01-09
 cover: Cover.png
 ---
