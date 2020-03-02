@@ -1,6 +1,6 @@
 ---
-title: Simulating return type inference in C#
-date: 2020-02-17
+title: Simulating Return Type Inference in C#
+date: 2020-03-09
 cover: Cover.png
 ---
 
@@ -14,17 +14,19 @@ In this article I will introduce you to a simple pattern that I've been using in
 
 ## Type inference
 
-Let's talk about type inference in general.
+Type inference is the ability of a compiler to automatically detect the type of a particular expression, without having the programmer explicitly specify it. This feature usually works by analyzing the constraints imposed by the flow of data in a program. Being able to detect the type automatically, languages that support type inference allow writing more succinct code while still maintaining the full benefits of a static type system.
 
-Type inference is when a compiler in a statically-typed language can guess the type of a specific expression without needing the programmer to manually specify it. One simple example of type inference is array initialization in C#:
+Most mainstream statically-typed languages have some form of type inference. One simple example of it in C# is array initialization:
 
 ```csharp
 var array = new[] {"Hello", "world"};
 ```
 
-Here we don't directly specify the type of the array with `new string[]`, instead we let the compiler do it automatically. The array is of type `string[]`, it's just that we didn't have to specify it manually. Actually in this case we have two types of type inference, another in the form of `var`.
+Here we don't directly specify the type of the array with `new string[]`, but instead let the compiler detect it automatically. Since we're initializing the array with two string expressions and all elements in an array must be of the same type, the type can be safely inferred to `string[]`.
 
-The most interesting aspect of type inference is, of course, generics. When using generic methods, we don't need to specify type arguments so long as they can be deduced from the parameter types. For example:
+The most interesting aspect of type inference is, of course, generics. It allows us to omit specifying generic arguments in a method, as long as they can be deduced based on the values passed to the parameters.
+
+For example, we can define a generic method `List.Create<T>` that creates a list from a sequence of elements:
 
 ```csharp
 public static class List
@@ -33,40 +35,21 @@ public static class List
 }
 ```
 
-Which we can use like this:
+Which can be used like this:
 
 ```csharp
-var list = List.Create("hello", "world");
+var list = List.Create(1, 3, 5);
 ```
 
-This similarly results in a list of strings, but we didn't have to specify that ourselves. The compiler can see that we're passing string parameters, so it infers the type of the resulting list automatically.
+In this scenario we could've specified the type explicitly by writing `List.Create<int>(...)` but we didn't have to, because the compiler is able to detect it on its own. This works because the generic type is constrained by the type of the array we pass into the `items` parameter, which is `int[]`.
 
-This also works just as well with multiple generic type arguments, as long as there's a matching parameter specified for each of them:
+Both the example with the list and the original example with array initialization are in fact using the same form of type inference. Also, in both of these cases, the type is detected based on the constraints imposed by the passed parameters -- which is the flow of data going _in_.
 
-```csharp
-public static class DictionaryExtensions
-{
-    public static TValue GetValueOrDefault<TKey, TValue>(this Dictionary<TKey, TValue> dic, TKey key, TValue defaultValue = default) =>
-        dic.TryGetValue(key, out var value) ? value : defaultValue;
-}
-```
-
-We can use it like this:
-
-```csharp
-var dic = new Dictionary<string, int>
-{
-    ["hello"] = 42,
-    ["world"] = 1337
-}
-
-var hello = dic.GetValueOrDefault("hello", -1); // 42
-var foo = dic.GetValueOrDefault("foo", -1); // -1
-```
-
-Note that for this to work, we have to specify both method parameters. If we leave the optional
+However, in some scenarios we may want the type inferred in the opposite direction. Let's see where this could be useful.
 
 ## Option type
+
+When writing code in a functional style, you are very likely to declare and use `Option<T>` to express a potential lack of value.
 
 ```csharp
 public readonly struct Option<T>
