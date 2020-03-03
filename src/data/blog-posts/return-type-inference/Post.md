@@ -14,17 +14,34 @@ In this article I will introduce you to a simple pattern that I've been using in
 
 ## Type inference
 
-Type inference is the ability of a compiler to automatically detect the type of a particular expression, without having the programmer explicitly specify it. This feature usually works by analyzing the constraints imposed by the flow of data in a program. Being able to detect the type automatically, languages that support type inference allow writing more succinct code while still maintaining the full benefits of a static type system.
+Type inference is the ability of a compiler to automatically detect the type of a particular expression, without having the programmer explicitly specify it. This feature works by analyzing the context in which the expression is evaluated, as well as the constraints imposed by the flow of data in the program.
 
-Most mainstream statically-typed languages have some form of type inference. One simple example of it in C# is array initialization:
+By being able to detect the type automatically, languages that support type inference allow writing more succinct code, while still maintaining the full benefits of a static type system. This is why most mainstream statically-typed languages have type inference, in one form or another.
+
+C#, being one of those languages, has type inference as well. The simplest possible example of it is the `var` keyword:
 
 ```csharp
-var array = new[] {"Hello", "world"};
+var x = 5;              // int
+var y = "foo";          // string
+var z = 2 + 1.0;        // double
+var g = Guid.NewGuid(); // Guid
 ```
 
-Here we don't directly specify the type of the array with `new string[]`, but instead let the compiler detect it automatically. Since we're initializing the array with two string expressions and all elements in an array must be of the same type, the type can be safely inferred to `string[]`.
+When doing a combined declaration and assignment operation with the `var` keyword, you don't need to specify the type of the variable. The compiler is able to detect it on its own based on the expression on the right side.
 
-The most interesting aspect of type inference is, of course, generics. It allows us to omit specifying generic arguments in a method, as long as they can be deduced based on the values passed to the parameters.
+In a similar vein, C# also allows initializing an array without having to manually specify its type:
+
+```csharp
+var array = new[] {"Hello", "world"}; // string[]
+```
+
+In this case, the compiler can see that we're initializing the array with two string elements so it can safely conclude that the resulting array is of type `string[]`. In some (very rare) cases, it can even infer the type of the array based on the most specific common type among the individual elements:
+
+```csharp
+var array = new[] {1, 2, 3.0}; // double[]
+```
+
+However, the most interesting aspect of type inference in C# is, of course, generic methods. When calling a method with a generic signature, we can omit type arguments as long as they can be deduced from the values passed to the method parameters.
 
 For example, we can define a generic method `List.Create<T>` that creates a list from a sequence of elements:
 
@@ -35,17 +52,17 @@ public static class List
 }
 ```
 
-Which can be used like this:
+Which in turn can be used like this:
 
 ```csharp
-var list = List.Create(1, 3, 5);
+var list = List.Create(1, 3, 5); // List<int>
 ```
 
-In this scenario we could've specified the type explicitly by writing `List.Create<int>(...)` but we didn't have to, because the compiler is able to detect it on its own. This works because the generic type is constrained by the type of the array we pass into the `items` parameter, which is `int[]`.
+In the above scenario we could've specified the type explicitly by writing `List.Create<int>(...)` but we didn't have to. The compiler is able to detect it automatically based on the parameters we passed into the method, which are constrained by the same type as the returned list itself.
 
-Both the example with the list and the original example with array initialization are in fact using the same form of type inference. Also, in both of these cases, the type is detected based on the constraints imposed by the passed parameters -- which is the flow of data going _in_.
+Interestingly enough, all of the examples shown above are in fact based on the same form of type inference, which works by analyzing the constraints imposed by other expressions, whose type is already known. In other words, it examines the flow of data that _goes in_ and draws conclusions about the data that _goes out_.
 
-However, in some scenarios we may want the type inferred in the opposite direction. Let's see where this could be useful.
+There are scenarios, however, when we may want the type inference to work in the opposite direction. Let's see where that could be useful.
 
 ## Option type
 
