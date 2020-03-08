@@ -66,7 +66,9 @@ There are scenarios, however, when we may want the type inference to work in the
 
 ## Option type
 
-When writing code in a functional style, you are very likely to declare and use `Option<T>` to express a potential lack of value.
+If you're writing C# code in a functional style, it's very likely that you have an `Option<T>` type defined. It's a container type that may or may not have a single value inside.
+
+It could look like this:
 
 ```csharp
 public readonly struct Option<T>
@@ -102,7 +104,11 @@ public readonly struct Option<T>
     public Option<TOut> Bind<TOut>(Func<T, Option<TOut>> bind) =>
         _hasValue ? bind(_value) : new Option<TOut>();
 }
+```
 
+Here we have
+
+```csharp
 public static class Option
 {
     public static Option<T> Some<T>(T value) => new Option<T>(value);
@@ -390,6 +396,8 @@ public class Translator
     }
 }
 ```
+
+If you're particularly savvy, you may point out that a compound type such as `Result<TOk, TError>` is not actually isomorphic to a union type.
 
 ## Dependent anonymous type inference
 
