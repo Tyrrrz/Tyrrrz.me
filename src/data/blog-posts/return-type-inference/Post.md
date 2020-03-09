@@ -62,13 +62,13 @@ In the above scenario we could've specified the type explicitly by writing `List
 
 Interestingly enough, all of the examples shown above are in fact based on the same form of type inference, which works by analyzing the constraints imposed by other expressions, whose type is already known. In other words, it examines the flow of data that _goes in_ and draws conclusions about the data that _goes out_.
 
-There are scenarios, however, when we may want the type inference to work in the opposite direction. Let's see where that could be useful.
+There are scenarios, however, where we may want the type inference to work in the opposite direction. Let's see where that could be useful.
 
 ## Option type
 
-If you're writing C# code in a functional style, it's very likely that you have an `Option<T>` type defined. It's a container type that may or may not have a single value inside.
+If you have been writing code in a functional style before, it's very likely that you're intimately familiar with the `Option<T>` type. It's a container that encapsulates a single value (or absence thereof) and allows us to perform various operations on the content without actually observing its state.
 
-It could look like this:
+In C#, an option type is usually defined by encapsulating two fields -- a generic value and a flag that indicates whether that value is actually set. It could look something like this:
 
 ```csharp
 public readonly struct Option<T>
@@ -106,7 +106,11 @@ public readonly struct Option<T>
 }
 ```
 
-Here we have
+This API design is fairly basic. The implementation above hides the actual value away from consumers, surfacing it only through the `Match(...)` method, which unwraps the container by handling both of its potential states. Additionally, there are `Select(...)` and `Bind(...)` methods that can be used to safely transform the value, regardless of whether it's actually been set or not.
+
+Also, in this example, `Option<T>` is defined as a `readonly struct`. Seeing as it's mainly returned from methods and used in local scopes, this decision makes sense from a performance point of view.
+
+Just to make things convenient, we may also want to provide factory methods that help construct new instances of `Option<T>` in a more fluent manner:
 
 ```csharp
 public static class Option
@@ -117,6 +121,8 @@ public static class Option
 }
 ```
 
+Which can be used like this:
+
 ```csharp
 public static Option<int> Parse(string number)
 {
@@ -126,9 +132,17 @@ public static Option<int> Parse(string number)
 }
 ```
 
-```csharp
-public readonly struct NoneOption { }
+As you can see, in case with `Option.Some<T>(...)`, we can drop the generic argument because the compiler can infer it based on the type of `value`, which is `int`. On the other hand, the same doesn't work with `Option.None<T>(...)` because it doesn't have any parameters, hence why we need to specify the type manually.
 
+Even though the type argument for `Option.None<T>(...)` seems to be inherently obvious from the context, the compiler is not able to deduce it. This is because, as mentioned earlier, type inference in C# only works by analyzing the data that flows in and not the other way around.
+
+Of course, ideally, we would want the compiler to figure out the type of `T` in `Option.None<T>(...)` based on the _return type_ this expression is _expected_ to have, as dictated by the signature of the containing method. If not, we would want it to at least get the `T` from the first branch of the conditional expression, where it was already inferred from `value`.
+
+Unfortunately, neither of these is possible with C#'s type system because it would need to work out the type in reverse, which it cannot do. That said, we can help it a bit.
+
+We can simulate _return type inference_ by having `Option.None` return a special non-generic "delayed" instance which can be coerced into `Option<T>`. Here's how that would look:
+
+```csharp
 public readonly struct Option<T>
 {
     private readonly T _value;
@@ -150,6 +164,10 @@ public readonly struct Option<T>
     public static implicit operator Option<T>(NoneOption none) => new Option<T>();
 }
 
+public readonly struct NoneOption
+{
+}
+
 public static class Option
 {
     public static Option<T> Some<T>(T value) => new Option<T>(value);
@@ -157,6 +175,12 @@ public static class Option
     public static NoneOption None { get; } = new NoneOption();
 }
 ```
+
+As you can see, `Option.None` now returns a dummy `NoneOption` object, which essentially represents an empty option whose type hasn't been decided yet. Because `NoneOption` is not generic, we were able to drop the generic arguments and turn `Option.None` into a property.
+
+Additionally, we made it so `Option<T>` implements an implicit conversion from `NoneOption`. Although operators themselves can't be generic in C#, they still retain type arguments of the declaring type, which allows us to define this conversion into _every possible_ variant of `Option<T>`.
+
+All of this allows us to write `Option.None` and have the compiler coerce it automatically to the destination type. From the consumer's point of view, it looks as though we've implemented return type inference:
 
 ```csharp
 public static Option<int> Parse(string number)
@@ -169,21 +193,23 @@ public static Option<int> Parse(string number)
 
 ## Result type
 
+
+
 ```csharp
-public readonly struct Result<TResult, TError>
+public readonly struct Result<TOk, TError>
 {
-    private readonly TResult _result;
+    private readonly TOk _result;
     private readonly TError _error;
     private readonly bool _isError;
 
-    private Result(TResult result, TError error, bool isError)
+    private Result(TOk result, TError error, bool isError)
     {
         _result = result;
         _error = error;
         _isError = isError;
     }
 
-    public Result(TResult result)
+    public Result(TOk result)
         : this(result, default, false)
     {
     }
@@ -196,11 +222,11 @@ public readonly struct Result<TResult, TError>
 
 public static class Result
 {
-    public static Result<TResult, TError> Ok<TResult, TError>(TResult result) =>
-        new Result<TResult, TError>(result);
+    public static Result<TOk, TError> Ok<TOk, TError>(TOk result) =>
+        new Result<TOk, TError>(result);
 
-    public static Result<TResult, TError> Error<TResult, TError>(TError error) =>
-        new Result<TResult, TError>(error);
+    public static Result<TOk, TError> Error<TOk, TError>(TError error) =>
+        new Result<TOk, TError>(error);
 }
 ```
 
@@ -214,20 +240,20 @@ public static Result<int, string> Parse(string input)
 ```
 
 ```csharp
-public readonly struct Result<TResult, TError>
+public readonly struct Result<TOk, TError>
 {
-    private readonly TResult _result;
+    private readonly TOk _result;
     private readonly TError _error;
     private readonly bool _isError;
 
-    private Result(TResult result, TError error, bool isError)
+    private Result(TOk result, TError error, bool isError)
     {
         _result = result;
         _error = error;
         _isError = isError;
     }
 
-    public Result(TResult result)
+    public Result(TOk result)
         : this(result, default, false)
     {
     }
@@ -237,11 +263,11 @@ public readonly struct Result<TResult, TError>
     {
     }
 
-    public static implicit operator Result<TResult, TError>(DelayedResult<TResult> ok) =>
-        new Result<TResult, TError>(ok.Value);
+    public static implicit operator Result<TOk, TError>(DelayedResult<TOk> ok) =>
+        new Result<TOk, TError>(ok.Value);
 
-    public static implicit operator Result<TResult, TError>(DelayedResult<TError> error) =>
-        new Result<TResult, TError>(error.Value);
+    public static implicit operator Result<TOk, TError>(DelayedResult<TError> error) =>
+        new Result<TOk, TError>(error.Value);
 }
 
 public readonly struct DelayedResult<T>
@@ -256,8 +282,8 @@ public readonly struct DelayedResult<T>
 
 public static class Result
 {
-    public static DelayedResult<TResult> Ok<TResult>(TResult result) =>
-        new DelayedResult<TResult>(result);
+    public static DelayedResult<TOk> Ok<TOk>(TOk result) =>
+        new DelayedResult<TOk>(result);
 
     public static DelayedResult<TError> Error<TError>(TError error) =>
         new DelayedResult<TError>(error);
@@ -316,20 +342,20 @@ Cannot convert expression type 'DelayedResult<string>' to return type 'Result<st
 ```
 
 ```csharp
-public readonly struct Result<TResult, TError>
+public readonly struct Result<TOk, TError>
 {
-    private readonly TResult _result;
+    private readonly TOk _result;
     private readonly TError _error;
     private readonly bool _isError;
 
-    private Result(TResult result, TError error, bool isError)
+    private Result(TOk result, TError error, bool isError)
     {
         _result = result;
         _error = error;
         _isError = isError;
     }
 
-    public Result(TResult result)
+    public Result(TOk result)
         : this(result, default, false)
     {
     }
@@ -339,11 +365,11 @@ public readonly struct Result<TResult, TError>
     {
     }
 
-    public static implicit operator Result<TResult, TError>(DelayedOk<TResult> ok) =>
-        new Result<TResult, TError>(ok.Value);
+    public static implicit operator Result<TOk, TError>(DelayedOk<TOk> ok) =>
+        new Result<TOk, TError>(ok.Value);
 
-    public static implicit operator Result<TResult, TError>(DelayedError<TError> error) =>
-        new Result<TResult, TError>(error.Value);
+    public static implicit operator Result<TOk, TError>(DelayedError<TError> error) =>
+        new Result<TOk, TError>(error.Value);
 }
 
 public readonly struct DelayedOk<T>
@@ -368,8 +394,8 @@ public readonly struct DelayedError<T>
 
 public static class Result
 {
-    public static DelayedOk<TResult> Ok<TResult>(TResult result) =>
-        new DelayedOk<TResult>(result);
+    public static DelayedOk<TOk> Ok<TOk>(TOk result) =>
+        new DelayedOk<TOk>(result);
 
     public static DelayedError<TError> Error<TError>(TError error) =>
         new DelayedError<TError>(error);
