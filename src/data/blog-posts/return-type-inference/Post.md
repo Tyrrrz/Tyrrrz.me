@@ -6,15 +6,15 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
-I really like building frameworks that enable other developers to make something cool. Sometimes, when chasing down the perfect API you have in mind, you may need to push the language to the very limit.
+Above everything else in software development, I really enjoy building frameworks that enable other developers to create something cool. Sometimes, when chasing that perfect design I have in mind, I find myself coming up with weird hacks to push the programming language to the limit.
 
-One such limit is the lack of return type inference in C#. The compiler fares well when it needs to return the type of an argument to a method, either when resolving the current signature among many overloads, or when determining the type of generic. But return type inference is something C# lacks.
+One such case happened not so long ago, when my coworker and I were looking at how to avoid specifying generic arguments in places where the compiler should be able to guess it based on return type. He said it was impossible seeing as C# can only infer generic arguments based on method parameters -- however I was able to come up with a way to prove him wrong.
 
-In this article I will introduce you to a simple pattern that I've been using in some cases to simulate return type inference.
+In this article I will show how you can use a little trick to simulate return type inference in C#, as well as some examples where that can be useful.
 
 ## Type inference
 
-Type inference is the ability of a compiler to automatically detect the type of a particular expression, without having the programmer explicitly specify it. This feature works by analyzing the context in which the expression is evaluated, as well as the constraints imposed by the flow of data in the program.
+Type inference, in general, is the ability of a compiler to automatically detect the type of a particular expression, without having the programmer explicitly specify it. This feature works by analyzing the context in which the expression is evaluated, as well as the constraints imposed by the flow of data in the program.
 
 By being able to detect the type automatically, languages that support type inference allow writing more succinct code, while still maintaining the full benefits of a static type system. This is why most mainstream statically-typed languages have type inference, in one form or another.
 
@@ -331,7 +331,7 @@ I'm very satisfied with this setup. We were able to drop the generic arguments e
 
 However, you may have noticed that there's a bug in the implementation. If the types of `TOk` and `TError` are the same, there's an ambiguity as to which state `DelayedResult<T>` actually represents.
 
-For example, imagine we were using our type in the following scenario:
+For example, imagine we were using our result type in the following scenario:
 
 ```csharp
 public interface ITranslationService
@@ -367,7 +367,7 @@ Here `Result.Error<TError>(...)` and `Result.Ok<TOk>(...)` both return `DelayedR
 Cannot convert expression type 'DelayedResult<string>' to return type 'Result<string,string>'
 ```
 
-Luckily, the fix is simple -- we just need to represent each of the individual states with a separate delayed type:
+Luckily, the fix is simple -- we just need to represent each of the individual states separately:
 
 ```csharp
 public readonly struct Result<TOk, TError>
@@ -453,116 +453,6 @@ public class Translator
 }
 ```
 
-Since `Result.Error<TError>(...)` now returns `DelayedError<string>` while `Result.Ok<TOk>(...)` returns `DelayedOk<string>`, the ambiguity is gone and the compiler can successfully work out the correct coercions.
+## Summary
 
-## Dependent anonymous type inference
-
-At one point in time I was writing a [Redux](https://redux.js.org) clone for XAML apps and while the project was ultimately scrapped, I learned a little trick from it.
-
-```csharp
-public class Store<TState, TAction>
-{
-    private readonly Func<TState, TAction, TState> _reduce;
-
-    public TState State { get; private set; }
-
-    public Store(Func<TState, TAction, TState> reduce, TState initial)
-    {
-        _reduce = reduce;
-        State = initial;
-    }
-
-    public void Apply(TAction action) => State = _reduce(State, action);
-}
-
-public static class Store
-{
-    public static Store<TState, TAction> Create<TState, TAction>(
-        TState initial, Func<TState, TAction, TState> reduce) =>
-        new Store<TState, TAction>(reduce, initial);
-}
-```
-
-```csharp
-public enum Action
-{
-    Increment,
-    Decrement
-}
-
-public static void Init()
-{
-    var store = Store.Create(
-        // Initial state
-        new
-        {
-            Counter = 0
-        },
-        // Reducer
-        (state, act) => act switch
-        {
-            Action.Increment => new
-            {
-                Counter = state.Counter + 1
-            },
-            Action.Decrement => new
-            {
-                Counter = state.Counter - 1
-            }
-        });
-}
-```
-
-```ini
-The type arguments for method
-  'Store<TState,TAction> Store.Create<TState,TAction>(TState, Func<TState,TAction,TState>)'
-  cannot be inferred from the usage. Try specifying the type arguments explicitly.
-```
-
-```csharp
-public class StoreRecipe<TState>
-{
-    public TState InitialState { get; }
-
-    public StoreRecipe(TState initialState)
-    {
-        InitialState = initialState;
-    }
-
-    public Store<TState, TAction> Create<TAction>(Func<TState, TAction, TState> reduce) =>
-        new Store<TState, TAction>(reduce, InitialState);
-}
-
-public static class Store
-{
-    public static StoreRecipe<TState> Initial<TState>(TState initial) =>
-        new StoreRecipe<TState>(initial);
-}
-```
-
-```csharp
-public static void Init()
-{
-    var store = Store
-        .Initial(new
-        {
-            Counter = 0
-        })
-        .Create<Action>((state, act) => act switch
-        {
-            Action.Increment => new
-            {
-                Counter = state.Counter + 1
-            },
-            Action.Decrement => new
-            {
-                Counter = state.Counter - 1
-            }
-        });
-
-    var valueBeforeApply = store.State.Counter; // 0
-
-    store.Apply(Action.Increment);
-    var valueAfterApply = store.State.Counter; // 1
-}
-```
+Although type inference in C# has its limits, we can push them a bit further with the help of implicit conversion operators. Using a simple trick shown in this article, we can simulate return type inference, enabling some potentially interesting design opportunities.
