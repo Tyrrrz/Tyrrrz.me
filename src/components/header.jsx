@@ -32,7 +32,7 @@ export default () => {
         backgroundColor: theme.mainColor,
         color: theme.inverseTextColor
       }}>
-      <div
+      <nav
         css={{
           display: `grid`,
           maxWidth: `1000px`,
@@ -72,7 +72,7 @@ export default () => {
           <MenuLink name={`blog`} to={routes.static.blog.path} partiallyActive={true} />
           <MenuLink name={`talks`} to={routes.static.talks.path} partiallyActive={true} />
         </div>
-      </div>
+      </nav>
     </header>
   );
 };
