@@ -1,6 +1,6 @@
 ---
 title: Simulating Return Type Inference in C#
-date: 2020-03-09
+date: 2020-03-10
 cover: Cover.png
 ---
 
