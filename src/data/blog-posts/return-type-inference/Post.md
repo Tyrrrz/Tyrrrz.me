@@ -6,11 +6,11 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
-Above everything else in software development, I really enjoy building frameworks that enable other developers to create something cool. Sometimes, when chasing that perfect design I have in mind, I find myself coming up with weird hacks to push the programming language to the limit.
+Above everything else in software development, I really enjoy building frameworks that enable other developers to create something cool. Sometimes, when chasing that perfect design I have in mind, I find myself coming up with weird hacks that really push the C# language to the limit.
 
-One such case happened not so long ago, when my coworker and I were looking at how to avoid specifying generic arguments in places where the compiler should be able to guess it based on return type. He said it was impossible seeing as C# can only infer generic arguments based on method parameters -- however I was able to come up with a way to prove him wrong.
+One such case happened not so long ago, when my coworker and I were looking at how to avoid specifying generic arguments in places where the compiler should be able to guess it based on return type. He said it was impossible seeing as C# can only infer generic arguments from method parameters -- however I was able to come up with a way to prove him wrong.
 
-In this article I will show how you can use a little trick to simulate return type inference in C#, as well as some examples where that can be useful.
+In this article I will show the little trick I came up with to simulate return type inference, as well as some examples where that can be useful.
 
 ## Type inference
 
@@ -138,9 +138,9 @@ Even though the type argument for `Option.None<T>(...)` seems to be inherently o
 
 Of course, ideally, we would want the compiler to figure out the type of `T` in `Option.None<T>(...)` based on the _return type_ this expression is _expected_ to have, as dictated by the signature of the containing method. If not, we would want it to at least get the `T` from the first branch of the conditional expression, where it was already inferred from `value`.
 
-Unfortunately, neither of these is possible with C#'s type system because it would need to work out the type in reverse, which it cannot do. That said, we can help it a bit.
+Unfortunately, neither of these is possible with C#'s type system because it would need to work out the type in reverse, which it cannot do. That said, we can help it a little bit.
 
-We can simulate _return type inference_ by having `Option.None` return a special non-generic "delayed" instance which can be coerced into `Option<T>`. Here's how that would look:
+We can simulate _return type inference_ by having `Option.None` return a special non-generic type representing an option with deferred initialization, which can be coerced into `Option<T>`. Here's how that would look:
 
 ```csharp
 public readonly struct Option<T>
@@ -178,7 +178,7 @@ public static class Option
 
 As you can see, `Option.None` now returns a dummy `NoneOption` object, which essentially represents an empty option whose type hasn't been decided yet. Because `NoneOption` is not generic, we were able to drop the generic arguments and turn `Option.None` into a property.
 
-Additionally, we made it so `Option<T>` implements an implicit conversion from `NoneOption`. Although operators themselves can't be generic in C#, they still retain type arguments of the declaring type, which allows us to define this conversion into _every possible_ variant of `Option<T>`.
+Additionally, we made it so `Option<T>` implements an implicit conversion from `NoneOption`. Although operators themselves can't be generic in C#, they still retain type arguments of the declaring type, which allows us to define this conversion for _every possible_ variant of `Option<T>`.
 
 All of this allows us to write `Option.None` and have the compiler coerce it automatically to the destination type. From the consumer's point of view, it looks as though we've implemented return type inference:
 
@@ -327,7 +327,7 @@ public static Result<int, string> Parse(string input)
 }
 ```
 
-I'm very satisfied with this setup. We were able to drop the generic arguments entirely, while maintaining the same signature and type safety as before. Again, from the top-level view this may look as if the generic arguments were somehow inferred from the expected return type.
+I'm much more satisfied with this setup. We were able to drop the generic arguments entirely, while maintaining the same signature and type safety as before. Again, from a high-level perspective this may look as if the generic arguments were somehow inferred from the expected return type.
 
 However, you may have noticed that there's a bug in the implementation. If the types of `TOk` and `TError` are the same, there's an ambiguity as to which state `DelayedResult<T>` actually represents.
 
@@ -430,7 +430,7 @@ public static class Result
 }
 ```
 
-Now the code from earlier will work exactly as expected:
+Going back to the code from earlier, it will now work exactly as expected:
 
 ```csharp
 public class Translator
