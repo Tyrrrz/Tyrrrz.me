@@ -193,24 +193,26 @@ public static Option<int> Parse(string number)
 
 ## Result type
 
+Just like we did with `Option<T>`, we may want to apply the same treatment to `Result<TOk, TError>`. This type fulfills a similar purpose, except that it also has a fully fledged value representing the negative case, instead of just being empty.
 
+Here's how we could implement it:
 
 ```csharp
 public readonly struct Result<TOk, TError>
 {
-    private readonly TOk _result;
+    private readonly TOk _ok;
     private readonly TError _error;
     private readonly bool _isError;
 
-    private Result(TOk result, TError error, bool isError)
+    private Result(TOk ok, TError error, bool isError)
     {
-        _result = result;
+        _ok = ok;
         _error = error;
         _isError = isError;
     }
 
-    public Result(TOk result)
-        : this(result, default, false)
+    public Result(TOk ok)
+        : this(ok, default, false)
     {
     }
 
@@ -218,17 +220,21 @@ public readonly struct Result<TOk, TError>
         : this(default, error, true)
     {
     }
+
+    // ...
 }
 
 public static class Result
 {
-    public static Result<TOk, TError> Ok<TOk, TError>(TOk result) =>
-        new Result<TOk, TError>(result);
+    public static Result<TOk, TError> Ok<TOk, TError>(TOk ok) =>
+        new Result<TOk, TError>(ok);
 
     public static Result<TOk, TError> Error<TOk, TError>(TError error) =>
         new Result<TOk, TError>(error);
 }
 ```
+
+And here's how it would then be used:
 
 ```csharp
 public static Result<int, string> Parse(string input)
@@ -239,22 +245,26 @@ public static Result<int, string> Parse(string input)
 }
 ```
 
+As you can see, the situation regarding type inference is even more dire here. Neither `Result.Ok<TOk, TError>(...)` nor `Result.Error<TOk, TError>(...)` have enough parameters to infer both generic arguments, so we are forced to specify them manually in both cases.
+
+Having to write out these types every time leads to visual noise, code duplication, and bad developer experience in general. Let's try to rectify this using the same technique from earlier:
+
 ```csharp
 public readonly struct Result<TOk, TError>
 {
-    private readonly TOk _result;
+    private readonly TOk _ok;
     private readonly TError _error;
     private readonly bool _isError;
 
-    private Result(TOk result, TError error, bool isError)
+    private Result(TOk ok, TError error, bool isError)
     {
-        _result = result;
+        _ok = ok;
         _error = error;
         _isError = isError;
     }
 
-    public Result(TOk result)
-        : this(result, default, false)
+    public Result(TOk ok)
+        : this(ok, default, false)
     {
     }
 
@@ -282,13 +292,30 @@ public readonly struct DelayedResult<T>
 
 public static class Result
 {
-    public static DelayedResult<TOk> Ok<TOk>(TOk result) =>
-        new DelayedResult<TOk>(result);
+    public static DelayedResult<TOk> Ok<TOk>(TOk ok) =>
+        new DelayedResult<TOk>(ok);
 
     public static DelayedResult<TError> Error<TError>(TError error) =>
         new DelayedResult<TError>(error);
 }
 ```
+
+Here we similarly defined `DelayedResult<T>` that represents the initialized part of `Result<TOk, TError>`. Again, we're using implicit conversion operators to coerce the delayed instance into the destination type.
+
+Doing all that enables us to rewrite our code like this:
+
+```csharp
+public static Result<int, string> Parse(string input)
+{
+    return int.TryParse(input, out var value)
+        ? (Result<int, string>) Result.Ok(value)
+        : Result.Error("Invalid value");
+}
+```
+
+This is a bit better but not ideal. The problem here is that the conditional expression in C# doesn't coerce its branches directly to the expected type, but instead tries to convert the type of the negative branch into the type of the positive branch. Because of that, we need to explicitly cast the positive branch into `Result<int, string>` to specify the common denominator.
+
+However, this issue can be completely avoided if we just use a conditional statement instead:
 
 ```csharp
 public static Result<int, string> Parse(string input)
@@ -300,14 +327,11 @@ public static Result<int, string> Parse(string input)
 }
 ```
 
-```csharp
-public static Result<int, string> Parse(string input)
-{
-    return int.TryParse(input, out var value)
-        ? (Result<int, string>) Result.Ok(value)
-        : Result.Error("Invalid value");
-}
-```
+I'm very satisfied with this setup. We were able to drop the generic arguments entirely, while maintaining the same signature and type safety as before. Again, from the top-level view this may look as if the generic arguments were somehow inferred from the expected return type.
+
+However, you may have noticed that there's a bug in the implementation. If the types of `TOk` and `TError` are the same, there's an ambiguity as to which state `DelayedResult<T>` actually represents.
+
+For example, imagine we were using our type in the following scenario:
 
 ```csharp
 public interface ITranslationService
@@ -337,26 +361,30 @@ public class Translator
 }
 ```
 
+Here `Result.Error<TError>(...)` and `Result.Ok<TOk>(...)` both return `DelayedResult<string>`, so the compiler struggles to figure out what to do with it:
+
 ```ini
 Cannot convert expression type 'DelayedResult<string>' to return type 'Result<string,string>'
 ```
 
+Luckily, the fix is simple -- we just need to represent each of the individual states with a separate delayed type:
+
 ```csharp
 public readonly struct Result<TOk, TError>
 {
-    private readonly TOk _result;
+    private readonly TOk _ok;
     private readonly TError _error;
     private readonly bool _isError;
 
-    private Result(TOk result, TError error, bool isError)
+    private Result(TOk ok, TError error, bool isError)
     {
-        _result = result;
+        _ok = ok;
         _error = error;
         _isError = isError;
     }
 
-    public Result(TOk result)
-        : this(result, default, false)
+    public Result(TOk ok)
+        : this(ok, default, false)
     {
     }
 
@@ -394,13 +422,15 @@ public readonly struct DelayedError<T>
 
 public static class Result
 {
-    public static DelayedOk<TOk> Ok<TOk>(TOk result) =>
-        new DelayedOk<TOk>(result);
+    public static DelayedOk<TOk> Ok<TOk>(TOk ok) =>
+        new DelayedOk<TOk>(ok);
 
     public static DelayedError<TError> Error<TError>(TError error) =>
         new DelayedError<TError>(error);
 }
 ```
+
+Now the code from earlier will work exactly as expected:
 
 ```csharp
 public class Translator
@@ -423,9 +453,11 @@ public class Translator
 }
 ```
 
-If you're particularly savvy, you may point out that a compound type such as `Result<TOk, TError>` is not actually isomorphic to a union type.
+Since `Result.Error<TError>(...)` now returns `DelayedError<string>` while `Result.Ok<TOk>(...)` returns `DelayedOk<string>`, the ambiguity is gone and the compiler can successfully work out the correct coercions.
 
 ## Dependent anonymous type inference
+
+At one point in time I was writing a [Redux](https://redux.js.org) clone for XAML apps and while the project was ultimately scrapped, I learned a little trick from it.
 
 ```csharp
 public class Store<TState, TAction>
