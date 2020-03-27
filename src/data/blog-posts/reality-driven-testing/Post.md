@@ -6,7 +6,7 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
-Humans are extremely efficient creatures. We are able to evolve our intelligence quickly by adopting the knowledge of previous generations, without necessarily questioning it too much. This lets us pool our collective minds and rely on smarter people to have figured out all the boring stuff, while we can focus our [slow-thinking system"](https://en.wikipedia.org/wiki/Thinking,_Fast_and_Slow) on what matters most.
+Humans are extremely efficient creatures. We are able to evolve our intelligence quickly by adopting the knowledge of previous generations, without necessarily questioning it too much. This lets us pool our collective minds and rely on smarter people to have figured out all the boring stuff, while we can focus our [slow-thinking system](https://en.wikipedia.org/wiki/Thinking,_Fast_and_Slow) on what matters most.
 
 In the world of software development, these shards of indisputable knowledge are what we call _best practices_. Two words to start or end code review arguments, to put junior developers out of their comfort zone and to inflate the ego of senior developers. After all, software design, architecture, processes is mostly a solved problem. Or is it?
 
@@ -44,7 +44,7 @@ I think unit testing is inefficient and most of the time not worth doing at all.
 
 Unit testing should be prioritized lower, ultimately considering it only as last resort. Instead of spending time trying to make your code more "unit-testable", it's more beneficial to make it more "functionally-testable" instead.
 
-Some other articles on the topic of unit testing that I personally found interesting:
+The topic of testing is very popular and there quite a lot of articles written that challenge the necessity for ubiquitous unit tests. I don't necessarily agree with everything mentioned in them, but they are well-reasoned and at the very least provide some food for thought:
 
 - [Fallacy of Unit Testing (Aaron W. Hsu)](https://www.sacrideo.us/the-fallacy-of-unit-testing)
 - [Slow database test fallacy (David Heinemeier Hansson)](https://dhh.dk/2014/slow-database-test-fallacy.html)
