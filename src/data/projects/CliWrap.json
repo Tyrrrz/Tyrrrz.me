@@ -1,7 +1,7 @@
 {
   "name": "CliWrap",
   "url": "https://github.com/Tyrrrz/CliWrap",
-  "description": "Wrapper for command line interfaces",
-  "stars": 420,
+  "description": "Library for executing and piping shell commands",
+  "stars": 658,
   "language": "C#"
 }
