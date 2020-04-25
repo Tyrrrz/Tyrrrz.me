@@ -24,9 +24,6 @@ exports.siteMetadata = {
 }
 
 exports.plugins = [
-  // Linting during development
-  resolvePlugin('gatsby-plugin-eslint'),
-
   // Source: file system
   resolvePlugin('gatsby-source-filesystem', {
     name: 'content',
