@@ -1,15 +1,15 @@
-import React from 'react';
-import useSiteMetadata from './hooks/useSiteMetadata';
-import Link from './link';
-import Layout from './layout';
-import Meta from './meta';
+import React from 'react'
+import useSiteMetadata from './hooks/useSiteMetadata'
+import Link from './link'
+import Layout from './layout'
+import Meta from './meta'
 
 export default () => {
-  const siteMetadata = useSiteMetadata();
+  const siteMetadata = useSiteMetadata()
 
   return (
     <Layout>
-      <Meta title="Donate" />
+      <Meta title='Donate' />
 
       <h2>Donate</h2>
 
@@ -46,5 +46,5 @@ export default () => {
         <li>Michael Dayah</li>
       </ul>
     </Layout>
-  );
-};
+  )
+}

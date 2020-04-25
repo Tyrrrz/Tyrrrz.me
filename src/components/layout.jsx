@@ -1,33 +1,33 @@
-import React from 'react';
-import { Global, css } from '@emotion/core';
-import emotionNormalize from 'emotion-normalize';
-import theme from '../theme';
-import Header from './header';
+import React from 'react'
+import { Global, css } from '@emotion/core'
+import emotionNormalize from 'emotion-normalize'
+import theme from '../theme'
+import Header from './header'
 
 export default ({ children }) => {
   const normalize = css`
     ${emotionNormalize}
-  `;
+  `
 
   const globalStyles = {
     html: {
       color: theme.textColor,
-      fontFamily: `'Maven Pro', 'Tahoma', 'Arial', sans-serif`,
-      fontSize: `20px`,
-      wordWrap: `break-word`,
+      fontFamily: '\'Maven Pro\', \'Tahoma\', \'Arial\', sans-serif',
+      fontSize: '20px',
+      wordWrap: 'break-word',
 
-      '@media only screen and (max-width: 640px)': { fontsize: `18px` }
+      '@media only screen and (max-width: 640px)': { fontsize: '18px' }
     },
     a: {
-      color: `inherit`,
+      color: 'inherit',
       textDecorationColor: theme.dimColor,
 
       ':hover': {
         color: theme.accentColor,
-        textDecorationColor: `initial`
+        textDecorationColor: 'initial'
       }
     }
-  };
+  }
 
   return (
     <>
@@ -37,12 +37,13 @@ export default ({ children }) => {
 
       <main
         css={{
-          maxWidth: `1000px`,
-          margin: `0 auto 2em auto`,
-          padding: `1em`
-        }}>
+          maxWidth: '1000px',
+          margin: '0 auto 2em auto',
+          padding: '1em'
+        }}
+      >
         {children}
       </main>
     </>
-  );
-};
+  )
+}

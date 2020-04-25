@@ -1,9 +1,9 @@
-const path = require(`path`);
-const routes = require(`./src/routes`);
+const path = require('path')
+const routes = require('./src/routes')
 
 exports.createPages = async ({ actions, graphql }) => {
   // Generate pages for static routes
-  Object.keys(routes.static).forEach(routeName => actions.createPage(routes.static[routeName]));
+  Object.keys(routes.static).forEach(routeName => actions.createPage(routes.static[routeName]))
 
   // Generate pages for blog posts
   const queryResult = await graphql(`
@@ -16,19 +16,19 @@ exports.createPages = async ({ actions, graphql }) => {
         }
       }
     }
-  `);
+  `)
 
-  if (queryResult.errors) throw queryResult.errors;
+  if (queryResult.errors) throw queryResult.errors
 
   queryResult.data.allMarkdownRemark.nodes.forEach(node => {
-    const slug = node.fields.slug;
+    const slug = node.fields.slug
 
     actions.createPage({
       path: routes.dynamic.blogPost.getPath(slug),
       component: routes.dynamic.blogPost.component,
       context: { slug }
-    });
-  });
+    })
+  })
 
   // Configure redirects
   Object.keys(routes.redirects).forEach(from => {
@@ -37,17 +37,17 @@ exports.createPages = async ({ actions, graphql }) => {
       toPath: routes.redirects[from],
       force: true,
       redirectInBrowser: true
-    });
-  });
-};
+    })
+  })
+}
 
 exports.onCreateNode = ({ actions, node }) => {
   // Add slug to markdown files
-  if (node.internal.type === `MarkdownRemark`) {
+  if (node.internal.type === 'MarkdownRemark') {
     actions.createNodeField({
       node,
-      name: `slug`,
+      name: 'slug',
       value: path.basename(path.dirname(node.fileAbsolutePath))
-    });
+    })
   }
-};
+}

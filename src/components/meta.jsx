@@ -1,37 +1,37 @@
-import React from 'react';
-import Helmet from 'react-helmet';
-import useSiteMetadata from './hooks/useSiteMetadata';
+import React from 'react'
+import Helmet from 'react-helmet'
+import useSiteMetadata from './hooks/useSiteMetadata'
 
 export default ({ title, description, image }) => {
-  const siteMetadata = useSiteMetadata();
+  const siteMetadata = useSiteMetadata()
 
   // Append site title to page title
   const actualTitle = title
     ? `${title} | ${siteMetadata.title}`
-    : siteMetadata.title;
+    : siteMetadata.title
 
   // Use fallback description if it's not set
-  const actualDescription = description || siteMetadata.description;
+  const actualDescription = description || siteMetadata.description
 
   return (
     <Helmet>
-      <html lang="en" />
+      <html lang='en' />
 
       <title>{actualTitle}</title>
 
-      <meta property="og:type" content="website" />
+      <meta property='og:type' content='website' />
 
-      <meta property="og:title" content={actualTitle} />
-      <meta name="twitter:title" content={actualTitle} />
+      <meta property='og:title' content={actualTitle} />
+      <meta name='twitter:title' content={actualTitle} />
 
-      <meta name="twitter:creator" content={`@${siteMetadata.twitter}`} />
-      <meta name="twitter:card" content="summary" />
+      <meta name='twitter:creator' content={`@${siteMetadata.twitter}`} />
+      <meta name='twitter:card' content='summary' />
 
-      <meta name="description" content={actualDescription} />
-      <meta property="og:description" content={actualDescription} />
-      <meta name="twitter:description" content={actualDescription} />
+      <meta name='description' content={actualDescription} />
+      <meta property='og:description' content={actualDescription} />
+      <meta name='twitter:description' content={actualDescription} />
 
-      {image && <meta property="og:image" content={image} />}
+      {image && <meta property='og:image' content={image} />}
     </Helmet>
-  );
-};
+  )
+}

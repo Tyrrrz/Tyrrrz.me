@@ -1,86 +1,86 @@
-const path = require(`path`);
+const path = require('path')
 
-const settings = require(`./src/settings`);
-const theme = require(`./src/theme`);
+const settings = require('./src/settings')
+const theme = require('./src/theme')
 
 // Gatsby's default syntax for defining plugins is awful so I wrote this
 const resolvePlugin = (plugin, options) => ({
   resolve: plugin,
   options: options
-});
+})
 
 exports.siteMetadata = {
   siteUrl: settings.siteDomain,
-  title: `Alexey Golub`,
-  description: `Alexey Golub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker`,
-  email: `tyrrrz@gmail.com`,
-  twitter: `Tyrrrz`,
-  github: `Tyrrrz`,
-  instagram: `Tyrrrz`,
-  patreon: `Tyrrrz`,
-  buymeacoffee: `Tyrrrz`,
-  bitcoin: `bc1qa3jkft6uckysrxrlc2sygguxshf7gufy0zm692`,
-  ethereum: `0x00E6B59BAD5F0c887E0eBD1b7bBd7b024d0796c9`
-};
+  title: 'Alexey Golub',
+  description: 'Alexey Golub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker',
+  email: 'tyrrrz@gmail.com',
+  twitter: 'Tyrrrz',
+  github: 'Tyrrrz',
+  instagram: 'Tyrrrz',
+  patreon: 'Tyrrrz',
+  buymeacoffee: 'Tyrrrz',
+  bitcoin: 'bc1qa3jkft6uckysrxrlc2sygguxshf7gufy0zm692',
+  ethereum: '0x00E6B59BAD5F0c887E0eBD1b7bBd7b024d0796c9'
+}
 
 exports.plugins = [
   // Linting during development
-  resolvePlugin(`gatsby-plugin-eslint`),
+  resolvePlugin('gatsby-plugin-eslint'),
 
   // Source: file system
-  resolvePlugin(`gatsby-source-filesystem`, {
-    name: `content`,
-    path: path.resolve(__dirname, `src`)
+  resolvePlugin('gatsby-source-filesystem', {
+    name: 'content',
+    path: path.resolve(__dirname, 'src')
   }),
 
   // Transform: images
-  resolvePlugin(`gatsby-transformer-sharp`),
+  resolvePlugin('gatsby-transformer-sharp'),
 
   // Transform: JSON
-  resolvePlugin(`gatsby-transformer-json`),
+  resolvePlugin('gatsby-transformer-json'),
 
   // Transform: markdown
-  resolvePlugin(`gatsby-transformer-remark`, {
+  resolvePlugin('gatsby-transformer-remark', {
     plugins: [
       // Transform image links
-      resolvePlugin(`gatsby-remark-images`, {
+      resolvePlugin('gatsby-remark-images', {
         maxWidth: 1280,
         linkImagesToOriginal: false
       }),
 
       // Zoom for images
-      resolvePlugin(`gatsby-remark-images-zoom`),
+      resolvePlugin('gatsby-remark-images-zoom'),
 
       // Syntax highlighting
-      resolvePlugin(`gatsby-remark-prismjs`, {
-        classPrefix: `language-`,
+      resolvePlugin('gatsby-remark-prismjs', {
+        classPrefix: 'language-',
         noInlineHighlight: true
       }),
 
       // Markdown extensions
-      resolvePlugin(`gatsby-remark-smartypants`)
+      resolvePlugin('gatsby-remark-smartypants')
     ]
   }),
 
   // App manifest
-  resolvePlugin(`gatsby-plugin-manifest`, {
-    name: `Tyrrrzme`,
-    short_name: `Tyrrrzme`,
+  resolvePlugin('gatsby-plugin-manifest', {
+    name: 'Tyrrrzme',
+    short_name: 'Tyrrrzme',
     theme_color: theme.mainColor,
     background_color: theme.mainColor,
-    icon: `src/static/favicon.png`,
-    start_url: `/`,
-    display: `browser`
+    icon: 'src/static/favicon.png',
+    start_url: '/',
+    display: 'browser'
   }),
 
   // Inject canonical URLs into meta tags
-  resolvePlugin(`gatsby-plugin-canonical-urls`, { siteUrl: settings.siteDomain }),
+  resolvePlugin('gatsby-plugin-canonical-urls', { siteUrl: settings.siteDomain }),
 
   // Disqus integration
-  resolvePlugin(`gatsby-plugin-disqus`, { shortname: settings.disqusId }),
+  resolvePlugin('gatsby-plugin-disqus', { shortname: settings.disqusId }),
 
   // Google Analytics integration
-  resolvePlugin(`gatsby-plugin-google-analytics`, {
+  resolvePlugin('gatsby-plugin-google-analytics', {
     trackingId: settings.googleAnalyticsId,
     anonymize: false,
     respectDNT: false,
@@ -91,14 +91,14 @@ exports.plugins = [
   }),
 
   // Netlify platform integration
-  resolvePlugin(`gatsby-plugin-netlify`),
+  resolvePlugin('gatsby-plugin-netlify'),
 
   // Misc plugins/dependencies
-  resolvePlugin(`gatsby-plugin-sharp`),
-  resolvePlugin(`gatsby-plugin-react-helmet`),
-  resolvePlugin(`gatsby-plugin-emotion`),
-  resolvePlugin(`gatsby-plugin-catch-links`),
-  resolvePlugin(`gatsby-plugin-sitemap`),
-  resolvePlugin(`gatsby-plugin-robots-txt`),
-  resolvePlugin(`gatsby-plugin-offline`)
-];
+  resolvePlugin('gatsby-plugin-sharp'),
+  resolvePlugin('gatsby-plugin-react-helmet'),
+  resolvePlugin('gatsby-plugin-emotion'),
+  resolvePlugin('gatsby-plugin-catch-links'),
+  resolvePlugin('gatsby-plugin-sitemap'),
+  resolvePlugin('gatsby-plugin-robots-txt'),
+  resolvePlugin('gatsby-plugin-offline')
+]
