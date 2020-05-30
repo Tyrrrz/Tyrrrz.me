@@ -24,30 +24,33 @@ Aggressively-popularized "best practices" often have a tendency of manifesting c
 
 In this article I will share my observations about unit testing and explain why I believe it to be a waste of time. I'll also explain which approaches I'm currently using instead to test my code, both in open source projects and day-to-day work.
 
-## Fallacy of unit testing
+## False promises
 
 Unit tests, as evident by the name, revolve around the concept of a "unit", which denotes a very small, logically-independent part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a program (or a method of a class).
 
-By executing the function with different inputs and comparing produced results to expected outputs, we can ensure that the function works correctly. If we test all units in a system in the same fashion, we can probably ensure that the system as a whole works correctly as well. Of course, that only works if the units are integrated with each other in a decoupled way which would allows us to isolate them easily, hence the need for dependency inversion.
+The test invokes a function with different inputs and compares produced results to expected outputs, making sure it behaves as expected. The idea is that, if all units in a system are tested to work correctly, the system as a whole should work correctly as well. Of course, that's only possible if the units are integrated with each other in a decoupled way which would allows us to isolate them easily, hence the need for dependency inversion.
 
-While testing in such way, we are supposedly able to:
+Let's look at an example system that we may want to test:
 
-- Find problems quickly and early.
-- Detect regressions and have confidence in refactoring.
-- Enforce good design principles in our code.
-- Have a living documentation of the system.
+// Translation service (simple)
 
-In reality, things are a bit different. Let's take a look at each of these points separately.
+*Note: the code snippets in this article are in C#, but the programming language is irrelevant to the points I'm making.*
+
+// Translation service (unit-testable)
+
+## Detecting regressions
+
+One of the expected benefits of automated tests is that we should be able to recklessly make changes to our code without worrying that some of the existing functionality may stop working properly. Once the tests are in place, any breaking changes should immediately be caught and reported.
+
+
+
+## Unit tests are small and fast
+
+Size is a very important factor in unit tests, as they should cover a very small portion of the system. Because of that, it makes sense to assume such tests should also execute quickly.
+
+
 
 ## Summary
-
-Whenever you say "testing" in a room full of software developers, it is immediately assumed that you're talking about unit testing. I believe it's really unfortunate the industry arrived at this stereotype.
-
-I think unit testing is inefficient and most of the time not worth doing at all. You're almost always better of writing wider-scope tests that cover a larger set of interactions, such as functional tests. Functional tests should match specifications that describe how the user can interact with the system and what they can observe in the process.
-
-Unit testing should be prioritized lower, ultimately considering it only as last resort. Instead of spending time trying to make your code more "unit-testable", it's more beneficial to make it more "functionally-testable" instead.
-
-The topic of testing is very popular and there quite a lot of articles written that challenge the necessity for ubiquitous unit tests. I don't necessarily agree with everything mentioned in them, but they are well-reasoned and at the very least provide some food for thought:
 
 - [Fallacy of Unit Testing (Aaron W. Hsu)](https://www.sacrideo.us/the-fallacy-of-unit-testing)
 - [Slow database test fallacy (David Heinemeier Hansson)](https://dhh.dk/2014/slow-database-test-fallacy.html)
