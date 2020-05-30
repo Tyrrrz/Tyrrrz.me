@@ -6,7 +6,7 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
-The importance of testing in modern software development is really hard to overstate. Delivering a successful software product is not something you do once and forget about, but is rather a continuous recurring process. With every line of code that changes, software has to remain in a functional state, which implies the need for rigorous testing.
+The importance of testing in modern software development is really hard to overstate. Delivering a successful product is not something you do once and forget about, but is rather a continuous recurring process. With every line of code that changes, software has to remain in a functional state, which implies the need for rigorous testing.
 
 Over time, as the software industry evolved, testing practices have matured as well. Gradually moving towards automation, testing approaches have also influenced software design itself, spawning mantras like test-driven development, emphasizing patterns such as dependency inversion, and ultimately leading to high-level architectures such as the "Clean Architecture" and similar.
 
@@ -14,7 +14,7 @@ Nowadays, automated testing is embedded so deeply within our perception of softw
 
 However, despite there being many different approaches, modern "best practices" primarily push developers specifically towards *unit testing*. Tests, whose scope lies higher on [Martin Fowler's pyramid](https://martinfowler.com/articles/practical-test-pyramid.html#TheTestPyramid) are either written as part of a wider suite (often by completely different people) or even disregarded entirely.
 
-The benefit of this approach is often explained by the argument that unit tests provide the most value during development because they're able to catch errors quickly and help enforce design patterns that facilitate modularity. This idea has become so widely accepted that the term "unit testing" is now somewhat conflated with automated testing in general, losing part of its meaning.
+The benefit of this approach is often supported by the argument that unit tests provide the most value during development because they're able to catch errors quickly and help enforce design patterns that facilitate modularity. This idea has become so widely accepted that the term "unit testing" is now somewhat conflated with automated testing in general, losing part of its meaning and contributing to confusion.
 
 When I was a less experienced developer, I believed in following these "best practices" to the letter, as I thought that would make my code better. I didn't particularly enjoy writing unit tests because of all the ceremony involved with abstractions and mocking, but it was the recommended approach after all, so who am I to know better.
 
@@ -26,17 +26,18 @@ In this article I will share my observations about unit testing and explain why 
 
 ## Fallacy of unit testing
 
-Unit testing is a popular term in software development and, as such, is void of any useful meaning. So before we continue any further, let's establish what exactly I mean when I say "unit testing".
+Unit tests, as evident by the name, revolve around the concept of a "unit", which denotes a very small, logically-independent part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a program (or a method of a class).
 
-A unit test is a piece of code that verifies that an individual, **logically-independent** and **smallest possible** part of software **behaves as intended**. In most contexts, this _part_, also known as a _unit_, refers to an interface such as a class or a function. If the unit we intend to test interacts with other parts of the program, these dependencies are replaced with stubs or mocks, in order to facilitate testing in complete isolation. The idea is that, if we ensure that all individual atomic pieces of a system work correctly, the probability of finding a defect in general is greatly reduced.
+By executing the function with different inputs and comparing produced results to expected outputs, we can ensure that the function works correctly. If we test all units in a system in the same fashion, we can probably ensure that the system as a whole works correctly as well. Of course, that only works if the units are integrated with each other in a decoupled way which would allows us to isolate them easily, hence the need for dependency inversion.
 
-With that out of the way, let's look at some of the benefits that unit tests provide, further referenced as _unit testing fallacies_:
+While testing in such way, we are supposedly able to:
 
-- Unit tests help find problems quickly and early.
-- Unit tests detect regressions and provide confidence in refactoring.
-- Unit tests are easier and faster to write because they are small and independent.
-- Unit tests enforce good design principles.
-- Unit tests provide a form of living documentation of the system.
+- Find problems quickly and early.
+- Detect regressions and have confidence in refactoring.
+- Enforce good design principles in our code.
+- Have a living documentation of the system.
+
+In reality, things are a bit different. Let's take a look at each of these points separately.
 
 ## Summary
 
@@ -54,3 +55,5 @@ The topic of testing is very popular and there quite a lot of articles written t
 - [Write tests. Not too many. Mostly integration (Kent C. Dodds)](https://kentcdodds.com/blog/write-tests)
 - [Why Most Unit Testing is Waste (James O. Coplien)](https://rbcs-us.com/documents/Why-Most-Unit-Testing-is-Waste.pdf)
 - [Mocking is a Code Smell (Eric Elliott)](https://medium.com/javascript-scene/mocking-is-a-code-smell-944a70c90a6a)
+- [Testing of Microservices at Spotify (André Schaffer)](https://labs.spotify.com/2018/01/11/testing-of-microservices)
+- [Stop writing Unit Tests (Anton Gorbikov)](https://antongorbikov.com/2018/09/24/stop-writing-unit-tests)
