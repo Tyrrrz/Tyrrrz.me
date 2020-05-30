@@ -12,15 +12,17 @@ Over time, as the software industry evolved, testing practices have matured as w
 
 Nowadays, automated testing is embedded so deeply within our perception of software development, it's hard to imagine one without the other. And since that ultimately enables us to produce software quickly without sacrificing quality, it's hard to argue that it's not a good thing.
 
-However, despite there being many different ways to skin a cat, modern "best practices" primarily push developers specifically towards *unit testing*. Tests, whose scope lies higher on [Martin Fowler's pyramid](https://martinfowler.com/articles/practical-test-pyramid.html#TheTestPyramid) are either written as part of a wider suite (often by completely different people) or disregarded entirely.
+However, despite there being many different approaches, modern "best practices" primarily push developers specifically towards *unit testing*. Tests, whose scope lies higher on [Martin Fowler's pyramid](https://martinfowler.com/articles/practical-test-pyramid.html#TheTestPyramid) are either written as part of a wider suite (often by completely different people) or even disregarded entirely.
 
-More often than not, you will see the phrase "unit testing" used in place of "automated testing" simply because the two terms have become almost synonymous with each other over time. In many cases, when someone says "unit testing", they might not even emphasize the "unit" part, but instead just use that to refer to any kind of tests written during development, which leads to confusion, especially among beginners.
+The benefit of this approach is often explained by the argument that unit tests provide the most value during development because they're able to catch errors quickly and help enforce design patterns that facilitate modularity. This idea has become so widely accepted that the term "unit testing" is now somewhat conflated with automated testing in general, losing part of its meaning.
 
-The problem here lies in the fact that aggressively-popularized "best practices" have a tendency of manifesting cargo cults around them, enticing developers to apply design patterns or use specific approaches without giving them a much needed second thought. In the context of automated testing, I find this prevalent when it comes to our industry's unhealthy obsession with unit testing.
+When I was a less experienced developer, I believed in following these "best practices" to the letter, as I thought that would make my code better. I didn't particularly enjoy writing unit tests because of all the ceremony involved with abstractions and mocking, but it was the recommended approach after all, so who am I to know better.
 
-As I've built more projects and gotten more experienced, I've slowly arrived at the conclusion that, in most cases, unit testing is actually a complete waste of time. Despite how controversial that may sound, I'm actually not the first person to reach that conclusion. Nevertheless, I think sharing the thoughts that lead me to this conclusion still warrants a blog post.
+It was only later, as I've experimented more and built more projects, that I started to realize that there are much better ways to approach testing and that **focusing on unit tests is**, in most cases, **a complete waste of time**.
 
-In this article I will explain how exactly unit testing falls short, why maintaining tests written in such way is inefficient, and how it often leads to bad software design. Besides that, I will also share which approaches I'm currently using to test code instead, both in my open source projects and day-to-day work.
+Aggressively-popularized "best practices" often have a tendency of manifesting cargo cults around them, enticing developers to apply design patterns or use specific approaches without giving them a much needed second thought. In the context of automated testing, I find this prevalent when it comes to our industry's unhealthy obsession with unit testing.
+
+In this article I will share my observations about unit testing and explain why I believe it to be a waste of time. I'll also explain which approaches I'm currently using instead to test my code, both in open source projects and day-to-day work.
 
 ## Fallacy of unit testing
 
