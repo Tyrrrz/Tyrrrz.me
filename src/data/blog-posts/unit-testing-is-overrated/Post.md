@@ -24,19 +24,87 @@ Aggressively-popularized "best practices" often have a tendency of manifesting c
 
 In this article I will share my observations about unit testing and explain why I believe it to be a waste of time. I'll also explain which approaches I'm currently using instead to test my code, both in open source projects and day-to-day work.
 
+*Note: this article contains code snippets in C#, but the language is irrelevant.*
+
 ## False promises
 
-Unit tests, as evident by the name, revolve around the concept of a "unit", which denotes a very small, logically-independent part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a program (or a method of a class).
+Unit tests, as evident by the name, revolve around the concept of a "unit", which denotes a very small, logically-independent part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a program (or a method of an object).
 
-The test invokes a function with different inputs and compares produced results to expected outputs, making sure it behaves as expected. The idea is that, if all units in a system are tested to work correctly, the system as a whole should work correctly as well. Of course, that's only possible if the units are integrated with each other in a decoupled way which would allows us to isolate them easily, hence the need for dependency inversion.
+The test invokes a function with different inputs and compares produced results to expected outputs, making sure it behaves as expected. The idea is that, if all units in a system are tested to work correctly, the system as a whole should work correctly as well (barring integrations which are tested separately). Of course, that's only possible if the units are integrated with each other in a decoupled way which would allows us to isolate them easily, hence the need for dependency inversion.
 
-Let's look at an example system that we may want to test:
+More specifically, with unit tests we're testing business logic.
 
-// Translation service (simple)
+To illustrate the ... let's proceed with a simple example of a system that we may be interested in testing:
 
-*Note: the code snippets in this article are in C#, but the programming language is irrelevant to the points I'm making.*
+```csharp
+public class LocationProvider : IDisposable
+{
+    private readonly HttpClient _httpClient = new HttpClient();
 
-// Translation service (unit-testable)
+    public Task<Location> GetLocationAsync(string locationQuery) { /* ... */ }
+
+    public Task<Location> GetLocationAsync() { /* ... */ }
+
+    public void Dispose() => _httpClient.Dispose();
+}
+
+public class SolarCalculator : IDiposable
+{
+    private readonly LocationProvider _locationProvider = new LocationProvider();
+
+    public Task<SolarTimes> GetSolarTimesAsync(DateTimeOffset date) { /* ... */ }
+
+    public void Dispose() => _locationProvider.Dispose();
+}
+```
+
+The code above illustrates a very simple system (or part thereof) which consists of two classes, `LocationProvider` for retrieving geographical coordinates and `SolarCalculator` which uses those coordinates to calculate sunrise and sunset on a particular date. While there's nothing wrong with this design, the classes above can't actually be unit tested because they're coupled.
+
+Let's iterate and update the code to use dependency injection:
+
+```csharp
+public interface ILocationProvider
+{
+    Task<Location> GetLocationAsync(string locationQuery);
+
+    Task<Location> GetLocationAsync();
+}
+
+public class LocationProvider : ILocationProvider
+{
+    private readonly HttpClient _httpClient;
+
+    public LocationProvider(HttpClient httpClient) =>
+        _httpClient = httpClient;
+
+    public Task<Location> GetLocationAsync(string locationQuery) { /* ... */ }
+
+    public Task<Location> GetLocationAsync() { /* ... */ }
+}
+
+public interface ISolarCalculator
+{
+    Task<SolarTimes> GetSolarTimesAsync(DateTimeOffset date);
+}
+
+public class SolarCalculator : ISolarCalculator
+{
+    private readonly ILocationProvider _locationProvider;
+
+    public SolarCalculator(ILocationProvider locationProvider) =>
+        _locationProvider = locationProvider;
+
+    public Task<SolarTimes> GetSolarTimesAsync(DateTimeOffset date) { /* ... */ }
+}
+```
+
+Ok, the code nearly doubled in size, but we've managed to decouple `LocationProvider` from `SolarCalculator` and replaced their point of integration with an interface. We had to drop `IDisposable` in the process, however, because the classes no longer own their dependencies so they shouldn't manage their lifetimes -- now we have to rely that it's done in the composition root instead.
+
+Let's write some unit tests for this:
+
+```csharp
+
+```
 
 ## Detecting regressions
 
@@ -48,7 +116,9 @@ One of the expected benefits of automated tests is that we should be able to rec
 
 Size is a very important factor in unit tests, as they should cover a very small portion of the system. Because of that, it makes sense to assume such tests should also execute quickly.
 
+## Pure functions
 
+So does that mean that unit tests should not be used at all? Well, as we've seen the issue with unit tests arise only if we're testing a unit which has dependencies on other units that we need to mock.
 
 ## Summary
 
