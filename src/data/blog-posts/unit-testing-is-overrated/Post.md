@@ -22,19 +22,21 @@ It was only later, as I've experimented more and built more projects, that I sta
 
 Aggressively-popularized "best practices" often have a tendency of manifesting cargo cults around them, enticing developers to apply design patterns or use specific approaches without giving them a much needed second thought. In the context of automated testing, I find this prevalent when it comes to our industry's unhealthy obsession with unit testing.
 
-In this article I will share my observations about unit testing and explain why I believe it to be a waste of time. I'll also explain which approaches I'm currently using instead to test my code, both in open source projects and day-to-day work.
+In this article I will share my observations about this testing technique and explain why I believe it to be inefficient. I'll also explain which approaches I'm currently using instead to test my code, both in open source projects and day-to-day work.
 
-*Note: this article contains code snippets in C#, but the language is irrelevant.*
+*Note: this article contains code examples which are written in C#, but the language itself is not (too) important to the points I'm making.*
 
 ## False promises
 
-Unit tests, as evident by the name, revolve around the concept of a "unit", which denotes a very small, logically-independent part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a program (or a method of an object).
+Unit tests, as evident by the name, revolve around the concept of a "unit", which denotes a very small isolated part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a module (or method of an object).
 
-The test invokes a function with different inputs and compares produced results to expected outputs, making sure it behaves as expected. The idea is that, if all units in a system are tested to work correctly, the system as a whole should work correctly as well (barring integrations which are tested separately). Of course, that's only possible if the units are integrated with each other in a decoupled way which would allows us to isolate them easily, hence the need for dependency inversion.
+Normally, when the code isn't written with unit tests in mind, it may be impossible to test some functions in complete isolation because they can have external dependencies. In order to _work around_ this issue, we can apply the dependency inversion principle and replace concrete dependencies with abstractions. These abstractions can then be substituted with real or fake implementations, depending on whether the code is executing normally or as part of a test.
 
-More specifically, with unit tests we're testing business logic.
+Besides that, unit tests are usually expected to be pure. For example, if a function contains code that writes data to the file system, that part needs to be abstracted away as well, otherwise the test that verifies such behavior will be considered an integration test instead, since its coverage extends to the unit's integration with the file system.
 
-To illustrate the ... let's proceed with a simple example of a system that we may be interested in testing:
+Considering the factors mentioned above, we can conclude that **unit tests are only useful to verify pure business logic inside of a particular function**. Their scope does not extend to testing side-effects or other integrations because that belongs to the domain of integration testing.
+
+To illustrate how these nuances affect design, let's take a look at an example of a simple system that we want to test. Imagine we're working on an application that calculates local sunrise and sunset times, which it does through the help of the following two classes:
 
 ```csharp
 public class LocationProvider : IDisposable
@@ -58,9 +60,9 @@ public class SolarCalculator : IDiposable
 }
 ```
 
-The code above illustrates a very simple system (or part thereof) which consists of two classes, `LocationProvider` for retrieving geographical coordinates and `SolarCalculator` which uses those coordinates to calculate sunrise and sunset on a particular date. While there's nothing wrong with this design, the classes above can't actually be unit tested because they're coupled.
+Although the design above is perfectly valid in terms of OOP, neither of these classes are actually unit-testable. Because `LocationProvider` depends on its own instance of `HttpClient` and `SolarCalculator` in turn depends on `LocationProvider`, it's impossible to isolate the business logic that may be contained within methods of these classes.
 
-Let's iterate and update the code to use dependency injection:
+Let's iterate and replace concrete implementations with abstractions:
 
 ```csharp
 public interface ILocationProvider
@@ -98,12 +100,27 @@ public class SolarCalculator : ISolarCalculator
 }
 ```
 
-Ok, the code nearly doubled in size, but we've managed to decouple `LocationProvider` from `SolarCalculator` and replaced their point of integration with an interface. We had to drop `IDisposable` in the process, however, because the classes no longer own their dependencies so they shouldn't manage their lifetimes -- now we have to rely that it's done in the composition root instead.
+By doing this we were able to decouple `LocationProvider` from `SolarCalculator`, but in exchange our code nearly doubled in size. Also note that we had to drop `IDisposable` from both classes because they can no longer reliably control the lifetime of their dependencies that may need to be disposed.
 
-Let's write some unit tests for this:
+It's important to point out that the interfaces we've defined serve no other practical purpose other than making unit testing possible. There is no actual need for polymorphism, these abstractions are only required to mock out the real implementations for isolated unit tests.
+
+Now that've done all of that work, let's finally reap the benefits and write some tests for `SolarCalculator.GetSolarTimesAsync`:
 
 ```csharp
+public class SolarCalculatorTests
+{
+    [Fact]
+    public async Task GetSolarTimesAsync_ReturnsCorrectSolarTimes_ForKyiv()
+    {
 
+    }
+
+    [Fact]
+    public async Task GetSolarTimesAsync_ReturnsCorrectSolarTimes_ForTokyo()
+    {
+
+    }
+}
 ```
 
 ## Detecting regressions
@@ -130,3 +147,4 @@ So does that mean that unit tests should not be used at all? Well, as we've seen
 - [Mocking is a Code Smell (Eric Elliott)](https://medium.com/javascript-scene/mocking-is-a-code-smell-944a70c90a6a)
 - [Testing of Microservices at Spotify (André Schaffer)](https://labs.spotify.com/2018/01/11/testing-of-microservices)
 - [Stop writing Unit Tests (Anton Gorbikov)](https://antongorbikov.com/2018/09/24/stop-writing-unit-tests)
+- [Unit Tests Fucking Suck. Honestly. (IndustriousEric)](https://medium.com/@IndustriousEric/unit-tests-fucking-suck-honestly-dabd31325e39)
