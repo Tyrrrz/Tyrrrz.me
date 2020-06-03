@@ -34,7 +34,7 @@ Normally, when the code isn't written with unit tests in mind, it may be impossi
 
 Besides that, unit tests are usually expected to be pure. For example, if a function contains code that writes data to the file system, that part needs to be abstracted away as well, otherwise the test that verifies such behavior will be considered an integration test instead, since its coverage extends to the unit's integration with the file system.
 
-Considering the factors mentioned above, we can conclude that **unit tests are only useful to verify pure business logic inside of a particular function**. Their scope does not extend to testing side-effects or other integrations because that belongs to the domain of integration testing.
+Considering the factors mentioned above, we can conclude that **unit tests are only useful to verify pure business logic inside of a given function**. Their scope does not extend to testing side-effects or other integrations because that belongs to the domain of integration testing.
 
 To illustrate how these nuances affect design, let's take a look at an example of a simple system that we want to test. Imagine we're working on an application that calculates local sunrise and sunset times, which it does through the help of the following two classes:
 
@@ -102,7 +102,7 @@ public class SolarCalculator : ISolarCalculator
 
 By doing this we were able to decouple `LocationProvider` from `SolarCalculator`, but in exchange our code nearly doubled in size. Also note that we had to drop `IDisposable` from both classes because they can no longer reliably control the lifetime of their dependencies that may need to be disposed.
 
-It's important to point out that the interfaces we've defined serve no other practical purpose other than making unit testing possible. There is no actual need for polymorphism, these abstractions are only required to mock out the real implementations for isolated unit tests.
+It's important to point out that the interfaces we've defined serve no other practical purpose other than making unit testing possible. As there is no need for actual polymorphism, these abstractions are only required to mock out the real implementations for isolated unit tests.
 
 Now that've done all of that work, let's finally reap the benefits and write some tests for `SolarCalculator.GetSolarTimesAsync`:
 
@@ -112,13 +112,25 @@ public class SolarCalculatorTests
     [Fact]
     public async Task GetSolarTimesAsync_ReturnsCorrectSolarTimes_ForKyiv()
     {
+        // Arrange
+        var location = new Location(50.45, 30.52);
+        var date = new DateTimeOffset(2019, 11, 04, 00, 00, 00, TimeSpan.FromHours(+2));
 
-    }
+        var expectedSolarTimes = new SolarTimes(
+            new TimeSpan(06, 55, 00),
+            new TimeSpan(16, 29, 00)
+        );
 
-    [Fact]
-    public async Task GetSolarTimesAsync_ReturnsCorrectSolarTimes_ForTokyo()
-    {
+        var locationProvider = Mock.Of<ILocationProvider>(lp =>
+            lp.GetLocationAsync() == Task.FromResult(location));
 
+        var solarCalculator = new SolarCalculator(locationProvider);
+
+        // Act
+        var solarTimes = await solarCalculator.GetSolarTimesAsync(date);
+
+        // Assert
+        solarTimes.Should().BeEquivalentTo(expectedSolarTimes);
     }
 }
 ```
