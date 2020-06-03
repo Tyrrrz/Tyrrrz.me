@@ -110,7 +110,7 @@ Now that've done all of that work, let's finally reap the benefits and write som
 public class SolarCalculatorTests
 {
     [Fact]
-    public async Task GetSolarTimesAsync_ReturnsCorrectSolarTimes_ForKyiv()
+    public async Task GetSolarTimesAsync_ForKyiv_ReturnsCorrectSolarTimes()
     {
         // Arrange
         var location = new Location(50.45, 30.52);
@@ -136,7 +136,7 @@ public class SolarCalculatorTests
 }
 ```
 
-Since unit tests and their respective units are tightly coupled, the general convention is to have the name of the test class match the name of the class under test. Here we have `SolarCalculatorTests` and a test method called `GetSolarTimesAsync_ReturnsCorrectSolarTimes_ForKyiv`, which follows the `Method_Result_Precondition` pattern.
+Since unit tests and their respective units are tightly coupled, the general convention is to have the name of the test class match the name of the class under test. Here we have `SolarCalculatorTests` and a test method called `GetSolarTimesAsync_ForKyiv_ReturnsCorrectSolarTimes`, which follows the `Method_Precondition_Result` pattern.
 
 In order to simulate the desired preconditions, we have to inject corresponding behavior into the unit's dependency, `ILocationProvider`. In this case we substitute the return value of `GetLocationAsync()` with a location, for which we know the correct solar times on a particular date.
 
@@ -159,6 +159,8 @@ Size is a very important factor in unit tests, as they should cover a very small
 So does that mean that unit tests should not be used at all? Well, as we've seen the issue with unit tests arise only if we're testing a unit which has dependencies on other units that we need to mock.
 
 ## Summary
+
+I'm not the first person to write an article about the questionable value of unit testing in modern software development. Here are some other great posts:
 
 - [Write tests. Not too many. Mostly integration (Kent C. Dodds)](https://kentcdodds.com/blog/write-tests)
 - [Fallacy of Unit Testing (Aaron W. Hsu)](https://www.sacrideo.us/the-fallacy-of-unit-testing)
