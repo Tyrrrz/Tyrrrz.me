@@ -26,13 +26,13 @@ In this article I will share my observations about this testing technique and ex
 
 *Note: this article contains code examples which are written in C#, but the language itself is not (too) important to the points I'm making.*
 
-## False promises
+## Unit as a design goal
 
 Unit tests, as evident by the name, revolve around the concept of a "unit", which denotes a very small isolated part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a module (or method of an object).
 
 Normally, when the code isn't written with unit tests in mind, it may be impossible to test some functions in complete isolation because they can have external dependencies. In order to _work around_ this issue, we can apply the dependency inversion principle and replace concrete dependencies with abstractions. These abstractions can then be substituted with real or fake implementations, depending on whether the code is executing normally or as part of a test.
 
-Besides that, unit tests are usually expected to be pure. For example, if a function contains code that writes data to the file system, that part needs to be abstracted away as well, otherwise the test that verifies such behavior will be considered an integration test instead, since its coverage extends to the unit's integration with the file system.
+Besides that, unit tests are expected to be pure. For example, if a function contains code that writes data to the file system, that part needs to be abstracted away as well, otherwise the test that verifies such behavior will be considered an integration test instead, since its coverage extends to the unit's integration with the file system.
 
 Considering the factors mentioned above, we can conclude that **unit tests are only useful to verify pure business logic inside of a given function**. Their scope does not extend to testing side-effects or other integrations because that belongs to the domain of integration testing.
 
@@ -62,7 +62,7 @@ public class SolarCalculator : IDiposable
 
 Although the design above is perfectly valid in terms of OOP, neither of these classes are actually unit-testable. Because `LocationProvider` depends on its own instance of `HttpClient` and `SolarCalculator` in turn depends on `LocationProvider`, it's impossible to isolate the business logic that may be contained within methods of these classes.
 
-Let's iterate and replace concrete implementations with abstractions:
+Let's iterate on that code and replace concrete implementations with abstractions:
 
 ```csharp
 public interface ILocationProvider
@@ -100,11 +100,11 @@ public class SolarCalculator : ISolarCalculator
 }
 ```
 
-By doing this we were able to decouple `LocationProvider` from `SolarCalculator`, but in exchange our code nearly doubled in size. Also note that we had to drop `IDisposable` from both classes because they can no longer reliably control the lifetime of their dependencies that may need to be disposed.
+By doing so we were able to decouple `LocationProvider` from `SolarCalculator`, but in exchange our code nearly doubled in size. Also note that we had to drop `IDisposable` from both classes because they **no longer own their dependencies** and thus have no business taking responsibility for their lifecycle.
 
-It's important to point out that the interfaces we've defined serve no other practical purpose other than making unit testing possible. As there is no need for actual polymorphism, these abstractions are only required to mock out the real implementations for isolated unit tests.
+While these changes may seem as an improvement to some, it's important to point out that the interfaces we've defined serve **no practical purpose other than making unit testing possible**. There's no need for actual polymorphism in our design, so, as far as our code is concerned, these abstractions are _autotelic_.
 
-Now that've done all of that work, let's finally reap the benefits and write some tests for `SolarCalculator.GetSolarTimesAsync`:
+Now that've done all of that work, let's finally reap the benefits and write some unit tests for `SolarCalculator.GetSolarTimesAsync`:
 
 ```csharp
 public class SolarCalculatorTests
@@ -122,7 +122,8 @@ public class SolarCalculatorTests
         );
 
         var locationProvider = Mock.Of<ILocationProvider>(lp =>
-            lp.GetLocationAsync() == Task.FromResult(location));
+            lp.GetLocationAsync() == Task.FromResult(location)
+        );
 
         var solarCalculator = new SolarCalculator(locationProvider);
 
@@ -134,6 +135,14 @@ public class SolarCalculatorTests
     }
 }
 ```
+
+Since unit tests and their respective units are tightly coupled, the general convention is to have the name of the test class match the name of the class under test. Here we have `SolarCalculatorTests` and a test method called `GetSolarTimesAsync_ReturnsCorrectSolarTimes_ForKyiv`, which follows the `Method_Result_Precondition` pattern.
+
+In order to simulate the desired preconditions, we have to inject corresponding behavior into the unit's dependency, `ILocationProvider`. In this case we substitute the return value of `GetLocationAsync()` with a location, for which we know the correct solar times on a particular date.
+
+Note that although `ILocationProvider` exposes two methods, by mocking a specific one, we're inherently making an **assumption about which exact method is used** by `GetSolarTimesAsync`. While that assumption may be correct, we're still relying on an implementation detail which is not exposed at an interface level. In fact, the method implementations are hidden in the snippets above, so we can't be sure how they're actually using `ILocationProvider`.
+
+At the end of the day the test works correctly and verifies the business logic inside `GetSolarTimesAsync`, which is responsible for calculating sunrise and sunset times for a specific geographic location. Of course the point of this exercise wasn't to each you how to write unit tests (you already knew that), but to point out some of the observations.
 
 ## Detecting regressions
 
@@ -151,12 +160,12 @@ So does that mean that unit tests should not be used at all? Well, as we've seen
 
 ## Summary
 
-- [Fallacy of Unit Testing (Aaron W. Hsu)](https://www.sacrideo.us/the-fallacy-of-unit-testing)
-- [Slow database test fallacy (David Heinemeier Hansson)](https://dhh.dk/2014/slow-database-test-fallacy.html)
-- [Test-induced design damage (David Heinemeier Hansson)](https://dhh.dk/2014/test-induced-design-damage.html)
 - [Write tests. Not too many. Mostly integration (Kent C. Dodds)](https://kentcdodds.com/blog/write-tests)
+- [Fallacy of Unit Testing (Aaron W. Hsu)](https://www.sacrideo.us/the-fallacy-of-unit-testing)
 - [Why Most Unit Testing is Waste (James O. Coplien)](https://rbcs-us.com/documents/Why-Most-Unit-Testing-is-Waste.pdf)
 - [Mocking is a Code Smell (Eric Elliott)](https://medium.com/javascript-scene/mocking-is-a-code-smell-944a70c90a6a)
+- [Slow database test fallacy (David Heinemeier Hansson)](https://dhh.dk/2014/slow-database-test-fallacy.html)
+- [Test-induced design damage (David Heinemeier Hansson)](https://dhh.dk/2014/test-induced-design-damage.html)
 - [Testing of Microservices at Spotify (André Schaffer)](https://labs.spotify.com/2018/01/11/testing-of-microservices)
 - [Stop writing Unit Tests (Anton Gorbikov)](https://antongorbikov.com/2018/09/24/stop-writing-unit-tests)
 - [Unit Tests Fucking Suck. Honestly. (IndustriousEric)](https://medium.com/@IndustriousEric/unit-tests-fucking-suck-honestly-dabd31325e39)
