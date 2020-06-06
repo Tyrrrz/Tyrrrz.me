@@ -107,7 +107,7 @@ By doing so we were able to decouple `LocationProvider` from `SolarCalculator`, 
 
 While these changes may seem as an improvement to some, it's important to point out that the interfaces we've defined serve **no practical purpose other than making unit testing possible**. There's no need for actual polymorphism in our design, so, as far as our code is concerned, these abstractions are _autotelic_.
 
-After going through all that work, let's finally reap the benefits and write a unit test for `SolarCalculator.GetSolarTimesAsync`:
+Let's try to reap the benefits of all that work and write a unit test for `SolarCalculator.GetSolarTimesAsync`:
 
 ```csharp
 public class SolarCalculatorTests
@@ -139,15 +139,19 @@ public class SolarCalculatorTests
 }
 ```
 
-Since the unit tests and their respective units are tightly coupled, it makes sense to put all unit tests related to `SolarCalculator` into a class called `SolarCalculatorTests`. As for the test names, we're using the popular `Method_Precondition_Result` pattern to make it more clear what the test actually verifies.
+Here we have a basic test that verifies that `SolarCalculator` works correctly for a known location. We're also following the recommended naming convention, where the test class is named after the class under test, and the name of the test method follows the `Method_Precondition_Result` pattern.
 
-In order to simulate the desired preconditions in a test, we have to inject corresponding behavior into the unit's dependency, `ILocationProvider`. In this case we do that by substituting the return value of `GetLocationAsync()` with a location, for which the correct solar times are already known ahead of time.
+In order to simulate the desired precondition in the "arrange" phase, we have to inject corresponding behavior into the unit's dependency, `ILocationProvider`. In this case we do that by substituting the return value of `GetLocationAsync()` with a location for which the correct solar times are already known ahead of time.
 
-Note that although `ILocationProvider` exposes two methods, from the contract perspective **we have no way of knowing which one it actually calls**. This means our only choice is to make an **assumption about the underlying implementation** of the method we're testing (which was deliberately hidden in the snippets above).
+Note that although `ILocationProvider` exposes two different methods, from the contract perspective **we have no way of knowing which one actually gets called**. This means that by choosing to mock a specific one of these methods, we are making an **assumption about the underlying implementation** of the method we're testing (which was deliberately hidden in the previous snippets).
 
-At the end of the day this test does work correctly and verifies that the business logic inside `GetSolarTimesAsync` matches our expectations. However, let's consider what we got out of it and whether the effort was worth it.
+All in all the test does correctly verify that the business logic inside `GetSolarTimesAsync` works as expected. However, as evident by the earlier remarks, it comes with a cost.
 
-## Extrapolating observations
+## The price of unit testing
+
+First of all, unit tests have a very limited purpose, which is to verify business logic in a localized scope.
+
+Mock-based unit testing is inherently **implementation-aware**.
 
 ### Limited purpose
 
@@ -205,6 +209,8 @@ So does that mean that unit tests should not be used at all? Well, as we've seen
 
 ## Think like a user
 
+## Code coverage is your friend
+
 ## Summary
 
 I'm not the first person to write an article about the questionable value of unit testing in modern software development. Here are some other great posts:
@@ -217,4 +223,3 @@ I'm not the first person to write an article about the questionable value of uni
 - [Slow database test fallacy (David Heinemeier Hansson)](https://dhh.dk/2014/slow-database-test-fallacy.html)
 - [Testing of Microservices at Spotify (André Schaffer)](https://labs.spotify.com/2018/01/11/testing-of-microservices)
 - [Unit Tests Fucking Suck. Honestly. (IndustriousEric)](https://medium.com/@IndustriousEric/unit-tests-fucking-suck-honestly-dabd31325e39)
-- [Stop writing Unit Tests (Anton Gorbikov)](https://antongorbikov.com/2018/09/24/stop-writing-unit-tests)
