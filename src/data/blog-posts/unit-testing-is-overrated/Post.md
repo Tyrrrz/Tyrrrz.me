@@ -26,7 +26,7 @@ In this article I will share my observations about this testing technique and ex
 
 *Note: this article contains code examples which are written in C#, but the language itself is not (too) important to the points I'm making.*
 
-## Unit as a design goal
+## Designing with unit tests in mind
 
 Unit tests, as evident by the name, revolve around the concept of a "unit", which denotes a very small isolated part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a module (or method of an object).
 
@@ -43,8 +43,10 @@ public class LocationProvider : IDisposable
 {
     private readonly HttpClient _httpClient = new HttpClient();
 
+    // Gets location by query
     public Task<Location> GetLocationAsync(string locationQuery) { /* ... */ }
 
+    // Gets current location by IP
     public Task<Location> GetLocationAsync() { /* ... */ }
 
     public void Dispose() => _httpClient.Dispose();
@@ -54,6 +56,7 @@ public class SolarCalculator : IDiposable
 {
     private readonly LocationProvider _locationProvider = new LocationProvider();
 
+    // Gets solar times for current location and specified date
     public Task<SolarTimes> GetSolarTimesAsync(DateTimeOffset date) { /* ... */ }
 
     public void Dispose() => _locationProvider.Dispose();
@@ -104,7 +107,7 @@ By doing so we were able to decouple `LocationProvider` from `SolarCalculator`, 
 
 While these changes may seem as an improvement to some, it's important to point out that the interfaces we've defined serve **no practical purpose other than making unit testing possible**. There's no need for actual polymorphism in our design, so, as far as our code is concerned, these abstractions are _autotelic_.
 
-Now that've done all of that work, let's finally reap the benefits and write some unit tests for `SolarCalculator.GetSolarTimesAsync`:
+After going through all that work, let's finally reap the benefits and write a unit test for `SolarCalculator.GetSolarTimesAsync`:
 
 ```csharp
 public class SolarCalculatorTests
@@ -136,13 +139,53 @@ public class SolarCalculatorTests
 }
 ```
 
-Since unit tests and their respective units are tightly coupled, the general convention is to have the name of the test class match the name of the class under test. Here we have `SolarCalculatorTests` and a test method called `GetSolarTimesAsync_ForKyiv_ReturnsCorrectSolarTimes`, which follows the `Method_Precondition_Result` pattern.
+Since the unit tests and their respective units are tightly coupled, it makes sense to put all unit tests related to `SolarCalculator` into a class called `SolarCalculatorTests`. As for the test names, we're using the popular `Method_Precondition_Result` pattern to make it more clear what the test actually verifies.
 
-In order to simulate the desired preconditions, we have to inject corresponding behavior into the unit's dependency, `ILocationProvider`. In this case we substitute the return value of `GetLocationAsync()` with a location, for which we know the correct solar times on a particular date.
+In order to simulate the desired preconditions in a test, we have to inject corresponding behavior into the unit's dependency, `ILocationProvider`. In this case we do that by substituting the return value of `GetLocationAsync()` with a location, for which the correct solar times are already known ahead of time.
 
-Note that although `ILocationProvider` exposes two methods, by mocking a specific one, we're inherently making an **assumption about which exact method is used** by `GetSolarTimesAsync`. While that assumption may be correct, we're still relying on an implementation detail which is not exposed at an interface level. In fact, the method implementations are hidden in the snippets above, so we can't be sure how they're actually using `ILocationProvider`.
+Note that although `ILocationProvider` exposes two methods, from the contract perspective **we have no way of knowing which one it actually calls**. This means our only choice is to make an **assumption about the underlying implementation** of the method we're testing (which was deliberately hidden in the snippets above).
 
-At the end of the day the test works correctly and verifies the business logic inside `GetSolarTimesAsync`, which is responsible for calculating sunrise and sunset times for a specific geographic location. Of course the point of this exercise wasn't to each you how to write unit tests (you already knew that), but to point out some of the observations.
+At the end of the day this test does work correctly and verifies that the business logic inside `GetSolarTimesAsync` matches our expectations. However, let's consider what we got out of it and whether the effort was worth it.
+
+## Extrapolating observations
+
+### Limited purpose
+
+When writing tests, it's surprisingly easy to forget what exactly we're trying to verify. With unit tests, it's important to remember that their purpose is to test business logic in a very localized scope.
+
+Would we benefit from unit testing a method that calculates solar times using a 60-lines algorithm? Most likely, yes.
+
+Would we benefit from unit testing a method that sends a request to a REST API and maps the result to geographical coordinates? Most likely, not.
+
+If your goal is to get high test coverage via unit tests, you will go from class to class...
+
+### Increased cognitive complexity
+
+A common argument in favor of unit testing is that, since they're isolated and narrowly scoped, they're quick and easy to write. However, it's not actually true because that narrowness in scope is achieved through indirections, which conversely increase complexity and requires a lot of ceremony.
+
+This is why it's hard to argue that the effort needed to make code unit-testable actually leads to better design in general. In my experience, it's quite the opposite.
+
+### High cost
+
+It takes a lot of effort to write good unit tests and it takes even more effort to maintain them as the project evolves. On top of that, very few developers see this as an enticing task, most just consider it a necessary evil.
+
+Unit tests come at a very high cost and it's only natural to question whether that effort would be better spent elsewhere.
+
+### Implementation-aware
+
+The main issue with performing tests in isolation is how that isolation is achieved. With unit tests
+
+### Low-level
+
+Unit tests are, by definition, very low-level. Their scope is limited to a very small unit.
+
+It's important to remember that your users don't think about your software product in terms of units, they think of it in terms of the top-level functionality it provides and what they can do with it. Unit tests don't attempt to simulate behavior at that level.
+
+Imagine that you have a meeting with the product owner and they ask whether that new invoicing feature is working correctly. If all you have been doing was writing unit tests, at best you'd be able to say "well, the `BankStatementRepositoryTests` and `InvoiceServiceTests` have passed!", but I doubt that would reinforce a lot of confidence.
+
+[!["Unit testing is a great way to ensure your mocks work" (@rkoutnik on Twitter)](Tweet-1.png)](https://twitter.com/rkoutnik/status/1242073856128495620)
+
+By now it should be painfully obvious that unit testing is not only a silver bullet this approach is often touted as, but a rather niche tool for very specific cases.
 
 ## Detecting regressions
 
@@ -158,6 +201,10 @@ Size is a very important factor in unit tests, as they should cover a very small
 
 So does that mean that unit tests should not be used at all? Well, as we've seen the issue with unit tests arise only if we're testing a unit which has dependencies on other units that we need to mock.
 
+## Prefer Fakes over Mocks
+
+## Think like a user
+
 ## Summary
 
 I'm not the first person to write an article about the questionable value of unit testing in modern software development. Here are some other great posts:
@@ -166,8 +213,8 @@ I'm not the first person to write an article about the questionable value of uni
 - [Fallacy of Unit Testing (Aaron W. Hsu)](https://www.sacrideo.us/the-fallacy-of-unit-testing)
 - [Why Most Unit Testing is Waste (James O. Coplien)](https://rbcs-us.com/documents/Why-Most-Unit-Testing-is-Waste.pdf)
 - [Mocking is a Code Smell (Eric Elliott)](https://medium.com/javascript-scene/mocking-is-a-code-smell-944a70c90a6a)
-- [Slow database test fallacy (David Heinemeier Hansson)](https://dhh.dk/2014/slow-database-test-fallacy.html)
 - [Test-induced design damage (David Heinemeier Hansson)](https://dhh.dk/2014/test-induced-design-damage.html)
+- [Slow database test fallacy (David Heinemeier Hansson)](https://dhh.dk/2014/slow-database-test-fallacy.html)
 - [Testing of Microservices at Spotify (André Schaffer)](https://labs.spotify.com/2018/01/11/testing-of-microservices)
-- [Stop writing Unit Tests (Anton Gorbikov)](https://antongorbikov.com/2018/09/24/stop-writing-unit-tests)
 - [Unit Tests Fucking Suck. Honestly. (IndustriousEric)](https://medium.com/@IndustriousEric/unit-tests-fucking-suck-honestly-dabd31325e39)
+- [Stop writing Unit Tests (Anton Gorbikov)](https://antongorbikov.com/2018/09/24/stop-writing-unit-tests)
