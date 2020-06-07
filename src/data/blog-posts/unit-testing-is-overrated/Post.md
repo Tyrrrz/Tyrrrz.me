@@ -167,29 +167,15 @@ It has always surprised me that one of the most popular arguments in favor of un
 
 Abstraction is a really powerful technique that enables a variety of useful design patterns, but it inevitably leads to much higher cognitive complexity.
 
-### Increased cognitive complexity
-
-A common argument in favor of unit testing is that, since they're isolated and narrowly scoped, they're quick and easy to write. However, it's not actually true because that narrowness in scope is achieved through indirections, which conversely increase complexity and requires a lot of ceremony.
-
-This is why it's hard to argue that the effort needed to make code unit-testable actually leads to better design in general. In my experience, it's quite the opposite.
-
-### High cost
+3. Unit tests **are expensive**
 
 It takes a lot of effort to write good unit tests and it takes even more effort to maintain them as the project evolves. On top of that, very few developers see this as an enticing task, most just consider it a necessary evil.
 
 Unit tests come at a very high cost and it's only natural to question whether that effort would be better spent elsewhere.
 
-### Implementation-aware
+4. Unit tests **rely on implementation details**
 
-The main issue with performing tests in isolation is how that isolation is achieved. With unit tests
-
-### Low-level
-
-Unit tests are, by definition, very low-level. Their scope is limited to a very small unit.
-
-It's important to remember that your users don't think about your software product in terms of units, they think of it in terms of the top-level functionality it provides and what they can do with it. Unit tests don't attempt to simulate behavior at that level.
-
-Imagine that you have a meeting with the product owner and they ask whether that new invoicing feature is working correctly. If all you have been doing was writing unit tests, at best you'd be able to say "well, the `BankStatementRepositoryTests` and `InvoiceServiceTests` have passed!", but I doubt that would reinforce a lot of confidence.
+5. Unit tests **don't exercise user behavior**
 
 [!["Unit testing is a great way to ensure your mocks work" (@rkoutnik on Twitter)](Tweet-1.png)](https://twitter.com/rkoutnik/status/1242073856128495620)
 
