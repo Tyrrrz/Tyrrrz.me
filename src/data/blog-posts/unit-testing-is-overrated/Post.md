@@ -145,23 +145,27 @@ In order to simulate the desired precondition in the "arrange" phase, we have to
 
 Note that although `ILocationProvider` exposes two different methods, from the contract perspective **we have no way of knowing which one actually gets called**. This means that by choosing to mock a specific one of these methods, we are making an **assumption about the underlying implementation** of the method we're testing (which was deliberately hidden in the previous snippets).
 
-All in all the test does correctly verify that the business logic inside `GetSolarTimesAsync` works as expected. However, as evident by the earlier remarks, it comes with a cost.
+All in all the test does correctly verify that the business logic inside `GetSolarTimesAsync` works as expected. However, let's expand on some of the observations we've made in the process.
 
-## The price of unit testing
+___
 
-First of all, unit tests have a very limited purpose, which is to verify business logic in a localized scope.
+1. Unit tests **have a limited purpose**
 
-Mock-based unit testing is inherently **implementation-aware**.
+It's important to understand that the goal of unit testing is to verify business logic in a very localized scope. If your intention is to test wider interactions, you will probably want to write integration tests instead.
 
-### Limited purpose
+For example, does it make sense to unit test a method that calculates solar times using a long and complicated mathematical algorithm? Most likely, _yes_.
 
-When writing tests, it's surprisingly easy to forget what exactly we're trying to verify. With unit tests, it's important to remember that their purpose is to test business logic in a very localized scope.
+Does it make sense to unit test a method that sends a request to a REST API to get geographical coordinates? Most likely, _not_.
 
-Would we benefit from unit testing a method that calculates solar times using a 60-lines algorithm? Most likely, yes.
+I often notice that some people write integration tests, but still refer to them as unit tests, arguing that a unit can be arbitrarily chosen and doesn't have to be limited to the smallest possible scope. This makes the line between unit tests and integration tests very blurry, ultimately just making the usage of the term completely useless.
 
-Would we benefit from unit testing a method that sends a request to a REST API and maps the result to geographical coordinates? Most likely, not.
+If you focus on unit testing as a goal in itself, you will find that, despite putting a lot of effort, most tests will not be able to provide you with the confidence you need, simply because they're testing the wrong thing. In my experience, most projects just don't have enough business logic in them to justify extensive unit testing.
 
-If your goal is to get high test coverage via unit tests, you will go from class to class...
+2. Unit tests **lead to complex design**
+
+It has always surprised me that one of the most popular arguments in favor of unit testing is that in enforces you to design software in a highly modular way. Why would anyone consider it beneficial to reduce code cohesion by adding unnecessary indirection?
+
+Abstraction is a really powerful technique that enables a variety of useful design patterns, but it inevitably leads to much higher cognitive complexity.
 
 ### Increased cognitive complexity
 
