@@ -151,21 +151,27 @@ ___
 
 1. Unit tests **have a limited purpose**
 
-It's important to understand that the goal of unit testing is to verify business logic in a very localized scope. If your intention is to test wider interactions, you will probably want to write integration tests instead.
+It's important to understand that the purpose of any unit test is very simple: verify business logic in an isolated scope. Depending on which interactions you intend to test, unit testing may or may not be the right tool for the job.
 
 For example, does it make sense to unit test a method that calculates solar times using a long and complicated mathematical algorithm? Most likely, _yes_.
 
 Does it make sense to unit test a method that sends a request to a REST API to get geographical coordinates? Most likely, _not_.
 
-I often notice that some people write integration tests, but still refer to them as unit tests, arguing that a unit can be arbitrarily chosen and doesn't have to be limited to the smallest possible scope. This makes the line between unit tests and integration tests very blurry, ultimately just making the usage of the term completely useless.
+If you treat unit testing as a goal in itself, you will quickly find that, despite putting a lot of effort, most tests will not be able to provide you with the confidence you need, simply because they're testing the wrong thing. In many cases it's much more beneficial to test wider interactions with integration tests, rather than focusing specifically on unit tests.
 
-If you focus on unit testing as a goal in itself, you will find that, despite putting a lot of effort, most tests will not be able to provide you with the confidence you need, simply because they're testing the wrong thing. In my experience, most projects just don't have enough business logic in them to justify extensive unit testing.
+Interestingly enough, some developers often get confused as to what constitutes a unit test or an integration test, which leads to them writing integration tests while still referring to them as unit tests. This makes the concept of a unit very fuzzy, ultimately just making the overall usage of the term completely useless.
 
-2. Unit tests **lead to complex design**
+2. Unit tests **lead to more complicated design**
 
-It has always surprised me that one of the most popular arguments in favor of unit testing is that in enforces you to design software in a highly modular way. Why would anyone consider it beneficial to reduce code cohesion by adding unnecessary indirection?
+One of the most popular arguments in favor of unit testing is that it enforces you to design software in a highly modular way. This builds on an assumption that it's easier to reason about code when it's split into many smaller components rather than a few larger ones.
 
-Abstraction is a really powerful technique that enables a variety of useful design patterns, but it inevitably leads to much higher cognitive complexity.
+In reality, however, it often leads to the opposite problem, where a particular feature may end up being very fragmented. This makes it much harder to assess the code because a developer needs to scan through multiple components that make up (what should've been) a single cohesive element.
+
+Additionally, the abundant usage of abstraction, which is required to achieve component isolation, creates a lot of unnecessary indirection. Although an incredibly powerful and useful technique in itself, abstraction inevitably increases cognitive complexity, making it further more difficult to reason about the code.
+
+Through that indirection we also end up losing some degree of encapsulation that we were able to maintain otherwise. For example, the responsibility of managing lifetimes of individual dependencies shifts from specific components to some other unrelated service (usually the dependency container).
+
+At the end of the day, while it's clear that unit testing does influence software design, it's highly debatable whether that's a good thing.
 
 3. Unit tests **are expensive**
 
