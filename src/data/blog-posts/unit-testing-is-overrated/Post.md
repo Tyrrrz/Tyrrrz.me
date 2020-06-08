@@ -165,15 +165,19 @@ Interestingly enough, some developers often get confused as to what constitutes 
 
 One of the most popular arguments in favor of unit testing is that it enforces you to design software in a highly modular way. This builds on an assumption that it's easier to reason about code when it's split into many smaller components rather than a few larger ones.
 
-In reality, however, it often leads to the opposite problem, where a particular feature may end up being very fragmented. This makes it much harder to assess the code because a developer needs to scan through multiple components that make up (what should've been) a single cohesive element.
+In reality, however, it often leads to the opposite problem, where a particular feature may end up being very fragmented. This makes it much harder to assess the code because a developer needs to scan through multiple components that make up what should've been a single cohesive element.
 
 Additionally, the abundant usage of abstraction, which is required to achieve component isolation, creates a lot of unnecessary indirection. Although an incredibly powerful and useful technique in itself, abstraction inevitably increases cognitive complexity, making it further more difficult to reason about the code.
 
 Through that indirection we also end up losing some degree of encapsulation that we were able to maintain otherwise. For example, the responsibility of managing lifetimes of individual dependencies shifts from specific components to some other unrelated service (usually the dependency container).
 
+Some of that infrastructural complexity can be also delegated to a dependency injection framework, making it easier to configure, manage, and activate dependencies. However, that reduces portability, which may be undesirable in some cases, for example when writing a library.
+
 At the end of the day, while it's clear that unit testing does influence software design, it's highly debatable whether that's a good thing.
 
 3. Unit tests **are expensive**
+
+Logically, it would make sense to assume that, since they are small and isolated, unit tests should be really easy and quick to write. This is another fallacy that seems to be rather popular, especially among managers.
 
 It takes a lot of effort to write good unit tests and it takes even more effort to maintain them as the project evolves. On top of that, very few developers see this as an enticing task, most just consider it a necessary evil.
 
@@ -186,6 +190,8 @@ Unit tests come at a very high cost and it's only natural to question whether th
 [!["Unit testing is a great way to ensure your mocks work" (@rkoutnik on Twitter)](Tweet-1.png)](https://twitter.com/rkoutnik/status/1242073856128495620)
 
 By now it should be painfully obvious that unit testing is not only a silver bullet this approach is often touted as, but a rather niche tool for very specific cases.
+
+## Why unit testing
 
 ## Detecting regressions
 
@@ -201,11 +207,11 @@ Size is a very important factor in unit tests, as they should cover a very small
 
 So does that mean that unit tests should not be used at all? Well, as we've seen the issue with unit tests arise only if we're testing a unit which has dependencies on other units that we need to mock.
 
-## Prefer Fakes over Mocks
+## Fakes over mocks
 
 ## Think like a user
 
-## Code coverage is your friend
+## Coverage metrics are useful
 
 ## Summary
 
