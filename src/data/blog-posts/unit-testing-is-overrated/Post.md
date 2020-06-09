@@ -8,7 +8,7 @@ cover: Cover.png
 
 The importance of testing in modern software development is really hard to overstate. Delivering a successful product is not something you do once and forget about, but is rather a continuous recurring process. With every line of code that changes, software has to remain in a functional state, which implies the need for rigorous testing.
 
-Over time, as the software industry evolved, testing practices have matured as well. Gradually moving towards automation, testing approaches have also influenced software design itself, spawning mantras like test-driven development, emphasizing patterns such as dependency inversion, and ultimately leading to high-level architectures such as the "Clean Architecture" and similar.
+Over time, as the software industry evolved, testing practices have matured as well. Gradually moving towards automation, testing approaches have also influenced software design itself, spawning mantras like test-driven development, emphasizing patterns such as dependency inversion, and popularizing high-level architectures that are built around it.
 
 Nowadays, automated testing is embedded so deeply within our perception of software development, it's hard to imagine one without the other. And since that ultimately enables us to produce software quickly without sacrificing quality, it's hard to argue that it's not a good thing.
 
@@ -139,7 +139,7 @@ public class SolarCalculatorTests
 }
 ```
 
-Here we have a basic test that verifies that `SolarCalculator` works correctly for a known location. We're also following the recommended naming convention, where the test class is named after the class under test, and the name of the test method follows the `Method_Precondition_Result` pattern.
+Here we have a basic test that verifies that `SolarCalculator` works correctly for a known location. Since unit tests and their units are tightly coupled, we're following the recommended naming convention, where the test class is named after the class under test, and the name of the test method follows the `Method_Precondition_Result` pattern.
 
 In order to simulate the desired precondition in the "arrange" phase, we have to inject corresponding behavior into the unit's dependency, `ILocationProvider`. In this case we do that by substituting the return value of `GetLocationAsync()` with a location for which the correct solar times are already known ahead of time.
 
@@ -159,7 +159,7 @@ Does it make sense to unit test a method that sends a request to a REST API to g
 
 If you treat unit testing as a goal in itself, you will quickly find that, despite putting a lot of effort, most tests will not be able to provide you with the confidence you need, simply because they're testing the wrong thing. In many cases it's much more beneficial to test wider interactions with integration tests, rather than focusing specifically on unit tests.
 
-Interestingly enough, some developers often get confused as to what constitutes a unit test or an integration test, which leads to them writing integration tests while still referring to them as unit tests. This makes the concept of a unit very fuzzy, ultimately just making the overall usage of the term completely useless.
+Interestingly enough, some developers often get confused as to what constitutes a unit test or an integration test, which leads to them writing integration tests while still referring to them as unit tests. Although it could be argued that a unit size can be chosen arbitrarily and can span multiple components, this makes the concept very fuzzy, ultimately just making the overall usage of the term "unit test" completely useless.
 
 2. Unit tests **lead to more complicated design**
 
@@ -169,21 +169,25 @@ In reality, however, it often leads to the opposite problem, where a particular 
 
 Additionally, the abundant usage of abstraction, which is required to achieve component isolation, creates a lot of unnecessary indirection. Although an incredibly powerful and useful technique in itself, abstraction inevitably increases cognitive complexity, making it further more difficult to reason about the code.
 
-Through that indirection we also end up losing some degree of encapsulation that we were able to maintain otherwise. For example, the responsibility of managing lifetimes of individual dependencies shifts from specific components to some other unrelated service (usually the dependency container).
+Through that indirection we also end up losing some degree of encapsulation that we were able to maintain otherwise. For example, the responsibility of managing lifetimes of individual dependencies shifts from components that contain them to some other unrelated service (usually the dependency container).
 
 Some of that infrastructural complexity can be also delegated to a dependency injection framework, making it easier to configure, manage, and activate dependencies. However, that reduces portability, which may be undesirable in some cases, for example when writing a library.
 
-At the end of the day, while it's clear that unit testing does influence software design, it's highly debatable whether that's a good thing.
+At the end of the day, while it's clear that unit testing does influence software design, it's highly debatable whether that's really a good thing.
 
 3. Unit tests **are expensive**
 
 Logically, it would make sense to assume that, since they are small and isolated, unit tests should be really easy and quick to write. This is another fallacy that seems to be rather popular, especially among managers.
 
-It takes a lot of effort to write good unit tests and it takes even more effort to maintain them as the project evolves. On top of that, very few developers see this as an enticing task, most just consider it a necessary evil.
+Even though the previously-mentioned modular architecture lures us into thinking that individual components can be considered separately from each other, unit tests don't actually benefit from that. In fact, the complexity of a unit test only grows proportionally to the number of external interactions the unit has, due to all the work that you have to do to achieve isolation while still exercising required behavior.
 
-Unit tests come at a very high cost and it's only natural to question whether that effort would be better spent elsewhere.
+Besides that, unit tests are by design very tightly coupled to the code they're testing, which means that any effort to make a change is effectively doubled as the test suite needs to be updated as well. What makes this worse is that very few developers seem to find doing that an exciting task, often pawning it off to more junior members on the team.
+
+Of course, given infinite resources we wouldn't be considering the cost aspect at all, but unfortunately that is not the reality we live in.
 
 4. Unit tests **rely on implementation details**
+
+The unfortunate implication of mock-based unit testing is that any test written with this approach is inherently implementation-aware.
 
 5. Unit tests **don't exercise user behavior**
 
@@ -224,4 +228,3 @@ I'm not the first person to write an article about the questionable value of uni
 - [Test-induced design damage (David Heinemeier Hansson)](https://dhh.dk/2014/test-induced-design-damage.html)
 - [Slow database test fallacy (David Heinemeier Hansson)](https://dhh.dk/2014/slow-database-test-fallacy.html)
 - [Testing of Microservices at Spotify (André Schaffer)](https://labs.spotify.com/2018/01/11/testing-of-microservices)
-- [Unit Tests Fucking Suck. Honestly. (IndustriousEric)](https://medium.com/@IndustriousEric/unit-tests-fucking-suck-honestly-dabd31325e39)
