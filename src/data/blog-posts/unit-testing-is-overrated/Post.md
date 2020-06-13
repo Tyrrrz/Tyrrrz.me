@@ -26,7 +26,7 @@ In this article I will share my observations about this testing technique and ex
 
 *Note: this article contains code examples which are written in C#, but the language itself is not (too) important to the points I'm making.*
 
-## Hook, line, and sinker
+## Unit tests as a focus
 
 Unit tests, as evident by the name, revolve around the concept of a "unit", which denotes a very small isolated part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a module (or method of an object).
 
@@ -213,7 +213,23 @@ Doing mock-based testing puts the value of such tests under an even bigger quest
 
 [!["Unit testing is a great way to ensure your mocks work" (@rkoutnik on Twitter)](Tweet-1.png)](https://twitter.com/rkoutnik/status/1242073856128495620)
 
-## Reality-based testing
+## The testing ellipsis
+
+So why would we, as an industry, decide that unit testing should be the primary method of testing software, given all of its existing flaws? For the most part, it's because integration testing has always been considered hard, slow, and unreliable.
+
+If you refer to the practical test pyramid, you will find that it suggests that the bulk of testing should be performed at the unit level due to being "cheaper and faster":
+
+![Test pyramid. Shows unit tests at the bottom, integration tests on top, and end-to-end tests at the peak.](Test-pyramid.png)
+
+Disregarding the fact that the argument for lower cost of unit tests is debatable, this pyramid has another major flaw. It's based on an assumption that tests get slower and more expensive as you go up in scope, which may hold true for the extremes, but there's no evidence to believe that this correlation is linear.
+
+If you consider the fact that the isolation comes with a considerable cost in itself, it's entirely likely that a test, whose scope lies somewhere in the middle of the integration scale, can provide much higher return on investment. In my experience, a more accurate representation of that relationship looks somewhat like this:
+
+![Test conversion efficiency graph. Shows that the efficiency correlation is likely not linear, as assumed.](Test-conversion-efficiency.png)
+
+Why does the correlation matter at all? Because, for example, if we assume that the correlation is linear, 3 unit tests should be able to cover the same code surface as 1 integration test, while each taking 1/3 of the cost and time to run. In such case, it makes sense to prefer unit tests, at least because separate tests should be easier to reason about and can be ran in parallel.
+
+However, if the correlation is not linear, it's possible that a single integration test does take longer to run, but has significantly lower cost than that of those individual unit tests combined. In this case, it may be more efficient to go with the integration test instead.
 
 ## Fakes over mocks
 
