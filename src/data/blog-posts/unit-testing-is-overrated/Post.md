@@ -211,25 +211,29 @@ The problem with unit tests is that they're the exact opposite of that. Since we
 
 Doing mock-based testing puts the value of such tests under an even bigger question, because the parts of our system that would've been used otherwise are replaced with mocks, further distancing the simulated environment from reality. It's impossible to gain confidence that the user will have a smooth experience by testing something that doesn't resemble that experience.
 
-[!["Unit testing is a great way to ensure your mocks work" (@rkoutnik on Twitter)](Tweet-1.png)](https://twitter.com/rkoutnik/status/1242073856128495620)
+[!["Unit testing is a great way to ensure your mocks work" (Tweet by @rkoutnik)](Tweet-1.png)](https://twitter.com/rkoutnik/status/1242073856128495620)
 
 ## The testing ellipsis
 
 So why would we, as an industry, decide that unit testing should be the primary method of testing software, given all of its existing flaws? For the most part, it's because integration testing has always been considered hard, slow, and unreliable.
 
-If you refer to the practical test pyramid, you will find that it suggests that the bulk of testing should be performed at the unit level due to being "cheaper and faster":
+If you refer to the traditional test pyramid, you will find that it suggests that most testing should be performed at the unit level due to it being "faster and cheaper":
 
 ![Test pyramid. Shows unit tests at the bottom, integration tests on top, and end-to-end tests at the peak.](Test-pyramid.png)
 
-Disregarding the fact that the argument for lower cost of unit tests is debatable, this pyramid has another major flaw. It's based on an assumption that tests get slower and more expensive as you go up in scope, which may hold true for the extremes, but there's no evidence to believe that this correlation is linear.
+This pyramid is overly simplistic and falls short on one main account: it lumps both cost and speed together on a single scale and assumes that tests get slower and more expensive as you go up in scope, which may hold true for the extremes but there's no evidence to believe that this correlation is always linear. It's easy to be misled by it, thinking that the point of highest return on investment is somewhere in the unit test area.
 
-If you consider the fact that the isolation comes with a considerable cost in itself, it's entirely likely that a test, whose scope lies somewhere in the middle of the integration scale, can provide much higher return on investment. In my experience, a more accurate representation of that relationship looks somewhat like this:
+If you consider the fact that isolation comes with a considerable cost in itself, it's entirely likely that a test, whose scope lies somewhere in the middle of the integration scale, can be cheaper (albeit slower) than a few unit tests, while also providing significantly higher level of confidence. In my experience, a more accurate representation of that relationship looks somewhat like this:
 
 ![Test conversion efficiency graph. Shows that the efficiency correlation is likely not linear, as assumed.](Test-conversion-efficiency.png)
 
-Why does the correlation matter at all? Because, for example, if we assume that the correlation is linear, 3 unit tests should be able to cover the same code surface as 1 integration test, while each taking 1/3 of the cost and time to run. In such case, it makes sense to prefer unit tests, at least because separate tests should be easier to reason about and can be ran in parallel.
+Of course, the validity of the above graph also depends on how the compound value of cost and speed is calculated. We already know that it's incorrect to assume that those two scale in tandem, so even the above model might not be the most representational.
 
-However, if the correlation is not linear, it's possible that a single integration test does take longer to run, but has significantly lower cost than that of those individual unit tests combined. In this case, it may be more efficient to go with the integration test instead.
+Speed in itself is an interesting factor, because, unlike cost, it's not so much about "faster is better" but rather "fast enough is good enough". In most cases, it doesn't make much of a difference whether a test runs in 1s or 1.5s, as long as the whole suite completes in a reasonable time, so that the developer can run it often for a shorter feedback loop.
+
+It makes a lot more sense to choose a specific threshold instead, which would depend on the project, its complexity and needs. For example, a heavy end-to-end suite taking 10 minutes to run might be too long to use during development, but 10 seconds may sound acceptable.
+
+Here's how that would affect our graph:
 
 ## Fakes over mocks
 
