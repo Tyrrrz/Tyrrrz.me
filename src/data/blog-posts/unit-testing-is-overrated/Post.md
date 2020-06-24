@@ -26,7 +26,7 @@ In this article I will share my observations about this testing technique and ex
 
 *Note: this article contains code examples which are written in C#, but the language itself is not (too) important to the points I'm making.*
 
-## Unit tests as a focus
+## Focusing on unit tests
 
 Unit tests, as evident by the name, revolve around the concept of a "unit", which denotes a very small isolated part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a module (or method of an object).
 
@@ -205,7 +205,7 @@ In most cases, the user works with the software through some top-level interface
 
 It doesn't even matter if a few layers deep there's a bug in some part of the system, as long as it never surfaces to the user and doesn't affect the provided functionality. Conversely, it makes no difference that we may have full coverage on all of the lower-level pieces, if there's a defect in the user interface that renders our system effectively useless.
 
-Of course, if you want to ensure that something works correctly, you do that exact thing and see if it does. In our case, the best way to gain confidence in the system is to simulate how an actual user would interact with the top-level interface and see if it works properly according to expectations.
+Of course, if you want to ensure that something works correctly, you have to check that exact thing and see if it does. In our case, the best way to gain confidence in the system is to simulate how an actual user would interact with the top-level interface and see if it works properly according to expectations.
 
 The problem with unit tests is that they're the exact opposite of that. Since we're always dealing with small isolated pieces of our code that the user doesn't directly interact with, we never test the actual user behavior.
 
@@ -217,23 +217,22 @@ Doing mock-based testing puts the value of such tests under an even bigger quest
 
 So why would we, as an industry, decide that unit testing should be the primary method of testing software, given all of its existing flaws? For the most part, it's because integration testing has always been considered hard, slow, and unreliable.
 
-If you refer to the traditional test pyramid, you will find that it suggests that most testing should be performed at the unit level due to it being "faster and cheaper":
+If you refer to the traditional test pyramid, you will find that it suggests that most testing should be performed at the unit level due to it being faster and cheaper as well as more isolated, all of which are important ingredients for good development experience:
 
 ![Test pyramid. Shows unit tests at the bottom, integration tests on top, and end-to-end tests at the peak.](Test-pyramid.png)
 
-This pyramid is overly simplistic and falls short on one main account: it lumps both cost and speed together on a single scale and assumes that tests get slower and more expensive as you go up in scope, which may hold true for the extremes but there's no evidence to believe that this correlation is always linear. It's easy to be misled by it, thinking that the point of highest return on investment is somewhere in the unit test area.
+The idea is that, although higher-level tests are expected to provide more confidence and require fewer tests to be written, it's easy to get caught up and end up with a suite that takes too long to run, is hard to maintain, and nearly impossible to parallelize. On the other hand, unit tests can be used to cover the majority of code in isolation, while only a smaller number of integration tests are needed to ensure that those components work when connected together as well.
 
-If you consider the fact that isolation comes with a considerable cost in itself, it's entirely likely that a test, whose scope lies somewhere in the middle of the integration scale, can be cheaper (albeit slower) than a few unit tests, while also providing significantly higher level of confidence. In my experience, a more accurate representation of that relationship looks somewhat like this:
+Due to its simplistic nature, the above pyramid mostly just focuses on the extremes and leads us into thinking that cost, speed, and other important properties scale linearly from one end to another as the integration scope gets wider. It also combines them together on a single axis, suggesting that a change in one property is reflected in an equal change in another property, which does not often hold true in reality.
 
-![Test conversion efficiency graph. Shows that the efficiency correlation is likely not linear, as assumed.](Test-conversion-efficiency.png)
+Besides that, the importance of those factors may greatly vary depending on the circumstances. For example, while we always want to keep the development cost as low as possible, it probably won't matter as much if a test takes 1s or 1.5s to run, as long as the whole suite completes in a reasonable time. Similarly, being able to parallelize tests, which is one of the advantages of isolation, doesn't provide as much of a benefit if the tests are too small to begin with.
 
-Of course, the validity of the above graph also depends on how the compound value of cost and speed is calculated. We already know that it's incorrect to assume that those two scale in tandem, so even the above model might not be the most representational.
+Furthermore, the pyramid is entirely based on an assumption that higher-level tests are inherently slower, more brittle and harder to manage than lower-level tests. While that may have been true in the past, the availability of tools such as Docker, in-memory providers for data stores, virtualized web servers, automation drivers, have all made it a much less significant issue than it was before.
 
-Speed in itself is an interesting factor, because, unlike cost, it's not so much about "faster is better" but rather "fast enough is good enough". In most cases, it doesn't make much of a difference whether a test runs in 1s or 1.5s, as long as the whole suite completes in a reasonable time, so that the developer can run it often for a shorter feedback loop.
+If you also consider the fact that isolation comes with a considerable cost in itself, it's entirely likely that a test, whose scope lies somewhere in the middle of the integration scale, can provide the highest return on investment. And at the end of the day that's all that really matters.
 
-It makes a lot more sense to choose a specific threshold instead, which would depend on the project, its complexity and needs. For example, a heavy end-to-end suite taking 10 minutes to run might be too long to use during development, but 10 seconds may sound acceptable.
+For these reasons, treating the test pyramid as a guide for establishing a project's test suite may not be the best idea because the model it provides is rather shallow and outdated. Instead it makes sense to consider testing approaches on a per-
 
-Here's how that would affect our graph:
 
 ## Fakes over mocks
 
