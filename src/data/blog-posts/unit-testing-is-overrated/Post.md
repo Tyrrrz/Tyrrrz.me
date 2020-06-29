@@ -26,7 +26,7 @@ In this article I will share my observations about this testing technique and ex
 
 *Note: this article contains code examples which are written in C#, but the language itself is not (too) important to the points I'm making.*
 
-## Focusing on unit tests
+## Fallacies of unit testing
 
 Unit tests, as evident by the name, revolve around the concept of a "unit", which denotes a very small isolated part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a module (or method of an object).
 
@@ -213,7 +213,7 @@ Doing mock-based testing puts the value of such tests under an even bigger quest
 
 [!["Unit testing is a great way to ensure your mocks work" (Tweet by @rkoutnik)](Tweet-1.png)](https://twitter.com/rkoutnik/status/1242073856128495620)
 
-## The testing pyramid
+## Pyramid-driven testing
 
 So why would we, as an industry, decide that unit testing should be the primary method of testing software, given all of its existing flaws? For the most part, it's because testing at higher levels has always been considered too hard, slow, and unreliable.
 
@@ -223,15 +223,15 @@ If you refer to the traditional test pyramid, you will find that it suggests tha
 
 The metaphorical model offered by the pyramid is meant to convey that a good testing approach should involve many different layers because focusing on the extremes can lead to issues where the tests are either too slow and unwieldy, or are useless at providing any confidence. That said, the lower levels are emphasized because that's where the return on investment for development testing is believed to be the highest.
 
-Despite providing the most confidence, top-level tests often end up being slow, hard to maintain, or too broad to be included as part of typically fast-paced development flow.  In most cases, such tests are instead maintained separately by dedicated QA specialists, as it's usually not considered to be the developer's job to write them.
+Top-level tests, despite providing the most confidence, often end up being slow, hard to maintain, or too broad to be included as part of typically fast-paced development flow. That's why, in most cases, such tests are instead maintained separately by dedicated QA specialists, as it's usually not considered to be the developer's job to write them.
 
-Integration testing, which is an abstract part of the spectrum that lies somewhere between unit testing and complete end-to-end testing, is quite often disregarded entirely. Because it's not really clear what exact level of integration is preferable, how to structure and organize such tests, or for the fear that they might get out of hand, many developers prefer to avoid them in favor of a more clear-cut extreme which is unit testing.
+Integration testing, which is an abstract part of the spectrum that lies somewhere between unit testing and complete end-to-end testing, is quite often just disregarded entirely. Because it's not really clear what exact level of integration is preferable, how to structure and organize such tests, or for the fear that they might get out of hand, many developers prefer to avoid them in favor of a more clear-cut extreme which is unit testing.
 
-For these reasons, all testing done during development typically resides at the very bottom of the pyramid. In fact, over time this has become so commonplace that development testing and unit testing are now practically synonymous with each other. This confusion is also perpetrated by conference talks, blog posts, books, and even some IDEs (JetBrains Rider calls any test you create a unit test).
+For these reasons, all testing done during development typically resides at the very bottom of the pyramid. In fact, over time this has become so commonplace that development testing and unit testing are now practically synonymous with each other, leading to confusion that is only perpetrated further by conference talks, blog posts, books, and even some IDEs (JetBrains Rider in particular calls every test a unit test for some reason).
 
-In the eyes of most developers, the message conveyed by the test pyramid looks somewhat like this:
+In the eyes of most developers, the test pyramid looks somewhat like this instead:
 
-![Test pyramid reimagined. Shows unit tests at the bottom and the rest marked as someone else's problem.](Test-pyramid-real.png)
+![Test pyramid as developers see it. Shows unit tests at the bottom and the rest marked as someone else's problem.](Test-pyramid-real.png)
 
 While the pyramid is a noble attempt to turn software testing into a solved problem, there are obviously many issues with this model. In particular, the assumptions it relies on might not be true for every context, especially the premise of highly-integrated test suites being slow or hard.
 
@@ -241,21 +241,25 @@ However, whenever we extrapolate experiences into guidelines, we tend to think o
 
 If we look back, it's clear that high-level testing was tough in 2000, it probably still was in 2009, but it's 2020 outside and we are, in fact, living in the future. Advancements in technology and software design have made it a much less significant issue than it once was.
 
-There are many ways to write fast integration and even end-to-end tests nowadays. Most modern application frameworks provide a separate API layer used for testing in a simulated environment, while tools like Docker let you run deterministic tests that rely on infrastructural dependencies or even other services.
+Most modern application frameworks nowadays provide some sort of separate API layer used for testing, where you can run your application in a simulated in-memory environment that is very close to the real one. Virtualization tools like Docker also make it possible to execute tests that rely on actual infrastructural dependencies, while still remaining deterministic and fast.
 
-In fact, unless you're developing a desktop application for Windows and are forced to use [UIAutomation](https://docs.microsoft.com/en-us/windows/win32/winauto/entry-uiauto-win32), writing high-level tests
+We have solutions like [Mountebank](http://mbtest.org), [GreenMail](https://greenmail-mail-test.github.io/greenmail), [Appium](http://appium.io), [Selenium](https://selenium.dev), [Cypress](https://cypress.io), and countless others that simplify different aspects of high-level testing that were once considered unapproachable. Unless you're developing desktop applications for Windows and are stuck with [UIAutomation framework](https://docs.microsoft.com/en-us/windows/win32/winauto/entry-uiauto-win32), you will likely have many options available.
 
-Another issue with the test pyramid is that it's overly-simplistic. Seeing as it presents the testing spectrum as a linear scale, it might make sense to assume that any gain in confidence provided by higher-level tests are offset by an equivalent amount of loss in maintainability and speed, compared to lower-level tests. This may be true for the extremes, but not necessarily holds for tests in the middle of the integration scope.
+The slow test fallacy is, however, not the only false assumption that the pyramid is based on. The idea of having the majority of testing concentrated at the unit level only works out if those tests actually provide value, which of course depends on how much business logic is contained within the code under test.
 
-Additionally, it forgets that the isolation has a cost in itself and isn't something that comes for free simply by "avoiding" external interactions. Because of that, it's entirely likely that there's a point somewhere between unit testing and integration testing, where the confidence provided by tests has the highest return on investment:
+Some applications may have a lot of business logic (e.g. payroll systems), some may have close to none (e.g. CRUD apps), most are somewhere in between. Majority of the projects I've personally worked on didn't have nearly enough of it to warrant extensive coverage with unit tests, but had plenty of infrastructural complexity on the other hand, which would actually benefit from integration testing.
+
+Of course, in an ideal world one would evaluate the context of the project and come up with a testing approach that is most suitable for the problem at hand. In reality, however, most developers don't even begin to think about it at all, instead just blindly stacking mountains of unit tests following what the best practices seemingly advise you to do.
+
+Finally, I think it's fair to say, the model provided by the test pyramid is actually just too simplistic in general. The vertical axes present the testing spectrum as a linear scale, where any gain in confidence you get by going up in the integration spectrum is offset by seemingly equivalent amount of loss in maintainability and speed. This may be true if you compare the extremes, but not necessarily so for the rest of the points in between.
+
+It also doesn't account for the fact that isolation has a cost in itself and isn't something that comes for free simply by "avoiding" external interactions. If you consider these aspects, it's entirely likely that the scale is actually not linear and that the point of highest return on investment resides somewhere closer to the middle rather than at the unit level:
 
 ![Graph that shows that the scale of cost & speed might not be linear to integration.](Test-conversion-efficiency.png)
 
-All in all the test pyramid is probably not the best guidance for establishing the testing suite for your project.
+All in all, I would advise against using the test pyramid as a reference for what a typical test suite should look like and instead focus on what's important for your project. Let's consider what guidelines are actually useful in that regard.
 
-## Fakes over mocks
-
-## Coverage metrics are useful
+## Reality-driven testing
 
 ## Summary
 
