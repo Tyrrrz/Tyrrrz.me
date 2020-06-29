@@ -257,9 +257,15 @@ It also doesn't account for the fact that isolation has a cost in itself and isn
 
 ![Graph that shows that the scale of cost & speed might not be linear to integration.](Test-conversion-efficiency.png)
 
-All in all, I would advise against using the test pyramid as a reference for what a typical test suite should look like and instead focus on what's important for your project. Let's consider what guidelines are actually useful in that regard.
+All in all, I would advise against using the test pyramid as a reference for what a typical test suite should look like and instead focus on what's important for your project. Let's look into what guidelines are actually useful in that regard.
 
 ## Reality-driven testing
+
+When we consider which tests have value and which don't, we think about the level of confidence they provide. The more confident we feel, the less we have to think everything through when making changes in code, because we can always rely on tests to catch most of the bugs that appear if we miss something.
+
+The amount of confidence a test gives us depends on how accurately it resembles the actual user behavior. If a test scenario operates at the system boundary without any knowledge of its inner workings, we end up trusting it a lot more, compared to a test which is more internally-involved.
+
+In essence, the primary goal of writing tests should be to model the user behavior as close as possible and verify that the responsible components work correctly. The more integrated a test is, the closer it is to the system boundary, and the more accurately it tests how the software is actually used.
 
 ## Summary
 
