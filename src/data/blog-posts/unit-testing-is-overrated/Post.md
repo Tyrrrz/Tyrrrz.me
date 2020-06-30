@@ -221,13 +221,13 @@ If you refer to the traditional test pyramid, you will find that it suggests tha
 
 ![Test pyramid. Shows unit tests at the bottom, integration tests on top, and end-to-end tests at the peak.](Test-pyramid.png)
 
-The metaphorical model offered by the pyramid is meant to convey that a good testing approach should involve many different layers because focusing on the extremes can lead to issues where the tests are either too slow and unwieldy, or are useless at providing any confidence. That said, the lower levels are emphasized because that's where the return on investment for development testing is believed to be the highest.
+The metaphorical model offered by the pyramid is meant to convey that a good testing approach should involve many different layers, because focusing on the extremes can lead to issues where the tests are either too slow and unwieldy, or are useless at providing any confidence. That said, the lower levels are emphasized as that's where the return on investment for development testing is believed to be the highest.
 
 Top-level tests, despite providing the most confidence, often end up being slow, hard to maintain, or too broad to be included as part of typically fast-paced development flow. That's why, in most cases, such tests are instead maintained separately by dedicated QA specialists, as it's usually not considered to be the developer's job to write them.
 
 Integration testing, which is an abstract part of the spectrum that lies somewhere between unit testing and complete end-to-end testing, is quite often just disregarded entirely. Because it's not really clear what exact level of integration is preferable, how to structure and organize such tests, or for the fear that they might get out of hand, many developers prefer to avoid them in favor of a more clear-cut extreme which is unit testing.
 
-For these reasons, all testing done during development typically resides at the very bottom of the pyramid. In fact, over time this has become so commonplace that development testing and unit testing are now practically synonymous with each other, leading to confusion that is only perpetrated further by conference talks, blog posts, books, and even some IDEs (JetBrains Rider in particular calls every test a unit test for some reason).
+For these reasons, all testing done during development typically resides at the very bottom of the pyramid. In fact, over time this has become so commonplace that development testing and unit testing are now practically synonymous with each other, leading to confusion that is only further perpetrated by conference talks, blog posts, books, and even some IDEs (all tests are unit tests, as far as JetBrains Rider is concerned).
 
 In the eyes of most developers, the test pyramid looks somewhat like this instead:
 
@@ -245,27 +245,37 @@ Most modern application frameworks nowadays provide some sort of separate API la
 
 We have solutions like [Mountebank](http://mbtest.org), [GreenMail](https://greenmail-mail-test.github.io/greenmail), [Appium](http://appium.io), [Selenium](https://selenium.dev), [Cypress](https://cypress.io), and countless others that simplify different aspects of high-level testing that were once considered unapproachable. Unless you're developing desktop applications for Windows and are stuck with [UIAutomation framework](https://docs.microsoft.com/en-us/windows/win32/winauto/entry-uiauto-win32), you will likely have many options available.
 
+On one of my previous projects, we had a web service which was tested at the system boundary using close to a hundred behavioral tests that took just under 10 seconds to run in parallel. Sure, it's possible to get much faster execution time than that with unit tests, but given the confidence they provide this was a no-brainer.
+
 The slow test fallacy is, however, not the only false assumption that the pyramid is based on. The idea of having the majority of testing concentrated at the unit level only works out if those tests actually provide value, which of course depends on how much business logic is contained within the code under test.
 
 Some applications may have a lot of business logic (e.g. payroll systems), some may have close to none (e.g. CRUD apps), most are somewhere in between. Majority of the projects I've personally worked on didn't have nearly enough of it to warrant extensive coverage with unit tests, but had plenty of infrastructural complexity on the other hand, which would actually benefit from integration testing.
 
 Of course, in an ideal world one would evaluate the context of the project and come up with a testing approach that is most suitable for the problem at hand. In reality, however, most developers don't even begin to think about it at all, instead just blindly stacking mountains of unit tests following what the best practices seemingly advise you to do.
 
-Finally, I think it's fair to say, the model provided by the test pyramid is actually just too simplistic in general. The vertical axes present the testing spectrum as a linear scale, where any gain in confidence you get by going up in the integration spectrum is offset by seemingly equivalent amount of loss in maintainability and speed. This may be true if you compare the extremes, but not necessarily so for the rest of the points in between.
+Finally, I think it's fair to say, the model provided by the test pyramid is just too simplistic in general. The vertical axes present the testing spectrum as a linear scale, where any gain in confidence you get by going up is apparently offset by an equivalent amount of loss in maintainability and speed. This may be true if you compare the extremes, but not necessarily so for the rest of the points in between.
 
-It also doesn't account for the fact that isolation has a cost in itself and isn't something that comes for free simply by "avoiding" external interactions. If you consider these aspects, it's entirely likely that the scale is actually not linear and that the point of highest return on investment resides somewhere closer to the middle rather than at the unit level:
+It also doesn't account for the fact that isolation has a cost in itself and isn't something that comes for free simply by "avoiding" external interactions. Given how much effort it takes to write and maintain mocks, it's entirely possible that a less-isolated test can be cheaper and end up providing more confidence, albeit running slightly slower.
+
+If you consider these aspects, it seems likely that the scale is not linear after all and that the point of highest return on investment resides somewhere closer to the middle rather than at the unit level:
 
 ![Graph that shows that the scale of cost & speed might not be linear to integration.](Test-conversion-efficiency.png)
 
-All in all, I would advise against using the test pyramid as a reference for what a typical test suite should look like and instead focus on what's important for your project. Let's look into what guidelines are actually useful in that regard.
+All in all, when you're trying to establish an efficient test suite for your project, the test pyramid isn't the best guideline you can follow. It makes a lot more sense to focus on what's relevant specifically to your context, instead of relying on "best practices".
 
 ## Reality-driven testing
 
-When we consider which tests have value and which don't, we think about the level of confidence they provide. The more confident we feel, the less we have to think everything through when making changes in code, because we can always rely on tests to catch most of the bugs that appear if we miss something.
+At the most basic level, a test provides value if it grants us some degree of confidence that the system is working correctly. The more confident we feel, the less cognitive effort we have to spend to make sure that the changes we're making are valid, because we trust our tests to do that for us.
 
-The amount of confidence a test gives us depends on how accurately it resembles the actual user behavior. If a test scenario operates at the system boundary without any knowledge of its inner workings, we end up trusting it a lot more, compared to a test which is more internally-involved.
+That trust in turn depends on how accurately the test resembles the actual user behavior. A test scenario operating at the system boundary without knowledge of any internal specifics is bound to provide us with greater confidence (and thus, value) than a test working at a lower level.
 
-In essence, the primary goal of writing tests should be to model the user behavior as close as possible and verify that the responsible components work correctly. The more integrated a test is, the closer it is to the system boundary, and the more accurately it tests how the software is actually used.
+In essence, the amount of confidence we gain from tests is the primary metric by which they should be measured. That, in itself, is also the goal.
+
+However, as we know, there are other factors in play as well, such as cost, speed, ability to parallelize, and whatnot, which are all important. The test pyramid makes strong assumptions on how these things scale in relation to each other, but these assumptions are not universal.
+
+Besides that, these factors are also secondary to the primary goal of obtaining confidence. An expensive test that takes a really long time to run but provides a lot of confidence is still infinitely more useful than an extremely fast and simple test that does nothing.
+
+For that reason, I find a good guideline to be: **write tests that are as highly-integrated as possible, while keeping their speed and complexity reasonable**.
 
 ## Summary
 
