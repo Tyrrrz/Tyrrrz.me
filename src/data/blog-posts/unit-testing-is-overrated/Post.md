@@ -277,21 +277,37 @@ Besides that, these factors are also secondary to the primary goal of obtaining 
 
 For that reason, I find a good guideline to be: **write tests that are as highly-integrated as possible, while keeping their speed and complexity reasonable**.
 
-What's reasonable or not is subjective and depends on the context. At the end of the day, it's important that the tests are used during actual development, which means it should be possible to run them for local builds and on CI and it shouldn't be a burden to maintain them.
+What's reasonable or not is subjective and depends on the context. At the end of the day, it's important that the tests are used during actual development, which means it should be possible to run them for local builds and on CI, and it shouldn't be a burden to maintain them.
 
 At the same time, your development tests should stay local to your project. For example, in the context of a solution based on microservices, a development end-to-end test is such that operates at the system boundary of an individual microservice, rather than an entire solution.
 
-While the main goal is to aim for the highest level of integration, depending on the priorities and limitations at hand, you may often end up with the majority of your tests scattered around the integration spectrum, with seemingly no clear sense of structure. That's fine, because structuring tests based on their level of isolation (as the pyramid does) is not important anyway.
+While the main goal is to aim for the highest level of integration, depending on the priorities and limitations at hand, your tests may end up at different points of the spectrum, with seemingly no clear sense of structure. That's fine, because structuring tests based on their level of isolation (as the pyramid does) is not actually important anyway.
 
-Instead, the tests should be partitioned by the behavior that they are meant to verify, or in other words, functionality.
+Instead, the tests should be partitioned by user-facing functionality that they are meant to verify. Such tests are typically called _functional tests_.
+
+Functional testing is not another layer on the pyramid, but a completely orthogonal concept. A functional test verifies a specific functional requirement, describing a specific user behavior and the expected result.
+
+Jira tickets/readme
+
+It is important that functional tests are written by developers.
 
 ## Summary
 
-I'm not the first person to write an article about the questionable value of unit testing in modern software development. Here are some other great posts:
+Unit testing is a popular approach for testing software, but mostly for the wrong reasons.
+
+If nothing else, consider these takeaways from the article:
+
+0. Think critically and challenge best practices
+1. Forget about the test pyramid
+2. Separate tests by functionality, instead of by classes, modules, or scope
+3. Aim for the highest level of integration while maintaining reasonable speed and cost
+4. Avoid sacrificing software design for testability
+5. Consider mocking only as a last resort
+
+There are also other great articles about modern software testing. Check them out:
 
 - [Write tests. Not too many. Mostly integration (Kent C. Dodds)](https://kentcdodds.com/blog/write-tests)
 - [Fallacy of Unit Testing (Aaron W. Hsu)](https://www.sacrideo.us/the-fallacy-of-unit-testing)
-- [Why Most Unit Testing is Waste (James O. Coplien)](https://rbcs-us.com/documents/Why-Most-Unit-Testing-is-Waste.pdf)
 - [Mocking is a Code Smell (Eric Elliott)](https://medium.com/javascript-scene/mocking-is-a-code-smell-944a70c90a6a)
 - [Test-induced design damage (David Heinemeier Hansson)](https://dhh.dk/2014/test-induced-design-damage.html)
 - [Slow database test fallacy (David Heinemeier Hansson)](https://dhh.dk/2014/slow-database-test-fallacy.html)
