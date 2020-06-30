@@ -269,13 +269,21 @@ At the most basic level, a test provides value if it grants us some degree of co
 
 That trust in turn depends on how accurately the test resembles the actual user behavior. A test scenario operating at the system boundary without knowledge of any internal specifics is bound to provide us with greater confidence (and thus, value) than a test working at a lower level.
 
-In essence, the amount of confidence we gain from tests is the primary metric by which they should be measured. That, in itself, is also the goal.
+In essence, the amount of confidence we gain from tests is the primary metric by which they should be measured. Pushing it as high as possible is also the goal.
 
 However, as we know, there are other factors in play as well, such as cost, speed, ability to parallelize, and whatnot, which are all important. The test pyramid makes strong assumptions on how these things scale in relation to each other, but these assumptions are not universal.
 
 Besides that, these factors are also secondary to the primary goal of obtaining confidence. An expensive test that takes a really long time to run but provides a lot of confidence is still infinitely more useful than an extremely fast and simple test that does nothing.
 
 For that reason, I find a good guideline to be: **write tests that are as highly-integrated as possible, while keeping their speed and complexity reasonable**.
+
+What's reasonable or not is subjective and depends on the context. At the end of the day, it's important that the tests are used during actual development, which means it should be possible to run them for local builds and on CI and it shouldn't be a burden to maintain them.
+
+At the same time, your development tests should stay local to your project. For example, in the context of a solution based on microservices, a development end-to-end test is such that operates at the system boundary of an individual microservice, rather than an entire solution.
+
+While the main goal is to aim for the highest level of integration, depending on the priorities and limitations at hand, you may often end up with the majority of your tests scattered around the integration spectrum, with seemingly no clear sense of structure. That's fine, because structuring tests based on their level of isolation (as the pyramid does) is not important anyway.
+
+Instead, the tests should be partitioned by the behavior that they are meant to verify, or in other words, functionality.
 
 ## Summary
 
