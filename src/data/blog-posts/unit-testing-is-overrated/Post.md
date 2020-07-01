@@ -265,27 +265,29 @@ All in all, when you're trying to establish an efficient test suite for your pro
 
 ## Reality-driven testing
 
-At the most basic level, a test provides value if it grants us some degree of confidence that the system is working correctly. The more confident we feel, the less cognitive effort we have to spend to make sure that the changes we're making are valid, because we trust our tests to do that for us.
+At the most basic level, a test provides value if it grants certainty that the software is working correctly. The more confident we feel, the less we have to rely on ourselves to spot potential bugs and regressions while introducing changes in code, because we trust our tests to do that for us.
 
 That trust in turn depends on how accurately the test resembles the actual user behavior. A test scenario operating at the system boundary without knowledge of any internal specifics is bound to provide us with greater confidence (and thus, value) than a test working at a lower level.
 
-In essence, the amount of confidence we gain from tests is the primary metric by which they should be measured. Pushing it as high as possible is also the goal.
+In essence, the degree of confidence we gain from tests is the primary metric by which their value should be measured. Pushing it as high as possible is also the primary goal.
 
-However, as we know, there are other factors in play as well, such as cost, speed, ability to parallelize, and whatnot, which are all important. The test pyramid makes strong assumptions on how these things scale in relation to each other, but these assumptions are not universal.
+Of course, as we know, there are other factors in play as well, such as cost, speed, ability to parallelize, and whatnot, which are all important. The test pyramid makes strong assumptions about how these things scale in relation to each other, but these assumptions are not universal.
 
-Besides that, these factors are also secondary to the primary goal of obtaining confidence. An expensive test that takes a really long time to run but provides a lot of confidence is still infinitely more useful than an extremely fast and simple test that does nothing.
+Moreover, these factors are also secondary to the primary goal of obtaining confidence. An expensive test that takes a really long time to run but provides a lot of confidence is still infinitely more useful than an extremely fast and simple test that does nothing.
 
-For that reason, I find a good guideline to be: **write tests that are as highly-integrated as possible, while keeping their speed and complexity reasonable**.
+For that reason, I find it best to **write tests that are as highly-integrated as possible, while keeping their speed and complexity reasonable**.
 
-What's reasonable or not is subjective and depends on the context. At the end of the day, it's important that these tests are written by developers and actually used during development, which means they shouldn't feel like a burden to maintain and it should be possible to run them for local builds and on CI.
+Does this mean that every test we write should be an end-to-end test? No, but we should be trying to get as far as we can in that direction, while keeping the downsides at an acceptable level.
 
-Doing this means that you will likely end up with tests that are scattered across different levels of the integration scale, with seemingly no clear sense of structure. Notably, this isn't an issue with unit testing, because there each test is coupled to a specific method or a function, so the structure usually mirrors that of the code itself.
+What's acceptable or not is subjective and depends on the context. At the end of the day, it's important that those tests are written by developers and are actually used during development, which means they shouldn't feel like a burden to maintain and it should be possible to run them for local builds and on CI.
 
-Fortunately, this doesn't matter because separating tests by their scope or the code they are related to is not important in itself. Instead, the tests should be partitioned by the actual user-facing functionality that they are meant to verify.
+Doing this also means that you will likely end up with tests that are scattered across different levels of the integration scale, with seemingly no clear sense of structure. This isn't an issue we would have had with unit testing, because there each test is coupled to a specific method or a function, so the structure usually ends up mirroring that of the code itself.
 
-Such tests are often called _functional_ because they are based on the software's functional requirements that dictate how it works and how it can be used. Functional testing is not another layer on the pyramid, but rather a completely orthogonal concept.
+Fortunately, this doesn't matter because organizing tests by individual classes or modules is not important in itself, but is rather a side-effect of unit testing. Instead, the tests should be partitioned by the actual user-facing functionality that they are meant to verify.
 
-Contrary to the popular belief, writing functional tests does not require you to use [Gherkin](https://en.wikipedia.org/wiki/Cucumber_(software)#Gherkin_language) or a BDD framework and can be done with the very same tools that are typically used for unit testing. For example, consider how we can rewrite the example from the beginning of the article so that the tests are structured based on functionality rather than classes:
+Such tests are often called _functional_ because they are based on the software's functional requirements, that describe what features it has and how they work. Functional testing is not another layer on the pyramid, but instead a completely orthogonal concept.
+
+Contrary to the popular belief, writing functional tests does not require you to use [Gherkin](https://en.wikipedia.org/wiki/Cucumber_(software)#Gherkin_language) or a BDD framework and can be done with the very same tools that are typically used for unit testing. For example, consider how we can rewrite the example from the beginning of the article so that the tests are structured around supported user behavior rather than classes:
 
 ```csharp
 public class SolarTimesSpecs
@@ -301,17 +303,21 @@ public class SolarTimesSpecs
 }
 ```
 
-Note that the actual implementation of the tests is hidden because it's not relevant. What's important is that the tests and their structure are driven by the user-facing functionality that the software is meant to have. For all intents and purposes, these may be integration tests, or end-to-end tests, or even unit tests, as long as they are based on functional requirements.
+Note that the actual implementation of the tests is hidden because it's not relevant to the fact that they're functional. What matters is that the tests and their structure is driven by the software requirements, while their scope can range anywhere from end-to-end to even unit level.
 
-Naming tests in accordance to specifications rather than classes has an additional advantage of removing that unnecessary coupling. Now, if we decide to rename `SolarCalculator` to something else or move it to a different directory, the tests won't need to be updated to reflect that.
+Naming tests in accordance to specifications rather than classes has an additional advantage of removing that unnecessary coupling. Now, if we decide to rename `SolarCalculator` to something else or move it to a different directory, the test names won't need to be updated to reflect that.
 
-As another example, here is how a test suite look on one of my open source projects, [CliWrap](https://github.com/Tyrrrz/CliWrap) (the underscores in the names are replaced by [xUnit](https://xunit.net/docs/configuration-files#methodDisplayOptions)):
+This structure is very useful in highlighting what's actually important, while leaving irrelevant details out. As another example, here is how the test suite is organized in [CliWrap](https://github.com/Tyrrrz/CliWrap) (the underscores are replaced with spaces by [xUnit](https://xunit.net/docs/configuration-files#methodDisplayOptions)):
 
 ![Functional tests used at CliWrap](CliWrap-functional-tests.png)
 
-Figuring out what are the functional requirements for a project requires abstract thinking, because you will need to think from the user's perspective rather than the perspective of a developer. That said, any project has functional requirements, either formally defined (specification documents, user stories) or informally defined (JIRA tickets, common sense). As long as the software does something that produces value, it has functional requirements.
+As long as a piece of software does something at least remotely useful, it will always have functional requirements. These can be either _formal_ (specification documents, user stories, etc.) or _informal_ (verbally agreed upon, assumed, JIRA tickets, written on toilet paper, etc.)
 
-When working on my open source projects, I often struggle with figuring out the functional requirements. What helps is readme.
+Turning informal specifications into functional tests can often be difficult because it requires us to abstract away from code and think from a user's perspective. What helps me with my open source projects is that I start by creating a readme file where I list a bunch of relevant usage examples, and then encode those into tests.
+
+Finally, with this comes the second guideline: **partition tests based on threads of behavior, rather than the code's internal structure**.
+
+By following these ideas, you should be able to establish a test suite that provides value and can be scaled based on your project's needs and limitations.
 
 ## Summary
 
