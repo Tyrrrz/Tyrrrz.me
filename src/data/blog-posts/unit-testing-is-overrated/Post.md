@@ -211,7 +211,7 @@ The problem with unit tests is that they're the exact opposite of that. Since we
 
 Doing mock-based testing puts the value of such tests under an even bigger question, because the parts of our system that would've been used otherwise are replaced with mocks, further distancing the simulated environment from reality. It's impossible to gain confidence that the user will have a smooth experience by testing something that doesn't resemble that experience.
 
-[!["Unit testing is a great way to ensure your mocks work" (Tweet by @rkoutnik)](Tweet-1.png)](https://twitter.com/rkoutnik/status/1242073856128495620)
+[!["Unit testing is a great way to ensure your mocks work" (Tweet by @rkoutnik)](Tweet-testing-mocks.png)](https://twitter.com/rkoutnik/status/1242073856128495620)
 
 ## Pyramid-driven testing
 
@@ -277,38 +277,65 @@ Besides that, these factors are also secondary to the primary goal of obtaining 
 
 For that reason, I find a good guideline to be: **write tests that are as highly-integrated as possible, while keeping their speed and complexity reasonable**.
 
-What's reasonable or not is subjective and depends on the context. At the end of the day, it's important that the tests are used during actual development, which means it should be possible to run them for local builds and on CI, and it shouldn't be a burden to maintain them.
+What's reasonable or not is subjective and depends on the context. At the end of the day, it's important that these tests are written by developers and actually used during development, which means they shouldn't feel like a burden to maintain and it should be possible to run them for local builds and on CI.
 
-At the same time, your development tests should stay local to your project. For example, in the context of a solution based on microservices, a development end-to-end test is such that operates at the system boundary of an individual microservice, rather than an entire solution.
+Doing this means that you will likely end up with tests that are scattered across different levels of the integration scale, with seemingly no clear sense of structure. Notably, this isn't an issue with unit testing, because there each test is coupled to a specific method or a function, so the structure usually mirrors that of the code itself.
 
-While the main goal is to aim for the highest level of integration, depending on the priorities and limitations at hand, your tests may end up at different points of the spectrum, with seemingly no clear sense of structure. That's fine, because structuring tests based on their level of isolation (as the pyramid does) is not actually important anyway.
+Fortunately, this doesn't matter because separating tests by their scope or the code they are related to is not important in itself. Instead, the tests should be partitioned by the actual user-facing functionality that they are meant to verify.
 
-Instead, the tests should be partitioned by user-facing functionality that they are meant to verify. Such tests are typically called _functional tests_.
+Such tests are often called _functional_ because they are based on the software's functional requirements that dictate how it works and how it can be used. Functional testing is not another layer on the pyramid, but rather a completely orthogonal concept.
 
-Functional testing is not another layer on the pyramid, but a completely orthogonal concept. A functional test verifies a specific functional requirement, describing a specific user behavior and the expected result.
+Contrary to the popular belief, writing functional tests does not require you to use [Gherkin](https://en.wikipedia.org/wiki/Cucumber_(software)#Gherkin_language) or a BDD framework and can be done with the very same tools that are typically used for unit testing. For example, consider how we can rewrite the example from the beginning of the article so that the tests are structured based on functionality rather than classes:
 
-Jira tickets/readme
+```csharp
+public class SolarTimesSpecs
+{
+    [Fact]
+    public async Task I_can_get_solar_times_automatically_for_my_location() { /* ... */ }
 
-It is important that functional tests are written by developers.
+    [Fact]
+    public async Task I_can_get_solar_times_during_periods_of_midnight_sun() { /* ... */ }
+
+    [Fact]
+    public async Task I_can_get_solar_times_if_my_location_cannot_be_determined() { /* ... */ }
+}
+```
+
+Note that the actual implementation of the tests is hidden because it's not relevant. What's important is that the tests and their structure are driven by the user-facing functionality that the software is meant to have. For all intents and purposes, these may be integration tests, or end-to-end tests, or even unit tests, as long as they are based on functional requirements.
+
+Naming tests in accordance to specifications rather than classes has an additional advantage of removing that unnecessary coupling. Now, if we decide to rename `SolarCalculator` to something else or move it to a different directory, the tests won't need to be updated to reflect that.
+
+As another example, here is how a test suite look on one of my open source projects, [CliWrap](https://github.com/Tyrrrz/CliWrap) (the underscores in the names are replaced by [xUnit](https://xunit.net/docs/configuration-files#methodDisplayOptions)):
+
+![Functional tests used at CliWrap](CliWrap-functional-tests.png)
+
+Figuring out what are the functional requirements for a project requires abstract thinking, because you will need to think from the user's perspective rather than the perspective of a developer. That said, any project has functional requirements, either formally defined (specification documents, user stories) or informally defined (JIRA tickets, common sense). As long as the software does something that produces value, it has functional requirements.
+
+When working on my open source projects, I often struggle with figuring out the functional requirements. What helps is readme.
 
 ## Summary
 
-Unit testing is a popular approach for testing software, but mostly for the wrong reasons.
+Unit testing is a popular approach for testing software, but mostly for the wrong reasons. It's often touted as an effective way for developers to test their code while also enforcing best design practices, however many find it encumbering and superficial.
 
-If nothing else, consider these takeaways from the article:
+It's important to understand that development testing does not equate to unit testing. The primary goal is not to write tests which are as isolated as possible, but rather to gain confidence that the code works according to its functional requirements. And there are better ways to achieve that.
+
+Writing high-level tests that are driven by user behavior will provide you with much higher return on investment in the long run, and it isn't as hard as it seems. Find an approach that makes the most sense for your project and stick to it.
+
+Here are the main takeaways:
 
 0. Think critically and challenge best practices
-1. Forget about the test pyramid
-2. Separate tests by functionality, instead of by classes, modules, or scope
+1. Don't rely on the the test pyramid
+2. Separate tests by functionality, rather than by classes, modules, or scope
 3. Aim for the highest level of integration while maintaining reasonable speed and cost
 4. Avoid sacrificing software design for testability
 5. Consider mocking only as a last resort
 
-There are also other great articles about modern software testing. Check them out:
+There are also other great articles about testing approaches in modern software development. These are the ones I've personally found really interesting:
 
 - [Write tests. Not too many. Mostly integration (Kent C. Dodds)](https://kentcdodds.com/blog/write-tests)
-- [Fallacy of Unit Testing (Aaron W. Hsu)](https://www.sacrideo.us/the-fallacy-of-unit-testing)
 - [Mocking is a Code Smell (Eric Elliott)](https://medium.com/javascript-scene/mocking-is-a-code-smell-944a70c90a6a)
 - [Test-induced design damage (David Heinemeier Hansson)](https://dhh.dk/2014/test-induced-design-damage.html)
 - [Slow database test fallacy (David Heinemeier Hansson)](https://dhh.dk/2014/slow-database-test-fallacy.html)
+- [Fallacy of Unit Testing (Aaron W. Hsu)](https://www.sacrideo.us/the-fallacy-of-unit-testing)
+- [The No. 1 unit testing best practice: Stop doing it (Vitaliy Pisarev)](https://techbeacon.com/app-dev-testing/no-1-unit-testing-best-practice-stop-doing-it)
 - [Testing of Microservices at Spotify (André Schaffer)](https://labs.spotify.com/2018/01/11/testing-of-microservices)
