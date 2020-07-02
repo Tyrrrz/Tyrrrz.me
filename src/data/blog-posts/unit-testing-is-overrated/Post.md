@@ -26,6 +26,8 @@ In this article I will share my observations about this testing technique and ex
 
 *Note: this article contains code examples which are written in C#, but the language itself is not (too) important to the points I'm making.*
 
+*Note 2: I've come to realize that programming terms are completely useless at conveying meanings because everyone seems to understand them differently. In this article I will be relying on the "standard" definitions, where unit testing targets smallest separable parts of code, end-to-end testing targets software's outermost entry points, while integration testing is for everything in-between.*
+
 ## Fallacies of unit testing
 
 Unit tests, as evident by the name, revolve around the concept of a "unit", which denotes a very small isolated part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a module (or method of an object).
@@ -243,7 +245,7 @@ If we look back, it's clear that high-level testing was tough in 2000, it probab
 
 Most modern application frameworks nowadays provide some sort of separate API layer used for testing, where you can run your application in a simulated in-memory environment that is very close to the real one. Virtualization tools like Docker also make it possible to execute tests that rely on actual infrastructural dependencies, while still remaining deterministic and fast.
 
-We have solutions like [Mountebank](http://mbtest.org), [GreenMail](https://greenmail-mail-test.github.io/greenmail), [Appium](http://appium.io), [Selenium](https://selenium.dev), [Cypress](https://cypress.io), and countless others that simplify different aspects of high-level testing that were once considered unapproachable. Unless you're developing desktop applications for Windows and are stuck with [UIAutomation framework](https://docs.microsoft.com/en-us/windows/win32/winauto/entry-uiauto-win32), you will likely have many options available.
+We have solutions like [Mountebank](http://mbtest.org), [WireMock](http://wiremock.org), [GreenMail](https://greenmail-mail-test.github.io/greenmail), [Appium](http://appium.io), [Selenium](https://selenium.dev), [Cypress](https://cypress.io), and countless others that simplify different aspects of high-level testing that were once considered unapproachable. Unless you're developing desktop applications for Windows and are stuck with [UIAutomation framework](https://docs.microsoft.com/en-us/windows/win32/winauto/entry-uiauto-win32), you will likely have many options available.
 
 On one of my previous projects, we had a web service which was tested at the system boundary using close to a hundred behavioral tests that took just under 10 seconds to run in parallel. Sure, it's possible to get much faster execution time than that with unit tests, but given the confidence they provide this was a no-brainer.
 
@@ -285,39 +287,43 @@ Doing this also means that you will likely end up with tests that are scattered 
 
 Fortunately, this doesn't matter because organizing tests by individual classes or modules is not important in itself, but is rather a side-effect of unit testing. Instead, the tests should be partitioned by the actual user-facing functionality that they are meant to verify.
 
-Such tests are often called _functional_ because they are based on the software's functional requirements, that describe what features it has and how they work. Functional testing is not another layer on the pyramid, but instead a completely orthogonal concept.
+Such tests are often called _functional_ because they are based on the software's functional requirements that describe what features it has and how they work. Functional testing is not another layer on the pyramid, but instead a completely orthogonal concept.
 
-Contrary to the popular belief, writing functional tests does not require you to use [Gherkin](https://en.wikipedia.org/wiki/Cucumber_(software)#Gherkin_language) or a BDD framework and can be done with the very same tools that are typically used for unit testing. For example, consider how we can rewrite the example from the beginning of the article so that the tests are structured around supported user behavior rather than classes:
+Contrary to the popular belief, writing functional tests does not require you to use [Gherkin](https://en.wikipedia.org/wiki/Cucumber_(software)#Gherkin_language) or a BDD framework, but can be done with the very same tools that are typically used for unit testing. For example, consider how we can rewrite the example from the beginning of the article so that the tests are structured around supported user behavior rather than classes:
 
 ```csharp
 public class SolarTimesSpecs
 {
     [Fact]
-    public async Task I_can_get_solar_times_automatically_for_my_location() { /* ... */ }
+    public async Task User_can_get_solar_times_automatically_for_their_location() { /* ... */ }
 
     [Fact]
-    public async Task I_can_get_solar_times_during_periods_of_midnight_sun() { /* ... */ }
+    public async Task User_can_get_solar_times_during_periods_of_midnight_sun() { /* ... */ }
 
     [Fact]
-    public async Task I_can_get_solar_times_if_my_location_cannot_be_determined() { /* ... */ }
+    public async Task User_can_get_solar_times_even_if_their_location_cannot_be_determined() { /* ... */ }
 }
 ```
 
-Note that the actual implementation of the tests is hidden because it's not relevant to the fact that they're functional. What matters is that the tests and their structure is driven by the software requirements, while their scope can range anywhere from end-to-end to even unit level.
+Note that the actual implementation of the tests is hidden because it's not relevant to the fact that they're functional. What matters is that the tests and their structure is driven by the software requirements, while their scope can theoretically range anywhere from end-to-end to even unit level.
 
 Naming tests in accordance to specifications rather than classes has an additional advantage of removing that unnecessary coupling. Now, if we decide to rename `SolarCalculator` to something else or move it to a different directory, the test names won't need to be updated to reflect that.
 
 This structure is very useful in highlighting what's actually important, while leaving irrelevant details out. As another example, here is how the test suite is organized in [CliWrap](https://github.com/Tyrrrz/CliWrap) (the underscores are replaced with spaces by [xUnit](https://xunit.net/docs/configuration-files#methodDisplayOptions)):
 
-![Functional tests used at CliWrap](CliWrap-functional-tests.png)
+![Functional tests used for CliWrap](CliWrap-functional-tests.png)
 
-As long as a piece of software does something at least remotely useful, it will always have functional requirements. These can be either _formal_ (specification documents, user stories, etc.) or _informal_ (verbally agreed upon, assumed, JIRA tickets, written on toilet paper, etc.)
+As long as a piece of software does something at least remotely useful, it will always have functional requirements. Those can be either _formal_ (specification documents, user stories, etc.) or _informal_ (verbally agreed upon, assumed, JIRA tickets, written on toilet paper, etc.)
 
-Turning informal specifications into functional tests can often be difficult because it requires us to abstract away from code and think from a user's perspective. What helps me with my open source projects is that I start by creating a readme file where I list a bunch of relevant usage examples, and then encode those into tests.
+Turning informal specifications into functional tests can often be difficult because it requires us to take a step away from code and challenge ourselves to think from a user's perspective. What helps me with my open source projects is that I start by creating a readme file where I list a bunch of relevant usage examples, and then encode those into tests.
 
-Finally, with this comes the second guideline: **partition tests based on threads of behavior, rather than the code's internal structure**.
+Finally, the second guideline is: **partition tests based on threads of behavior, rather than the code's internal structure**.
 
-By following these ideas, you should be able to establish a test suite that provides value and can be scaled based on your project's needs and limitations.
+If we combine all these ideas, we get a mental framework that provides us with a clear goal for writing tests and a good sense of organization, while not relying on any assumptions. We can use it to establish a test suite for our project that focuses on value, and then scale it according to priorities and limitations relevant to current context.
+
+## Functional testing for web services (ASP.NET Core)
+
+## Recipes for success
 
 ## Summary
 
