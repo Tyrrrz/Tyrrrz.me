@@ -46,10 +46,10 @@ public class LocationProvider : IDisposable
     private readonly HttpClient _httpClient = new HttpClient();
 
     // Gets location by query
-    public Task<Location> GetLocationAsync(string locationQuery) { /* ... */ }
+    public async Task<Location> GetLocationAsync(string locationQuery) { /* ... */ }
 
     // Gets current location by IP
-    public Task<Location> GetLocationAsync() { /* ... */ }
+    public async Task<Location> GetLocationAsync() { /* ... */ }
 
     public void Dispose() => _httpClient.Dispose();
 }
@@ -59,7 +59,7 @@ public class SolarCalculator : IDiposable
     private readonly LocationProvider _locationProvider = new LocationProvider();
 
     // Gets solar times for current location and specified date
-    public Task<SolarTimes> GetSolarTimesAsync(DateTimeOffset date) { /* ... */ }
+    public async Task<SolarTimes> GetSolarTimesAsync(DateTimeOffset date) { /* ... */ }
 
     public void Dispose() => _locationProvider.Dispose();
 }
@@ -84,9 +84,9 @@ public class LocationProvider : ILocationProvider
     public LocationProvider(HttpClient httpClient) =>
         _httpClient = httpClient;
 
-    public Task<Location> GetLocationAsync(string locationQuery) { /* ... */ }
+    public async Task<Location> GetLocationAsync(string locationQuery) { /* ... */ }
 
-    public Task<Location> GetLocationAsync() { /* ... */ }
+    public async Task<Location> GetLocationAsync() { /* ... */ }
 }
 
 public interface ISolarCalculator
@@ -101,7 +101,7 @@ public class SolarCalculator : ISolarCalculator
     public SolarCalculator(ILocationProvider locationProvider) =>
         _locationProvider = locationProvider;
 
-    public Task<SolarTimes> GetSolarTimesAsync(DateTimeOffset date) { /* ... */ }
+    public async Task<SolarTimes> GetSolarTimesAsync(DateTimeOffset date) { /* ... */ }
 }
 ```
 
@@ -319,11 +319,184 @@ Turning informal specifications into functional tests can often be difficult bec
 
 Finally, the second guideline is: **partition tests based on threads of behavior, rather than the code's internal structure**.
 
-If we combine all these ideas, we get a mental framework that provides us with a clear goal for writing tests and a good sense of organization, while not relying on any assumptions. We can use it to establish a test suite for our project that focuses on value, and then scale it according to priorities and limitations relevant to current context.
+If we combine all these ideas, we get a mental framework that provides us with a clear goal for writing tests and a good sense of organization, while not relying on any assumptions. We can use it to establish a test suite for our project that focuses on value, and then scale it according to priorities and limitations relevant to the current context.
 
-## Functional testing for web services (ASP.NET Core)
+## Functional testing for web services (via ASP.NET Core)
 
-## Recipes for success
+There might still be some confusion as to what constitutes functional testing or how exactly it's supposed to look especially if you've never done it before, so it makes sense to show a simple but complete example. For this, we will turn our original example into a web service and cover it with tests according to the rules we've outlined earlier. This app will be based on ASP.NET Core, which is a web framework I'm most familiar with, but the same idea should also equally apply to to any other platform.
+
+Our web service is going to expose endpoints to calculate sunrise and sunset times based on the user's IP or provided location. To make things a bit more interesting, we'll also add a Redis caching layer to store previous calculations for faster responses.
+
+The tests will work by launching the app in a simulated environment where it can receive HTTP requests, handle routing, perform validation, and exhibit almost identical behavior to an app running in production. At the same time, we will also use Docker to make sure our tests are relying on the same infrastructural dependencies as the real app does, while trying to keep the test run time reasonably fast.
+
+Let's first go over the implementation of the web app to understand what we're dealing with. Note, some parts in the code snippets below are omitted for brevity, but you can also check out the full project on [GitHub](https://github.com/FuncTestingInAspNetCoreExample).
+
+First off, we will need a way to get the user's location by IP, which is done by the `LocationProvider` class we've seen in earlier examples. It works simply by wrapping an external geoip lookup service called [IP-API](https://ip-api.com/):
+
+```csharp
+public class LocationProvider
+{
+    private readonly HttpClient _httpClient;
+
+    public LocationProvider(HttpClient httpClient) =>
+        _httpClient = httpClient;
+
+    public async Task<Location> GetLocationAsync(string query) { /* ... */ }
+
+    public async Task<Location> GetLocationAsync(IPAddress ip)
+    {
+        // If IP is local, just don't pass anything (useful when running on localhost)
+        var ipFormatted = !ip.IsLocal() ? ip.MapToIPv4().ToString() : "";
+
+        var json = await _httpClient.GetJsonAsync($"http://ip-api.com/json/{ipFormatted}");
+
+        var latitude = json.GetProperty("lat").GetDouble();
+        var longitude = json.GetProperty("lon").GetDouble();
+
+        return new Location
+        {
+            Latitude = latitude,
+            Longitude = longitude
+        };
+    }
+}
+```
+
+In order to turn location into solar times, we're going to rely on the [sunrise/sunset algorithm published by US Naval Observatory](https://edwilliams.org/sunrise_sunset_algorithm.htm). The algorithm itself is too long to include here, but the rest of the implementation for `SolarCalculator` is as follows:
+
+```csharp
+public class SolarCalculator
+{
+    private readonly LocationProvider _locationProvider;
+
+    public SolarCalculator(LocationProvider locationProvider) =>
+        _locationProvider = locationProvider;
+
+    private static TimeSpan CalculateSolarTimeOffset(Location location, DateTimeOffset instant,
+        double zenith, bool isSunrise) { /* ... */ }
+
+    public async Task<SolarTimes> GetSolarTimesAsync(IPAddress ip, DateTimeOffset date)
+    {
+        var location = await _locationProvider.GetLocationAsync(ip);
+
+        var sunriseOffset = CalculateSolarTimeOffset(location, date, 90.83, true);
+        var sunsetOffset = CalculateSolarTimeOffset(location, date, 90.83, false);
+
+        var sunrise = date.ResetTimeOfDay().Add(sunriseOffset);
+        var sunset = date.ResetTimeOfDay().Add(sunsetOffset);
+
+        return new SolarTimes
+        {
+            Sunrise = sunrise,
+            Sunset = sunset
+        };
+    }
+
+    public Task<SolarTimes> GetSolarTimesAsync(Location location, DateTimeOffset date) { /* ... */ }
+}
+```
+
+Since it's an MVC web app, the aforementioned functionality is made available through HTTP endpoints with the help of a simple controller:
+
+```csharp
+[ApiController]
+[Route("solartimes")]
+public class SolarTimeController : ControllerBase
+{
+    private readonly SolarCalculator _solarCalculator;
+    private readonly CachingLayer _cachingLayer;
+
+    public SolarTimeController(SolarCalculator solarCalculator, CachingLayer cachingLayer)
+    {
+        _solarCalculator = solarCalculator;
+        _cachingLayer = cachingLayer;
+    }
+
+    [HttpGet("by_ip")]
+    public async Task<IActionResult> GetByIp()
+    {
+        var ip = HttpContext.Connection.RemoteIpAddress;
+        var cacheKey = ip.ToString();
+
+        var cachedSolarTimes = await _cachingLayer.TryGetAsync<SolarTimes>(cacheKey);
+        if (cachedSolarTimes != null)
+            return Ok(cachedSolarTimes);
+
+        var solarTimes = await _solarCalculator.GetSolarTimesAsync(ip, DateTimeOffset.Now);
+        await _cachingLayer.SetAsync(cacheKey, solarTimes);
+
+        return Ok(solarTimes);
+    }
+
+    [HttpGet("by_location")]
+    public async Task<IActionResult> GetByLocation(double lat, double lon) { /* ... */ }
+}
+```
+
+As seen above, the `/solartimes/by_ip` endpoint mostly just delegates execution to `SolarCalculator`, but also has very simple caching logic to avoid redundant requests to 3rd party services. The caching is done by the `CachingLayer` class which encapsulates a Redis client used to store and retrieve JSON content:
+
+```csharp
+public class CachingLayer
+{
+    private readonly IConnectionMultiplexer _redis;
+
+    public CachingLayer(IConnectionMultiplexer connectionMultiplexer) =>
+        _redis = connectionMultiplexer;
+
+    public async Task<T> TryGetAsync<T>(string key) where T : class
+    {
+        var result = await _redis.GetDatabase().StringGetAsync(key);
+
+        if (result.HasValue)
+            return JsonSerializer.Deserialize<T>(result.ToString());
+
+        return null;
+    }
+
+    public async Task SetAsync<T>(string key, T obj) where T : class =>
+        await _redis.GetDatabase().StringSetAsync(key, JsonSerializer.Serialize(obj));
+}
+```
+
+Finally, all of the above parts are wired together in the `Startup` class by configuring request pipeline and registering required services:
+
+```csharp
+public class Startup
+{
+    private readonly IConfiguration _configuration;
+
+    public Startup(IConfiguration configuration) =>
+        _configuration = configuration;
+
+    private string GetRedisConnectionString() =>
+        _configuration.GetConnectionString("Redis");
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddMvc(o => o.EnableEndpointRouting = false);
+
+        services.AddSingleton<IConnectionMultiplexer>(
+            ConnectionMultiplexer.Connect(GetRedisConnectionString()));
+
+        services.AddSingleton<CachingLayer>();
+
+        services.AddHttpClient<LocationProvider>();
+        services.AddTransient<SolarCalculator>();
+    }
+
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        if (env.IsDevelopment())
+            app.UseDeveloperExceptionPage();
+
+        app.UseMvcWithDefaultRoute();
+    }
+}
+```
+
+Although it's a rather simple project, this app already incorporates a decent amount of infrastructural complexity by relying on a 3rd party web service (geoip provider) as well as a persistence layer (Redis). This is a rather common setup which a lot of real-life projects can relate to.
+
+## Drawbacks and considerations
 
 ## Summary
 
