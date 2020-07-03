@@ -373,7 +373,10 @@ public class SolarCalculator
         _locationProvider = locationProvider;
 
     private static TimeSpan CalculateSolarTimeOffset(Location location, DateTimeOffset instant,
-        double zenith, bool isSunrise) { /* ... */ }
+        double zenith, bool isSunrise)
+    {
+        /* ... */
+    }
 
     public async Task<SolarTimes> GetSolarTimesAsync(IPAddress ip, DateTimeOffset date)
     {
@@ -413,7 +416,7 @@ public class SolarTimeController : ControllerBase
     }
 
     [HttpGet("by_ip")]
-    public async Task<IActionResult> GetByIp()
+    public async Task<IActionResult> GetByIp(DateTimeOffset? date)
     {
         var ip = HttpContext.Connection.RemoteIpAddress;
         var cacheKey = ip.ToString();
@@ -422,14 +425,17 @@ public class SolarTimeController : ControllerBase
         if (cachedSolarTimes != null)
             return Ok(cachedSolarTimes);
 
-        var solarTimes = await _solarCalculator.GetSolarTimesAsync(ip, DateTimeOffset.Now);
+        var solarTimes = await _solarCalculator.GetSolarTimesAsync(ip, date ?? DateTimeOffset.Now);
         await _cachingLayer.SetAsync(cacheKey, solarTimes);
 
         return Ok(solarTimes);
     }
 
     [HttpGet("by_location")]
-    public async Task<IActionResult> GetByLocation(double lat, double lon) { /* ... */ }
+    public async Task<IActionResult> GetByLocation(double lat, double lon, DateTimeOffset? date)
+    {
+        /* ... */
+    }
 }
 ```
 
@@ -495,6 +501,69 @@ public class Startup
 ```
 
 Although it's a rather simple project, this app already incorporates a decent amount of infrastructural complexity by relying on a 3rd party web service (geoip provider) as well as a persistence layer (Redis). This is a rather common setup which a lot of real-life projects can relate to.
+
+With a classical approach focused on unit testing, we would find ourselves targeting the service layer and maybe controller layer of our app, writing isolated tests that ensure that every branch of code executes correctly. Doing that would be useful to an extent, but could never give us confidence that the actual endpoints, with all of the middleware and peripheral components, work as intended.
+
+Note that we haven't added any autotelic interfaces for our classes because we don't know if they are going to be required. At this point it's not yet clear how broad our tests are going to be, so we avoid inducing unnecessary damage to the architecture until we're sure we need it.
+
+Let's move on to testing. First thing we need to do is establish some important infrastructural components that will support our tests. One of them is `FakeApp` which is an object that encapsulates a virtual version of our app:
+
+```csharp
+public class FakeApp : IDisposable
+{
+    private readonly WebApplicationFactory<Startup> _appFactory;
+
+    public HttpClient Client { get; }
+
+    public FakeApp()
+    {
+        _appFactory = new WebApplicationFactory<Startup>();
+        Client = _appFactory.CreateClient();
+    }
+
+    public void Dispose()
+    {
+        Client.Dispose();
+        _appFactory.Dispose();
+    }
+}
+```
+
+The majority of the work is already done by [`WebApplicationFactory`](https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-3.1), which is a utility provided by the framework that allows us to bootstrap our app in-memory for testing purposes. It also provides us with API to override configuration, service registrations, and the request pipeline if needed.
+
+We can use an instance of this object in tests to run the app, send requests with the provided `HttpClient`, and then check that the response matches expectations. It can be either shared among multiple tests or instead created separately for each one.
+
+Since we rely on Redis, we also want to have a way to spin up a fresh server to be used by our app. There are many ways to do it, but for a simple example I decided to use xUnit's fixture API for this purpose:
+
+```csharp
+public class RedisFixture : IAsyncLifetime
+{
+    private string _containerId;
+
+    public async Task InitializeAsync()
+    {
+        var result = await Cli.Wrap("docker")
+            .WithArguments("run -d -p 6379:6379 redis")
+            .ExecuteBufferedAsync();
+
+        _containerId = result.StandardOutput.Trim();
+    }
+
+    public async Task ResetAsync() =>
+        await Cli.Wrap("docker")
+            .WithArguments($"exec {_containerId} redis-cli FLUSHALL")
+            .ExecuteAsync();
+
+    public async Task DisposeAsync() =>
+        await Cli.Wrap("docker")
+            .WithArguments($"container kill {_containerId}")
+            .ExecuteAsync();
+}
+```
+
+The above code works by implementing the `IAsyncLifetime` interface that lets us define methods which are going to be executed before and after the tests run. We are using these methods to start a Redis container in Docker and then kill it once the testing has finished.
+
+Finally, with all of that done, we can write the actual tests:
 
 ## Drawbacks and considerations
 
