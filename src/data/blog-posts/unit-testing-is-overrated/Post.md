@@ -1,6 +1,6 @@
 ---
 title: Unit Testing is Overrated
-date: 2020-03-30
+date: 2020-07-07
 cover: Cover.png
 ---
 
@@ -542,6 +542,7 @@ public class RedisFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
+        // Simplified, but ideally should bind to a random port
         var result = await Cli.Wrap("docker")
             .WithArguments("run -d -p 6379:6379 redis")
             .ExecuteBufferedAsync();
@@ -563,9 +564,60 @@ public class RedisFixture : IAsyncLifetime
 
 The above code works by implementing the `IAsyncLifetime` interface that lets us define methods which are going to be executed before and after the tests run. We are using these methods to start a Redis container in Docker and then kill it once the testing has finished.
 
-Finally, with all of that done, we can write the actual tests:
+Besides that, the `RedisFixture` class also exposes `ResetAsync` method which executes the `FLUSHALL` command to delete all keys from the database. We will be using this method to reset Redis to a clean slate before each test is ran. As an alternative, we could also just restart the container instead, which takes a bit longer but is arguably more fool-proof.
+
+Now that the infrastructure is set up, we can move on to writing our first test:
+
+```csharp
+public class SolarTimeSpecs : IClassFixture<RedisFixture>, IAsyncLifetime
+{
+    private readonly RedisFixture _redisFixture;
+
+    public SolarTimeSpecs(RedisFixture redisFixture)
+    {
+        _redisFixture = redisFixture;
+    }
+
+    // Reset Redis before each test
+    public async Task InitializeAsync() => await _redisFixture.ResetAsync();
+
+    [Fact]
+    public async Task User_can_get_solar_times_for_their_location_by_ip()
+    {
+        // Arrange
+        using var app = new FakeApp();
+
+        // Act
+        var response = await app.Client.GetStringAsync("/solartimes/by_ip");
+        var solarTimes = JsonSerializer.Deserialize<SolarTimes>(response);
+
+        // Assert
+        solarTimes.Sunset.Should().BeWithin(TimeSpan.FromDays(1)).After(solarTimes.Sunrise);
+        solarTimes.Sunrise.Should().BeCloseTo(DateTimeOffset.Now, TimeSpan.FromDays(1));
+        solarTimes.Sunset.Should().BeCloseTo(DateTimeOffset.Now, TimeSpan.FromDays(1));
+    }
+}
+```
+
+As you can see, the setup is really simple. All we need to do is create an instance of `FakeApp` and use the provided `HttpClient` to send requests to one of the endpoints, just like you would if it was a real web app.
+
+This specific test works by querying the `/solartimes/by_ip` route, which determines user's sunrise and sunset times for the current date based on their IP. Since we're relying on an actual GeoIP provider and don't know what the result is going to be, we're performing property-based assertions to ensure that the solar times are valid.
+
+Although those assertions will be able to catch a multitude of potential bugs, it doesn't give us full confidence that the result is actually correct. There are a couple of different ways we can improve on this, however.
+
+An obvious option would be to replace the actual GeoIP provider with a fake instance that will always return the same location, allowing us to hard-code the expected solar times. The downside of doing that is that we won't be able to verify the integration between our app and the 3rd party service we depend on.
+
+As an alternative approach, we can instead substitute the client IP address that we send in tests. I like this option more because it allows us to keep the same integration scope, while making the test more deterministic.
 
 ## Drawbacks and considerations
+
+Unfortunately, there is [no silver bullet](https://en.wikipedia.org/wiki/No_Silver_Bullet) and the approaches described in this article also suffer from some potential drawbacks. In the interest of fairness, it makes sense to include them as well.
+
+One of the biggest challenges I've found when writing high-level functional tests is figuring out a good balance between usefulness and usability. Unlike with approaches focused on unit testing, it does take more effort to ensure that the functional tests are sufficiently deterministic, don't take too long, can run in parallel, and are generally usable during development.
+
+In many cases it also requires a more involved understanding of the project's dependencies and the technologies it relies on, because it helps with knowing which options are available and which trade-offs are worth it. This puts a certain prerequisite on the responsible person or the team in general in terms of seniority.
+
+Understanding what is a functional requirement what isn't can also appear tricky sometimes.
 
 ## Summary
 
