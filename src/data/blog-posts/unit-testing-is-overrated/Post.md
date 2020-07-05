@@ -301,7 +301,7 @@ public class SolarTimesSpecs
     public async Task User_can_get_solar_times_during_periods_of_midnight_sun() { /* ... */ }
 
     [Fact]
-    public async Task User_can_get_solar_times_even_if_their_location_cannot_be_determined() { /* ... */ }
+    public async Task User_can_get_solar_times_if_their_location_cannot_be_determined() { /* ... */ }
 }
 ```
 
@@ -380,7 +380,10 @@ public class SolarCalculator
         /* ... */
     }
 
-    public async Task<SolarTimes> GetSolarTimesAsync(Location location, DateTimeOffset date) { /* ... */ }
+    public async Task<SolarTimes> GetSolarTimesAsync(Location location, DateTimeOffset date)
+    {
+        /* ... */
+    }
 
     public async Task<SolarTimes> GetSolarTimesAsync(IPAddress ip, DateTimeOffset date)
     {
@@ -864,7 +867,7 @@ However, if our goal is only to test the integration between the app and Redis, 
 
 ```csharp
 [Fact]
-public async Task User_can_get_solar_times_for_their_location_by_ip_multiple_times_with_the_same_result()
+public async Task User_can_get_solar_times_for_their_location_by_ip_multiple_times()
 {
     // Arrange
     using var app = new FakeApp();
