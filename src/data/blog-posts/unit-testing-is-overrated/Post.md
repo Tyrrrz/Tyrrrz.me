@@ -421,7 +421,7 @@ public class SolarTimeController : ControllerBase
     public async Task<IActionResult> GetByIp(DateTimeOffset? date)
     {
         var ip = HttpContext.Connection.RemoteIpAddress;
-        var cacheKey = ip.ToString();
+        var cacheKey = $"{ip},{date}";
 
         var cachedSolarTimes = await _cachingLayer.TryGetAsync<SolarTimes>(cacheKey);
         if (cachedSolarTimes != null)
@@ -611,7 +611,290 @@ An obvious option would be to replace the actual GeoIP provider with a fake inst
 
 As an alternative approach, we can instead substitute the IP address that the test server receives from the client. This way we can make the test more strict, while maintaining the same integration scope.
 
+To accomplish this, we will need to create a startup filter that lets us inject a custom IP address into request context using middleware:
 
+```csharp
+public class FakeIpStartupFilter : IStartupFilter
+{
+    public IPAddress Ip { get; set; } = IPAddress.Parse("::1");
+
+    public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> nextFilter)
+    {
+        return app =>
+        {
+            app.Use(async (ctx, next) =>
+            {
+                ctx.Connection.RemoteIpAddress = Ip;
+                await next();
+            });
+
+            nextFilter(app);
+        };
+    }
+}
+```
+
+We can then wire it into `FakeApp` by registering it as a service:
+
+```csharp
+public class FakeApp : IDisposable
+{
+    private readonly WebApplicationFactory<Startup> _appFactory;
+    private readonly FakeIpStartupFilter _fakeIpStartupFilter = new FakeIpStartupFilter();
+
+    public HttpClient Client { get; }
+
+    public IPAddress ClientIp
+    {
+        get => _fakeIpStartupFilter.Ip;
+        set => _fakeIpStartupFilter.Ip = value;
+    }
+
+    public FakeApp()
+    {
+        _appFactory = new WebApplicationFactory<Startup>().WithWebHostBuilder(o =>
+        {
+            o.ConfigureServices(s =>
+            {
+                s.AddSingleton<IStartupFilter>(_fakeIpStartupFilter);
+            });
+        });
+
+        Client = _appFactory.CreateClient();
+    }
+
+    /* ... */
+}
+```
+
+Now we can update the test to rely on concrete data:
+
+```csharp
+[Fact]
+public async Task User_can_get_solar_times_for_their_location_by_ip()
+{
+    // Arrange
+    using var app = new FakeApp
+    {
+        ClientIp = IPAddress.Parse("20.112.101.1")
+    };
+
+    var date = new DateTimeOffset(2020, 07, 03, 0, 0, 0, TimeSpan.FromHours(-5));
+    var expectedSunrise = new DateTimeOffset(2020, 07, 03, 05, 20, 37, TimeSpan.FromHours(-5));
+    var expectedSunset = new DateTimeOffset(2020, 07, 03, 20, 28, 54, TimeSpan.FromHours(-5));
+
+    // Act
+    var query = new QueryBuilder
+    {
+        {"date", date.ToString("O", CultureInfo.InvariantCulture)}
+    };
+
+    var response = await app.Client.GetStringAsync($"/solartimes/by_ip{query}");
+    var solarTimes = JsonSerializer.Deserialize<SolarTimes>(response);
+
+    // Assert
+    solarTimes.Sunrise.Should().BeCloseTo(expectedSunrise, TimeSpan.FromSeconds(1));
+    solarTimes.Sunset.Should().BeCloseTo(expectedSunset, TimeSpan.FromSeconds(1));
+}
+```
+
+Some developers might still feel uneasy about relying on a real 3rd party web service in tests, because it may lead to non-deterministic results. Conversely, one can argue that we do actually want our tests to incorporate that dependency, because we want to catch if it breaks or changes in unexpected ways, as it can lead to bugs in our own software.
+
+Of course, doing that is not always possible, for example if a service has usage quotas, costs money, or is simply slow or unreliable. In such cases we would want to replace it with a fake (preferably not mocked) implementation in tests instead.
+
+Similarly to the first one, we can also write a test that covers the second endpoint. This one is simpler because all input parameters are passed directly in URL query:
+
+```csharp
+[Fact]
+public async Task User_can_get_solar_times_for_a_specific_location_and_date()
+{
+    // Arrange
+    using var app = new FakeApp();
+
+    var date = new DateTimeOffset(2020, 07, 03, 0, 0, 0, TimeSpan.FromHours(+3));
+    var expectedSunrise = new DateTimeOffset(2020, 07, 03, 04, 52, 23, TimeSpan.FromHours(+3));
+    var expectedSunset = new DateTimeOffset(2020, 07, 03, 21, 11, 45, TimeSpan.FromHours(+3));
+
+    // Act
+    var query = new QueryBuilder
+    {
+        {"lat", "50.45"},
+        {"lon", "30.52"},
+        {"date", date.ToString("O", CultureInfo.InvariantCulture)}
+    };
+
+    var response = await app.Client.GetStringAsync($"/solartimes/by_location{query}");
+    var solarTimes = JsonSerializer.Deserialize<SolarTimes>(response);
+
+    // Assert
+    solarTimes.Sunrise.Should().BeCloseTo(expectedSunrise, TimeSpan.FromSeconds(1));
+    solarTimes.Sunset.Should().BeCloseTo(expectedSunset, TimeSpan.FromSeconds(1));
+}
+```
+
+We can keep adding tests like this one to ensure that the app supports all possible locations, dates, and handles potential edge cases such as the [midnight sun phenomenon](https://en.wikipedia.org/wiki/Midnight_sun). However, you may not want to re-test the entire pipeline each time, but focus just on the business logic that calculates the solar times.
+
+Doing that would imply that we need to isolate `SolarCalculator` from `LocationProvider` somehow and that in turn implies mocking which we want to avoid. Fortunately, there is a more clever way to achieve that.
+
+We can alter the implementation of `SolarCalculator` by separating the pure and impure parts of the code away from each other:
+
+```csharp
+public class SolarCalculator
+{
+    private static TimeSpan CalculateSolarTimeOffset(Location location, DateTimeOffset instant,
+        double zenith, bool isSunrise)
+    {
+        /* ... */
+    }
+
+    public SolarTimes GetSolarTimes(Location location, DateTimeOffset date)
+    {
+        var sunriseOffset = CalculateSolarTimeOffset(location, date, 90.83, true);
+        var sunsetOffset = CalculateSolarTimeOffset(location, date, 90.83, false);
+
+        var sunrise = date.ResetTimeOfDay().Add(sunriseOffset);
+        var sunset = date.ResetTimeOfDay().Add(sunsetOffset);
+
+        return new SolarTimes
+        {
+            Sunrise = sunrise,
+            Sunset = sunset
+        };
+    }
+}
+```
+
+Now the implementation of this class is completely pure and, by extension, does not require `LocationProvider` as a dependency. To wire everything back together, all we need to do is update the controller:
+
+```csharp
+[ApiController]
+[Route("solartimes")]
+public class SolarTimeController : ControllerBase
+{
+    private readonly SolarCalculator _solarCalculator;
+    private readonly LocationProvider _locationProvider;
+    private readonly CachingLayer _cachingLayer;
+
+    public SolarTimeController(
+        SolarCalculator solarCalculator,
+        LocationProvider locationProvider,
+        CachingLayer cachingLayer)
+    {
+        _solarCalculator = solarCalculator;
+        _locationProvider = locationProvider;
+        _cachingLayer = cachingLayer;
+    }
+
+    [HttpGet("by_ip")]
+    public async Task<IActionResult> GetByIp(DateTimeOffset? date)
+    {
+        var ip = HttpContext.Connection.RemoteIpAddress;
+        var cacheKey = ip.ToString();
+
+        var cachedSolarTimes = await _cachingLayer.TryGetAsync<SolarTimes>(cacheKey);
+        if (cachedSolarTimes != null)
+            return Ok(cachedSolarTimes);
+
+        // Composition instead of dependency injection
+        var location = await _locationProvider.GetLocationAsync(ip);
+        var solarTimes = _solarCalculator.GetSolarTimes(location, date ?? DateTimeOffset.Now);
+
+        await _cachingLayer.SetAsync(cacheKey, solarTimes);
+
+        return Ok(solarTimes);
+    }
+
+    /* ... */
+}
+```
+
+With that done, we can add some extra light-weight tests to cover the business logic more extensively, while still not mocking anything:
+
+```csharp
+[Fact]
+public void User_can_get_solar_times_for_New_York_in_November()
+{
+    // Arrange
+    var location = new Location
+    {
+        Latitude = 40.71,
+        Longitude = -74.00
+    };
+
+    var date = new DateTimeOffset(2019, 11, 04, 00, 00, 00, TimeSpan.FromHours(-5));
+    var expectedSunrise = new DateTimeOffset(2019, 11, 04, 06, 29, 34, TimeSpan.FromHours(-5));
+    var expectedSunset = new DateTimeOffset(2019, 11, 04, 16, 49, 04, TimeSpan.FromHours(-5));
+
+    // Act
+    var solarTimes = new SolarCalculator().GetSolarTimes(location, date);
+
+    // Assert
+    solarTimes.Sunrise.Should().BeCloseTo(expectedSunrise, TimeSpan.FromSeconds(1));
+    solarTimes.Sunset.Should().BeCloseTo(expectedSunset, TimeSpan.FromSeconds(1));
+}
+
+[Fact]
+public void User_can_get_solar_times_for_Tromso_in_January()
+{
+    // Arrange
+    var location = new Location
+    {
+        Latitude = 69.65,
+        Longitude = 18.96
+    };
+
+    var date = new DateTimeOffset(2020, 01, 03, 00, 00, 00, TimeSpan.FromHours(+1));
+    var expectedSunrise = new DateTimeOffset(2020, 01, 03, 11, 48, 31, TimeSpan.FromHours(+1));
+    var expectedSunset = new DateTimeOffset(2020, 01, 03, 11, 48, 45, TimeSpan.FromHours(+1));
+
+    // Act
+    var solarTimes = new SolarCalculator().GetSolarTimes(location, date);
+
+    // Assert
+    solarTimes.Sunrise.Should().BeCloseTo(expectedSunrise, TimeSpan.FromSeconds(1));
+    solarTimes.Sunset.Should().BeCloseTo(expectedSunset, TimeSpan.FromSeconds(1));
+}
+```
+
+Finally, we may also want to make sure that our Redis caching layer works correctly. Even though we're using it in our tests, it never actually returns a cached response because the database gets reset between tests.
+
+The problem with testing things like caching is that they can't be defined by functional requirements. A user, with no awareness of the app's internal affairs, has no way of knowing whether the responses are returned from cache or not.
+
+However, if our goal is only to test the integration between the app and Redis, we don't actually need to write implementation-aware tests and can do something like this instead:
+
+```csharp
+[Fact]
+public async Task User_can_get_solar_times_for_their_location_by_ip_multiple_times_with_the_same_result()
+{
+    // Arrange
+    using var app = new FakeApp();
+
+    // Act
+    var collectedSolarTimes = new List<SolarTimes>();
+
+    for (var i = 0; i < 3; i++)
+    {
+        var response = await app.Client.GetStringAsync("/solartimes/by_ip");
+        var solarTimes = JsonSerializer.Deserialize<SolarTimes>(response);
+
+        collectedSolarTimes.Add(solarTimes);
+    }
+
+    // Assert
+    collectedSolarTimes.Select(t => t.Sunrise).Distinct().Should().ContainSingle();
+    collectedSolarTimes.Select(t => t.Sunset).Distinct().Should().ContainSingle();
+}
+```
+
+This test asserts that the endpoint always returns the same result for the same input, which is enough to ensure that cached responses are also processed correctly.
+
+At the end of the day we have a simple test suite that looks like this:
+
+![Test suite](Example-test-results.png)
+
+Note that the duration of the tests is pretty good, with the fastest integration test completing at 55ms and the slowest being under a second (due to suffering from cold start). Considering that these tests involve the entire lifecycle, including all dependencies and infrastructure, I would say that this is more than acceptable.
+
+If you want to tinker with the example project yourself, you can find it [on GitHub](https://github.com/Tyrrrz/FuncTestingInAspNetCoreExample).
 
 ## Drawbacks and considerations
 
