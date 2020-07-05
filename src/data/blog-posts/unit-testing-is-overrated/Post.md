@@ -611,13 +611,25 @@ As an alternative approach, we can instead substitute the client IP address that
 
 ## Drawbacks and considerations
 
-Unfortunately, there is [no silver bullet](https://en.wikipedia.org/wiki/No_Silver_Bullet) and the approaches described in this article also suffer from some potential drawbacks. In the interest of fairness, it makes sense to include them as well.
+Unfortunately, there is [no silver bullet](https://en.wikipedia.org/wiki/No_Silver_Bullet) and the approaches described in this article also suffer from some potential drawbacks. In the interest of fairness, it makes sense to mention them as well.
 
-One of the biggest challenges I've found when writing high-level functional tests is figuring out a good balance between usefulness and usability. Unlike with approaches focused on unit testing, it does take more effort to ensure that the functional tests are sufficiently deterministic, don't take too long, can run in parallel, and are generally usable during development.
+One of the biggest challenges I've found when doing high-level functional testing is figuring out a good balance between usefulness and usability. Compared to approaches that focus specifically on unit testing, it does take more effort to ensure that such tests are sufficiently deterministic, don't take too long, can run independently of each other, and are generally usable during development.
 
-In many cases it also requires a more involved understanding of the project's dependencies and the technologies it relies on, because it helps with knowing which options are available and which trade-offs are worth it. This puts a certain prerequisite on the responsible person or the team in general in terms of seniority.
+The wider the scope of the tests is, the harder it is to find that balance, and often requires
 
-Understanding what is a functional requirement what isn't can also appear tricky sometimes.
+In order to set up the infrastructure required for running tests you will need a good understanding of the project's dependencies and the technologies it relies on. Knowing how they work is important as it , whether they can be easily containerized or simulated with fake implementations, is important as it helps with knowing which options are available and which trade-offs are worth it. Often it will also take additional work to configure fixtures, cleanup behavior, test services, and so on.
+
+
+
+In many cases it also requires a much deeper understanding of the project's dependencies and the technologies it relies on, because it helps with knowing which options are available and which trade-offs are worth it. This puts a certain prerequisite on the responsible person or the team in general in terms of experience.
+
+Establishing
+
+Writing such tests in itself involves a bit more planning because it's no longer just about covering every method of every class, but rather about outlining software requirements and turning them into code. Understanding what those requirements are and which of them are functional can also be tricky and requires an ability to think from a user's point of view.
+
+From a technical perspective, higher-level tests suffer from a lack of locality. If a test fails, either due to unmet expectations or because of an unhandled exception, it's often unclear what is the exact cause of the error.
+
+Although there are ways to make it better, ultimately it's always going to be a trade-off. When comparing to tests which are more isolated, integration tests are generally worse at indicating the origin of the error, but are better at showing its impact on the user.
 
 ## Summary
 
