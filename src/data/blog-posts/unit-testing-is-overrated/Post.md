@@ -323,15 +323,15 @@ If we combine all these ideas, we get a mental framework that provides us with a
 
 ## Functional testing for web services (via ASP.NET Core)
 
-There might still be some confusion as to what constitutes functional testing or how exactly it's supposed to look especially if you've never done it before, so it makes sense to show a simple but complete example. For this, we will turn our original example into a web service and cover it with tests according to the rules we've outlined earlier. This app will be based on ASP.NET Core, which is a web framework I'm most familiar with, but the same idea should also equally apply to to any other platform.
+There might still be some confusion as to what constitutes functional testing or how exactly it's supposed to look especially if you've never done it before, so it makes sense to show a simple but complete example. For this, we will turn the solar calculator from earlier into a web service and cover it with tests according to the rules we've outlined in the previous part of the article. This app will be based on ASP.NET Core, which is a web framework I'm most familiar with, but the same idea should also equally apply to to any other platform.
 
 Our web service is going to expose endpoints to calculate sunrise and sunset times based on the user's IP or provided location. To make things a bit more interesting, we'll also add a Redis caching layer to store previous calculations for faster responses.
 
-The tests will work by launching the app in a simulated environment where it can receive HTTP requests, handle routing, perform validation, and exhibit almost identical behavior to an app running in production. At the same time, we will also use Docker to make sure our tests are relying on the same infrastructural dependencies as the real app does, while trying to keep the test run time reasonably fast.
+The tests will work by launching the app in a simulated environment where it can receive HTTP requests, handle routing, perform validation, and exhibit almost identical behavior to an app running in production. At the same time, we will also use Docker to make sure our tests are relying on the same infrastructural dependencies as the real app does.
 
 Let's first go over the implementation of the web app to understand what we're dealing with. Note, some parts in the code snippets below are omitted for brevity, but you can also check out the full project on [GitHub](https://github.com/FuncTestingInAspNetCoreExample).
 
-First off, we will need a way to get the user's location by IP, which is done by the `LocationProvider` class we've seen in earlier examples. It works simply by wrapping an external geoip lookup service called [IP-API](https://ip-api.com/):
+First off, we will need a way to get the user's location by IP, which is done by the `LocationProvider` class we've seen in earlier examples. It works simply by wrapping an external GeoIP lookup service called [IP-API](https://ip-api.com/):
 
 ```csharp
 public class LocationProvider
@@ -340,8 +340,6 @@ public class LocationProvider
 
     public LocationProvider(HttpClient httpClient) =>
         _httpClient = httpClient;
-
-    public async Task<Location> GetLocationAsync(string query) { /* ... */ }
 
     public async Task<Location> GetLocationAsync(IPAddress ip)
     {
@@ -376,7 +374,13 @@ public class SolarCalculator
         double zenith, bool isSunrise)
     {
         /* ... */
+
+        // Algorithm omitted for brevity
+
+        /* ... */
     }
+
+    public async Task<SolarTimes> GetSolarTimesAsync(Location location, DateTimeOffset date) { /* ... */ }
 
     public async Task<SolarTimes> GetSolarTimesAsync(IPAddress ip, DateTimeOffset date)
     {
@@ -394,12 +398,10 @@ public class SolarCalculator
             Sunset = sunset
         };
     }
-
-    public Task<SolarTimes> GetSolarTimesAsync(Location location, DateTimeOffset date) { /* ... */ }
 }
 ```
 
-Since it's an MVC web app, the aforementioned functionality is made available through HTTP endpoints with the help of a simple controller:
+Since it's an MVC web app, we will also have a controller that provides endpoints to expose the app's functionality:
 
 ```csharp
 [ApiController]
@@ -500,13 +502,13 @@ public class Startup
 }
 ```
 
-Although it's a rather simple project, this app already incorporates a decent amount of infrastructural complexity by relying on a 3rd party web service (geoip provider) as well as a persistence layer (Redis). This is a rather common setup which a lot of real-life projects can relate to.
+Note that we didn't have our classes implement any autotelic interfaces because we're not planning to use mocks. It may happen that we will need to substitute one of the services in tests but it's not yet clear now, so we avoid unnecessary work (and design damage) until we're sure we need it.
 
-With a classical approach focused on unit testing, we would find ourselves targeting the service layer and maybe controller layer of our app, writing isolated tests that ensure that every branch of code executes correctly. Doing that would be useful to an extent, but could never give us confidence that the actual endpoints, with all of the middleware and peripheral components, work as intended.
+Although it's a rather simple project, this app already incorporates a decent amount of infrastructural complexity by relying on a 3rd party web service (GeoIP provider) as well as a persistence layer (Redis). This is a rather common setup which a lot of real-life projects can relate to.
 
-Note that we haven't added any autotelic interfaces for our classes because we don't know if they are going to be required. At this point it's not yet clear how broad our tests are going to be, so we avoid inducing unnecessary damage to the architecture until we're sure we need it.
+With a classical approach focused on unit testing, we would find ourselves targeting the service layer and possibly the controller layer of our app, writing isolated tests that ensure that every branch of code executes correctly. Doing that would be useful to an extent, but could never give us confidence that the actual endpoints, with all of the middleware and peripheral components, work as intended.
 
-Let's move on to testing. First thing we need to do is establish some important infrastructural components that will support our tests. One of them is `FakeApp` which is an object that encapsulates a virtual version of our app:
+Instead, we will write tests that target the endpoints directly. To do that, we will need to create a separate testing project and add a few infrastructural components that will support our tests. One of them is `FakeApp` which is going to be used to encapsulate a virtual instance of our app:
 
 ```csharp
 public class FakeApp : IDisposable
@@ -529,11 +531,11 @@ public class FakeApp : IDisposable
 }
 ```
 
-The majority of the work is already done by [`WebApplicationFactory`](https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-3.1), which is a utility provided by the framework that allows us to bootstrap our app in-memory for testing purposes. It also provides us with API to override configuration, service registrations, and the request pipeline if needed.
+The majority of the work is already done by [`WebApplicationFactory`](https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-3.1), which is a utility provided by the framework that allows us to bootstrap the app in-memory for testing purposes. It also provides us with API to override configuration, service registrations, and the request pipeline if needed.
 
-We can use an instance of this object in tests to run the app, send requests with the provided `HttpClient`, and then check that the response matches expectations. It can be either shared among multiple tests or instead created separately for each one.
+We can use an instance of this object in tests to run the app, send requests with the provided `HttpClient`, and then check that the response matches our expectations. This instance can be either shared among multiple tests or instead created separately for each one.
 
-Since we rely on Redis, we also want to have a way to spin up a fresh server to be used by our app. There are many ways to do it, but for a simple example I decided to use xUnit's fixture API for this purpose:
+Since we also rely on Redis, we want to have a way to spin up a fresh server to be used by our app. There are many ways to do it, but for a simple example I decided to use xUnit's fixture API for this purpose:
 
 ```csharp
 public class RedisFixture : IAsyncLifetime
@@ -564,7 +566,7 @@ public class RedisFixture : IAsyncLifetime
 
 The above code works by implementing the `IAsyncLifetime` interface that lets us define methods which are going to be executed before and after the tests run. We are using these methods to start a Redis container in Docker and then kill it once the testing has finished.
 
-Besides that, the `RedisFixture` class also exposes `ResetAsync` method which executes the `FLUSHALL` command to delete all keys from the database. We will be using this method to reset Redis to a clean slate before each test is ran. As an alternative, we could also just restart the container instead, which takes a bit longer but is arguably more fool-proof.
+Besides that, the `RedisFixture` class also exposes `ResetAsync` method which can be used to execute the `FLUSHALL` command to delete all keys from the database. We will be calling this method to reset Redis to a clean slate before each test. As an alternative, we could also just restart the container instead, which takes a bit longer but is probably more reliable.
 
 Now that the infrastructure is set up, we can move on to writing our first test:
 
@@ -605,9 +607,11 @@ This specific test works by querying the `/solartimes/by_ip` route, which determ
 
 Although those assertions will be able to catch a multitude of potential bugs, it doesn't give us full confidence that the result is actually correct. There are a couple of different ways we can improve on this, however.
 
-An obvious option would be to replace the actual GeoIP provider with a fake instance that will always return the same location, allowing us to hard-code the expected solar times. The downside of doing that is that we won't be able to verify the integration between our app and the 3rd party service we depend on.
+An obvious option would be to replace the actual GeoIP provider with a fake instance that will always return the same location, allowing us to hard-code the expected solar times. The downside of doing that is that we will be effectively reducing the integration scope, which means we won't be able to verify that our app talks to the 3rd party service correctly.
 
-As an alternative approach, we can instead substitute the client IP address that we send in tests. I like this option more because it allows us to keep the same integration scope, while making the test more deterministic.
+As an alternative approach, we can instead substitute the IP address that the test server receives from the client. This way we can make the test more strict, while maintaining the same integration scope.
+
+
 
 ## Drawbacks and considerations
 
@@ -615,21 +619,19 @@ Unfortunately, there is [no silver bullet](https://en.wikipedia.org/wiki/No_Silv
 
 One of the biggest challenges I've found when doing high-level functional testing is figuring out a good balance between usefulness and usability. Compared to approaches that focus specifically on unit testing, it does take more effort to ensure that such tests are sufficiently deterministic, don't take too long, can run independently of each other, and are generally usable during development.
 
-The wider the scope of the tests is, the harder it is to find that balance, and often requires
+The wide scope of tests also implies the need for a deeper understanding of the project's dependencies and technologies it relies upon. It's important to know how they're used, whether they can be easily containerized, which options are available and what are the trade-offs.
 
-In order to set up the infrastructure required for running tests you will need a good understanding of the project's dependencies and the technologies it relies on. Knowing how they work is important as it , whether they can be easily containerized or simulated with fake implementations, is important as it helps with knowing which options are available and which trade-offs are worth it. Often it will also take additional work to configure fixtures, cleanup behavior, test services, and so on.
+In the context of integration testing, the "testability" aspect is not defined by how well the code can be isolated, but instead by how well the actual infrastructure accommodates and facilitates testing. This puts a certain prerequisite on the responsible person and the team in general in terms of technical expertise.
 
+It may also take some time to set up and configure the testing environment, as it involves creating fixtures, wiring fake implementations, adding custom initialization and cleanup behavior, and so on. All of these things need to be maintained as the project scales and becomes more complicated.
 
+Writing functional tests in itself involves a bit more planning as well, because it's no longer just about covering every method of every class, but rather about outlining software requirements and turning them into code. Understanding what those requirements are and which of them are functional can also be tricky sometimes, as it requires an ability to think from a user's perspective.
 
-In many cases it also requires a much deeper understanding of the project's dependencies and the technologies it relies on, because it helps with knowing which options are available and which trade-offs are worth it. This puts a certain prerequisite on the responsible person or the team in general in terms of experience.
+Another common concern is that high-level tests often suffer from a lack of locality. If a test fails, either due to unmet expectations or because of an unhandled exception, it's usually unclear what exactly caused the error.
 
-Establishing
+Although there are ways to mitigate this issue, ultimately it's always going to be a trade-off: isolated tests are better at indicating the cause of an error, while integrated tests are better at highlighting the impact. Both are equally useful, so it comes down to what you consider to be more important.
 
-Writing such tests in itself involves a bit more planning because it's no longer just about covering every method of every class, but rather about outlining software requirements and turning them into code. Understanding what those requirements are and which of them are functional can also be tricky and requires an ability to think from a user's point of view.
-
-From a technical perspective, higher-level tests suffer from a lack of locality. If a test fails, either due to unmet expectations or because of an unhandled exception, it's often unclear what is the exact cause of the error.
-
-Although there are ways to make it better, ultimately it's always going to be a trade-off. When comparing to tests which are more isolated, integration tests are generally worse at indicating the origin of the error, but are better at showing its impact on the user.
+At the end of the day, I still think functional testing is worth it even despite these shortcomings, as I find that it leads to a better developer experience overall. It's been a while since I've done classic unit testing and I'm not looking forward to starting again.
 
 ## Summary
 
@@ -648,7 +650,7 @@ Here are the main takeaways:
 4. Avoid sacrificing software design for testability
 5. Consider mocking only as a last resort
 
-There are also other great articles about testing approaches in modern software development. These are the ones I've personally found really interesting:
+There are also other great articles about alternative testing approaches in modern software development. These are the ones I've personally found really interesting:
 
 - [Write tests. Not too many. Mostly integration (Kent C. Dodds)](https://kentcdodds.com/blog/write-tests)
 - [Mocking is a Code Smell (Eric Elliott)](https://medium.com/javascript-scene/mocking-is-a-code-smell-944a70c90a6a)
