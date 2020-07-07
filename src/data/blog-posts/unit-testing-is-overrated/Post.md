@@ -109,7 +109,7 @@ public class SolarCalculator : ISolarCalculator
 
 By doing so we were able to decouple `LocationProvider` from `SolarCalculator`, but in exchange our code nearly doubled in size. Also note that we had to drop `IDisposable` from both classes because they **no longer own their dependencies** and thus have no business taking responsibility for their lifecycle.
 
-While these changes may seem as an improvement to some, it's important to point out that the interfaces we've defined serve **no practical purpose other than making unit testing possible**. There's no need for actual polymorphism in our design, so, as far as our code is concerned, these abstractions are _autotelic_.
+While these changes may seem as an improvement to some, it's important to point out that the interfaces we've defined serve **no practical purpose other than making unit testing possible**. There's no need for actual polymorphism in our design, so, as far as our code is concerned, these abstractions are _autotelic_ (i.e. abstractions for the sake of abstractions).
 
 Let's try to reap the benefits of all that work and write a unit test for `SolarCalculator.GetSolarTimesAsync`:
 
@@ -319,9 +319,11 @@ As long as a piece of software does something at least remotely useful, it will 
 
 Turning informal specifications into functional tests can often be difficult because it requires us to take a step away from code and challenge ourselves to think from a user's perspective. What helps me with my open source projects is that I start by creating a readme file where I list a bunch of relevant usage examples, and then encode those into tests.
 
-To summarize, we can conclude that it's best to **partition tests based on threads of behavior, rather than the code's internal structure**.
+To summarize, we can conclude that it's a good idea to **partition tests based on threads of behavior, rather than the code's internal structure**.
 
-If we combine all these ideas, we get a mental framework that provides us with a clear goal for writing tests and a good sense of organization, while not relying on any assumptions. We can use it to establish a test suite for our project that focuses on value, and then scale it according to priorities and limitations relevant to the current context.
+Both of the aforementioned guidelines, when combined, form a mental framework that provides us with a clear goal for writing tests and a good sense of organization, while not relying on any assumptions. We can use it to establish a test suite for our project that focuses on value, and then scale it according to priorities and limitations relevant to the current context.
+
+The idea is that, instead of focusing on a specific scope or distribution of scopes, we build our test suite based on the user-facing functionality, while attempting to cover that functionality as accurately as we can.
 
 ## Functional testing for web services (via ASP.NET Core)
 
@@ -737,9 +739,11 @@ public async Task User_can_get_solar_times_for_a_specific_location_and_date()
 }
 ```
 
-We can keep adding tests like this one to ensure that the app supports all possible locations, dates, and handles potential edge cases such as the [midnight sun phenomenon](https://en.wikipedia.org/wiki/Midnight_sun). However, you may not want to re-test the entire pipeline each time but focus just on the business logic that calculates the solar times.
+We can keep adding tests like this one to ensure that the app supports all possible locations, dates, and handles potential edge cases such as the [midnight sun phenomenon](https://en.wikipedia.org/wiki/Midnight_sun). However, it's possible that doing so will scale poorly as we may not want to execute the entire pipeline each time just to verify that the business logic that calculates solar times works correctly.
 
-Doing that would imply that we need to isolate `SolarCalculator` from `LocationProvider` somehow and that in turn implies mocking which we want to avoid. Fortunately, there is a more clever way to achieve that.
+It's important to note that, although we want to avoid it if possible, we can still reduce the integration scope if there's a real reason for it. In this case, we can choose to cover additional cases with unit tests instead.
+
+Normally, that would imply that we need to isolate `SolarCalculator` from `LocationProvider` somehow, which in turn implies mocking. Fortunately, there is a clever way to avoid it.
 
 We can alter the implementation of `SolarCalculator` by separating the pure and impure parts of the code away from each other:
 
@@ -815,7 +819,7 @@ public class SolarTimeController : ControllerBase
 }
 ```
 
-Since our existing tests are not aware of implementation details, this simple refactoring didn't break them in any way (which would not be the case with unit tests). With that done, we can write some additional light-weight tests to cover the business logic more extensively, while still not mocking anything:
+Since our existing tests are not aware of implementation details, this simple refactoring didn't break them in any way. With that done, we can write some additional light-weight tests to cover the business logic more extensively, while still not mocking anything:
 
 ```csharp
 [Fact]
@@ -863,7 +867,9 @@ public void User_can_get_solar_times_for_Tromso_in_January()
 }
 ```
 
-Although these tests no longer exercise the full integration scope, they are still driven by functional requirements of the app. Because we already have another high-level test that covers the entire endpoint, we can keep these ones more narrow without sacrificing overall confidence. This trade-off makes sense if we're trying to improve execution speed, but I would recommend to stick to high-level tests as much as possible, at least until it becomes a problem.
+Although these tests no longer exercise the full integration scope, they are still driven by functional requirements of the app. Because we already have another high-level test that covers the entire endpoint, we can keep these ones more narrow without sacrificing overall confidence.
+
+This trade-off makes sense if we're trying to improve execution speed, but I would recommend to stick to high-level tests as much as possible, at least until it becomes a problem.
 
 Finally, we may also want to do something to ensure that our Redis caching layer works correctly as well. Even though we're using it in our tests, it never actually returns a cached response because the database gets reset between tests.
 
