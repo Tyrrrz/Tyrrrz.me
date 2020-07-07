@@ -207,7 +207,7 @@ In most cases, the user works with the software through some top-level interface
 
 It doesn't even matter if a few layers deep there's a bug in some part of the system, as long as it never surfaces to the user and doesn't affect the provided functionality. Conversely, it makes no difference that we may have full coverage on all the lower-level pieces, if there's a defect in the user interface that renders our system effectively useless.
 
-Of course, if you want to ensure that something works correctly, you have to check that exact thing and see if it does. In our case, the best way to gain confidence in the system is to simulate how an actual user would interact with the top-level interface and see if it works properly according to expectations.
+Of course, if you want to ensure that something works correctly, you have to check that exact thing and see if it does. In our case, the best way to gain confidence in the system is to simulate how a real user would interact with the top-level interface and see if it works properly according to expectations.
 
 The problem with unit tests is that they're the exact opposite of that. Since we're always dealing with small isolated pieces of our code that the user doesn't directly interact with, we never test the actual user behavior.
 
@@ -251,7 +251,7 @@ On one of my previous projects, we had a web service which was tested at the sys
 
 The slow test fallacy is, however, not the only false assumption that the pyramid is based on. The idea of having the majority of testing concentrated at the unit level only works out if those tests actually provide value, which of course depends on how much business logic is contained within the code under test.
 
-Some applications may have a lot of business logic (e.g. payroll systems), some may have close to none (e.g. CRUD apps), most are somewhere in between. Majority of the projects I've personally worked on didn't have nearly enough of it to warrant extensive coverage with unit tests but had plenty of infrastructural complexity on the other hand, which would actually benefit from integration testing.
+Some applications may have a lot of business logic (e.g. payroll systems), some may have close to none (e.g. CRUD apps), most are somewhere in between. Majority of the projects I've personally worked on didn't have nearly enough of it to warrant extensive coverage with unit tests but had plenty of infrastructural complexity on the other hand, which would benefit from integration testing.
 
 Of course, in an ideal world one would evaluate the context of the project and come up with a testing approach that is most suitable for the problem at hand. In reality, however, most developers don't even begin to think about it at all, instead just blindly stacking mountains of unit tests following what the best practices seemingly advise you to do.
 
@@ -281,7 +281,7 @@ For that reason, I find it best to **write tests that are as highly integrated a
 
 Does this mean that every test we write should be an end-to-end test? No, but we should be trying to get as far as we can in that direction, while keeping the downsides at an acceptable level.
 
-What's acceptable or not is subjective and depends on the context. At the end of the day, it's important that those tests are written by developers and are actually used during development, which means they shouldn't feel like a burden to maintain and it should be possible to run them for local builds and on CI.
+What's acceptable or not is subjective and depends on the context. At the end of the day, it's important that those tests are written by developers and are used during development, which means they shouldn't feel like a burden to maintain and it should be possible to run them for local builds and on CI.
 
 Doing this also means that you will likely end up with tests that are scattered across different levels of the integration scale, with seemingly no clear sense of structure. This isn't an issue we would have had with unit testing, because there each test is coupled to a specific method or a function, so the structure usually ends up mirroring that of the code itself.
 
@@ -309,7 +309,7 @@ Note that the actual implementation of the tests is hidden because it's not rele
 
 Naming tests in accordance to specifications rather than classes has an additional advantage of removing that unnecessary coupling. Now, if we decide to rename `SolarCalculator` to something else or move it to a different directory, the test names won't need to be updated to reflect that.
 
-This structure is very useful in highlighting what's actually important, while leaving irrelevant details out. As another example, here is how the test suite is organized in [CliWrap](https://github.com/Tyrrrz/CliWrap) (the underscores are replaced with spaces by [xUnit](https://xunit.net/docs/configuration-files#methodDisplayOptions)):
+This structure is very useful in highlighting what's really important, while leaving irrelevant details out. As another example, here is how the test suite is organized in [CliWrap](https://github.com/Tyrrrz/CliWrap) (the underscores are replaced with spaces by [xUnit](https://xunit.net/docs/configuration-files#methodDisplayOptions)):
 
 ![Functional tests used for CliWrap](CliWrap-functional-tests.png)
 
@@ -608,9 +608,9 @@ As you can see, the setup is really simple. All we need to do is create an insta
 
 This specific test works by querying the `/solartimes/by_ip` route, which determines user's sunrise and sunset times for the current date based on their IP. Since we're relying on an actual GeoIP provider and don't know what the result is going to be, we're performing property-based assertions to ensure that the solar times are valid.
 
-Although those assertions will be able to catch a multitude of potential bugs, it doesn't give us full confidence that the result is actually correct. There are a couple of different ways we can improve on this, however.
+Although those assertions will be able to catch a multitude of potential bugs, it doesn't give us full confidence that the result is fully correct. There are a couple of different ways we can improve on this, however.
 
-An obvious option would be to replace the actual GeoIP provider with a fake instance that will always return the same location, allowing us to hard-code the expected solar times. The downside of doing that is that we will be effectively reducing the integration scope, which means we won't be able to verify that our app talks to the 3rd party service correctly.
+An obvious option would be to replace the real GeoIP provider with a fake instance that will always return the same location, allowing us to hard-code the expected solar times. The downside of doing that is that we will be effectively reducing the integration scope, which means we won't be able to verify that our app talks to the 3rd party service correctly.
 
 As an alternative approach, we can instead substitute the IP address that the test server receives from the client. This way we can make the test more strict, while maintaining the same integration scope.
 
@@ -863,7 +863,7 @@ Finally, we may also want to make sure that our Redis caching layer works correc
 
 The problem with testing things like caching is that they can't be defined by functional requirements. A user, with no awareness of the app's internal affairs, has no way of knowing whether the responses are returned from cache or not.
 
-However, if our goal is only to test the integration between the app and Redis, we don't actually need to write implementation-aware tests and can do something like this instead:
+However, if our goal is only to test the integration between the app and Redis, we don't need to write implementation-aware tests and can do something like this instead:
 
 ```csharp
 [Fact]
