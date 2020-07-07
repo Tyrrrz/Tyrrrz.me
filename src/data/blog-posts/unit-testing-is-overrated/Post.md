@@ -12,7 +12,7 @@ Over time, as the software industry evolved, testing practices have matured as w
 
 Nowadays, automated testing is embedded so deeply within our perception of software development, it's hard to imagine one without the other. And since that ultimately enables us to produce software quickly without sacrificing quality, it's hard to argue that it's not a good thing.
 
-However, despite there being many different approaches, modern "best practices" primarily push developers specifically towards *unit testing*. Tests, whose scope lies higher on [Mike Cohn's pyramid](https://martinfowler.com/articles/practical-test-pyramid.html#TheTestPyramid) are either written as part of a wider suite (often by completely different people) or even disregarded entirely.
+However, despite there being many different approaches, modern "best practices" primarily push developers specifically towards _unit testing_. Tests, whose scope lies higher on [Mike Cohn's pyramid](https://martinfowler.com/articles/practical-test-pyramid.html#TheTestPyramid) are either written as part of a wider suite (often by completely different people) or even disregarded entirely.
 
 The benefit of this approach is often supported by the argument that unit tests provide the most value during development because they're able to catch errors quickly and help enforce design patterns that facilitate modularity. This idea has become so widely accepted that the term "unit testing" is now somewhat conflated with automated testing in general, losing part of its meaning and contributing to confusion.
 
@@ -24,9 +24,9 @@ Aggressively popularized "best practices" often have a tendency of manifesting c
 
 In this article I will share my observations about this testing technique and go over why I believe it to be inefficient. I'll also explain which approaches I'm currently using instead to test my code, both in open source projects and day-to-day work.
 
-*Note: this article contains code examples which are written in C#, but the language itself is not (too) important to the points I'm making.*
+_Note: this article contains code examples which are written in C#, but the language itself is not (too) important to the points I'm making._
 
-*Note 2: I've come to realize that programming terms are completely useless at conveying meanings because everyone seems to understand them differently. In this article I will be relying on the "standard" definitions, where unit testing targets smallest separable parts of code, end-to-end testing targets software's outermost entry points, while integration testing is for everything in-between.*
+_Note 2: I've come to realize that programming terms are completely useless at conveying meanings because everyone seems to understand them differently. In this article I will be relying on the "standard" definitions, where unit testing targets smallest separable parts of code, end-to-end testing targets software's outermost entry points, while integration testing is for everything in-between._
 
 ## Fallacies of unit testing
 
@@ -149,7 +149,7 @@ Note that although `ILocationProvider` exposes two different methods, from the c
 
 All in all, the test does correctly verify that the business logic inside `GetSolarTimesAsync` works as expected. However, let's expand on some of the observations we've made in the process.
 
-___
+---
 
 1. Unit tests **have a limited purpose**
 
@@ -289,7 +289,7 @@ Fortunately, this doesn't matter because organizing tests by individual classes 
 
 Such tests are often called _functional_ because they are based on the software's functional requirements that describe what features it has and how they work. Functional testing is not another layer on the pyramid, but instead a completely orthogonal concept.
 
-Contrary to the popular belief, writing functional tests does not require you to use [Gherkin](https://en.wikipedia.org/wiki/Cucumber_(software)#Gherkin_language) or a BDD framework, but can be done with the very same tools that are typically used for unit testing. For example, consider how we can rewrite the example from the beginning of the article so that the tests are structured around supported user behavior rather than units of code:
+Contrary to the popular belief, writing functional tests does not require you to use [Gherkin](<https://en.wikipedia.org/wiki/Cucumber_(software)#Gherkin_language>) or a BDD framework, but can be done with the very same tools that are typically used for unit testing. For example, consider how we can rewrite the example from the beginning of the article so that the tests are structured around supported user behavior rather than units of code:
 
 ```csharp
 public class SolarTimesSpecs
