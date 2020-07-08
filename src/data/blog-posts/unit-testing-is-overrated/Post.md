@@ -303,7 +303,7 @@ public class SolarTimesSpecs
     public async Task User_can_get_solar_times_during_periods_of_midnight_sun() { /* ... */ }
 
     [Fact]
-    public async Task User_can_get_solar_times_if_their_location_cannot_be_determined() { /* ... */ }
+    public async Task User_can_get_solar_times_if_their_location_cannot_be_resolved() { /* ... */ }
 }
 ```
 
