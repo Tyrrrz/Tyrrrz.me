@@ -942,7 +942,7 @@ Writing high-level tests that are driven by user behavior will provide you with 
 Here are the main takeaways:
 
 0. Think critically and challenge best practices
-1. Don't rely on the the test pyramid
+1. Don't rely on the test pyramid
 2. Separate tests by functionality, rather than by classes, modules, or scope
 3. Aim for the highest level of integration while maintaining reasonable speed and cost
 4. Avoid sacrificing software design for testability
