@@ -25,7 +25,7 @@ namespace MyProject
 }
 ```
 
-Now, in order to link the XAML to our newly-created code-behind, we simply need to add the `x:Class` attribute, like so:
+Now, in order to link the XAML to our newly created code-behind, we simply need to add the `x:Class` attribute, like so:
 
 ```xml
 <ResourceDictionary x:Class="MyProject.MyResourceDictionary"
@@ -36,4 +36,4 @@ Now, in order to link the XAML to our newly-created code-behind, we simply need 
 </ResourceDictionary>
 ```
 
-The value in `x:Class` should be equal to the fully-qualified name of the code-behind class that we've just created. Once you set it up, Visual Studio will be able to register event handlers directly in your code-behind, the same way it does for Windows, Pages, etc.
+The value in `x:Class` should be equal to the fully qualified name of the code-behind class that we've just created. Once you set it up, Visual Studio will be able to register event handlers directly in your code-behind, the same way it does for Windows, Pages, etc.

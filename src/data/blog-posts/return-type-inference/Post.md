@@ -16,7 +16,7 @@ In this article I will show a little trick I came up with to simulate return typ
 
 Type inference, in general, is the ability of a compiler to automatically detect the type of a particular expression, without having the programmer explicitly specify it. This feature works by analyzing the context in which the expression is evaluated, as well as the constraints imposed by the flow of data in the program.
 
-By being able to detect the type automatically, languages that support type inference allow writing more succinct code, while still maintaining the full benefits of a static type system. This is why most mainstream statically-typed languages have type inference, in one form or another.
+By being able to detect the type automatically, languages that support type inference allow writing more succinct code, while still maintaining the full benefits of a static type system. This is why most mainstream statically typed languages have type inference, in one form or another.
 
 C#, being one of those languages, has type inference as well. The simplest possible example of it is the `var` keyword:
 

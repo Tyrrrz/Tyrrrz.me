@@ -54,7 +54,7 @@ let sawtooth = anyChar >>= fun a -> satisfy <| isOppositeCase a >>= fun b -> pre
 //             ~~~~~~~              ~~~~~~~    ~~~~~~~~~~~~~~~~              ~~~~~~~~~~~~~~
 // parse any char --^                  ^         ^                              ^
 //                                     |         |                              |
-// then any char satisfying predicate --         -- partially-applied function  |
+// then any char satisfying predicate --         -- partially applied function  |
 //                                                                              |
 //             then combine the results in a tuple ------------------------------
 ```

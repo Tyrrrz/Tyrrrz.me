@@ -82,7 +82,7 @@ It's a bit different than the previous one but it takes the same parameters. In 
 
 By setting `start` to `0` and `count` to `1` we are limiting the response to one listing since we are only interested in the image which is the same for all listings anyway.
 
-Finally, the fully-formed URL should look something like this:
+Finally, the fully formed URL should look something like this:
 
 `http://steamcommunity.com/market/listings/730/AK-47%20%7C%20Redline%20%28Field-Tested%29/render?start=0&count=1&currency=1&format=json`
 

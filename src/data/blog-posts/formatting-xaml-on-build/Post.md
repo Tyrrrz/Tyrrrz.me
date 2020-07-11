@@ -201,6 +201,6 @@ Now, when we run `dotnet build` on the project, it will also execute XAMLStyler 
 
 XAMLStyler is an awesome tool that will make you forget about formatting in your XAML files once and for all. By integrating it into the build process, we ensure that all XAML files will adhere to a consistent and clean format, no matter who's working on it and where.
 
-With .NET Core 3.0 we can now install locally-scoped command line tools. This is better than the previously available global tool concept because it's more portable. By using local tools we can also easily integrate custom workflows into our project.
+With .NET Core 3.0 we can now install locally scoped command line tools. This is better than the previously available global tool concept because it's more portable. By using local tools we can also easily integrate custom workflows into our project.
 
 If you're interested to learn more about .NET Core global and local tools, check out [this article by Andrew Lock](https://andrewlock.net/new-in-net-core-3-local-tools) and [another one by Stuart Lang](https://stu.dev/dotnet-core-3-local-tools). There's also a [curated list of .NET custom tools](https://github.com/natemcmaster/dotnet-tools) maintained by Nate McMaster.

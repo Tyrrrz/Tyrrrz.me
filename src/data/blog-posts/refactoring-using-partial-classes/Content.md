@@ -401,6 +401,6 @@ public partial class FormatCommand : ICommand
 
 ## Summary
 
-Partial classes can be used for more than just auto-generated code. It's a powerful language feature that enables creative ways to arrange code into smaller logically-independent units. This can be very helpful when we want to reduce cognitive load or to simply keep things a bit more organized.
+Partial classes can be used for more than just auto-generated code. It's a powerful language feature that enables creative ways to arrange code into smaller logically independent units. This can be very helpful when we want to reduce cognitive load or to simply keep things a bit more organized.
 
 Since we're on the topic of refactoring, consider also checking out [a few interesting ways we can use extension methods](/blog/creative-use-of-extension-methods) to write cleaner code. Similarly to partial classes, they might have more uses than you thought.
