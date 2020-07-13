@@ -56,7 +56,7 @@ public class LocationProvider : IDisposable
     public void Dispose() => _httpClient.Dispose();
 }
 
-public class SolarCalculator : IDiposable
+public class SolarCalculator : IDisposable
 {
     private readonly LocationProvider _locationProvider = new LocationProvider();
 
