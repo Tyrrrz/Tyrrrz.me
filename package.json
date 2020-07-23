@@ -12,7 +12,7 @@
     "@openfonts/fira-code_all": "^1.44.4",
     "axios": "^0.19.2",
     "emotion-normalize": "^10.1.0",
-    "gatsby": "^2.19.18",
+    "gatsby": "^2.24.10",
     "gatsby-image": "^2.2.41",
     "gatsby-plugin-canonical-urls": "^2.1.20",
     "gatsby-plugin-catch-links": "^2.1.25",
