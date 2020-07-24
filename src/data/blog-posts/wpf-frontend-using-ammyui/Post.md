@@ -10,7 +10,7 @@ Quite a long time ago I've stumbled upon a very interesting open source project 
 
 Ammy is a JSON-like layout language which compiles to XAML and also has some cool extra features.
 
-I've never been a big fan of XAML, so it got me interested and I decided to use it when starting one of my projects [DiscordChatExporter](https://github.com/Tyrrrz/DiscordChatExporter).
+I've never been a big fan of XAML, so it got me interested and I decided to use it when starting one of my projects, [DiscordChatExporter](https://github.com/Tyrrrz/DiscordChatExporter).
 
 ## Installation
 

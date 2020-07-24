@@ -8,7 +8,7 @@ cover: Cover.png
 
 Above everything else in software development, I really enjoy building frameworks that enable other developers to create something cool. Sometimes, when chasing that perfect design I have in mind, I find myself coming up with weird hacks that really push the C# language to the limit.
 
-One such case happened not so long ago, when my coworker and I were looking at how to avoid specifying generic arguments, in places where the compiler should seemingly be able to guess it based on the return type. He said it was impossible seeing as C# can only infer generic arguments from method parameters -- however I was able to come up with a way to prove him wrong.
+One such case happened not so long ago, when my coworker and I were looking at how to avoid specifying generic arguments, in places where the compiler should seemingly be able to guess it based on the return type. He said it was impossible, seeing as C# can only infer generic arguments from method parameters, however I was able to come up with a way to prove him wrong.
 
 In this article I will show a little trick I came up with to simulate return type inference, as well as some examples where that can be useful.
 

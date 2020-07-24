@@ -6,13 +6,11 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
-The concept of parsing has always seemed very complicated to me. I thought that to work in this area you had to have access to some secret knowledge brought by an alien race or something.
+The concept of parsing has always seemed very complicated to me. I thought that to work in this area you had to have access to some secret knowledge brought by an alien race or something along those lines.
 
-Some time ago, I had to implement proper markdown parsing in [DiscordChatExporter](https://github.com/Tyrrrz/DiscordChatExporter) so that I could replace the ineffective regular expressions I had been using. I had no idea how to approach this problem, so I spent days researching into this, eventually learning about parser combinators. This concept introduced me to a whole new paradigm of writing parsers that actually makes it a fun and enjoyable experience.
+A while ago I had to implement proper markdown parsing in [DiscordChatExporter](https://github.com/Tyrrrz/DiscordChatExporter) so that I could replace the ineffective regular expressions I had been using. I had no idea how to approach this problem, so I spent days researching into this, eventually learning about parser combinators. This concept introduced me to a whole new paradigm of writing parsers that actually makes it a fun and enjoyable experience.
 
 In this article I will try to give a brief high-level overview of what is a parser and what constitutes a formal language, then scope into parser combinators to show how easy it is to build parsers with it. We will also write a working JSON processor as an exercise.
-
-But first, let's start with a simple question...
 
 ## What is a parser
 
@@ -32,7 +30,7 @@ For instance, do you see some sort of logical structure when you look at `123 45
 
 For obvious reasons, a computer can't inherently detect patterns like that. After all, it only sees a seemingly random sequence of bytes: `31 32 33 20 34 35 36 2E 39 37`.
 
-As we're dealing with text, we need some way to analyze it. To do that, we essentially need to produce the same set of syntactic components that we were able to see naturally:
+As we're dealing with text, we need some way to analyze it. To do that, we essentially need to programmatically produce the same set of syntactic components that we are able to see naturally:
 
 ```csharp
 new SyntacticComponents[]

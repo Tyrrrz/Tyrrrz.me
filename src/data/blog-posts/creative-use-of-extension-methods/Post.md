@@ -10,7 +10,7 @@ I'm sure everyone with at least some background in C# is aware of extension meth
 
 This is extremely convenient in cases where you want to add functionality to types you don't have control over. In fact, I think everyone at some point authored extensions for the base class library just to make some things more accessible.
 
-But besides the more obvious use cases, there are a few interesting patterns that directly rely on extension methods, showing how they can used in a slightly less conventional way.
+But besides the more obvious use cases, there are a few other interesting patterns that directly rely on extension methods, showing how they can used in a slightly less conventional way.
 
 ## Adding methods to enums
 
@@ -159,7 +159,7 @@ public interface IExportService
 }
 ```
 
-This change just broke all existing implementations of `IExportService` and now all of them have to be updated to support writing to memory as well.
+This change just broke all existing implementations of `IExportService` because now all of them have to be updated to support writing to memory as well.
 
 Instead of doing all that, we could have designed the initial version of the interface slightly differently:
 
@@ -170,9 +170,9 @@ public interface IExportService
 }
 ```
 
-This way, the interface enforces writing to the most generic destination -- `Stream`. Now we are no longer limited to a file output and can effectively write to almost anything.
+This way, the interface enforces writing to the most generic destination, a `Stream`. Now we are no longer limited to files and can target a variety of different outputs as well.
 
-The only downside of this approach is that the more basic operations are not as straightforward as they used to be -- now you need to set up a concrete instance of a `Stream`, wrap it in a `using` statement, and pass it as a parameter.
+The only downside to this approach is that the more basic operations are not as straightforward as they used to be -- now you need to set up a concrete instance of a `Stream`, wrap it in a `using` statement, and pass it as a parameter.
 
 Fortunately, this downside can be completely negated with the use of extension methods:
 

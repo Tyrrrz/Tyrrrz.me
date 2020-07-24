@@ -6,7 +6,7 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
-Almost a year ago, I started developing [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode), a library that scraps information on YouTube videos and lets you download them. Originally, my main motivation for developing it was simply gaining experience since this task involved a lot of research and reverse-engineering. Nowadays, YoutubeExplode is arguably the most consistent and robust .NET library for doing this.
+Almost a year ago, I started developing [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode), a library that scraps information on YouTube videos and lets you download them. Originally, my main motivation for developing it was simply to gain experience, as the task involved a lot of research and reverse-engineering. Nowadays, YoutubeExplode is arguably the most consistent and robust .NET library for dealing with YouTube.
 
 Since this is a relatively popular discussion topic among many beginner developers, I thought that I could help out by sharing the knowledge I found by spending dozens of hours staring at Chrome Developer Tools.
 
@@ -14,9 +14,9 @@ _Note: even though the base principles explained here are unlikely to change, so
 
 ## Getting video metadata
 
-In order to find and resolve media streams, you need to first get video metadata. There are a few ways to do it, but the most reliable one is by querying an AJAX endpoint used internally by YouTube's iframe embed API. The format is as follows: https://www.youtube.com/get_video_info?video_id={videoId}.
+In order to find and resolve media streams, you need to first get video metadata. There are a few ways to do it, but the most reliable one is by querying an AJAX endpoint used internally by YouTube's iframe embed API. The format is as follows: <https://www.youtube.com/get_video_info?video_id={videoId}>.
 
-The request can take a lot of different parameters, but at minimum it needs a video ID -- the value in the URL that comes after `/watch?v=`, for example `e_S9VvJM1PI`.
+The request can take a lot of different parameters, but at a minimum it needs a video ID -- the value in the URL that comes after `/watch?v=`, for example `e_S9VvJM1PI`.
 
 The response contains URL-encoded metadata, which has to be decoded first before it's usable. After that, you can map the parameter names to values in a dictionary for easier access. Some parameter values are nested objects themselves, so they can in turn be mapped to nested dictionaries.
 
@@ -436,11 +436,11 @@ Interestingly, even just by having the header set, the throttling seems to kick 
 Here's a recap of all required steps you need to take in order to download a video from YouTube:
 
 1. Get video's ID (e.g. `e_S9VvJM1PI`).
-2. Download video's embed page (e.g. https://www.youtube.com/embed/e_S9VvJM1PI).
-3. Extract player source URL (e.g. https://www.youtube.com/yts/jsbin/player-vflYXLM5n/en_US/base.js).
+2. Download video's embed page (e.g. <https://www.youtube.com/embed/e_S9VvJM1PI>).
+3. Extract player source URL (e.g. <https://www.youtube.com/yts/jsbin/player-vflYXLM5n/en_US/base.js>).
 4. Get the value of `sts` (e.g. `17488`).
 5. Download and parse player source code.
-6. Request video metadata (e.g. https://www.youtube.com/get_video_info?video_id=e_S9VvJM1PI&sts=17488&hl=en). Try with `el=detailpage` if it fails.
+6. Request video metadata (e.g. <https://www.youtube.com/get_video_info?video_id=e_S9VvJM1PI&sts=17488&hl=en>). Try with `el=detailpage` if it fails.
 7. Parse the URL-encoded metadata and extract information about streams.
 8. If they have signatures, use the player source to decipher them and update the URLs.
 9. If there's a reference to DASH manifest, extract the URL and decipher it if necessary as well.

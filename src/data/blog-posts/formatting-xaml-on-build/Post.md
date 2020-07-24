@@ -6,11 +6,11 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
-Recently, I've decided to switch from Visual Studio to Rider as my default .NET development environment. The main problem with Visual Studio was that was too slow when paired with ReSharper and, unfortunately, too useless when not. Rider offered me the best of both worlds.
+Recently, I've decided to switch from Visual Studio to Rider as my default .NET development environment. The main problem with Visual Studio was that it was too slow when paired with ReSharper and, unfortunately, too useless when not. Rider offered me the best of both worlds.
 
 However, one of the things that made the jump really difficult was the absence of [XAMLStyler extension](https://marketplace.visualstudio.com/items?itemName=TeamXavalon.XAMLStyler) in Rider. It's an incredibly useful plugin that automatically formats your XAML files on save, letting you completely forget about sorting attributes, maintaining indentation, and other mundane things like that. After using it for three years, the idea of writing XAML without it was unbearable.
 
-The problem is that .NET, historically, has been a rather closed ecosystem. If you wanted to extend the developer experience, that typically meant installing a custom Visual Studio extension or writing your own. Everything revolved around the same IDE, same workflow, same stack, same set of tools, and there wasn't much choice.
+The problem is that .NET, historically, has been a rather closed ecosystem. If you wanted to extend the development experience, that typically meant installing a custom Visual Studio extension or writing your own. Everything revolved around the same IDE, same workflow, same stack, same set of tools, and there wasn't much of a choice.
 
 With the advent of .NET Core the situation started changing. We are now seeing a mentality shift where everything is evolving towards more modular and portable components, with even .NET SDK itself being shipped as a command line tool. Overall, .NET development experience is starting to resemble that of Node.js, which I personally think is a great thing.
 
