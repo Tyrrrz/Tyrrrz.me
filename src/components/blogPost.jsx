@@ -42,7 +42,12 @@ export default ({ data }) => {
   const url = routes.dynamic.blogPost.getPath(slug)
   const title = data.markdownRemark.frontmatter.title
   const coverImage = data.markdownRemark.frontmatter.cover
-  const coverImageUrl = coverImage && new URL(coverImage.childImageSharp.original.src, settings.siteDomain)
+  const coverImageUrl =
+    coverImage &&
+    new URL(
+      coverImage.childImageSharp.original.src,
+      settings.siteDomain
+    ).toString()
   const date = data.markdownRemark.frontmatter.date
   const html = data.markdownRemark.html
   const excerpt = data.markdownRemark.excerpt
@@ -79,7 +84,11 @@ export default ({ data }) => {
           marginLeft: '1.5em'
         }}
       >
-        <Link to={`https://twitter.com/${siteMetadata.twitter}`}>Follow me on Twitter</Link> to get notified when I post a new article ✨
+        Follow me on{' '}
+        <Link to={`https://twitter.com/${siteMetadata.twitter}`}>Twitter</Link>{' '}
+        or subscribe to the{' '}
+        <Link to={routes.dynamic.blogPost.getPath('rss.xml')}>RSS Feed</Link> to
+        get notified when I post a new article ✨
       </div>
     </div>
   )
@@ -87,7 +96,7 @@ export default ({ data }) => {
   const Comments = ({ ...props }) => (
     <Disqus
       config={{
-        url: new URL(url, settings.siteDomain),
+        url: new URL(url, settings.siteDomain).toString(),
         identifier: `Blog/${slug}`,
         title: title
       }}
@@ -113,15 +122,11 @@ export default ({ data }) => {
         }}
       >
         <span>
-          <Icon path={mdiCalendar} />
-          {' '}
-          {date}
+          <Icon path={mdiCalendar} /> {date}
         </span>
 
         <span>
-          <Icon path={mdiClockOutline} />
-          {' '}
-          {timeToRead}
+          <Icon path={mdiClockOutline} /> {timeToRead}
         </span>
       </div>
 
@@ -129,7 +134,8 @@ export default ({ data }) => {
       <div
         css={{
           code: {
-            fontFamily: '\'Fira Code\', \'Consolas\', \'Monaco\', \'Andale Mono\', \'Ubuntu Mono\', monospace',
+            fontFamily:
+              "'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace",
             fontSize: '0.8em'
           },
 

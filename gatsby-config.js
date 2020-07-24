@@ -59,6 +59,44 @@ exports.plugins = [
     ]
   }),
 
+  // RSS feed
+  resolvePlugin('gatsby-plugin-feed', {
+    feeds: [
+      {
+        serialize: ({ query: { site, allMarkdownRemark } }) => {
+          return allMarkdownRemark.edges.map(edge => {
+            return Object.assign({}, edge.node.frontmatter, {
+              description: edge.node.excerpt,
+              date: edge.node.frontmatter.date,
+              url: new URL(`/blog/${edge.node.fields.slug}`, site.siteMetadata.siteUrl).toString(),
+              guid: new URL(`/blog/${edge.node.fields.slug}`, site.siteMetadata.siteUrl).toString()
+            })
+          })
+        },
+        query: `
+          {
+            allMarkdownRemark(
+              sort: { order: DESC, fields: [frontmatter___date] },
+            ) {
+              edges {
+                node {
+                  excerpt(format: PLAIN, pruneLength: 500)
+                  fields { slug }
+                  frontmatter {
+                    title
+                    date
+                  }
+                }
+              }
+            }
+          }
+        `,
+        output: '/blog/rss.xml',
+        title: 'Blog | Alexey Golub (RSS Feed)'
+      }
+    ]
+  }),
+
   // App manifest
   resolvePlugin('gatsby-plugin-manifest', {
     name: 'Tyrrrzme',

@@ -4,7 +4,9 @@ import MdiIcon from '@mdi/react'
 import { mdiCalendar, mdiClockOutline } from '@mdi/js'
 import routes from '../routes'
 import { humanizeTimeToRead } from '../utils'
+import useSiteMetadata from './hooks/useSiteMetadata'
 import Link from './link'
+import Separator from './separator'
 import Layout from './layout'
 import Meta from './meta'
 
@@ -27,6 +29,8 @@ export const query = graphql`
 `
 
 export default ({ data }) => {
+  const siteMetadata = useSiteMetadata()
+
   const Icon = ({ ...props }) => (
     <MdiIcon
       size='1em'
@@ -47,9 +51,7 @@ export default ({ data }) => {
     const timeToRead = humanizeTimeToRead(node.timeToRead)
 
     return (
-      <div
-        css={{ '&:not(:last-child)': { marginBottom: '1.5em' } }}
-      >
+      <div css={{ '&:not(:last-child)': { marginBottom: '1.5em' } }}>
         {/* Title */}
         <div css={{ fontSize: '1.5em' }}>
           <Link to={url} css={{ textDecoration: 'none' }}>
@@ -72,17 +74,13 @@ export default ({ data }) => {
           </span>
 
           <span>
-            <Icon path={mdiClockOutline} />
-            {' '}
-            {timeToRead}
+            <Icon path={mdiClockOutline} /> {timeToRead}
           </span>
         </div>
 
         {/* Excerpt */}
         <div css={{ marginTop: '0.3em' }}>
-          {excerpt}
-          {' '}
-          <Link to={url}>continue reading</Link>
+          {excerpt} <Link to={url}>continue reading</Link>
         </div>
       </div>
     )
@@ -92,7 +90,18 @@ export default ({ data }) => {
     <Layout>
       <Meta title='Blog' />
 
-      {data.allMarkdownRemark.nodes.map(node => <Listing key={node.slug} node={node} />)}
+      {data.allMarkdownRemark.nodes.map((node) => (
+        <Listing key={node.slug} node={node} />
+      ))}
+
+      <Separator />
+
+      <div>
+        Want to know when I post a new article? Follow me on{' '}
+        <Link to={`https://twitter.com/${siteMetadata.twitter}`}>Twitter</Link>{' '}
+        or subscribe to the{' '}
+        <Link to={routes.dynamic.blogPost.getPath('rss.xml')}>RSS Feed</Link> ✨
+      </div>
     </Layout>
   )
 }
