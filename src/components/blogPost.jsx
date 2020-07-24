@@ -1,7 +1,7 @@
 import React from 'react'
 import { graphql } from 'gatsby'
 import MdiIcon from '@mdi/react'
-import { mdiCalendar, mdiClockOutline, mdiTwitterCircle } from '@mdi/js'
+import { mdiCalendar, mdiClockOutline, mdiTwitter } from '@mdi/js'
 import { Disqus } from 'gatsby-plugin-disqus'
 import settings from '../settings'
 import routes from '../routes'
@@ -70,7 +70,7 @@ export default ({ data }) => {
       {...props}
     >
       <div css={{ gridColumn: 1 }}>
-        <Icon path={mdiTwitterCircle} size='3em' color='#1da1f2' />
+        <Icon path={mdiTwitter} size='3em' color='#1da1f2' />
       </div>
       <div
         css={{

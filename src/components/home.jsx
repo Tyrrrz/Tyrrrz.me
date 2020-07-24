@@ -1,7 +1,7 @@
 import React from 'react'
 import { graphql } from 'gatsby'
 import MdiIcon from '@mdi/react'
-import { mdiAt, mdiGithubCircle, mdiTwitterCircle, mdiInstagram } from '@mdi/js'
+import { mdiAt, mdiGithub, mdiTwitter, mdiInstagram } from '@mdi/js'
 import Img from 'gatsby-image'
 import moment from 'moment'
 import theme from '../theme'
@@ -75,8 +75,8 @@ export default ({ data }) => {
       {/* Socials */}
       <div css={{ textAlign: 'center' }}>
         <SocialLink iconPath={mdiAt} to={`mailto:${siteMetadata.email}`} alt='Email' />
-        <SocialLink iconPath={mdiGithubCircle} to={`https://github.com/${siteMetadata.github}`} alt='GitHub' />
-        <SocialLink iconPath={mdiTwitterCircle} to={`https://twitter.com/${siteMetadata.twitter}`} alt='Twitter' />
+        <SocialLink iconPath={mdiGithub} to={`https://github.com/${siteMetadata.github}`} alt='GitHub' />
+        <SocialLink iconPath={mdiTwitter} to={`https://twitter.com/${siteMetadata.twitter}`} alt='Twitter' />
         <SocialLink iconPath={mdiInstagram} to={`https://instagram.com/${siteMetadata.instagram}`} alt='Instagram' />
       </div>
     </Layout>
