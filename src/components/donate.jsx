@@ -14,16 +14,20 @@ export default () => {
       <h2>Donate</h2>
 
       <p>
-        If you found any of my projects useful and want to support me, please consider donating. This will put a smile on my face and
-        motivate me to continue 😊
+        If you found any of my projects useful and want to support me, please
+        consider donating. This will motivate me to continue 😊
       </p>
 
       <ul>
         <li>
-          <Link to={`https://patreon.com/${siteMetadata.patreon}`}>Patreon</Link>
+          <Link to={`https://patreon.com/${siteMetadata.patreon}`}>
+            Patreon
+          </Link>
         </li>
         <li>
-          <Link to={`https://buymeacoffee.com/${siteMetadata.buymeacoffee}`}>Buy me a coffee</Link>
+          <Link to={`https://buymeacoffee.com/${siteMetadata.buymeacoffee}`}>
+            Buy me a coffee
+          </Link>
         </li>
         <li>
           Bitcoin (BTC): <code>{siteMetadata.bitcoin}</code>
@@ -33,7 +37,7 @@ export default () => {
         </li>
       </ul>
 
-      <p>I want to thank the following people for their amazing support ❤️</p>
+      <p>I want to thank the following people for their particularly generous support 💜</p>
       <ul>
         <li>Peter Wesselius</li>
         <li>Mark Ledwich</li>
@@ -44,6 +48,8 @@ export default () => {
         <li>Richard</li>
         <li>Foritus</li>
         <li>Michael Dayah</li>
+        <li>Victor Smith</li>
+        <li>Sprocketman1981</li>
       </ul>
     </Layout>
   )
