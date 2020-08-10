@@ -2,7 +2,7 @@ import React from 'react';
 import Helmet from 'react-helmet';
 
 import config from '../../config';
-import { getRelativeUrl, isAbsoluteUrl } from '../../utils';
+import { getAbsoluteUrl, isAbsoluteUrl } from '../../utils';
 import useSiteMetadata from './useSiteMetadata';
 
 export default ({ title, description, imageUrl }) => {
@@ -15,7 +15,7 @@ export default ({ title, description, imageUrl }) => {
   const actualDescription = description || siteMetadata.description;
 
   // Automatically root image URL
-  const actualImageUrl = imageUrl && !isAbsoluteUrl(imageUrl) ? getRelativeUrl(config.siteDomain, imageUrl) : imageUrl;
+  const actualImageUrl = imageUrl && !isAbsoluteUrl(imageUrl) ? getAbsoluteUrl(config.siteDomain, imageUrl) : imageUrl;
 
   return (
     <Helmet>

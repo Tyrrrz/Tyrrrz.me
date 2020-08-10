@@ -6,7 +6,7 @@ import React from 'react';
 import config from '../config';
 import routes from '../routes';
 import theme from '../theme';
-import { humanizeTimeToRead } from '../utils';
+import { getAbsoluteUrl, humanizeTimeToRead } from '../utils';
 import Layout from './Layout';
 import Icon from './shared/Icon';
 import Link from './shared/Link';
@@ -83,7 +83,7 @@ export default ({ data }) => {
   const Comments = ({ ...props }) => (
     <Disqus
       config={{
-        url: new URL(url, config.siteDomain).toString(),
+        url: getAbsoluteUrl(config.siteDomain, url),
         identifier: `Blog/${slug}`,
         title: title
       }}

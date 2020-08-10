@@ -2,6 +2,8 @@ const path = require('path')
 
 const config = require('./src/config')
 const theme = require('./src/theme')
+const { getAbsoluteUrl } = require('./src/utils')
+const routes = require('./src/routes')
 
 // Gatsby's default syntax for defining plugins is awful so I wrote this
 const resolvePlugin = (plugin, options) => ({
@@ -68,8 +70,8 @@ exports.plugins = [
             ...edge.node.frontmatter,
             description: edge.node.excerpt,
             date: edge.node.frontmatter.date,
-            url: new URL(`/blog/${edge.node.fields.slug}`, site.siteMetadata.siteUrl).toString(),
-            guid: new URL(`/blog/${edge.node.fields.slug}`, site.siteMetadata.siteUrl).toString()
+            url: getAbsoluteUrl(site.siteMetadata.siteUrl, routes.dynamic.blogPost.getPath(edge.node.fields.slug)),
+            guid: getAbsoluteUrl(site.siteMetadata.siteUrl, routes.dynamic.blogPost.getPath(edge.node.fields.slug))
           })),
         query: `
           {

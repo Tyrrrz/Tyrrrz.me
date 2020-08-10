@@ -1,4 +1,4 @@
-exports.getRelativeUrl = (base, relative) => new URL(relative, base).toString();
+exports.getAbsoluteUrl = (base, relative) => new URL(relative, base).toString();
 
 exports.isAbsoluteUrl = (url) => /^[a-z][a-z\d+\-.]*:/iu.test(url);
 
