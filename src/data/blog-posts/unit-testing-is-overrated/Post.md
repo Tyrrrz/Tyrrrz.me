@@ -6,6 +6,8 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
+_Translations: [Russian](https://habr.com/ru/company/qiwi/blog/510608)_
+
 The importance of testing in modern software development is really hard to overstate. Delivering a successful product is not something you do once and forget about but is rather a continuous recurring process. With every line of code that changes, software must remain in a functional state, which implies the need for rigorous testing.
 
 Over time, as the software industry evolved, testing practices have matured as well. Gradually moving towards automation, testing approaches have also influenced software design itself, spawning mantras like test-driven development, emphasizing patterns such as dependency inversion, and popularizing high-level architectures that are built around it.
