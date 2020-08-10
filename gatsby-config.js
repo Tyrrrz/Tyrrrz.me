@@ -1,6 +1,6 @@
 const path = require('path')
 
-const settings = require('./src/settings')
+const config = require('./src/config')
 const theme = require('./src/theme')
 
 // Gatsby's default syntax for defining plugins is awful so I wrote this
@@ -10,7 +10,7 @@ const resolvePlugin = (plugin, options) => ({
 })
 
 exports.siteMetadata = {
-  siteUrl: settings.siteDomain,
+  siteUrl: config.siteDomain,
   title: 'Alexey Golub',
   description: 'Alexey Golub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker',
   email: 'tyrrrz@gmail.com',
@@ -63,16 +63,14 @@ exports.plugins = [
   resolvePlugin('gatsby-plugin-feed', {
     feeds: [
       {
-        serialize: ({ query: { site, allMarkdownRemark } }) => {
-          return allMarkdownRemark.edges.map(edge => {
-            return Object.assign({}, edge.node.frontmatter, {
-              description: edge.node.excerpt,
-              date: edge.node.frontmatter.date,
-              url: new URL(`/blog/${edge.node.fields.slug}`, site.siteMetadata.siteUrl).toString(),
-              guid: new URL(`/blog/${edge.node.fields.slug}`, site.siteMetadata.siteUrl).toString()
-            })
-          })
-        },
+        serialize: ({ query: { site, allMarkdownRemark } }) =>
+          allMarkdownRemark.edges.map(edge => ({
+            ...edge.node.frontmatter,
+            description: edge.node.excerpt,
+            date: edge.node.frontmatter.date,
+            url: new URL(`/blog/${edge.node.fields.slug}`, site.siteMetadata.siteUrl).toString(),
+            guid: new URL(`/blog/${edge.node.fields.slug}`, site.siteMetadata.siteUrl).toString()
+          })),
         query: `
           {
             allMarkdownRemark(
@@ -109,14 +107,14 @@ exports.plugins = [
   }),
 
   // Inject canonical URLs into meta tags
-  resolvePlugin('gatsby-plugin-canonical-urls', { siteUrl: settings.siteDomain }),
+  resolvePlugin('gatsby-plugin-canonical-urls', { siteUrl: config.siteDomain }),
 
   // Disqus integration
-  resolvePlugin('gatsby-plugin-disqus', { shortname: settings.disqusId }),
+  resolvePlugin('gatsby-plugin-disqus', { shortname: config.disqusId }),
 
   // Google Analytics integration
   resolvePlugin('gatsby-plugin-google-analytics', {
-    trackingId: settings.googleAnalyticsId,
+    trackingId: config.googleAnalyticsId,
     anonymize: false,
     respectDNT: false,
     sampleRate: 100,

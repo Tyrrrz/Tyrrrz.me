@@ -1,33 +1,27 @@
-import React from 'react'
-import useSiteMetadata from './hooks/useSiteMetadata'
-import Link from './link'
-import Layout from './layout'
-import Meta from './meta'
+import React from 'react';
+
+import Layout from './Layout';
+import Link from './shared/Link';
+import Meta from './shared/Meta';
+import useSiteMetadata from './shared/useSiteMetadata';
 
 export default () => {
-  const siteMetadata = useSiteMetadata()
+  const siteMetadata = useSiteMetadata();
 
   return (
     <Layout>
-      <Meta title='Donate' />
+      <Meta title="Donate" />
 
       <h2>Donate</h2>
 
-      <p>
-        If you found any of my projects useful and want to support me, please
-        consider donating. This will motivate me to continue 😊
-      </p>
+      <p>If you found any of my projects useful and want to support me, please consider donating. This will motivate me to continue 😊</p>
 
       <ul>
         <li>
-          <Link to={`https://patreon.com/${siteMetadata.patreon}`}>
-            Patreon
-          </Link>
+          <Link to={`https://patreon.com/${siteMetadata.patreon}`}>Patreon</Link>
         </li>
         <li>
-          <Link to={`https://buymeacoffee.com/${siteMetadata.buymeacoffee}`}>
-            Buy me a coffee
-          </Link>
+          <Link to={`https://buymeacoffee.com/${siteMetadata.buymeacoffee}`}>Buy me a coffee</Link>
         </li>
         <li>
           Bitcoin (BTC): <code>{siteMetadata.bitcoin}</code>
@@ -52,5 +46,5 @@ export default () => {
         <li>Sprocketman1981</li>
       </ul>
     </Layout>
-  )
-}
+  );
+};

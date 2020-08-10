@@ -4,4 +4,4 @@ module.exports = {
   textColor: '#252525',
   inverseTextColor: '#ffffff',
   dimColor: '#b4b4b4'
-}
+};

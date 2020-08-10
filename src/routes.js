@@ -1,38 +1,38 @@
-const path = require('path')
+const path = require('path');
 
 const staticRoutes = {
   home: {
     path: '/',
-    component: path.resolve(__dirname, 'components', 'home.jsx')
+    component: path.resolve(__dirname, 'components', 'Home.jsx')
   },
   error404: {
     path: '404',
-    component: path.resolve(__dirname, 'components', 'error404.jsx')
+    component: path.resolve(__dirname, 'components', 'Error404.jsx')
   },
   projects: {
     path: '/projects',
-    component: path.resolve(__dirname, 'components', 'projects.jsx')
+    component: path.resolve(__dirname, 'components', 'Projects.jsx')
   },
   blog: {
     path: '/blog',
-    component: path.resolve(__dirname, 'components', 'blog.jsx')
+    component: path.resolve(__dirname, 'components', 'Blog.jsx')
   },
   talks: {
     path: '/talks',
-    component: path.resolve(__dirname, 'components', 'talks.jsx')
+    component: path.resolve(__dirname, 'components', 'Talks.jsx')
   },
   donate: {
     path: '/donate',
-    component: path.resolve(__dirname, 'components', 'donate.jsx')
+    component: path.resolve(__dirname, 'components', 'Donate.jsx')
   }
-}
+};
 
 const dynamicRoutes = {
   blogPost: {
-    getPath: slug => `${staticRoutes.blog.path}/${slug}`,
-    component: path.resolve(__dirname, 'components', 'blogPost.jsx')
+    getPath: (slug) => `${staticRoutes.blog.path}/${slug}`,
+    component: path.resolve(__dirname, 'components', 'BlogPost.jsx')
   }
-}
+};
 
 const redirects = {
   // Redirect legacy project URLs to their GitHub pages
@@ -49,10 +49,10 @@ const redirects = {
   '/Projects/WPSteamMarketExcerpt': 'https://github.com/Tyrrrz/WPSteamMarketExcerpt',
   '/Projects/YoutubeDownloader': 'https://github.com/Tyrrrz/YoutubeDownloader',
   '/Projects/YoutubeExplode': 'https://github.com/Tyrrrz/YoutubeExplode'
-}
+};
 
 module.exports = {
   static: staticRoutes,
   dynamic: dynamicRoutes,
   redirects: redirects
-}
+};

@@ -1,6 +1,17 @@
 const path = require('path')
 const routes = require('./src/routes')
 
+exports.onCreateNode = ({ actions, node }) => {
+  // Add slug to markdown files
+  if (node.internal.type === 'MarkdownRemark') {
+    actions.createNodeField({
+      node,
+      name: 'slug',
+      value: path.basename(path.dirname(node.fileAbsolutePath))
+    })
+  }
+}
+
 exports.createPages = async ({ actions, graphql }) => {
   // Generate pages for static routes
   Object.keys(routes.static).forEach(routeName => actions.createPage(routes.static[routeName]))
@@ -39,15 +50,4 @@ exports.createPages = async ({ actions, graphql }) => {
       redirectInBrowser: true
     })
   })
-}
-
-exports.onCreateNode = ({ actions, node }) => {
-  // Add slug to markdown files
-  if (node.internal.type === 'MarkdownRemark') {
-    actions.createNodeField({
-      node,
-      name: 'slug',
-      value: path.basename(path.dirname(node.fileAbsolutePath))
-    })
-  }
 }
