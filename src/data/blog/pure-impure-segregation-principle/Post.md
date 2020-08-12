@@ -56,4 +56,21 @@ public static void IsProductEdible(DateTimeOffset expiration, DateTimeOffset ins
 
 In this case, the reason it's considered impure is because this method causes mutations by displaying text in the terminal. As a general observation, we can also extrapolate that any method that returns `void` is most likely going to be impure, as a pure function that doesn't return anything is inherently useless.
 
-There would be little reason to classify functions based on whether they contain side-effects if it didn't provide something useful. Well, it just so happens that pure code has the following properties:
+Finally, the method in the following example may also seem impure at a first glance:
+
+```csharp
+public static bool AllProductsEdible(IReadOnlyList<Product> products, DateTimeOffset instant)
+{
+    for (var i = 0; i < products.Count; i++)
+    {
+        if (instant >= products[i].Expiration)
+            return false;
+    }
+
+    return true;
+}
+```
+
+Seeing as `AllProductsEdible` mutates the value of `i` during the course of its execution, one could think that such a method is not pure either. However, because the variable `i` is in local scope and cannot be accessed from outside of the method, these mutations are not observable and, as such, do not make the code impure.
+
+Of course, there would be little reason to establish this classification if it didn't allow us to infer valuable conclusions. Well, it just so happens that pure code has the following properties:
