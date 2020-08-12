@@ -21,3 +21,39 @@ When I was just getting into functional programming, one of the earliest mindset
 Because of its importance, I feel like this topic really deserves a dedicated article of its own. So to that end, I will try to cover it in this piece, explaining what makes the code pure or impure, why would we want to create separation based on such seemingly arbitrary properties, where it can be beneficial and where it probably isn't worth doing at all.
 
 _Note: as usual, the article contains code samples in F# and C#, but the ideas are universal and apply to practically any language._
+
+## Pure and impure code
+
+As I'm writing this in 2020, there is no doubt that most readers are already familiar with the concept of purity in programming, as it's discussed quite often nowadays. Nevertheless, let's go over it one more time to make sure we're on the same page.
+
+In essence, _pure code_ is code encapsulated within a function, whose **behavior is influenced only by the function's parameters** and whose **evaluation influences only the value returned by that function**. In other words, a pure function doesn't have implicit dependencies, is not influenced by the global state, and does not read from any other non-deterministic sources (such as the file system, database, etc.). At the same time it also doesn't perform any actions that can cause mutations in outside environment, otherwise known as _side-effects_.
+
+Conversely, a function that breaks at least one of those two rules is considered _impure_. To illustrate this, let's look at a very simple example:
+
+```csharp
+public static bool IsProductEdible(DateTimeOffset expiration) =>
+    DateTimeOffset.Now < expiration;
+
+public static bool IsProductEdible(DateTimeOffset expiration, DateTimeOffset instant) =>
+    instant < expiration;
+```
+
+While the above two versions of the `IsProductEdible` method are rather similar, only one of them is in fact pure. Due to the fact that the first overload reads the current date and time from `DateTimeOffset.Now`, it has an implicit dependency on a non-deterministic data source, which means that executing the method with the same parameter ten days apart may produce different results.
+
+The second overload, which takes the current date and time as an explicit parameter, does not exhibit that problem. Regardless of whether we call that method now or in ten days, the result is guaranteed to always be the same for the same set of parameters.
+
+Because of that, the first method shown above is impure, while the second one is pure. Additionally, the following method would be impure as well:
+
+```csharp
+public static void IsProductEdible(DateTimeOffset expiration, DateTimeOffset instant)
+{
+    if (instant < expiration)
+        Console.WriteLine("It's edible.");
+    else
+        Console.WriteLine("It's not edible.");
+}
+```
+
+In this case, the reason it's considered impure is because this method causes mutations by displaying text in the terminal. As a general observation, we can also extrapolate that any method that returns `void` is most likely going to be impure, as a pure function that doesn't return anything is inherently useless.
+
+There would be little reason to classify functions based on whether they contain side-effects if it didn't provide something useful. Well, it just so happens that pure code has the following properties:
