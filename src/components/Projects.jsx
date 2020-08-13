@@ -32,9 +32,9 @@ const ProjectListing = ({ node }) => {
   const language = node.language;
 
   return (
-    <div css={{ '&:not(:last-child)': { marginBottom: '1.5em' } }}>
+    <div css={{ '&:not(:last-child)': { marginBottom: '1.5rem' } }}>
       {/* Title */}
-      <div css={{ fontSize: '1.5em' }}>
+      <div css={{ fontSize: '1.5rem' }}>
         <Link to={url} css={{ textDecoration: 'none' }}>
           {name}
         </Link>
@@ -43,11 +43,11 @@ const ProjectListing = ({ node }) => {
       {/* Meta */}
       <div
         css={{
-          marginTop: '0.3em',
+          marginTop: '0.3rem',
           opacity: '0.65',
-          fontSize: '0.8em',
+          fontSize: '0.8rem',
 
-          'span + span': { marginLeft: '1em' }
+          'span + span': { marginLeft: '1rem' }
         }}
       >
         <span>
@@ -60,7 +60,7 @@ const ProjectListing = ({ node }) => {
       </div>
 
       {/* Description */}
-      <div css={{ marginTop: '0.3em' }}>{description}</div>
+      <div css={{ marginTop: '0.3rem' }}>{description}</div>
     </div>
   );
 };

@@ -3,9 +3,9 @@ import React from 'react';
 
 export default ({ ...props }) => (
   <MdiIcon
-    size="1em"
+    size="1rem"
     css={{
-      marginTop: '0.06em',
+      marginTop: '0.06rem',
       verticalAlign: 'top'
     }}
     {...props}

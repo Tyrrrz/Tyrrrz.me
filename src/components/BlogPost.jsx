@@ -65,13 +65,13 @@ export default ({ data }) => {
       {...props}
     >
       <div css={{ gridColumn: 1 }}>
-        <Icon path={mdiTwitter} size="3em" color="#1da1f2" />
+        <Icon path={mdiTwitter} size="3rem" color="#1da1f2" />
       </div>
       <div
         css={{
           gridColumn: 2,
           alignSelf: 'center',
-          marginLeft: '1.5em'
+          marginLeft: '1.5rem'
         }}
       >
         Follow me on <Link to={`https://twitter.com/${siteMetadata.twitter}`}>Twitter</Link> or subscribe to the{' '}
@@ -96,16 +96,16 @@ export default ({ data }) => {
       <Meta title={title} description={excerpt} imageUrl={coverImageUrl} />
 
       {/* Title */}
-      <div css={{ fontSize: '2em' }}>{title}</div>
+      <div css={{ fontSize: '2rem' }}>{title}</div>
 
       {/* Meta */}
       <div
         css={{
-          marginTop: '0.3em',
+          marginTop: '0.3rem',
           opacity: '0.65',
-          fontSize: '0.8em',
+          fontSize: '0.8rem',
 
-          'span + span': { marginLeft: '1em' }
+          'span + span': { marginLeft: '1rem' }
         }}
       >
         <span>
@@ -119,10 +119,10 @@ export default ({ data }) => {
 
       {/* Translations */}
       {translations && (
-        <div css={{ marginTop: '0.4em', opacity: '0.85', fontSize: '0.9em' }}>
+        <div css={{ marginTop: '0.4rem', opacity: '0.85', fontSize: '0.9rem' }}>
           <Icon path={mdiTranslate} /> Translations:{' '}
           {translations.map((translation) => (
-            <Link css={{ marginRight: '0.5em' }} key={translation.lang} to={translation.url}>
+            <Link css={{ marginRight: '0.5rem' }} key={translation.lang} to={translation.url}>
               {translation.lang}
             </Link>
           ))}
@@ -134,11 +134,11 @@ export default ({ data }) => {
         css={{
           code: {
             fontFamily: "'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace",
-            fontSize: '0.8em'
+            fontSize: '0.8rem'
           },
 
           '*:not(pre) > code': {
-            padding: '0.2em',
+            padding: '0.2rem',
             borderRadius: '2px',
             backgroundColor: '#f0f0f0'
           },
@@ -151,12 +151,12 @@ export default ({ data }) => {
           'blockquote p': {
             borderLeft: `solid 2px ${theme.accentColor}`,
             borderRadius: '2px',
-            paddingLeft: '0.5em'
+            paddingLeft: '0.5rem'
           },
 
           hr: {
             opacity: '0.4',
-            margin: '1em auto',
+            margin: '1rem auto',
             width: '20%',
             borderTop: `1px solid ${theme.dimColor}`
           }

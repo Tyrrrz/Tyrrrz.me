@@ -17,8 +17,7 @@ const HeaderLink = ({ name, ...props }) => (
       textDecoration: 'none',
 
       ':hover': { color: theme.accent },
-
-      '&:not(:last-child)': { marginRight: '0.4em' }
+      '&:not(:last-child)': { marginRight: '0.4rem' }
     }}
     {...props}
   >
@@ -32,7 +31,7 @@ const Header = () => {
   return (
     <header
       css={{
-        padding: '0.3em 0',
+        padding: '0.3rem 0',
         backgroundColor: theme.mainColor,
         color: theme.inverseTextColor
       }}
@@ -60,7 +59,7 @@ const Header = () => {
         <div
           css={{
             gridArea: 'title',
-            fontSize: '2.3em'
+            fontSize: '2.3rem'
           }}
         >
           <Link to={routes.static.home.path} css={{ textDecoration: 'none' }}>
@@ -72,7 +71,7 @@ const Header = () => {
         <div
           css={{
             gridArea: 'menu',
-            fontSize: '1.3em'
+            fontSize: '1.3rem'
           }}
         >
           <HeaderLink name="home" to={routes.static.home.path} partiallyActive={false} />
@@ -119,8 +118,8 @@ export default ({ children }) => {
       <main
         css={{
           maxWidth: '1000px',
-          margin: '0 auto 2em auto',
-          padding: '1em'
+          margin: '0 auto 2rem auto',
+          padding: '1rem'
         }}
       >
         {children}

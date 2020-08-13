@@ -36,9 +36,9 @@ const TalkListing = ({ node }) => {
   const mainUrl = recordingUrl || presentationUrl || eventUrl || '#';
 
   return (
-    <div css={{ '&:not(:last-child)': { marginBottom: '1.5em' } }}>
+    <div css={{ '&:not(:last-child)': { marginBottom: '1.5rem' } }}>
       {/* Title */}
-      <div css={{ fontSize: '1.5em' }}>
+      <div css={{ fontSize: '1.5rem' }}>
         <Link to={mainUrl} css={{ textDecoration: 'none' }}>
           {title}
         </Link>
@@ -47,11 +47,11 @@ const TalkListing = ({ node }) => {
       {/* Meta */}
       <div
         css={{
-          marginTop: '0.3em',
+          marginTop: '0.3rem',
           opacity: '0.65',
-          fontSize: '0.8em',
+          fontSize: '0.8rem',
 
-          'span + span': { marginLeft: '1em' }
+          'span + span': { marginLeft: '1rem' }
         }}
       >
         <span>
@@ -64,14 +64,14 @@ const TalkListing = ({ node }) => {
       </div>
 
       {/* Description */}
-      <div css={{ marginTop: '0.3em' }}>{description}</div>
+      <div css={{ marginTop: '0.3rem' }}>{description}</div>
 
       {/* Links */}
       <div
         css={{
-          marginTop: '0.3em',
+          marginTop: '0.3rem',
 
-          'a + a': { marginLeft: '0.85em' }
+          'a + a': { marginLeft: '0.85rem' }
         }}
       >
         {eventUrl && <Link to={eventUrl}>Event</Link>}

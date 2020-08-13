@@ -38,9 +38,9 @@ const BlogListing = ({ node }) => {
   const timeToRead = humanizeTimeToRead(node.timeToRead);
 
   return (
-    <div css={{ '&:not(:last-child)': { marginBottom: '1.5em' } }}>
+    <div css={{ '&:not(:last-child)': { marginBottom: '1.5rem' } }}>
       {/* Title */}
-      <div css={{ fontSize: '1.5em' }}>
+      <div css={{ fontSize: '1.5rem' }}>
         <Link to={url} css={{ textDecoration: 'none' }}>
           {title}
         </Link>
@@ -49,11 +49,11 @@ const BlogListing = ({ node }) => {
       {/* Meta */}
       <div
         css={{
-          marginTop: '0.3em',
+          marginTop: '0.3rem',
           opacity: '0.65',
-          fontSize: '0.8em',
+          fontSize: '0.8rem',
 
-          'span + span': { marginLeft: '1em' }
+          'span + span': { marginLeft: '1rem' }
         }}
       >
         <span>
@@ -66,7 +66,7 @@ const BlogListing = ({ node }) => {
       </div>
 
       {/* Excerpt */}
-      <div css={{ marginTop: '0.3em' }}>
+      <div css={{ marginTop: '0.3rem' }}>
         {excerpt} <Link to={url}>continue reading</Link>
       </div>
     </div>
