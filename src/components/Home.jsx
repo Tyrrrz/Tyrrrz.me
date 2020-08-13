@@ -28,12 +28,11 @@ const SocialLink = ({ iconPath, ...props }) => (
   <Link
     css={{
       '&:hover': { svg: { path: { fill: theme.accentColor } } },
-
-      '&:not(:last-child)': { marginRight: '0.4em' }
+      '&:not(:last-child)': { marginRight: '0.4rem' }
     }}
     {...props}
   >
-    <Icon path={iconPath} size="1.4em" />
+    <Icon path={iconPath} size="1.4rem" />
   </Link>
 );
 
@@ -49,11 +48,11 @@ export default ({ data }) => {
       {/* Photo */}
       <div
         css={{
-          marginTop: '1em',
+          marginTop: '1rem',
           textAlign: 'center'
         }}
       >
-        <Img fixed={data.file.childImageSharp.fixed} alt="my photo" css={{ borderRadius: '40%' }} />
+        <Img fixed={data.file.childImageSharp.fixed} alt="My photo" css={{ borderRadius: '40%' }} />
       </div>
 
       <Separator />
@@ -62,12 +61,12 @@ export default ({ data }) => {
       <div>
         <p>Hello! My name is Alexey, also known online as Tyrrrz. I&apos;m a {myAge} y/o software developer based in Kyiv, Ukraine.</p>
         <p>
-          I&apos;m mostly experienced in C#/.NET, Azure/AWS, cloud-native applications and related technologies. At the moment I&apos;m
-          working as a senior software developer for Svitla Systems, an outstaffing company.
+          Most of my endeavors are in C#, but every now and then I code in F# and TypeScript as well. I&apos;m primarily interested in the
+          cloud, distributed systems, and web applications.
         </p>
         <p>
-          In my spare time, I&apos;m developing and maintaining a number of open-source projects. I also sometimes speak at conferences and
-          blog on technical topics.
+          My professional hobbies involve open source, conference speaking, and blogging. Outside of that I&apos;m also into outdoor
+          photography, playing guitar, and learning foreign languages.
         </p>
       </div>
 
