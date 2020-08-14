@@ -101,10 +101,18 @@ Now, of course it wouldn't be very useful to classify code based on these seemin
 - Pure functions are highly localized and are generally easier to debug and reason about
 - Pure functions don't have implicit dependencies and are trivial to test in isolation
 
-Judging by this list alone, it's clear that pure code is extremely flexible and convenient to work with. In fact, the initial instinct may be that we should optimize our design in such way that we write exclusively pure code.
+Judging by this list alone, it's rather clear that pure code is extremely flexible and convenient to work with. In fact, the initial instinct may be that we should optimize our design in such way that we focus exclusively on writing pure code.
 
-Unfortunately, that's not possible because **purity is not an indication of quality, but rather of purpose**. Any program will invariably have impure code, as it's required to handle infrastructural concerns, such as reading user input, persisting data, making changes in the environment, and whatnot.
+Unfortunately, that's not possible because **purity is not an indication of quality, but rather of purpose**. Any program will invariably have impure code, as it's required to handle infrastructural concerns, such as reading user input, persisting data, making changes in the environment, and all the other things that make our software actually useful.
 
-We can't change how much of our code is pure or impure without changing how the program works. However, we can instead change how these different parts interact with each other.
+These aspects are dictated by the functional requirements and not so much by the design. No matter what, we will always have some impure elements in our code.
+
+Having said that, it's also important to remember that impurity is inherently contagious. Depending on how we expose it to the rest of our code, we may end with different degrees of impurity in our software.
+
+That, in turn, is something we can actually control. By designing our application in a way that minimizes impure interactions and delays them as much as possible, we can limit the amount of effectful and non-deterministic code we have, allowing us to reap the benefits of pure functions.
 
 ## Flattening the dependency tree
+
+## "Almost" pure code
+
+## Inverting side-effects
