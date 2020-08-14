@@ -950,13 +950,3 @@ Here are the main takeaways:
 3. Aim for the highest level of integration while maintaining reasonable speed and cost
 4. Avoid sacrificing software design for testability
 5. Consider mocking only as a last resort
-
-There are also other great articles about alternative testing approaches in modern software development. These are the ones I've personally found really interesting:
-
-- [Write tests. Not too many. Mostly integration (Kent C. Dodds)](https://kentcdodds.com/blog/write-tests)
-- [Mocking is a Code Smell (Eric Elliott)](https://medium.com/javascript-scene/mocking-is-a-code-smell-944a70c90a6a)
-- [Test-induced design damage (David Heinemeier Hansson)](https://dhh.dk/2014/test-induced-design-damage.html)
-- [Slow database test fallacy (David Heinemeier Hansson)](https://dhh.dk/2014/slow-database-test-fallacy.html)
-- [Fallacy of Unit Testing (Aaron W. Hsu)](https://www.sacrideo.us/the-fallacy-of-unit-testing)
-- [The No. 1 unit testing best practice: Stop doing it (Vitaliy Pisarev)](https://techbeacon.com/app-dev-testing/no-1-unit-testing-best-practice-stop-doing-it)
-- [Testing of Microservices at Spotify (André Schaffer)](https://labs.spotify.com/2018/01/11/testing-of-microservices)
