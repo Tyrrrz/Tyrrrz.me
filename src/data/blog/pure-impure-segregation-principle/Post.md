@@ -319,6 +319,8 @@ public class UserManager
 }
 ```
 
+Looking at the snippet above, it's clear that we can apply the pure-impure segregation principle and extract the pure portion of the code into a self-contained function. The `GenerateId` method can be pushed out and replaced with a parameter, while the database side-effect can be moved to a higher layer without any changes.
+
 ```csharp
 // Next example, make sure userName is unique
 ```
