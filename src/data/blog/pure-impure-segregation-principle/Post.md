@@ -40,11 +40,11 @@ public static bool IsFoodEdible(DateTimeOffset expiration, DateTimeOffset instan
     instant < expiration;
 ```
 
-While both versions of the `IsFoodEdible` method are similar, only one of them is actually pure. The first overload has an implicit dependency on an external state, specifically the current system time. In practice, this means that evaluating this function multiple times may very well produce different results even for the same input parameter, which violates the first rule.
+While both versions of the `IsFoodEdible` function are similar, only one of them is actually pure. The first overload has an implicit dependency on an external state, specifically the current system time. In practice, this means that evaluating this function multiple times may very well produce different results even for the same input parameter, which violates the first rule.
 
-The other overload takes the current date and time as an explicit parameter instead and thus does not exhibit that problem. Regardless of whether we call that method now or ten years into the future, the result is guaranteed to always be the same for the same set of parameters. In other words, the behavior of this method depends only on the parameters that were passed to it.
+The other version takes the current date and time as an explicit parameter instead and thus does not exhibit that problem. Regardless of whether we call that function now or ten years into the future, the result is guaranteed to always be the same for the same set of parameters. In other words, the behavior of this function depends only on the parameters that were passed to it.
 
-Because of that, the second method shown in the above example is pure, while the first one isn't. Additionally, the following variant would be impure as well:
+Because of that, the second function shown in the above example is pure, while the first one isn't. Additionally, the following variant would be impure as well:
 
 ```csharp
 public static void IsFoodEdible(DateTimeOffset expiration, DateTimeOffset instant)
@@ -56,11 +56,11 @@ public static void IsFoodEdible(DateTimeOffset expiration, DateTimeOffset instan
 }
 ```
 
-In this case, the impurity comes from the fact that this method generates side-effects by interacting with the standard output stream. Since the evaluation of this method influences something other than the returned value, it breaks the second rule we outlined earlier.
+In this case, the impurity comes from the fact that this function generates side-effects by interacting with the standard output stream. Since the evaluation of this function influences something other than the returned value, it breaks the second rule we outlined earlier.
 
-Moreover, as a general observation, we can also establish that any method that doesn't return anything (whose return type is `void`) is practically guaranteed to be impure, because a pure function without a return value is inherently useless. Furthermore, if a method executes asynchronously, it's also likely going to be impure, because asynchrony naturally comes from I/O operations.
+Moreover, as a general observation, we can also establish that any function that doesn't return anything (whose return type is `void`) is practically guaranteed to be impure, because a pure function without a return value is inherently useless. Furthermore, if a function executes asynchronously, it's also likely going to be impure, because asynchrony naturally comes from I/O operations.
 
-Finally, the method in the following example may seem impure at a first glance too, but really isn't:
+Finally, the function in the following example may seem impure at a first glance too, but really isn't:
 
 ```csharp
 public static bool AllFoodEdible(IReadOnlyList<DateTimeOffset> expirations, DateTimeOffset instant)
@@ -75,7 +75,7 @@ public static bool AllFoodEdible(IReadOnlyList<DateTimeOffset> expirations, Date
 }
 ```
 
-Seeing as `AllFoodEdible` mutates the value of `i` during the course of its execution, one could think that such a method is not pure either, because its evaluation influences more than just its result. However, because the variable `i` is defined in local scope and cannot be accessed from outside of this method, these mutations are not externally observable and, as such, do not make the code impure.
+Seeing as `AllFoodEdible` mutates the value of `i` during the course of its execution, one could think that such a function is not pure either, because its evaluation influences more than just its result. However, because the variable `i` is defined in local scope and cannot be accessed from outside of this function, these mutations are not externally observable and, as such, do not make the code impure.
 
 Besides that, **impurity is also contagious**. While an impure function can call any other function, a pure function may only call other pure functions:
 
@@ -112,6 +112,10 @@ Having said that, it's also important to remember that impurity is inherently co
 That, in turn, is something we can actually control. By designing our application in a way that minimizes impure interactions and delays them as much as possible, we can limit the amount of effectful and non-deterministic code we have, allowing us to reap the most benefits out of pure functions.
 
 ## Flattening the dependency tree
+
+Although the concept of purity forms the foundation of functional programming, it isn't given as much thought in the object-oriented world. In fact, the main purpose of object-oriented design is to aggregate related behavior in a single contextual entity, which usually involves state and mutations.
+
+Software written with OOP in mind follows a hierarchical design, where objects are composed together to represent different layers of abstraction in a connected fashion. Any impurities that may exist in those objects are free to spread from child to parent, potentially contaminating the entire tree.
 
 ## "Almost" pure code
 
