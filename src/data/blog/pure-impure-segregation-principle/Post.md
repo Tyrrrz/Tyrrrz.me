@@ -40,7 +40,7 @@ public static bool IsFoodEdible(DateTimeOffset expiration, DateTimeOffset instan
     instant < expiration;
 ```
 
-While both versions of the `IsFoodEdible` method are similar, only one of them is actually pure. The first overload has an implicit dependency on some external state, specifically the current system time. In practice, this means that evaluating the function multiple times may very well produce different results even for the same input parameter, which violates the first rule.
+While both versions of the `IsFoodEdible` method are similar, only one of them is actually pure. The first overload has an implicit dependency on some external state, specifically the current system time. In practice, this means that evaluating this function multiple times may very well produce different results even for the same input parameter, which violates the first rule.
 
 The other overload takes the current date and time as an explicit parameter instead and thus does not exhibit that problem. Regardless of whether we call that method now or ten years into the future, the result is guaranteed to always be the same for the same set of parameters.
 
@@ -58,9 +58,9 @@ public static void IsFoodEdible(DateTimeOffset expiration, DateTimeOffset instan
 
 In this case, the impurity comes from the fact that this method generates side-effects by interacting with the standard output stream. Since the evaluation of this method influences something other than the returned value, it breaks the second rule we outlined earlier.
 
-Moreover, as a general observation, we can also establish that any method that doesn't return anything (whose return type is `void`) is practically guaranteed to be impure, because a pure function without a return value is inherently useless. Additionally, any method that executes asynchronously is also likely going to be impure because asynchrony comes from I/O operations.
+Moreover, as a general observation, we can also establish that any method that doesn't return anything (whose return type is `void`) is practically guaranteed to be impure, because a pure function without a return value is inherently useless. Furthermore, if a method executes asynchronously, it's also likely going to be impure, because asynchrony naturally comes from I/O operations.
 
-Finally, the method in the following example may seem impure at a first glance too, but isn't:
+Finally, the method in the following example may seem impure at a first glance too, but really isn't:
 
 ```csharp
 public static bool AllFoodEdible(IReadOnlyList<DateTimeOffset> expirations, DateTimeOffset instant)
@@ -75,7 +75,7 @@ public static bool AllFoodEdible(IReadOnlyList<DateTimeOffset> expirations, Date
 }
 ```
 
-Seeing as `AllFoodEdible` mutates the value of `i` during the course of its execution, one could think that such a method is not pure either, because its evaluation influences more than just the result. However, because the variable `i` is defined in local scope and cannot be accessed from outside of this method, these mutations are not externally observable and, as such, do not make the code impure.
+Seeing as `AllFoodEdible` mutates the value of `i` during the course of its execution, one could think that such a method is not pure either, because its evaluation influences more than just its result. However, because the variable `i` is defined in local scope and cannot be accessed from outside of this method, these mutations are not externally observable and, as such, do not make the code impure.
 
 Besides that, **impurity is also contagious**. While an impure function can call pure or impure functions alike, a pure function can only call other pure functions:
 
@@ -85,11 +85,11 @@ public static string GetId() => Guid.NewGuid().ToString();
 
 // Pure function
 public static string GetFilePath(string dirPath, string name) =>
-    Path.Combine(dirPath, name);
+    dirPath + name;
 
 // Impure function (because it calls an impure function)
 public static string GetFilePath(string dirPath, string name) =>
-    Path.Combine(dirPath, name) + GetId();
+    dirPath + name + GetId();
 ```
 
 Now, of course it wouldn't be very useful to classify code based on these seemingly arbitrary traits if it didn't provide us with some useful insights. When it comes to purity, these insights come in a form of properties that all pure functions are known to possess:
@@ -109,7 +109,7 @@ These aspects are dictated by the functional requirements and not so much by the
 
 Having said that, it's also important to remember that impurity is inherently contagious. Depending on how we expose it to the rest of our code, we may end with different degrees of impurity in our software.
 
-That, in turn, is something we can actually control. By designing our application in a way that minimizes impure interactions and delays them as much as possible, we can limit the amount of effectful and non-deterministic code we have, allowing us to reap the benefits of pure functions.
+That, in turn, is something we can actually control. By designing our application in a way that minimizes impure interactions and delays them as much as possible, we can limit the amount of effectful and non-deterministic code we have, allowing us to reap the most benefits out of pure functions.
 
 ## Flattening the dependency tree
 
