@@ -117,7 +117,7 @@ Although the concept of purity forms the foundation of functional programming, i
 
 Software written with OOP in mind follows a hierarchical design, where objects are composed together to represent different layers of abstraction in a connected fashion. Any impurities that may exist in those objects are free to spread from child to parent, potentially contaminating the entire dependency tree.
 
-To better understand what that means in practice, let's revisit the example I used in my previous article. Here we have a simple web API application that calculates user's sunrise and sunset times based on their IP. The functionality is modeled as a composition of three classes: `LocationProvider` for turning IP address into location, `SolarCalculator` for calculating solar times based on that location, and finally `SolarTimesController` to expose the result through an HTTP endpoint:
+To better understand what that means in practice, let's revisit the example I used in my previous article. Here we have a simple web API application that calculates user's sunrise and sunset times based on their IP. The functionality is modeled as a composition of three classes: `LocationProvider` for turning IP address into a geographical location, `SolarCalculator` for calculating solar times based on that location, and finally `SolarTimesController` to expose the result through an HTTP endpoint:
 
 ```csharp
 public class LocationProvider
@@ -149,6 +149,16 @@ public class SolarCalculator
     private readonly LocationProvider _locationProvider;
 
     /* ... */
+
+    private DateTimeOffset CalculateSunrise(Location location, DateTimeOffset date)
+    {
+        /* Pure (implementation omitted) */
+    }
+
+    private DateTimeOffset CalculateSunset(Location location, DateTimeOffset date)
+    {
+        /* Pure (implementation omitted) */
+    }
 
     public async Task<SolarTimes> GetSolarTimesAsync(IPAddress ip, DateTimeOffset date)
     {
@@ -184,7 +194,7 @@ public class SolarTimeController : ControllerBase
 }
 ```
 
-Note how this vertical slice represents a branch of a (potentially much more involved) class hierarchy. Schematically, the data flows from one object to another like this:
+Note how these three classes represent a vertical slice from a potentially much more involved object hierarchy. Schematically, the flow of data in this relationship can be depicted like so:
 
 ```ini
  [ LocationProvider ]
@@ -196,25 +206,29 @@ Note how this vertical slice represents a branch of a (potentially much more inv
 [ SolarTimesController ]
 ```
 
-If we consider this relationship from a standpoint of purity, we'll see that the entire chain is actually impure. While `LocationProvider` is impure because it performs non-deterministic I/O, `SolarCalculator` is also impure due to its dependency on the former.
+This is a very typical scenario for "classically" designed object-oriented software. You'll probably find it extremely familiar if you have experience working on code that follows the [n-tier architecture](https://en.wikipedia.org/wiki/Multitier_architecture) or any other similar pattern.
 
-In practice, that means that none of the assumptions we can reliably make about pure functions can be made about `SolarCalculator.GetSolarTimesAsync`. Now if we wanted to isolate that function from its impure dependency for the purpose of unit testing, we would have to introduce an abstraction and apply mocking techniques.
+If we consider this relationship from a standpoint of purity, we'll notice that the entire call chain shown previously is impure. And while for `LocationProvider` it makes sense because it performs non-deterministic I/O, the `SolarCalculator` is impure only due to its dependency on the former.
 
-All of this could be avoided if we redesign our application with the pure-impure segregation principle in mind. Let's see what we can do:
+That design is not ideal, because we lose out on the benefits of pure functions without really getting anything in return. Now if we wanted to, for example, test `SolarCalculator.GetSolarTimesAsync` in isolation, we would only be able do that with the help of an autotelic abstraction and a mock object, which is not desirable.
+
+This issue could've been avoided if we architected our code with the pure-impure segregation principle in mind. Let's see how we can refactor our classes to push the impurities out of `SolarCalculator`:
 
 ```csharp
 public class LocationProvider
 {
-    /* (no changes) */
+    /* ... */
 }
 
 public class SolarCalculator
 {
+    /* ... */
+
     public SolarTimes GetSolarTimes(Location location, DateTimeOffset date)
     {
         // Pure
-        var sunriseOffset = CalculateSunrise(location, date);
-        var sunsetOffset = CalculateSunset(location, date);
+        var sunrise = CalculateSunrise(location, date);
+        var sunset = CalculateSunset(location, date);
 
         return new SolarTimes(sunrise, sunset);
     }
@@ -247,6 +261,12 @@ public class SolarTimesController
 }
 ```
 
+Previously, the method in `SolarCalculator` took an IP address as a parameter and relied on `LocationProvider` to get the coordinates it maps to. After refactoring, the method now instead takes the location directly, skipping the previously required impure step.
+
+Of course, that impurity didn't just disappear into thin air, our software still needs to get the location somehow. The difference is that now this concern is pushed out of our pure code and towards the boundary of the system, which is the controller in this case.
+
+By doing that, the data flow has changed as well, from a direct hierarchy to something more resembling of a pipeline:
+
 ```ini
 [ LocationProvider ]  [ SolarCalculator ]
           |                   |
@@ -254,6 +274,10 @@ public class SolarTimesController
                 ↓       ↓
         [ SolarTimesController ]
 ```
+
+The benefit of this design is that the pure business logic is no longer contaminated by non-deterministic effectful code, which means we can take advantage of the useful properties we listed in the previous section. If we wanted to parallelize or test `SolarCalculator`, it's trivial to do so now, while it wasn't as easy before.
+
+## Interleaved impurities
 
 ## "Almost" pure code
 
