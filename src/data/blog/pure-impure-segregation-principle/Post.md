@@ -115,8 +115,140 @@ That, in turn, is something we can actually control. By designing our applicatio
 
 Although the concept of purity forms the foundation of functional programming, it isn't given as much thought in the object-oriented world. In fact, the main purpose of object-oriented design is to aggregate related behavior in a single contextual entity, which usually involves state and mutations.
 
-Software written with OOP in mind follows a hierarchical design, where objects are composed together to represent different layers of abstraction in a connected fashion. Any impurities that may exist in those objects are free to spread from child to parent, potentially contaminating the entire tree.
+Software written with OOP in mind follows a hierarchical design, where objects are composed together to represent different layers of abstraction in a connected fashion. Any impurities that may exist in those objects are free to spread from child to parent, potentially contaminating the entire dependency tree.
+
+To better understand what that means in practice, let's revisit the example I used in my previous article. Here we have a simple web API application that calculates user's sunrise and sunset times based on their IP. The functionality is modeled as a composition of three classes: `LocationProvider` for turning IP address into location, `SolarCalculator` for calculating solar times based on that location, and finally `SolarTimesController` to expose the result through an HTTP endpoint:
+
+```csharp
+public class LocationProvider
+{
+    private readonly HttpClient _httpClient;
+
+    /* ... */
+
+    public async Task<Location> GetLocationAsync(IPAddress ip)
+    {
+        // Pure
+        var ipFormatted = !ip.IsLocal()
+            ? ip.MapToIPv4().ToString()
+            : "";
+
+        // Impure
+        var json = await _httpClient.GetJsonAsync($"http://ip-api.com/json/{ipFormatted}");
+
+        // Pure
+        var latitude = json.GetProperty("lat").GetDouble();
+        var longitude = json.GetProperty("lon").GetDouble();
+
+        return new Location(latitude, longitude);
+    }
+}
+
+public class SolarCalculator
+{
+    private readonly LocationProvider _locationProvider;
+
+    /* ... */
+
+    public async Task<SolarTimes> GetSolarTimesAsync(IPAddress ip, DateTimeOffset date)
+    {
+        // Impure
+        var location = await _locationProvider.GetLocationAsync(ip);
+
+        // Pure
+        var sunrise = CalculateSunrise(location, date);
+        var sunset = CalculateSunset(location, date);
+
+        return new SolarTimes(sunrise, sunset);
+    }
+}
+
+[ApiController, Route("solartimes")]
+public class SolarTimeController : ControllerBase
+{
+    private readonly SolarCalculator _solarCalculator;
+
+    /* ... */
+
+    [HttpGet("by_ip")]
+    public async Task<IActionResult> GetSolarTimesByIp(DateTimeOffset? date)
+    {
+        // Impure
+        var result = await _solarCalculator.GetSolarTimesAsync(
+            HttpContext.Connection.RemoteIpAddress,
+            date ?? DateTimeOffset.Now
+        );
+
+        return Ok(result);
+    }
+}
+```
+
+Note how this vertical slice represents a branch of a (potentially much more involved) class hierarchy. Schematically, the data flows from one object to another like this:
+
+```ini
+ [ LocationProvider ]
+           |
+           ↓
+  [ SolarCalculator ]
+           |
+           ↓
+[ SolarTimesController ]
+```
+
+If we consider this relationship from a standpoint of purity, we'll see that the entire chain is actually impure. While `LocationProvider` is impure because it performs non-deterministic I/O, `SolarCalculator` is also impure due to its dependency on the former.
+
+In practice, that means that none of the assumptions we can reliably make about pure functions can be made about `SolarCalculator.GetSolarTimesAsync`. Now if we wanted to isolate that function from its impure dependency for the purpose of unit testing, we would have to introduce an abstraction and apply mocking techniques.
+
+All of this could be avoided if we redesign our application with the pure-impure segregation principle in mind. Let's see what we can do:
+
+```csharp
+public class LocationProvider
+{
+    /* (no changes) */
+}
+
+public class SolarCalculator
+{
+    public SolarTimes GetSolarTimes(Location location, DateTimeOffset date)
+    {
+        // Pure
+        var sunriseOffset = CalculateSunrise(location, date);
+        var sunsetOffset = CalculateSunset(location, date);
+
+        return new SolarTimes(sunrise, sunset);
+    }
+}
+
+[ApiController, Route("solartimes")]
+public class SolarTimesController
+{
+    private readonly LocationProvider _locationProvider;
+    private readonly SolarCalculator _solarCalculator;
+
+    /* ... */
+
+    [HttpGet("by_ip")]
+    public async Task<IActionResult> GetSolarTimesByIp(DateTimeOffset? date)
+    {
+        // Impure
+        var location = await _locationProvider.GetLocationAsync(
+            HttpContext.Connection.RemoteIpAddress
+        );
+
+        // Pure
+        var result = _solarCalculator.GetSolarTimes(
+            location,
+            date ?? DateTimeOffset.Now
+        );
+
+        return Ok(result);
+    }
+}
+```
 
 ## "Almost" pure code
 
 ## Inverting side-effects
+
+## Summary
