@@ -285,6 +285,44 @@ The benefit of this design is that the pure business logic is no longer contamin
 
 ## Interleaved impurities
 
+This type of "lossless" refactoring shown above is usually only possible when the impure operation comes either directly before or directly after the pure code we want to isolate. Unfortunately, this is not always the case.
+
+Let's consider the following example of a class that manages user identity in an application:
+
+```csharp
+public class UserManager
+{
+    private readonly Database _database;
+
+    /* ... */
+
+    private string GenerateId() => Guid.NewGuid().ToString();
+
+    private string ComputeHash(string str) => new SHA1CryptoServiceProvider().ComputeHash(
+        Encoding.UTF8.GetBytes(str)
+    );
+
+    public async Task<User> CreateUserAsync(string userName, string password)
+    {
+        // Impure
+        var userId = GenerateId();
+
+        // Pure
+        var passwordHash = ComputeHash(password);
+        var user = new User(userId, userName, passwordHash);
+
+        // Impure
+        await _database.PersistUserAsync(user);
+
+        return user;
+    }
+}
+```
+
+```csharp
+// Next example, make sure userName is unique
+```
+
 ## "Almost" pure code
 
 ## Inverting side-effects
