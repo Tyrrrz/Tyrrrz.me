@@ -117,7 +117,13 @@ Although the concept of purity forms the foundation of functional programming, i
 
 Software written with OOP in mind follows a hierarchical design, where objects are composed together to represent different layers of abstraction in a connected fashion. Any impurities that may exist in those objects are free to spread from child to parent, potentially contaminating the entire dependency tree.
 
-To better understand what that means in practice, let's revisit the example I used in my previous article. Here we have a simple web API application that calculates user's sunrise and sunset times based on their IP. The functionality is modeled as a composition of three classes: `LocationProvider` for turning IP address into a geographical location, `SolarCalculator` for calculating solar times based on that location, and finally `SolarTimesController` to expose the result through an HTTP endpoint:
+To better understand what that means in practice, let's revisit an example from my previous article. The idea was to build a simple web API application that calculates user's sunrise and sunset times based on their IP. This functionality was modeled using three classes:
+
+- `LocationProvider` to get a location from an IP address, using a public GeoIP provider
+- `SolarCalculator` to calculate solar times from that location
+- `SolarTimesController` to expose the result through an HTTP endpoint
+
+Here's the code for that:
 
 ```csharp
 public class LocationProvider
@@ -263,7 +269,7 @@ public class SolarTimesController
 
 Previously, the method in `SolarCalculator` took an IP address as a parameter and relied on `LocationProvider` to get the coordinates it maps to. After refactoring, the method now instead takes the location directly, skipping the previously required impure step.
 
-Of course, that impurity didn't just disappear into thin air, our software still needs to get the location somehow. The difference is that now this concern is pushed out of our pure code and towards the boundary of the system, which is the controller in this case.
+Of course, that impurity didn't just disappear into thin air, our software still needs to get the location somehow. The difference is that now this concern is pushed out towards the boundary of the system, which in this case is the controller.
 
 By doing that, the data flow has changed as well, from a direct hierarchy to something more resembling of a pipeline:
 
