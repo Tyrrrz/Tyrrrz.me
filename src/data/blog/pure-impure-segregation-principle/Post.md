@@ -247,6 +247,14 @@ public class SolarTimesController
 }
 ```
 
+```ini
+[ LocationProvider ]  [ SolarCalculator ]
+          |                   |
+          |_____         _____|
+                ↓       ↓
+        [ SolarTimesController ]
+```
+
 ## "Almost" pure code
 
 ## Inverting side-effects
