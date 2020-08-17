@@ -298,9 +298,13 @@ public class RecommendationsProvider
 
     /* ... */
 
-    // Get song recommendations based on what the user has listened to
     public async Task<IReadOnlyList<Song>> GetRecommendationsAsync(string userName)
     {
+        // 1. Get own top songs
+        // 2. Get other users who listened to them
+        // 3. Get top songs of those users
+        // 4. Return recommendations
+
         // Impure
         var scrobbles = await _songService.GetTopScrobblesAsync(userName);
 
@@ -353,6 +357,10 @@ public class RecommendationsProvider
 ```
 
 The above algorithm works by retrieving the user's top 100 most listened songs and then finding others who've listened to the same titles. Following that, it analyzes the profiles of users who have a similar taste in music and extracts their top songs to serve as a basis for recommendation.
+
+This function would benefit greatly from being pure due to how much business logic is encapsulated within it, but unfortunately the refactoring method we used earlier won't work here. In order to isolate `GetRecommendationsAsync` from its dependencies, we would have to supply the function upfront with an entire list of songs, users, and their scrobbles, which is completely impractical (and probably impossible).
+
+We could, perhaps, split the function into smaller pieces and handle the four different stages of the algorithm separately. That may work, but we would then create unnecessary fragmentation, significantly lowering cohesiveness of our class and individual functions, making the code much harder to maintain and reason about. This is something that we really want to avoid.
 
 ## "Almost" pure code
 
