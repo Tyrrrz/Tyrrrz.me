@@ -318,11 +318,12 @@ public class RecommendationsProvider
         foreach (var scrobble in scrobblesSnapshot)
         {
             // Impure
-            var otherListeners = await _songService.GetTopListenersAsync(scrobble.Song.Id);
+            var otherListeners = await _songService
+                .GetTopListenersAsync(scrobble.Song.Id);
 
             // Pure
             var otherListenersSnapsot = otherListeners
-                .Where(u => u.TotalScrobbleCount > 10_000)
+                .Where(u => u.TotalScrobbleCount >= 10_000)
                 .OrderByDescending(u => u.TotalScrobbleCount)
                 .Take(20)
                 .ToArray();
@@ -330,7 +331,8 @@ public class RecommendationsProvider
             foreach (var otherListener in otherListenersSnapsot)
             {
                 // Impure
-                var otherScrobbles = await _songService.GetTopScrobblesAsync(otherListener.UserName);
+                var otherScrobbles = await _songService
+                    .GetTopScrobblesAsync(otherListener.UserName);
 
                 // Pure
                 var otherScrobblesSnapshot = otherScrobbles
@@ -360,7 +362,7 @@ The above algorithm works by retrieving the user's top 100 most listened songs a
 
 It's clear that this function would benefit greatly from being pure due to how much business logic is encapsulated within it, but unfortunately the refactoring method we used earlier won't work here. In order to isolate `GetRecommendationsAsync` from its dependencies, we would have to supply the function with an entire list of songs, users, and their scrobbles upfront, which is completely impractical (and probably impossible).
 
-We could, perhaps, split the function into smaller pieces and handle the four different stages of the algorithm separately. That may work, but we would then create unnecessary fragmentation, significantly lowering cohesiveness of our class and individual functions, making the code much harder to maintain and reason about.
+We could, perhaps, split the function into smaller pieces and handle the four different stages of the algorithm separately. That may work, but we would then create unnecessary fragmentation, significantly lowering cohesiveness of our code, making it much harder to maintain and reason about.
 
 ## "Almost" pure code
 
