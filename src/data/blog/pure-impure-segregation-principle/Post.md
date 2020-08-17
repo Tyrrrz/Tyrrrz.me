@@ -1,5 +1,5 @@
 ---
-title: Pure-Impure Segregation Principle
+title: Pure-Impure Segregation Principle as a Solution to Complexity
 date: 2020-08-30
 cover: Cover.png
 ---
@@ -285,47 +285,80 @@ The benefit of this design is that the pure business logic is no longer contamin
 
 ## Interleaved impurities
 
-This type of "lossless" refactoring shown above is usually only possible when the impure operation comes either directly before or directly after the pure code we want to isolate. Unfortunately, this is not always the case.
+This type of "lossless" refactoring shown above is possible only when the impure operation comes either directly before or directly after the pure code that we want to isolate. Unfortunately, this is not always the case.
 
-Let's consider the following example of a class that manages user identity in an application:
+Often we have to deal with functions that have pure and impure concerns interleaved with each other, creating a cohesive structure that is hard to break apart. This happens when providing the entire set of data required by the function is simply not practical.
+
+To illustrate a scenario like that, let's take a look at a slightly more involved example. The following snippet contains a class called `RecommendationsProvider` which is responsible for generating song recommendations for a user:
 
 ```csharp
-public class UserManager
+public class RecommendationsProvider
 {
-    private readonly Database _database;
+    private readonly SongService _songService;
 
     /* ... */
 
-    private string GenerateId() => Guid.NewGuid().ToString();
-
-    private string ComputeHash(string str) => new SHA1CryptoServiceProvider().ComputeHash(
-        Encoding.UTF8.GetBytes(str)
-    );
-
-    public async Task<User> CreateUserAsync(string userName, string password)
+    // Get song recommendations based on what the user has listened to
+    public async Task<IReadOnlyList<Song>> GetRecommendationsAsync(string userName)
     {
         // Impure
-        var userId = GenerateId();
+        var scrobbles = await _songService.GetTopScrobblesAsync(userName);
 
         // Pure
-        var passwordHash = ComputeHash(password);
-        var user = new User(userId, userName, passwordHash);
+        var scrobblesSnapshot = scrobbles
+            .OrderByDescending(s => s.ScrobbleCount)
+            .Take(100)
+            .ToArray();
 
-        // Impure
-        await _database.PersistUserAsync(user);
+        var recommendationCandidates = new List<Song>();
+        foreach (var scrobble in scrobblesSnapshot)
+        {
+            // Impure
+            var otherListeners = await _songService.GetTopListenersAsync(scrobble.Song.Id);
 
-        return user;
+            // Pure
+            var otherListenersSnapsot = otherListeners
+                .Where(u => u.TotalScrobbleCount > 10_000)
+                .OrderByDescending(u => u.TotalScrobbleCount)
+                .Take(20)
+                .ToArray();
+
+            foreach (var otherListener in otherListenersSnapsot)
+            {
+                // Impure
+                var otherScrobbles = await _songService.GetTopScrobblesAsync(otherListener.UserName);
+
+                // Pure
+                var otherScrobblesSnapshot = otherScrobbles
+                    .Where(s => s.Song.IsVerifiedArtist)
+                    .OrderByDescending(s => s.Song.Rating)
+                    .Take(10)
+                    .ToArray();
+
+                recommendationCandidates.AddRange(
+                    otherScrobblesSnapshot.Select(s => s.Song)
+                );
+            }
+        }
+
+        // Pure
+        var recommendations = recommendationCandidates
+            .OrderByDescending(s => s.Rating)
+            .Take(200)
+            .ToArray();
+
+        return recommendations;
     }
 }
 ```
 
-Looking at the snippet above, it's clear that we can apply the pure-impure segregation principle and extract the pure portion of the code into a self-contained function. The `GenerateId` method can be pushed out and replaced with a parameter, while the database side-effect can be moved to a higher layer without any changes.
-
-```csharp
-// Next example, make sure userName is unique
-```
+The above algorithm works by retrieving the user's top 100 most listened songs and then finding others who've listened to the same titles. Following that, it analyzes the profiles of users who have a similar taste in music and extracts their top songs to serve as a basis for recommendation.
 
 ## "Almost" pure code
+
+Purity is a myth.
+
+Mention `Path.Join` and how it's pure but kinda isn't.
 
 ## Inverting side-effects
 
