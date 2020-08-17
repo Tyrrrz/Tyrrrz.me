@@ -6,21 +6,21 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
-About a month ago I published an article titled ["Unit Testing is Overrated"](/blog/unit-testing-is-overrated) where I shared my thoughts on how developers place way too much faith in that testing approach and why it often isn't the best tool for the job. While I didn't expect that post to do particularly well, in three weeks it managed to get over 100'000 views and 1'000 comments, despite its controversial nature (or, perhaps, owing to it?).
+About a month ago I published an article titled ["Unit Testing is Overrated"](/blog/unit-testing-is-overrated) where I shared my thoughts on how developers place way too much faith in that testing approach and why it often isn't the best tool for the job. While I didn't expect that post to do particularly well, in three weeks it managed to get over 100'000 views and 1'000 comments, even despite its controversial nature (or, perhaps, owing to it?).
 
 It was really interesting to follow the discussions that unfolded, given the vast contrast of opinions people seemed to have on the subject. And while most commenters mainly shared their personal experiences, a few have also voiced criticism of the way some arguments were presented.
 
-In particular, a couple of comments mentioned that the drawbacks I've described, especially those concerning abstractions and mocking, are really just a byproduct of object-oriented programming and its inherent flaws. Had my examples been designed with functional principles in mind, many of the outlined problems would never have surfaced.
+In particular, a couple of comments mentioned that the drawbacks I've described, especially those pertaining to abstractions and mocking, are really just a byproduct of object-oriented programming and its inherent flaws. Had my examples been designed with functional principles in mind, many of the outlined problems would never have surfaced.
 
-More specifically, the suggested solution was to refactor the presented class hierarchy by extracting the pure business logic away from the rest of the code. Getting rid of the hierarchy eliminates the need for mocking, which in turn greatly simplifies unit testing.
+More specifically, the suggested solution was to refactor the presented class hierarchy, by extracting the pure business logic away from the rest of the code. Getting rid of the impure dependency eliminates the need for mocking, which in turn simplifies unit testing.
 
-Although the article briefly mentions this approach as well, it's true that the original example was a bit forced and could be improved. That said, I think the main point goes beyond that code snippet and was still able to make its way across.
+This exact approach was actually mentioned in later parts of the article as well, albeit in a slightly different context. Although it does make isolated testing easier for that particular snippet of code, the raised issues are more nuanced than that.
 
-Regardless of that, I also believe that the principle of separating code based on purity, which is what the suggested approach was about, is incredibly important and often overlooked. When applied correctly, it can make a great impact on the design of your software, providing benefits in many other areas besides just unit testing.
+Nevertheless, I think that the principle of separating code based on purity is very important and often overlooked. When applied correctly, it can have an incredible impact on the design of your software, providing benefits in many areas, including, but not limited to, unit testing.
 
-I initially became familiar with it when I was trying to get into functional programming while learning F#. It changed my mindset significantly and since then I've been relying on these ideas all the time, even when writing object-oriented code.
+Depending on who you ask, this principle may be referred to by different names, such as ["Functional core, imperative shell"](https://destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell), ["Impure-pure-impure sandwich"](https://blog.ploeh.dk/2017/02/02/dependency-rejection/), and maybe even some others. And while most developers seem to agree on its value, there's still some misunderstanding remaining as to where it is actually useful.
 
-In this article I will go in-depth on what makes the code pure or impure, why is that important to us, and how we can use it to improve our code. And while I'm definitely not the first person to write about this, I think it doesn't hurt to devote a bit more attention to this topic.
+In this article I will try to explain the main ideas behind this concept, starting from what makes code pure or impure, to how we can take advantage of it to write better software. We will also look at some examples to see where this principle can be applied in practice.
 
 _Note: as usual, the code samples in this article are written in C#, but the ideas are universal and apply to practically any language._
 
