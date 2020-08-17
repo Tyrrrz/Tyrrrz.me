@@ -364,6 +364,8 @@ It's clear that this function would benefit greatly from being pure due to how m
 
 We could, perhaps, split the function into smaller pieces and handle the four different stages of the algorithm separately. That may work, but we would then create unnecessary fragmentation, significantly lowering cohesiveness of our code, making it much harder to maintain and reason about.
 
+This is the point where most developers who try to apply pure-impure segregation principle in object-oriented programming usually give up. However, there's a way to keep the function as a single cohesive element and still make it pure.
+
 ## "Almost" pure code
 
 Purity is a myth.
