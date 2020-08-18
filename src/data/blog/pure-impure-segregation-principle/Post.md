@@ -228,8 +228,7 @@ public class LocationProvider
 
 public class SolarCalculator
 {
-    /* ... */
-
+    // Can be made into a static method
     public SolarTimes GetSolarTimes(Location location, DateTimeOffset date)
     {
         // Pure
@@ -287,9 +286,9 @@ The benefit of this design is that the pure business logic is no longer contamin
 
 This type of "lossless" refactoring shown above is possible only when the impure operation comes either directly before or directly after the pure code that we want to isolate. Unfortunately, this is not always the case.
 
-Often we have to deal with functions that have pure and impure concerns interleaved with each other, creating a cohesive structure that is hard to break apart. This happens when providing the entire set of data required by the function is simply not practical.
+Often we have to deal with functions that have pure and impure concerns interleaved with each other, creating a cohesive structure that is hard to break apart. This happens when exposing the entire set of required data as function parameters is simply unfeasible.
 
-To illustrate a scenario like that, let's take a look at a slightly more involved example. The following snippet contains a class called `RecommendationsProvider` which is responsible for generating song recommendations for a user:
+To illustrate a scenario like that, let's take a look at a slightly more involved example. The following snippet contains a class called `RecommendationsProvider` which is responsible for generating song suggestions for a user of a music streaming service:
 
 ```csharp
 public class RecommendationsProvider
@@ -358,20 +357,78 @@ public class RecommendationsProvider
 }
 ```
 
-The above algorithm works by retrieving the user's top 100 most listened songs and then finding others who've listened to the same titles. After that, it analyzes the profiles of users who have a similar taste in music and extracts their top songs to serve as a basis for recommendation.
+The above algorithm works by retrieving the user's most listened songs, finding others who've listened to the same titles, and then extracting their top songs as well. In the end, the recommendations are formed based on what other users with a similar taste listen to the most.
 
-It's clear that this function would benefit greatly from being pure due to how much business logic is encapsulated within it, but unfortunately the refactoring method we used earlier won't work here. In order to isolate `GetRecommendationsAsync` from its dependencies, we would have to supply the function with an entire list of songs, users, and their scrobbles upfront, which is completely impractical (and probably impossible).
+It's quite clear that this function would benefit greatly from being pure, due to how much business logic is encapsulated within it, but unfortunately the refactoring technique we relied upon earlier won't work here. In order to fully isolate `GetRecommendationsAsync` from its impure dependencies, we would have to somehow supply the function with an entire list of songs, users, and their scrobbles upfront, which is completely impractical (and likely impossible).
 
-We could, perhaps, split the function into smaller pieces and handle the four different stages of the algorithm separately. That may work, but we would then create unnecessary fragmentation, significantly lowering cohesiveness of our code, making it much harder to maintain and reason about.
+As a workaround, we could decide to split the function into smaller pieces that handle each of the four different stages of the algorithm separately. In doing so, we'll probably end up with a pipeline consisting of `ProcessOwnScrobbles`, `ProcessOtherListeners`, `ProcessOtherScrobbles`, `FinalizeRecommendations`, with impure operations inserted between them.
 
-This is the point where most developers who try to apply pure-impure segregation principle in object-oriented programming usually give up. However, there's a way to keep the function as a single cohesive element and still make it pure.
+Although it does work, the value of such change is questionable. Not only would we introduce unnecessary fragmentation into what is supposed to be a single cohesive element, it would also become much harder to reason about the recommendation generator as a self-contained algorithm.
+
+It's important to remember that our goal is not to remove impurities altogether, but rather to push them out towards the boundary of the application. One way we could achieve that is by somehow delaying the execution of impure operation.
+
+Let's see how we can do that:
+
+```csharp
+public class RecommendationsProvider
+{
+    // Can be made into a static method
+    public Func<SongService, Task<IReadOnlyList<Song>>> GetRecommendationsFunc(string userName)
+    {
+        return songService =>
+        {
+            var scrobbles = await songService.GetTopScrobblesAsync(userName);
+
+            var scrobblesSnapshot = scrobbles
+                .OrderByDescending(s => s.ScrobbleCount)
+                .Take(100)
+                .ToArray();
+
+            /* ... */
+        };
+    }
+}
+```
+
+Now, instead of evaluating the result directly, the function preserves `userName` in a closure and returns another function which can be evaluated at a later point. That function, in turn, relies on a parameter of type `SongService` to retrieve the song recommendations we need.
+
+Because `GetRecommendationsFunc` does not perform any impure operations itself and simply returns an impure function, it is completely pure. Essentially, instead of yielding the result directly, the method encodes all of the information required to obtain it in a lambda:
+
+```csharp
+// Pure
+var getRecommendationsAsync = new RecommendationsProvider().GetRecommendationsFunc("JohnDoe");
+
+// Impure
+var recommendations = await getRecommendationsAsync(new SongService());
+```
+
+This approach may look extremely awkward in the context of object-oriented programming, but this is something functional languages provide out of the box with their support for _currying_. For example, this is essentially the same code as above, but written in F#:
+
+```fsharp
+let getRecommendations userName songService = task {
+    let! scrobbles = songService.GetTopScrobblesAsync(userName)
+
+    let scrobblesSnapshot = scrobbles
+        |> Seq.sortByDescending (fun s -> s.ScrobbleCount)
+        |> Seq.take 100
+        |> Seq.toArray
+
+    // ...
+}
+
+// Pure
+let getRecommendationsPartial = getRecommendations "JohnDoe"
+
+// Impure
+let! recommendations = getRecommendationsPartial SongService()
+```
+
+At this point you may glance at all of this and realize that it looks weird but at the same time oddly familiar. Indeed, what we did here is that we've essentially re-invented dependency injection, except inversed.
 
 ## "Almost" pure code
 
 Purity is a myth.
 
 Mention `Path.Join` and how it's pure but kinda isn't.
-
-## Inverting side-effects
 
 ## Summary
