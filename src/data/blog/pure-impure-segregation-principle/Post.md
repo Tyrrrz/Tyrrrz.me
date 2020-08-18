@@ -365,7 +365,7 @@ As a workaround, we could also split the function into smaller pieces, each hand
 
 While that would work, the value of such change is questionable. Instead of having one cohesive element to reason about, we'd end up with multiple fragmented parts which are completely useless to us on their own.
 
-However, since our original goal is to push the impurities out towards the system boundaries, we may try to approach this issue from another angle. In essence, all we need to do is delay the evaluation of impure functions until the last possible moment.
+However, since our original goal is to push the impurities out towards the system boundaries, we may try to approach this issue from another angle. In essence, all we need to do is delay the evaluation of impure functions until the last possible opportunity.
 
 Let's see how we can achieve that:
 
@@ -522,7 +522,7 @@ If you're really keen on writing code like this in C#, I would recommend using [
 
 ## "Almost" pure code
 
-Purity is a myth.
+Throughout the article, I referred to the term "pure" as something that can be verifiably proven. In reality, however, purity is an artificial concept.
 
 Mention `Path.Join` and how it's pure but kinda isn't.
 
