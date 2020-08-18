@@ -22,7 +22,7 @@ Depending on who you ask, this principle may be referred to by different names, 
 
 In this article I will try to explain the main ideas behind this concept, starting from what makes code pure or impure, to how we can take advantage of it to write better software. We will also look at some examples to see where this principle can be applied in practice.
 
-_Note: as usual, the code samples in this article are written in C#, but the ideas are universal and apply to practically any language._
+_Note: as usual, the code samples in this article are written in C# and F#, but the ideas are universal and apply to practically any language._
 
 ## Pure vs impure
 
@@ -375,7 +375,7 @@ public class RecommendationsProvider
     // Can be made into a static method
     public Func<SongService, Task<IReadOnlyList<Song>>> GetRecommendationsFunc(string userName)
     {
-        return songService =>
+        return async songService =>
         {
             var scrobbles = await songService.GetTopScrobblesAsync(userName);
 
@@ -392,7 +392,7 @@ public class RecommendationsProvider
 
 Now, instead of evaluating the result directly, the function preserves `userName` in a closure and returns another function which can be evaluated at a later point. That function, in turn, relies on a parameter of type `SongService` to retrieve the song recommendations we need.
 
-Because `GetRecommendationsFunc` does not perform any impure operations itself and simply returns an impure function, it is completely pure. Essentially, instead of yielding the result directly, the method encodes all of the information required to obtain it in a lambda:
+Because `GetRecommendationsFunc` does not perform any impure operations itself and simply returns an impure function, it is, in fact, completely pure. Essentially, instead of yielding the result directly, this method returns a lambda which encodes all of the information required to obtain it:
 
 ```csharp
 // Pure
@@ -402,7 +402,7 @@ var getRecommendationsAsync = new RecommendationsProvider().GetRecommendationsFu
 var recommendations = await getRecommendationsAsync(new SongService());
 ```
 
-This approach may look extremely awkward in the context of object-oriented programming, but this is something functional languages provide out of the box with their support for _currying_. For example, this is essentially the same code as above, but written in F#:
+This technique may look extremely awkward in the context of object-oriented programming, but this is something functional languages provide out of the box with their support for _currying_. For example, this is essentially the same code as above, but written in F#:
 
 ```fsharp
 let getRecommendations userName songService = task {
@@ -423,7 +423,97 @@ let getRecommendationsPartial = getRecommendations "JohnDoe"
 let! recommendations = getRecommendationsPartial SongService()
 ```
 
-At this point you may glance at all of this and realize that it looks weird but at the same time oddly familiar. Indeed, what we did here is that we've essentially re-invented dependency injection, except inversed.
+At this point you may notice that, by delaying the resolution of an impure dependency towards the system boundary, we've essentially reinvented dependency injection. The only difference is that it works in reverse order compared to what we're used to.
+
+While the object-oriented way of doing dependency injection expects us to provide the dependencies first, the functional way typically operates in the opposite direction. For contrast, here are both approaches side-by-side:
+
+```csharp
+// Object-oriented DI (dependencies first)
+var recommendationsProvider = new RecommendationsProvider(new SongService());
+var recommendations = await recommendationsProvider.GetRecommendationsAsync("JohnDoe");
+
+// Functional DI (dependencies last)
+var getRecommendationsAsync = Domain.GetRecommendationsFunc("JohnDoe");
+var recommendations = await getRecommendationsAsync(new SongService());
+```
+
+[![Tweet by @importantshock](Tweet-dependency-injection.png)](https://twitter.com/importantshock/status/1085740688283746304)
+
+Although both of these approaches are essentially equivalent, there's a slight benefit in using the second one. As functions are generally easier to compose than objects, we can apply various transformations on the _future_ result, without actually observing its value.
+
+For example, we can define a special `Map` extension method that allows us to transform a delegate from one type to another. The following is its implementation for asynchronous functions with a single parameter:
+
+```csharp
+public static Func<TParam, Task<TMappedResult>> Map(
+    this Func<TParam, Task<TResult>> source,
+    Func<TResult, TMappedResult> transform)
+{
+    return async param =>
+    {
+        var result = await source(param);
+        return transform(result);
+    };
+}
+```
+
+Note that although the above code evaluates the result of `source`, it happens within a nested lambda. This effectively makes the transformation lazy, which means that the `Map` method itself is pure.
+
+As an example, let's use this extension to refine the provided recommendations to only contain metal songs and limit their total number to 10:
+
+```csharp
+// Pure
+var getRecommendationsAsync = Domain.GetRecommendationsFunc("JohnDoe");
+
+// Pure
+var getSpecificRecommendationsAsync = getRecommendationsAsync.Map(recommendations =>
+    // Get only a subset of recommendations
+    recommendations
+        .Where(s => s.Genres.Contains("Metal"))
+        .Take(10)
+        .ToArray()
+);
+
+// Impure
+var specificRecommendations = await getSpecificRecommendationsAsync(new SongService());
+```
+
+Similarly, we can also define another extension method called `Merge`, which would allow us to lazily combine many impure functions together:
+
+```csharp
+public static Func<TParam, Task<TResult>> Merge(
+    this Func<TParam, Task<TResult>> source,
+    Func<TParam, Task<TResult>> other,
+    Func<TResult, TResult, TResult> join)
+{
+    return async param =>
+    {
+        var left = await source(param);
+        var right = await other(param);
+
+        return join(left, right);
+    }
+}
+```
+
+Which we then could use like this:
+
+```csharp
+// Pure
+var getRecommendationsForJohnDoeAsync = Domain.GetRecommendationsFunc("JohnDoe");
+var getRecommendationsForJaneDoeAsync = Domain.GetRecommendationsFunc("JaneDoe");
+
+// Pure
+var getAllRecommendationsAsync = getRecommendationsForJohnDoeAsync.Merge(
+    getRecommendationsForJaneDoeAsync,
+    (recommendationsForJohn, recommendationsForJane) =>
+        recommendationsForJohn
+            .Concat(recommendationsForJane)
+            .ToArray()
+);
+
+// Impure
+var allRecommendations = await getAllRecommendationsAsync(new SongService());
+```
 
 ## "Almost" pure code
 
