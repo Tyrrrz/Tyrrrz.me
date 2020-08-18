@@ -288,7 +288,7 @@ This type of "lossless" refactoring shown above is possible only when the impure
 
 Often we have to deal with functions that have pure and impure concerns interleaved with each other, creating a cohesive structure that is hard to break apart. This happens when exposing the entire set of required data as function parameters is simply unfeasible.
 
-To illustrate a scenario like that, let's take a look at a slightly more involved example. The following snippet contains a class called `RecommendationsProvider` which is responsible for generating song suggestions for a user of a music streaming service:
+To illustrate a scenario like that, let's take a look at a slightly more involved example. The following snippet contains a class called `RecommendationsProvider` which is responsible for generating song suggestions for a user of some music streaming service:
 
 ```csharp
 public class RecommendationsProvider
@@ -357,17 +357,17 @@ public class RecommendationsProvider
 }
 ```
 
-The above algorithm works by retrieving the user's most listened songs, finding others who've listened to the same titles, and then extracting their top songs as well. In the end, the recommendations are formed based on what other users with a similar taste listen to the most.
+The above algorithm works by retrieving the user's most listened songs, finding others who've listened to the same titles, and then extracting their top songs as well. In the end, the recommendations are formed based on what users with a similar taste listen to the most.
 
 It's quite clear that this function would benefit greatly from being pure, due to how much business logic is encapsulated within it, but unfortunately the refactoring technique we relied upon earlier won't work here. In order to fully isolate `GetRecommendationsAsync` from its impure dependencies, we would have to somehow supply the function with an entire list of songs, users, and their scrobbles upfront, which is completely impractical (and likely impossible).
 
-As a workaround, we could decide to split the function into smaller pieces that handle each of the four different stages of the algorithm separately. In doing so, we'll probably end up with a pipeline consisting of `ProcessOwnScrobbles`, `ProcessOtherListeners`, `ProcessOtherScrobbles`, `FinalizeRecommendations`, with impure operations inserted between them.
+As a workaround, we could also split the function into smaller pieces, each handling one of the four stages of the algorithm separately. In doing so, we'd probably arrive at a pipeline consisting of `ProcessOwnScrobbles`, `ProcessOtherListeners`, `ProcessOtherScrobbles`, and `FinalizeRecommendations`, with impure operations inserted between them.
 
-Although it does work, the value of such change is questionable. Not only would we introduce unnecessary fragmentation into what is supposed to be a single cohesive element, it would also become much harder to reason about the recommendation generator as a self-contained algorithm.
+While that would work, the value of such change is questionable. Instead of having one cohesive element to reason about, we'd end up with multiple fragmented parts which are completely useless to us on their own.
 
-It's important to remember that our goal is not to remove impurities altogether, but rather to push them out towards the boundary of the application. One way we could achieve that is by somehow delaying the execution of impure operation.
+However, since our original goal is to push the impurities out towards the system boundaries, we may try to approach this issue from another angle. In essence, all we need to do is delay the evaluation of impure functions until the last possible moment.
 
-Let's see how we can do that:
+Let's see how we can achieve that:
 
 ```csharp
 public class RecommendationsProvider
@@ -390,9 +390,9 @@ public class RecommendationsProvider
 }
 ```
 
-Now, instead of evaluating the result directly, the function preserves `userName` in a closure and returns another function which can be evaluated at a later point. That function, in turn, relies on a parameter of type `SongService` to retrieve the song recommendations we need.
+Now, instead of evaluating the result directly, our method preserves `userName` in a closure and returns another function which can be evaluated at a later point. That function, in turn, relies on a parameter of type `SongService` to retrieve the song recommendations we need.
 
-Because `GetRecommendationsFunc` does not perform any impure operations itself and simply returns an impure function, it is, in fact, completely pure. Essentially, instead of yielding the result directly, this method returns a lambda which encodes all of the information required to obtain it:
+Because `GetRecommendationsFunc` does not perform any impure operations itself and simply returns an impure function, it is completely pure. Essentially, instead of yielding the result directly, this method returns a lambda which encodes all of the information required to obtain it:
 
 ```csharp
 // Pure
@@ -402,7 +402,7 @@ var getRecommendationsAsync = new RecommendationsProvider().GetRecommendationsFu
 var recommendations = await getRecommendationsAsync(new SongService());
 ```
 
-This technique may look extremely awkward in the context of object-oriented programming, but this is something functional languages provide out of the box with their support for _currying_. For example, this is essentially the same code as above, but written in F#:
+This technique may look extremely awkward in the context of object-oriented programming, but this is something functional languages have first-class support for, thanks to a feature known as _currying_. As an example, this is essentially the same code as above, but written in F# instead:
 
 ```fsharp
 let getRecommendations userName songService = task {
@@ -439,9 +439,9 @@ var recommendations = await getRecommendationsAsync(new SongService());
 
 [![Tweet by @importantshock](Tweet-dependency-injection.png)](https://twitter.com/importantshock/status/1085740688283746304)
 
-Although both of these approaches are essentially equivalent, there's a slight benefit in using the second one. As functions are generally easier to compose than objects, we can apply various transformations on the _future_ result, without actually observing its value.
+Although both of these approaches are essentially equivalent, there's a slight nuance to the second one. As functions are generally easier to compose than objects, we can apply various transformations on the result, without observing its actual value.
 
-For example, we can define a special `Map` extension method that allows us to transform a delegate from one type to another. The following is its implementation for asynchronous functions with a single parameter:
+For example, we can define a special `Map` extension method that allows us to transform a delegate from one type to another. The following is its implementation for asynchronous functions with just one parameter:
 
 ```csharp
 public static Func<TParam, Task<TMappedResult>> Map(
@@ -456,9 +456,9 @@ public static Func<TParam, Task<TMappedResult>> Map(
 }
 ```
 
-Note that although the above code evaluates the result of `source`, it happens within a nested lambda. This effectively makes the transformation lazy, which means that the `Map` method itself is pure.
+Note that although the above code evaluates the result of `source`, it happens within a nested lambda. This effectively makes the transformation lazy, which means that the `Map` method itself remains pure.
 
-As an example, let's use this extension to refine the provided recommendations to only contain metal songs and limit their total number to 10:
+As an example, let's use this extension to refine the provided recommendations to only contain songs of a specific genre and limit their total number:
 
 ```csharp
 // Pure
@@ -477,7 +477,7 @@ var getSpecificRecommendationsAsync = getRecommendationsAsync.Map(recommendation
 var specificRecommendations = await getSpecificRecommendationsAsync(new SongService());
 ```
 
-Similarly, we can also define another extension method called `Merge`, which would allow us to lazily combine many impure functions together:
+Similarly, we can also define another extension method called `Merge`. This one would allow us to lazily combine two impure functions together:
 
 ```csharp
 public static Func<TParam, Task<TResult>> Merge(
@@ -495,7 +495,7 @@ public static Func<TParam, Task<TResult>> Merge(
 }
 ```
 
-Which we then could use like this:
+Its usage would then be as follows:
 
 ```csharp
 // Pure
@@ -505,6 +505,7 @@ var getRecommendationsForJaneDoeAsync = Domain.GetRecommendationsFunc("JaneDoe")
 // Pure
 var getAllRecommendationsAsync = getRecommendationsForJohnDoeAsync.Merge(
     getRecommendationsForJaneDoeAsync,
+    // Merge both recommendations into a single list
     (recommendationsForJohn, recommendationsForJane) =>
         recommendationsForJohn
             .Concat(recommendationsForJane)
@@ -514,6 +515,10 @@ var getAllRecommendationsAsync = getRecommendationsForJohnDoeAsync.Merge(
 // Impure
 var allRecommendations = await getAllRecommendationsAsync(new SongService());
 ```
+
+There's no point denying that programming in such style, while definitely possible, is extremely cumbersome in an OO-first language. Although we managed to achieve our goal of separating pure and impure concerns from each other, it came at a considerable cost.
+
+If you're really keen on writing code like this in C#, I would recommend using [Language-Ext](https://github.com/louthy/language-ext) for general functional primitives and [Eff](https://github.com/nessos/Eff) for effectful composition. In case you want to learn more about the latter, there is a [great introductory article](https://eiriktsarpalis.wordpress.com/2020/07/20/effect-programming-in-csharp) written by one of its authors.
 
 ## "Almost" pure code
 
