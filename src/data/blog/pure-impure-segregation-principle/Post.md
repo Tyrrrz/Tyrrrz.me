@@ -1,5 +1,5 @@
 ---
-title: Pure-Impure Segregation Principle as a Solution to Complexity
+title: Pure-Impure Segregation Principle
 date: 2020-08-30
 cover: Cover.png
 ---
@@ -12,17 +12,19 @@ It was really interesting to follow the discussions that unfolded, given the vas
 
 In particular, a couple of comments mentioned that the drawbacks I've described, especially those pertaining to abstractions and mocking, are really just a byproduct of object-oriented programming and its inherent flaws. Had my examples been designed with functional principles in mind, many of the outlined problems would never have surfaced.
 
-More specifically, the suggested solution was to refactor the presented class hierarchy, by extracting the pure business logic away from the rest of the code. Getting rid of the impure dependency eliminates the need for mocking, which in turn simplifies unit testing.
+More specifically, the suggested solution was to refactor the presented class hierarchy by extracting the pure business logic away from the rest of the code. Getting rid of the impure dependency eliminates the need for mocking, which in turn simplifies unit testing.
 
-This exact approach was actually mentioned in later parts of the article as well, albeit in a slightly different context. Although it does make isolated testing easier for that particular snippet of code, the raised issues are more nuanced than that.
+This exact approach was actually mentioned in later parts of the post as well, albeit in a slightly different context. Although it does make isolated testing easier for that particular snippet of code, it doesn't actually invalidate the main issues raised by the article.
 
-Nevertheless, I think that the principle of separating code based on purity is very important and often overlooked. When applied correctly, it can have an incredible impact on the design of your software, providing benefits in many areas, including, but not limited to, unit testing.
+That said, I also think that the underlying principle of separating code based on purity is very important and often overlooked. When used correctly, it can positively influence software design, providing benefits in terms of readability, portability and, as mentioned, unit testing.
 
-Depending on who you ask, this principle may be referred to by different names, such as ["Functional core, imperative shell"](https://destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell), ["Impure-pure-impure sandwich"](https://blog.ploeh.dk/2017/02/02/dependency-rejection/), and maybe even some others. And while most developers seem to agree on its value, there's still some misunderstanding remaining as to where it is actually useful.
+Depending on who you ask, this principle may have different names, such as [functional core, imperative shell](https://destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell), [impure-pure-impure sandwich](https://blog.ploeh.dk/2017/02/02/dependency-rejection), and some others. And while most developers seem to agree on its value, there's still some misunderstanding remaining as to how it's applied beyond simple academic examples.
 
-In this article I will try to explain the main ideas behind this concept, starting from what makes code pure or impure, to how we can take advantage of it to write better software. We will also look at some examples to see where this principle can be applied in practice.
+At the end of the day, just like with any other software development pattern, its usefulness is entirely situational. However, it offers a good mental model for reasoning about non-determinism in our code, which is relevant regardless of context.
 
-_Note: as usual, the code samples in this article are written in C# and F#, but the ideas are universal and apply to practically any language._
+In this article I will try to explain the main ideas behind this concept, such as what makes code pure or impure, why it is important to us, and how we can leverage that knowledge to write better software. We will also take a look at some examples where purity-based separation leads to better design, and examples where it doesn't.
+
+_Note: as usual, the code samples in this article are written in C#, but the ideas are universal and apply to practically any language._
 
 ## Pure vs impure
 
@@ -284,6 +286,8 @@ The benefit of this design is that the pure business logic is no longer contamin
 
 ## Interleaved impurities
 
+It may seem that this approach can help us get rid of dependencies.
+
 This type of "lossless" refactoring shown above is possible only when the impure operation comes either directly before or directly after the pure code that we want to isolate. Unfortunately, this is not always the case.
 
 Often we have to deal with functions that have pure and impure concerns interleaved with each other, creating a cohesive structure that is hard to break apart. This happens when exposing the entire set of required data as function parameters is simply unfeasible.
@@ -527,3 +531,5 @@ Throughout the article, I referred to the term "pure" as something that can be v
 Mention `Path.Join` and how it's pure but kinda isn't.
 
 ## Summary
+
+Overall, the concept of purity provides a very useful mental model for looking at code. When looking at code from this perspective, it's clear how some operations may introduce indeterminism, become difficult to isolate, or make code harder to reason about.
