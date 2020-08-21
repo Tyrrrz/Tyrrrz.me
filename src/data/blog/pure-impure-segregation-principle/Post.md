@@ -522,11 +522,60 @@ There's no point denying that programming in such style, while definitely possib
 
 If you're really keen on writing code like this in C#, I would recommend using [Language-Ext](https://github.com/louthy/language-ext) for general functional primitives and [Eff](https://github.com/nessos/Eff) for effectful composition. In case you want to learn more about the latter, there is a [great introductory article](https://eiriktsarpalis.wordpress.com/2020/07/20/effect-programming-in-csharp) written by one of its authors.
 
-## "Almost" pure code
+## "Almost pure" code
 
-Throughout the article, I referred to the term "pure" as something that can be verifiably proven. In reality, however, purity is an artificial concept.
+Although throughout the article we've referred to purity as an objectively provable characteristic, it's not exactly so in practice. In fact, code purity is just as relative of a concept as everything else.
 
-Mention `Path.Join` and how it's pure but kinda isn't.
+Let's consider a simple example below:
+
+```csharp
+public static Item FindItem(IEnumerable<Item> items, string name)
+{
+    var maybeItem = items.FirstOrDefault(i => i.Name == name);
+    if (maybeItem != null)
+        return item;
+
+    throw new Exception("Item not found.");
+}
+```
+
+The above function attempts to find an item in a sequence by its name. It follows an "optimistic" design, where the signature guarantees that an item will be found, while the negative outcome is treated as exceptional.
+
+According to the criteria of purity, this function is not pure because the result of its evaluation is not entirely encapsulated within the returned value. Throwing an exception is an effectful operation, since it can lead to the termination of the program.
+
+Despite that, the function is still deterministic, cacheable, parallelizable, and testable, as long as you remember to handle the exception that may be raised in certain circumstances. // TODO
+
+Let's take a look at another example:
+
+```csharp
+public static int Divide(int a, int b) => a / b;
+```
+
+Given the simplicity of this function, it seems very clear that it's completely pure. In reality, however, it shares the exact same problem as the function in the previous snippet.
+
+The integer division operator actually has an exceptional outcome as well, which is when the supplied divisor is equal to _zero_. If we were to try and invoke `Divide(1337, 0)`, it would throw an exception, indicating that the function is, in fact, technically impure.
+
+Here's another interesting one:
+
+```csharp
+public static string GetOutputPath(Report report, string outputDir)
+{
+    var fileExtension = report.Format == ReportFormat.Html ? "html" : "txt";
+    var fileName = $"{report.Name}.{fileExtension}";
+
+    return Path.Combine(outputDir, fileName);
+}
+```
+
+The code above calls the [`Path.Combine`](https://docs.microsoft.com/en-us/dotnet/api/system.io.path.combine?view=netcore-3.1#System_IO_Path_Combine_System_String_System_String_) method, which joins path segments together into a single file or directory path. Just like in the other two scenarios, it can also throw an exception, when a segment contains invalid characters.
+
+What's more interesting about it though, is that its behavior relies on the value of the `Path.DirectorySeparatorChar` constant. Depending on whether you run this code on Windows or Linux, the produced result may be different.
+
+However, since it is a constant, that value is guaranteed to stay the same, at least for the duration of the program's lifetime. Because of that, we can argue that this nuance doesn't break any rules of purity and the evaluation is still deterministic.
+
+At the same time, if we decide to cache the result for some purpose, we would have to be careful not to share it between instances of the application running on different operating systems. Even though the function is deterministic, it's only deterministic within one session, which might not provide us with enough assurance.
+
+As you can see, the concept of purity gets really hazy once you start digging deep into specifics.
 
 ## Summary
 
