@@ -286,8 +286,6 @@ The benefit of this design is that the pure business logic is no longer contamin
 
 ## Interleaved impurities
 
-It may seem that this approach can help us get rid of dependencies.
-
 This type of "lossless" refactoring shown above is possible only when the impure operation comes either directly before or directly after the pure code that we want to isolate. Unfortunately, this is not always the case.
 
 Often we have to deal with functions that have pure and impure concerns interleaved with each other, creating a cohesive structure that is hard to break apart. This happens when exposing the entire set of required data as function parameters is simply unfeasible.
@@ -532,4 +530,10 @@ Mention `Path.Join` and how it's pure but kinda isn't.
 
 ## Summary
 
-Overall, the concept of purity provides a very useful mental model for looking at code. When looking at code from this perspective, it's clear how some operations may introduce indeterminism, become difficult to isolate, or make code harder to reason about.
+Overall, the concept of purity is very useful, as it helps us understand how some operations may make our code non-deterministic, difficult to reason about, and cumbersome to test in isolation. Impure interactions are not bad on their own, but the constraints they impose are contagious in nature and may spread to other parts of the application.
+
+The pure-impure segregation principle aims to limit impurities to an essential minimum, by decoupling them from the rest of the code. Ultimately, the goal is push all non-pure operations towards the outermost layers of the system, while keeping the domain layer comprised entirely of pure functions.
+
+Designing software in such way leads to an architecture that resembles a pipeline rather than a hierarchy, which favors functional style of programming. Depending on the project, this may aid in expressing the flow of data more clearly, among other useful benefits.
+
+However, this is not always practical and there are scenarios where extracting pure code comes at a cost of severely reduced cohesiveness. In any case, if the goal is only to facilitate testability, [architecting your solution for high-level testing](/blog/unit-testing-is-overrated) is likely a better time investment.
