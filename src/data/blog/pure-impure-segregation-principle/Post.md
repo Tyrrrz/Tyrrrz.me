@@ -6,25 +6,25 @@ cover: Cover.png
 
 ![cover](Cover.png)
 
-About a month ago I published an article titled ["Unit Testing is Overrated"](/blog/unit-testing-is-overrated) where I shared my thoughts on how developers place way too much faith in that testing approach and why it often isn't the best tool for the job. While I didn't expect that post to do particularly well, in three weeks it managed to get over 100'000 views and 1'000 comments, even despite its controversial nature (or, perhaps, owing to it?).
+About two months ago I published an article titled ["Unit Testing is Overrated"](/blog/unit-testing-is-overrated) where I shared my thoughts on how developers place way too much faith in that testing approach and why it often isn't the best tool for the job. While I didn't expect that post to do particularly well, in three weeks it managed to get over 100K views and 1000 comments, even despite its controversial nature (or, perhaps, owing to it?).
 
 It was really interesting to follow the discussions that unfolded, given the vast contrast of opinions people seemed to have on the subject. And while most commenters mainly shared their personal experiences, a few have also voiced criticism of the way some arguments were presented.
 
-In particular, a couple of comments mentioned that the drawbacks I've described, especially those pertaining to abstractions and mocking, are really just a byproduct of object-oriented programming and its inherent flaws. Had my examples been designed with functional principles in mind, many of the outlined problems would never have surfaced.
+In particular, one person mentioned that the drawbacks I've described, especially those pertaining to abstractions and mocking, are really just a byproduct of object-oriented programming and its inherent flaws. Had my examples been designed with functional principles in mind, many of the outlined problems would never have surfaced.
 
 More specifically, the suggested solution was to refactor the presented class hierarchy by extracting the pure business logic away from the rest of the code. Getting rid of the impure dependency eliminates the need for mocking, which in turn simplifies unit testing.
 
 This exact approach was actually mentioned in later parts of the post as well, albeit in a slightly different context. Although it does make isolated testing easier for that particular snippet of code, it doesn't actually invalidate the main issues raised by the article.
 
-That said, I also think that the underlying principle of separating code based on purity is very important and often overlooked. When used correctly, it can positively influence software design, providing benefits in terms of readability, portability and, as mentioned, unit testing.
+That said, I also think that the underlying principle of code separation based on purity is very important and often overlooked. When used correctly, it can positively influence software design, providing benefits in terms of readability, portability and, as mentioned, unit testing.
 
 Depending on who you ask, this principle may have different names, such as [functional core, imperative shell](https://destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell), [impure-pure-impure sandwich](https://blog.ploeh.dk/2017/02/02/dependency-rejection), and some others. And while most developers seem to agree on its value, there's still some misunderstanding remaining as to how it's applied beyond simple academic examples.
 
-At the end of the day, just like with any other software development pattern, its usefulness is entirely situational. However, it offers a good mental model for reasoning about non-determinism in our code, which is relevant regardless of context.
+At the end of the day, just like with any other software development pattern, its usefulness is entirely situational. However, it offers a good mental model for reasoning about non-determinism in code, which is relevant regardless of context.
 
-In this article I will try to explain the main ideas behind this concept, such as what makes code pure or impure, why it is important to us, and how we can leverage that knowledge to write better software. We will also take a look at some examples where purity-based separation leads to better design, and examples where it doesn't.
+In this article we will look at what actually makes something pure or impure, why is that important to us, and how we can leverage that knowledge to write better software. I will show examples of where applying this principle lends to better design, as well scenarios where it doesn't.
 
-_Note: as usual, the code samples in this article are written in C#, but the ideas are universal and apply to practically any language._
+_Note: as usual, the code samples in this article are written in C#, but the main ideas apply to any language._
 
 ## Pure vs impure
 
@@ -60,7 +60,7 @@ public static void IsFoodEdible(DateTimeOffset expiration, DateTimeOffset instan
 
 In this case, the impurity comes from the fact that this function generates side-effects by interacting with the standard output stream. Since the evaluation of this function influences something other than its returned value, it breaks the second rule we outlined earlier.
 
-Generally speaking, any function that doesn't return anything (or whose return value may be ignored) is guaranteed to be impure, because a pure function without a return value is inherently useless. Furthermore, if a function executes asynchronously, it's also a reliable giveaway that a function is impure, since asynchrony naturally comes from I/O operations.
+Generally speaking, **any function that doesn't return anything** (or whose return value may be ignored) **is guaranteed to be impure**, because a pure function without a return value is inherently useless. Furthermore, if a function executes asynchronously, it's also a reliable giveaway that a function is impure, since asynchrony naturally comes from I/O operations.
 
 Finally, the function in the following example may seem impure at a first glance too, but actually isn't:
 
@@ -77,22 +77,7 @@ public static bool AllFoodEdible(IReadOnlyList<DateTimeOffset> expirations, Date
 }
 ```
 
-Seeing as `AllFoodEdible` mutates the value of `i` during the course of its execution, one could think that such a function is not pure either. However, because the variable `i` is defined in a local scope and cannot be accessed from outside of this function, these mutations are not externally observable and, as such, do not make the code impure.
-
-Besides all that, **impurity is also contagious**. While an impure function can call any other function, a pure function may only call other pure functions:
-
-```csharp
-// Impure function
-public static string GetId() => Guid.NewGuid().ToString();
-
-// Pure function
-public static string GetFilePath(string dirPath, string name) =>
-    dirPath + name;
-
-// Impure function (because it calls an impure function)
-public static string GetFilePath(string dirPath, string name) =>
-    dirPath + name + GetId();
-```
+Seeing as `AllFoodEdible` mutates the value of `i` during the course of its execution, one could think that such a function is not pure either. However, because the variable `i` is encapsulated within a local scope and cannot be accessed from outside of this function, these mutations are not externally observable and, as such, do not make the code impure.
 
 Now, of course it wouldn't be very useful to classify code based on these seemingly arbitrary traits if it didn't provide us with some useful insights. When it comes to purity, these insights come in a form of properties that all pure functions are known to possess:
 
@@ -105,13 +90,28 @@ Now, of course it wouldn't be very useful to classify code based on these seemin
 
 Judging by this list alone, it's rather clear that pure code is extremely flexible and convenient to work with. In fact, the initial instinct may be that we should optimize our design in such way that we focus exclusively on writing pure code.
 
-Unfortunately, that's not possible because **purity is not an indication of quality, but rather of purpose**. Any program will invariably have impure code, as it's required to handle infrastructural concerns, such as reading user input, persisting data, making changes in the environment, and all the other things that make our software actually useful.
+Unfortunately, that's not possible because **purity**, in itself, **is not an indication of quality, but rather of purpose**. Any program will invariably have impure code, as it's required to handle infrastructural concerns, such as reading user input, persisting data, making changes in the environment, and all the other things that make our software actually useful.
 
-These aspects are dictated by the functional requirements and not so much by the design. No matter what, some impure elements are bound to exist.
+These aspects are dictated by the functional requirements of the software and not so much by its design. That means that we can't simply eliminate impurities from our code, at least not without also changing how it works.
 
-Having said that, it's important to remember that impurity is inherently contagious. Depending on how it's exposed to the rest of the code, it may represent a bigger or a smaller portion of the whole.
+Having said that, one very important characteristic of **impurity** is that it's **inherently contagious**. If an otherwise pure function calls an impure function, it becomes impure as well:
 
-That, in turn, is something we can actually control. By designing our application in a way that minimizes impure interactions and delays them as much as possible, we can limit the amount of effectful and non-deterministic code we have, allowing us to reap the most benefits out of pure functions.
+```csharp
+// Impure function
+public static string GetId() => Guid.NewGuid().ToString();
+
+// Impure function (calls an impure function)
+public static string GetFilePath(string dirPath, string name) =>
+    dirPath + name + GetId();
+
+// Pure function (takes the result of impure function as a parameter)
+public static string GetFilePath(string dirPath, string name, string id) =>
+    dirPath + name + id;
+```
+
+In other words, depending on how the code is structured and how it interacts with non-deterministic and effectful operations, impurities may make up a larger or smaller portion of the whole. That, in turn, is something we can actually control.
+
+As a guiding principle, we can establish that, to reap the most benefits out of pure functions, the design of our software needs to **limit impure interactions and delay them as much as possible**. Ideally, they should be pushed towards the outermost layers of the architecture, also known as the _system boundaries_.
 
 ## Flattening the dependency tree
 
@@ -282,7 +282,7 @@ In doing that, we also flattened the hierarchy so that all of the dependencies a
         [ SolarTimesController ]
 ```
 
-The benefit of this design is that the pure business logic is no longer contaminated by non-deterministic effectful code, which means we can take advantage of the useful properties we listed in the previous section. If we wanted to parallelize or test `SolarCalculator`, it's trivial to do so now, while it wasn't as easy before.
+The benefit of this design is that the pure business logic is no longer contaminated by non-deterministic effectful code, which means we can take advantage of the useful properties we listed in the previous section. If we wanted to parallelize or test `SolarCalculator`, it's much easier to do so now than it was before.
 
 ## Interleaved impurities
 
