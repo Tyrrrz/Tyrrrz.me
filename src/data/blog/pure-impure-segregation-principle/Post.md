@@ -522,60 +522,79 @@ There's no point denying that programming in such style, while definitely possib
 
 If you're really keen on writing code like this in C#, I would recommend using [Language-Ext](https://github.com/louthy/language-ext) for general functional primitives and [Eff](https://github.com/nessos/Eff) for effectful composition. In case you want to learn more about the latter, there is a [great introductory article](https://eiriktsarpalis.wordpress.com/2020/07/20/effect-programming-in-csharp) written by one of its authors.
 
-## "Almost pure" code
+## Pure "enough" code
 
-Although throughout the article we've referred to purity as an objectively provable characteristic, it's not exactly so in practice. In fact, code purity is just as relative of a concept as everything else.
+Although it's convenient to treat purity as an objectively provable characteristic, it's actually a bit more nuanced than that. As a matter of fact, one could say that purity is a relative concept, not an absolute one.
 
-Let's consider a simple example below:
+To understand what exactly I mean by that, let's take a look at an example:
 
 ```csharp
-public static Item FindItem(IEnumerable<Item> items, string name)
+public static int FindIndexOf(IEnumerable<Item> items, Item item)
 {
-    var maybeItem = items.FirstOrDefault(i => i.Name == name);
-    if (maybeItem != null)
-        return item;
+    var i = 0;
+
+    foreach (var o in items)
+    {
+        if (o == item)
+            return i;
+
+        i++;
+    }
 
     throw new Exception("Item not found.");
 }
 ```
 
-The above function attempts to find an item in a sequence by its name. It follows an "optimistic" design, where the signature guarantees that an item will be found, while the negative outcome is treated as exceptional.
+This is a very simple function that attempts to find an index that corresponds to the position of an item in a sequence, or throw an exception in case of failure. The negative outcome is assumed to be very improbable in this scenario, hence why an exception is used as opposed to a fallback value.
 
-According to the criteria of purity, this function is not pure because the result of its evaluation is not entirely encapsulated within the returned value. Throwing an exception is an effectful operation, since it can lead to the termination of the program.
+According to the criteria of purity, this function is not pure because the result of its evaluation is not entirely encapsulated within the returned value. Throwing an exception is an effectful operation, since it can change the behavior of the function above in the call stack, or lead to the termination of the program altogether.
 
-Despite that, the function is still deterministic, cacheable, parallelizable, and testable, as long as you remember to handle the exception that may be raised in certain circumstances. // TODO
+However, despite all that, the function is still deterministic, cacheable, parallelizable, and testable, as long as we remember to handle the exception that may be raised in certain circumstances. Even though it's not technically pure, it still retains most of the important properties we care about.
 
-Let's take a look at another example:
+Let's consider an even simpler example:
 
 ```csharp
-public static int Divide(int a, int b) => a / b;
+public static int Wrap(int value, int period) => value % period;
 ```
 
-Given the simplicity of this function, it seems very clear that it's completely pure. In reality, however, it shares the exact same problem as the function in the previous snippet.
+Seeing as the above code literally just represents a mathematical expression, it seems logical that it must be pure. In reality, however, this function shares the exact same problem as the one in the previous snippet.
 
-The integer division operator actually has an exceptional outcome as well, which is when the supplied divisor is equal to _zero_. If we were to try and invoke `Divide(1337, 0)`, it would throw an exception, indicating that the function is, in fact, technically impure.
+The modulus operator has an exceptional outcome, which occurs when the supplied divisor is equal to _zero_. If we were to try and invoke `Wrap(123, 0)`, it would throw an exception, indicating that the function is actually impure as well.
 
-Here's another interesting one:
+Notably, this problem could be avoided if we used something like `Option<int>` as return type instead. This approach eliminates the need for an exception (and this is how [Darklang does it](https://docs.darklang.com/languagedetails#floats)), but comes with an expense of making basic arithmetic operations appear more cumbersome.
+
+In any case, even though the code we wrote originally doesn't satisfy the theoretical definition of purity, it might be _pure enough_ for our usage scenario.
+
+Let's also take a look at an opposite situation:
 
 ```csharp
 public static string GetOutputPath(Report report, string outputDir)
 {
-    var fileExtension = report.Format == ReportFormat.Html ? "html" : "txt";
+    var fileExtension = report.Format == ReportFormat.Html
+        ? "html"
+        : "txt";
+
     var fileName = $"{report.Name}.{fileExtension}";
 
     return Path.Combine(outputDir, fileName);
 }
 ```
 
-The code above calls the [`Path.Combine`](https://docs.microsoft.com/en-us/dotnet/api/system.io.path.combine?view=netcore-3.1#System_IO_Path_Combine_System_String_System_String_) method, which joins path segments together into a single file or directory path. Just like in the other two scenarios, it can also throw an exception, when a segment contains invalid characters.
+The code above assembles a file path for the provided report by combining the output directory with the generated file name. It calls the [`Path.Combine`](https://docs.microsoft.com/en-us/dotnet/api/system.io.path.combine?view=netcore-3.1#System_IO_Path_Combine_System_String_System_String_) method, whose behavior relies on the value of the `Path.DirectorySeparatorChar` constant, as it indicates which directory separator character is used by the operating system.
 
-What's more interesting about it though, is that its behavior relies on the value of the `Path.DirectorySeparatorChar` constant. Depending on whether you run this code on Windows or Linux, the produced result may be different.
+Since it is a constant and its value is guaranteed to always be the same for the duration of the program's lifetime, our function is pure (as long as we also disregard exceptions). However, it's pure only within the current session.
 
-However, since it is a constant, that value is guaranteed to stay the same, at least for the duration of the program's lifetime. Because of that, we can argue that this nuance doesn't break any rules of purity and the evaluation is still deterministic.
+If we imagine that we're building a cross-platform solution, it's logical that we treat specifics of each platform as environmental parameters. In other words, for code that is expected to run seamlessly on Windows and Linux, the path separator constant essentially acts as a global variable.
 
-At the same time, if we decide to cache the result for some purpose, we would have to be careful not to share it between instances of the application running on different operating systems. Even though the function is deterministic, it's only deterministic within one session, which might not provide us with enough assurance.
+Assuming our goal is to test `GetOutputPath` in isolation, simply relying on the parameters of the function is not enough. We would also need to execute tests on each of the supported operating systems, to make sure it actually works with all possible path separators.
 
-As you can see, the concept of purity gets really hazy once you start digging deep into specifics.
+In this case, the fact that the function is pure does not provide us with sufficient guarantees. While it's pure by definition, it's not _pure enough_ for what we need.
+
+As you can see, the concept of purity gets a bit hazy once you start digging into specifics. In reality, everything around us is inherently impure, so what we accept as pure really depends on what level of abstraction we choose to operate at.
+
+If you decide to follow the rules pedantically, you'll find the idea of modelling any problem domain with pure functions quickly becomes impractical. However, it's important to remember that **the goal is not purity in itself, but rather the benefits it provides**.
+
+At the end of the day, it's up to the developer to draw the line and decide what makes sense and what doesn't. The concept of purity is really just an approximation and should be treated as such.
 
 ## Summary
 
@@ -585,4 +604,4 @@ The pure-impure segregation principle aims to limit impurities to an essential m
 
 Designing software in such way leads to an architecture that resembles a pipeline rather than a hierarchy, which favors functional style of programming. Depending on the project, this may aid in expressing the flow of data more clearly, among other useful benefits.
 
-However, this is not always practical and there are scenarios where extracting pure code comes at a cost of severely reduced cohesiveness. In any case, if the goal is only to facilitate testability, [architecting your solution for high-level testing](/blog/unit-testing-is-overrated) is likely a better time investment.
+However, this is not always practical and there are scenarios where extracting pure code comes at a cost of severely reduced cohesiveness. In any case, if your goal is to facilitate testing without mocking, [architecting your solution for high-level testing](/blog/unit-testing-is-overrated) is likely going to be a much better time investment.
