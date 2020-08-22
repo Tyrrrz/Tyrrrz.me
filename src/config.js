@@ -1,6 +1,5 @@
 module.exports = {
-  siteDomain: process.env.URL || process.env.TYRRRZME_DOMAIN || 'http://localhost:8000',
-  disqusId: process.env.TYRRRZME_DISQUS,
-  googleAnalyticsId: process.env.TYRRRZME_GOOGLEANALYTICS,
-  clickyId: process.env.TYRRRZME_CLICKY
+  siteDomain: process.env.GATSBY_URL || 'http://localhost:8000',
+  disqusId: process.env.GATSBY_DISQUS,
+  googleAnalyticsId: process.env.GATSBY_GOOGLEANALYTICS
 };

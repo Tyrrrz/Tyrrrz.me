@@ -1,15 +1,15 @@
-const path = require('path')
+const path = require('path');
 
-const config = require('./src/config')
-const theme = require('./src/theme')
-const { getAbsoluteUrl } = require('./src/utils')
-const routes = require('./src/routes')
+const config = require('./src/config');
+const theme = require('./src/theme');
+const { getAbsoluteUrl } = require('./src/utils');
+const routes = require('./src/routes');
 
 // Gatsby's default syntax for defining plugins is awful so I wrote this
 const resolvePlugin = (plugin, options) => ({
   resolve: plugin,
   options: options
-})
+});
 
 exports.siteMetadata = {
   siteUrl: config.siteDomain,
@@ -23,7 +23,7 @@ exports.siteMetadata = {
   buymeacoffee: 'Tyrrrz',
   bitcoin: 'bc1qa3jkft6uckysrxrlc2sygguxshf7gufy0zm692',
   ethereum: '0x00E6B59BAD5F0c887E0eBD1b7bBd7b024d0796c9'
-}
+};
 
 exports.plugins = [
   // Source: file system
@@ -66,7 +66,7 @@ exports.plugins = [
     feeds: [
       {
         serialize: ({ query: { site, allMarkdownRemark } }) =>
-          allMarkdownRemark.edges.map(edge => ({
+          allMarkdownRemark.edges.map((edge) => ({
             ...edge.node.frontmatter,
             description: edge.node.excerpt,
             date: edge.node.frontmatter.date,
@@ -136,4 +136,4 @@ exports.plugins = [
   resolvePlugin('gatsby-plugin-sitemap'),
   resolvePlugin('gatsby-plugin-robots-txt'),
   resolvePlugin('gatsby-plugin-offline')
-]
+];

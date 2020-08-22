@@ -62,7 +62,7 @@
     "develop": "gatsby develop",
     "start": "npm run develop",
     "serve": "gatsby serve",
-    "lint": "eslint */**/*.{js,jsx,ts,tsx} --fix --ignore-path .gitignore",
+    "lint": "eslint **/*.{js,jsx,ts,tsx} --fix --ignore-path .gitignore",
     "pull-github-data": "node ./scripts/pullGitHubData.js"
   },
   "repository": {
