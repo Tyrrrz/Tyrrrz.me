@@ -23,19 +23,19 @@ export default ({ title, description, imageUrl }) => {
 
       <title>{actualTitle}</title>
 
-      <meta property="og:type" content="website" />
-
-      <meta property="og:title" content={actualTitle} />
-      <meta name="twitter:title" content={actualTitle} />
-
-      <meta name="twitter:creator" content={`@${siteMetadata.twitter}`} />
-      <meta name="twitter:card" content="summary" />
-
       <meta name="description" content={actualDescription} />
-      <meta property="og:description" content={actualDescription} />
-      <meta name="twitter:description" content={actualDescription} />
 
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={actualTitle} />
+      <meta property="og:description" content={actualDescription} />
       <meta property="og:image" content={actualImageUrl} />
+
+      <meta name="twitter:title" content={actualTitle} />
+      <meta name="twitter:site" content={`@${siteMetadata.twitter}`} />
+      <meta name="twitter:creator" content={`@${siteMetadata.twitter}`} />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:description" content={actualDescription} />
+      <meta name="twitter:image" content={actualImageUrl} />
     </Helmet>
   );
 };
