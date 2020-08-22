@@ -561,7 +561,7 @@ Seeing as the above code literally just represents a mathematical expression, it
 
 The modulus operator has an exceptional outcome, which occurs when the supplied divisor is equal to _zero_. If we were to try and invoke `Wrap(123, 0)`, it would throw an exception, indicating that the function is actually impure as well.
 
-Notably, this problem could be avoided if we used something like `Option<int>` as return type instead. This approach eliminates the need for an exception (and this is how [Darklang does it](https://docs.darklang.com/languagedetails#floats)), but comes with an expense of making basic arithmetic operations appear more cumbersome.
+Notably, this problem could be avoided if we used something like `Option<int>` as return type instead. This approach eliminates the need for an exception (and this is how [Darklang does it](https://docs.darklang.com/languagedetails#floats)), but comes at an expense of making basic arithmetic operations appear more cumbersome.
 
 In any case, even though the code we wrote originally doesn't satisfy the theoretical definition of purity, it might be _pure enough_ for our usage scenario.
 
@@ -580,7 +580,7 @@ public static string GetOutputPath(Report report, string outputDir)
 }
 ```
 
-The code above assembles a file path for the provided report by combining the output directory with the generated file name. It calls the [`Path.Combine`](https://docs.microsoft.com/en-us/dotnet/api/system.io.path.combine?view=netcore-3.1#System_IO_Path_Combine_System_String_System_String_) method, whose behavior relies on the value of the `Path.DirectorySeparatorChar` constant, as it indicates which directory separator character is used by the operating system.
+The code above assembles a file path for the provided report by combining the output directory with the generated file name. It calls the [`Path.Combine`](https://docs.microsoft.com/en-us/dotnet/api/system.io.path.combine?view=netcore-3.1#System_IO_Path_Combine_System_String_System_String_) method, whose behavior relies on the value of the `Path.DirectorySeparatorChar` constant, as it indicates which directory separator is used by the operating system.
 
 Since it is a constant and its value is guaranteed to always be the same for the duration of the program's lifetime, our function is pure (as long as we also disregard exceptions). However, it's pure only within the current session.
 
