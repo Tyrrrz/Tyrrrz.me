@@ -1,6 +1,6 @@
 ---
 title: Pure-Impure Segregation Principle
-date: 2020-08-30
+date: 2020-08-24
 cover: Cover.png
 ---
 
@@ -22,17 +22,17 @@ Depending on who you ask, this principle may have different names, such as [func
 
 At the end of the day, just like with any other software development pattern, its usefulness is entirely situational. However, it offers a good mental model for reasoning about non-determinism in code, which is relevant regardless of context.
 
-In this article we will look at what actually makes something pure or impure, why is that important to us, and how we can leverage that knowledge to write better software. I will show examples of where applying this principle lends to better design, as well scenarios where it doesn't.
+In this article we will look at what actually makes something pure or impure, why is that important to us, and how we can leverage that knowledge to write better software. I will show examples of where applying this principle lends to better design, as well scenarios where it might not be as helpful.
 
 _Note: as usual, the code samples in this article are written in C#, but the main ideas apply to any language._
 
 ## Pure vs impure
 
-As I'm writing this in 2020, there is no doubt that most readers are already familiar with the concept of purity in programming. Nevertheless, let's go over it one more time to make sure we're on the same page.
+As I'm writing this in 2020, there is no doubt that most readers are already familiar with the concept of purity in programming. Nevertheless, let's go over it one more time to make sure we are on the same page.
 
 In essence, _pure code_ is code encapsulated within a function, whose **evaluation is influenced only by its parameters** and whose **evaluation influences only its returned value**. In other words, a pure function doesn't have any implicit arguments, doesn't depend on or interact with external state, and doesn't generate any observable _side-effects_.
 
-Conversely, a function which breaks at least one of those two rules is considered _impure_. To illustrate this, let's look at a very simple example:
+Conversely, a function which breaks at least one of those two rules is called _impure_. To illustrate this, let's look at a very simple example:
 
 ```csharp
 public static bool IsFoodEdible(DateTimeOffset expiration) =>
@@ -42,7 +42,7 @@ public static bool IsFoodEdible(DateTimeOffset expiration, DateTimeOffset instan
     instant < expiration;
 ```
 
-While both versions of the `IsFoodEdible` function are similar, only one of them is actually pure. The first overload gets the current time from the system clock, which creates an implicit dependency on external state. In practice, this means that evaluating the function multiple times may very well produce different results even for the same input parameter, violating the first rule of purity.
+While both versions of the `IsFoodEdible` function are similar, only one of them is pure. The first overload gets the current time from the system clock, creating an implicit dependency on some external state. In practice, this means that evaluating the function multiple times may very well produce different results even for the same input parameters, which violates the first rule of purity.
 
 The other version takes the current time as an explicit parameter instead and thus does not exhibit that problem. Regardless of whether we call that function now or ten years into the future, the result is guaranteed to always be the same for the same input. In other words, the behavior of the function depends only on the parameters that were passed to it and nothing else.
 
@@ -58,9 +58,9 @@ public static void IsFoodEdible(DateTimeOffset expiration, DateTimeOffset instan
 }
 ```
 
-In this case, the impurity comes from the fact that this function generates side-effects by interacting with the standard output stream. Since the evaluation of this function influences something other than its returned value, it breaks the second rule we outlined earlier.
+In this case, the impurity comes from the fact that this function generates side-effects by interacting with the standard output stream. Since its evaluation influences something other than its returned value, it breaks the second rule we outlined earlier.
 
-Generally speaking, **any function that doesn't return anything** (or whose return value may be ignored) **is guaranteed to be impure**, because a pure function without a return value is inherently useless. Furthermore, if a function executes asynchronously, it's also a reliable giveaway that a function is impure, since asynchrony naturally comes from I/O operations.
+As a general rule, **any function that doesn't return anything** (or whose return value may be ignored) **is guaranteed to be impure**, because a pure function without a return value is inherently useless. Furthermore, if a function executes asynchronously, it's also a reliable giveaway that a function is impure, since asynchrony naturally comes from I/O operations.
 
 Finally, the function in the following example may seem impure at a first glance too, but actually isn't:
 
@@ -77,16 +77,16 @@ public static bool AllFoodEdible(IReadOnlyList<DateTimeOffset> expirations, Date
 }
 ```
 
-Seeing as `AllFoodEdible` mutates the value of `i` during the course of its execution, one could think that such a function is not pure either. However, because the variable `i` is encapsulated within a local scope and cannot be accessed from outside of this function, these mutations are not externally observable and, as such, do not make the code impure.
+Seeing as `AllFoodEdible` mutates the value of `i` during the course of its execution, one could think that such a function is not pure either. However, because the variable `i` is encapsulated within a local scope and cannot be accessed from outside, this mutation is not externally observable and, as such, does not make the function impure.
 
-Now, of course it wouldn't be very useful to classify code based on these seemingly arbitrary traits if it didn't provide us with some useful insights. When it comes to purity, these insights come in a form of properties that all pure functions are known to possess:
+Now, of course it wouldn't make much sense to classify code based on these seemingly arbitrary traits if purity didn't provide us with some useful benefits. Indeed, since pure functions are deterministic and have no side-effects, they possess the following intrinsic qualities:
 
-- They produce deterministic results which can be safely cached
-- They never have race conditions and can be easily parallelized
-- They are self-contained and don't influence the behavior of other functions
-- They are always CPU-bound and don't need to execute asynchronously
-- They are highly localized and are generally easier to debug and reason about
-- They don't have implicit dependencies and are trivial to test in isolation
+- Easy to reason about
+- Can be safely cached
+- Can be safely parallelized
+- Testable in isolation
+- Don't execute asynchronously
+- Don't influence other functions
 
 Judging by this list alone, it's rather clear that pure code is extremely flexible and convenient to work with. In fact, the initial instinct may be that we should optimize our design in such way that we focus exclusively on writing pure code.
 
@@ -94,7 +94,7 @@ Unfortunately, that's not possible because **purity**, in itself, **is not an in
 
 These aspects are dictated by the functional requirements of the software and not so much by its design. That means that we can't simply eliminate impurities from our code, at least not without also changing how it works.
 
-Having said that, one very important characteristic of **impurity** is that it's **inherently contagious**. If an otherwise pure function calls an impure function, it becomes impure as well:
+Having said that, one very important characteristic of **impurity** is that it's **inherently contagious**. Any function that depends on the execution of an impure function becomes impure as well:
 
 ```csharp
 // Impure function
@@ -109,9 +109,9 @@ public static string GetFilePath(string dirPath, string name, string id) =>
     dirPath + name + id;
 ```
 
-In other words, depending on how the code is structured and how it interacts with non-deterministic and effectful operations, impurities may make up a larger or smaller portion of the whole. That, in turn, is something we can actually control.
+Depending on how the code is structured and how it interacts with non-deterministic and effectful operations, impurities may make up a larger or smaller portion of the whole. That, in turn, is something we can actually control.
 
-As a guiding principle, we can establish that, to reap the most benefits out of pure functions, the design of our software needs to **limit impure interactions and delay them as much as possible**. Ideally, they should be pushed towards the outermost layers of the architecture, also known as the _system boundaries_.
+In order to reap the most benefit out of pure functions, we need to design software in a way that **limits impure interactions and delays them as much as possible**. Ideally, we should strive to push them as far out as we can, towards the _boundaries of the system_.
 
 ## Flattening the dependency tree
 
@@ -119,13 +119,11 @@ Although the concept of purity forms the foundation of functional programming, i
 
 Software written with OOP in mind follows a hierarchical design, where objects are composed together to represent different layers of abstraction in a connected fashion. Any impurities that may exist in those objects are free to spread from child to parent, potentially contaminating the entire dependency tree.
 
-To better understand what that means in practice, let's revisit an example from my previous article. The idea was to build a simple web API application that calculates user's sunrise and sunset times based on their IP. This functionality was modeled using three classes:
+To better understand what that means in practice, let's revisit an example from my previous article. The idea was to build a simple web API application that calculates user's sunrise and sunset times based on their IP. This functionality can be modeled using three classes:
 
 - `LocationProvider` to get a location from an IP address, using a public GeoIP database
 - `SolarCalculator` to calculate solar times from that location
 - `SolarTimesController` to expose the result through an HTTP endpoint
-
-Here's the code for that:
 
 ```csharp
 public class LocationProvider
@@ -228,10 +226,9 @@ public class LocationProvider
     /* ... */
 }
 
-public class SolarCalculator
+public static class SolarCalculator
 {
-    // Can be made into a static method
-    public SolarTimes GetSolarTimes(Location location, DateTimeOffset date)
+    public static SolarTimes GetSolarTimes(Location location, DateTimeOffset date)
     {
         // Pure
         var sunrise = CalculateSunrise(location, date);
@@ -245,7 +242,6 @@ public class SolarCalculator
 public class SolarTimesController
 {
     private readonly LocationProvider _locationProvider;
-    private readonly SolarCalculator _solarCalculator;
 
     /* ... */
 
@@ -258,7 +254,7 @@ public class SolarTimesController
         );
 
         // Pure
-        var result = _solarCalculator.GetSolarTimes(
+        var result = SolarCalculator.GetSolarTimes(
             location,
             date ?? DateTimeOffset.Now
         );
@@ -268,9 +264,9 @@ public class SolarTimesController
 }
 ```
 
-Previously, the method in `SolarCalculator` took an IP address as a parameter and relied on `LocationProvider` to get the coordinates it maps to. After refactoring, the method now instead takes the location directly, skipping the previously required impure step.
+Previously, the method in `SolarCalculator` took an IP address as a parameter and relied on `LocationProvider` to get the coordinates it maps to. After refactoring, the method is now static and instead takes the location directly, skipping the previously required impure operation.
 
-Of course, that impurity didn't just disappear into thin air, our software still needs to get the location somehow. The difference is that now this concern is pushed out towards the boundary of the system, which in this case is the controller.
+Of course, that impurity didn't just disappear into thin air, our software still needs to get the location anyhow. The difference is that now this concern is pushed out towards the boundary of the system, which, in this case, is represented by the controller.
 
 In doing that, we also flattened the hierarchy so that all of the dependencies are aggregated at the boundary. The data flow now looks a bit more like a pipeline instead:
 
@@ -282,13 +278,13 @@ In doing that, we also flattened the hierarchy so that all of the dependencies a
         [ SolarTimesController ]
 ```
 
-The benefit of this design is that the pure business logic is no longer contaminated by non-deterministic effectful code, which means we can take advantage of the useful properties we listed in the previous section. If we wanted to parallelize or test `SolarCalculator`, it's much easier to do so now than it was before.
+The benefit of this design is that our pure business logic is no longer contaminated by effectful code, which means we can take advantage of the useful properties listed in the previous section. For example, if we wanted to parallelize or test `SolarCalculator`, it's much easier to do so now than it was before.
 
 ## Interleaved impurities
 
-This type of "lossless" refactoring shown above is possible only when the impure operation comes either directly before or directly after the pure code that we want to isolate. Unfortunately, this is not always the case.
+Although very useful, the type of "lossless" refactoring shown earlier only works if the data required by the function can be easily encapsulated within input parameters. Unfortunately, this is not always the case.
 
-Often we have to deal with functions that have pure and impure concerns interleaved with each other, creating a cohesive structure that is hard to break apart. This happens when exposing the entire set of required data as function parameters is simply unfeasible.
+Often a function may need to dynamically resolve data from an external API or a database, with no way of knowing about it beforehand. This typically results in an implementation where pure and impure concerns are interleaved with each other, creating a tightly coupled cohesive structure.
 
 To illustrate a scenario like that, let's take a look at a slightly more involved example. The following snippet contains a class called `RecommendationsProvider` which is responsible for generating song suggestions for a user of some music streaming service:
 
@@ -301,10 +297,10 @@ public class RecommendationsProvider
 
     public async Task<IReadOnlyList<Song>> GetRecommendationsAsync(string userName)
     {
-        // 1. Get own top songs
-        // 2. Get other users who listened to them
-        // 3. Get top songs of those users
-        // 4. Return recommendations
+        // 1. Get user's own top scrobbles
+        // 2. Get other users who listened to the same songs
+        // 3. Get top scrobbles of those users
+        // 4. Aggregate the songs into recommendations
 
         // Impure
         var scrobbles = await _songService.GetTopScrobblesAsync(userName);
@@ -359,168 +355,96 @@ public class RecommendationsProvider
 }
 ```
 
-The above algorithm works by retrieving the user's most listened songs, finding others who've listened to the same titles, and then extracting their top songs as well. In the end, the recommendations are formed based on what users with a similar taste listen to the most.
+The above algorithm works by retrieving the user's most listened songs, finding other people who have also listened to the same titles, and then extracting their top songs as well. Those songs are then aggregated into a list of recommendations and returned back to the caller.
 
-It's quite clear that this function would benefit greatly from being pure, due to how much business logic is encapsulated within it, but unfortunately the refactoring technique we relied upon earlier won't work here. In order to fully isolate `GetRecommendationsAsync` from its impure dependencies, we would have to somehow supply the function with an entire list of songs, users, and their scrobbles upfront, which is completely impractical (and likely impossible).
+It's quite clear that this function would benefit greatly from being pure, seeing how much business logic is encapsulated within it. Unfortunately, the technique we relied upon earlier won't work here.
 
-As a workaround, we could also split the function into smaller pieces, each handling one of the four stages of the algorithm separately. In doing so, we'd probably arrive at a pipeline consisting of `ProcessOwnScrobbles`, `ProcessOtherListeners`, `ProcessOtherScrobbles`, and `FinalizeRecommendations`, with impure operations inserted between them.
+In order to fully isolate `GetRecommendationsAsync` from its impure dependencies, we would have to somehow supply the function with an entire list of songs, users, and their scrobbles upfront. If we assume that we're dealing with data on millions of users, it's obvious that this would be completely impractical and likely even impossible.
 
-While that would work, the value of such change is questionable. Instead of having one cohesive element to reason about, we'd end up with multiple fragmented parts which are completely useless to us on their own.
-
-However, since our original goal is to push the impurities out towards the system boundaries, we may try to approach this issue from another angle. In essence, all we need to do is delay the evaluation of impure functions until the last possible opportunity.
-
-Let's see how we can achieve that:
+A seemingly obvious way we could try to work around this problem is to split the function into smaller pieces, each handling one of the four stages of the algorithm separately:
 
 ```csharp
 public class RecommendationsProvider
 {
-    // Can be made into a static method
-    public Func<SongService, Task<IReadOnlyList<Song>>> GetRecommendationsFunc(string userName)
+    /* ... */
+
+    // Pure
+    public static IReadOnlyList<string> HandleOwnScrobbles(IReadOnlyList<Scrobble> scrobbles) =>
+        scrobbles
+            .OrderByDescending(s => s.ScrobbleCount)
+            .Take(100)
+            .Select(s => s.Song.Id)
+            .ToArray();
+
+    // Pure
+    public static IReadOnlyList<string> HandleOtherListeners(IReadOnlyList<User> users) =>
+        users
+            .Where(u => u.TotalScrobbleCount >= 10_000)
+            .OrderByDescending(u => u.TotalScrobbleCount)
+            .Take(20)
+            .Select(u => u.UserName)
+            .ToArray();
+
+    // Pure
+    public static IReadOnlyList<Song> HandleOtherScrobbles(IReadOnlyList<Scrobble> scrobbles) =>
+        scrobbles
+            .Where(s => s.Song.IsVerifiedArtist)
+            .OrderByDescending(s => s.Song.Rating)
+            .Take(10)
+            .Select(s => s.Song)
+            .ToArray();
+
+    // Pure
+    public static IReadOnlyList<Song> FinalizeRecommendations(IReadOnlyList<Song> songs) =>
+        songs
+            .OrderByDescending(s => s.Rating)
+            .Take(200)
+            .ToArray();
+
+    public async Task<IReadOnlyList<Song>> GetRecommendationsAsync(string userName)
     {
-        return async songService =>
+        // Impure
+        var scrobbles = await _songService.GetTopScrobblesAsync(userName);
+
+        // Pure
+        var songIds = HandleOwnScrobbles(scrobbles);
+
+        var recommendationCandidates = new List<Song>();
+        foreach (var songId in songIds)
         {
-            var scrobbles = await songService.GetTopScrobblesAsync(userName);
+            // Impure
+            var otherListeners = await _songService
+                .GetTopListenersAsync(songId);
 
-            var scrobblesSnapshot = scrobbles
-                .OrderByDescending(s => s.ScrobbleCount)
-                .Take(100)
-                .ToArray();
+            // Pure
+            var otherUserNames = HandleOtherListeners(otherListeners);
 
-            /* ... */
-        };
+            foreach (var otherUserName in otherUserNames)
+            {
+                // Impure
+                var otherScrobbles = await _songService
+                    .GetTopScrobblesAsync(otherListener.UserName);
+
+                // Pure
+                var songsToRecommend = HandleOtherScrobbles(otherScrobbles);
+
+                recommendationCandidates.AddRange(songsToRecommend);
+            }
+        }
+
+        // Pure
+        return FinalizeRecommendations(recommendationCandidates);
     }
 }
 ```
 
-Now, instead of evaluating the result directly, our method preserves `userName` in a closure and returns another function which can be evaluated at a later point. That function, in turn, relies on a parameter of type `SongService` to retrieve the song recommendations we need.
+By extracting all of the pure code out of `GetRecommendationsAsync`, we can now write unit tests that verify that the intermediate stages of the algorithm work as intended. On the surface, it looks as though we managed to achieve exactly what we wanted.
 
-Because `GetRecommendationsFunc` does not perform any impure operations itself and simply returns an impure function, it is completely pure. Essentially, instead of yielding the result directly, this method returns a lambda which encodes all of the information required to obtain it:
+However, instead of having one cohesive element to reason about, we ended up with multiple fragments, each having no meaning or value of its own. While unit testing of individual parts may have become easier, the benefit is very questionable, as it provides no confidence in the correctness of the algorithm as a whole.
 
-```csharp
-// Pure
-var getRecommendationsAsync = new RecommendationsProvider().GetRecommendationsFunc("JohnDoe");
+Ultimately, we weren't able to push impurities out towards the system boundaries -- what we did was simply push the pure code further in instead. In other words, the flow of data in the program remains completely unchanged.
 
-// Impure
-var recommendations = await getRecommendationsAsync(new SongService());
-```
-
-This technique may look extremely awkward in the context of object-oriented programming, but this is something functional languages have first-class support for, thanks to a feature known as _currying_. As an example, this is essentially the same code as above, but written in F# instead:
-
-```fsharp
-let getRecommendations userName songService = task {
-    let! scrobbles = songService.GetTopScrobblesAsync(userName)
-
-    let scrobblesSnapshot = scrobbles
-        |> Seq.sortByDescending (fun s -> s.ScrobbleCount)
-        |> Seq.take 100
-        |> Seq.toArray
-
-    // ...
-}
-
-// Pure
-let getRecommendationsPartial = getRecommendations "JohnDoe"
-
-// Impure
-let! recommendations = getRecommendationsPartial SongService()
-```
-
-At this point you may notice that, by delaying the resolution of an impure dependency towards the system boundary, we've essentially reinvented dependency injection. The only difference is that it works in reverse order compared to what we're used to.
-
-While the object-oriented way of doing dependency injection expects us to provide the dependencies first, the functional way typically operates in the opposite direction. For contrast, here are both approaches side-by-side:
-
-```csharp
-// Object-oriented DI (dependencies first)
-var recommendationsProvider = new RecommendationsProvider(new SongService());
-var recommendations = await recommendationsProvider.GetRecommendationsAsync("JohnDoe");
-
-// Functional DI (dependencies last)
-var getRecommendationsAsync = Domain.GetRecommendationsFunc("JohnDoe");
-var recommendations = await getRecommendationsAsync(new SongService());
-```
-
-[![Tweet by @importantshock](Tweet-dependency-injection.png)](https://twitter.com/importantshock/status/1085740688283746304)
-
-Although both of these approaches are essentially equivalent, there's a slight nuance to the second one. As functions are generally easier to compose than objects, we can apply various transformations on the result, without observing its actual value.
-
-For example, we can define a special `Map` extension method that allows us to transform a delegate from one type to another. The following is its implementation for asynchronous functions with just one parameter:
-
-```csharp
-public static Func<TParam, Task<TMappedResult>> Map(
-    this Func<TParam, Task<TResult>> source,
-    Func<TResult, TMappedResult> transform)
-{
-    return async param =>
-    {
-        var result = await source(param);
-        return transform(result);
-    };
-}
-```
-
-Note that although the above code evaluates the result of `source`, it happens within a nested lambda. This effectively makes the transformation lazy, which means that the `Map` method itself remains pure.
-
-As an example, let's use this extension to refine the provided recommendations to only contain songs of a specific genre and limit their total number:
-
-```csharp
-// Pure
-var getRecommendationsAsync = Domain.GetRecommendationsFunc("JohnDoe");
-
-// Pure
-var getSpecificRecommendationsAsync = getRecommendationsAsync.Map(recommendations =>
-    // Get only a subset of recommendations
-    recommendations
-        .Where(s => s.Genres.Contains("Metal"))
-        .Take(10)
-        .ToArray()
-);
-
-// Impure
-var specificRecommendations = await getSpecificRecommendationsAsync(new SongService());
-```
-
-Similarly, we can also define another extension method called `Merge`. This one would allow us to lazily combine two impure functions together:
-
-```csharp
-public static Func<TParam, Task<TResult>> Merge(
-    this Func<TParam, Task<TResult>> source,
-    Func<TParam, Task<TResult>> other,
-    Func<TResult, TResult, TResult> join)
-{
-    return async param =>
-    {
-        var left = await source(param);
-        var right = await other(param);
-
-        return join(left, right);
-    }
-}
-```
-
-Its usage would then be as follows:
-
-```csharp
-// Pure
-var getRecommendationsForJohnDoeAsync = Domain.GetRecommendationsFunc("JohnDoe");
-var getRecommendationsForJaneDoeAsync = Domain.GetRecommendationsFunc("JaneDoe");
-
-// Pure
-var getAllRecommendationsAsync = getRecommendationsForJohnDoeAsync.Merge(
-    getRecommendationsForJaneDoeAsync,
-    // Merge both recommendations into a single list
-    (recommendationsForJohn, recommendationsForJane) =>
-        recommendationsForJohn
-            .Concat(recommendationsForJane)
-            .ToArray()
-);
-
-// Impure
-var allRecommendations = await getAllRecommendationsAsync(new SongService());
-```
-
-There's no point denying that programming in such style, while definitely possible, is extremely cumbersome in an OO-first language. Although we managed to achieve our goal of separating pure and impure concerns from each other, it came at a considerable cost.
-
-If you're really keen on writing code like this in C#, I would recommend using [Language-Ext](https://github.com/louthy/language-ext) for general functional primitives and [Eff](https://github.com/nessos/Eff) for effectful composition. In case you want to learn more about the latter, there is a [great introductory article](https://eiriktsarpalis.wordpress.com/2020/07/20/effect-programming-in-csharp) written by one of its authors.
+The main issue is that each stage of the recommendation algorithm depends on additional data derived from the previous stages. Since this behavior is inherently non-deterministic, it's impossible to express it using pure functions.
 
 ## Pure "enough" code
 
@@ -545,7 +469,7 @@ public static int FindIndexOf(IEnumerable<Item> items, Item item)
 }
 ```
 
-This is a very simple function that attempts to find an index that corresponds to the position of an item in a sequence, or throw an exception in case of failure. The negative outcome is assumed to be very improbable in this scenario, hence why an exception is used as opposed to a fallback value.
+This is a very simple function that attempts to find an index that corresponds to the position of an item in a sequence or throw an exception in case of failure. The negative outcome is assumed to be very improbable in this scenario, hence why an exception is used as opposed to a fallback value.
 
 According to the criteria of purity, this function is not pure because the result of its evaluation is not entirely encapsulated within the returned value. Throwing an exception is an effectful operation, since it can change the behavior of the function above in the call stack, or lead to the termination of the program altogether.
 
@@ -557,7 +481,7 @@ Let's consider an even simpler example:
 public static int Wrap(int value, int period) => value % period;
 ```
 
-Seeing as the above code literally just represents a mathematical expression, it seems logical that it must be pure. In reality, however, this function shares the exact same problem as the one in the previous snippet.
+Seeing as the above code literally just represents a mathematical expression, it seems logical that it must be pure. However, this function shares the exact same problem as the one in the previous snippet.
 
 The modulus operator has an exceptional outcome, which occurs when the supplied divisor is equal to _zero_. If we were to try and invoke `Wrap(123, 0)`, it would throw an exception, indicating that the function is actually impure as well.
 
@@ -594,13 +518,13 @@ As you can see, the concept of purity gets a bit hazy once you start digging int
 
 If you decide to follow the rules pedantically, you'll find the idea of modelling any problem domain with pure functions quickly becomes impractical. However, it's important to remember that **the goal is not purity in itself, but rather the benefits it provides**.
 
-At the end of the day, it's up to the developer to draw the line and decide what makes sense and what doesn't. The concept of purity is really just an approximation and should be treated as such.
+At the end of the day, the entire notion of purity is just a mathematical model, which may not necessarily translate very well to applied programming. As a developer of the project, it is up to you to draw the line and decide what makes sense and what doesn't.
 
 ## Summary
 
-Overall, the concept of purity is very useful, as it helps us understand how some operations may make our code non-deterministic, difficult to reason about, and cumbersome to test in isolation. Impure interactions are not bad on their own, but the constraints they impose are contagious in nature and may spread to other parts of the application.
+Overall, purity is a pretty useful concept, as it helps us understand how some operations may make our code non-deterministic, difficult to reason about, and cumbersome to test in isolation. Impure interactions are not bad on their own, but the constraints they impose are contagious in nature and may spread to other parts of the application.
 
-The pure-impure segregation principle aims to limit impurities to an essential minimum, by decoupling them from the rest of the code. Ultimately, the goal is push all non-pure operations towards the outermost layers of the system, while keeping the domain layer comprised entirely of pure functions.
+The pure-impure segregation principle aims to limit impurities to an essential minimum, by decoupling them from the rest of the code. Ultimately, the goal is to push all non-pure operations towards the outermost layers of the system, while keeping the domain layer comprised entirely of pure functions.
 
 Designing software in such way leads to an architecture that resembles a pipeline rather than a hierarchy, which favors functional style of programming. Depending on the project, this may aid in expressing the flow of data more clearly, among other useful benefits.
 
