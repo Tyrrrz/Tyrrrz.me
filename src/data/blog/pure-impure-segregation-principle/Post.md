@@ -361,7 +361,7 @@ It's quite clear that this function would benefit greatly from being pure, seein
 
 In order to fully isolate `GetRecommendationsAsync` from its impure dependencies, we would have to somehow supply the function with an entire list of songs, users, and their scrobbles upfront. If we assume that we're dealing with data on millions of users, it's obvious that this would be completely impractical and likely even impossible.
 
-A seemingly obvious way we could try to work around this problem is to split the function into smaller pieces, each handling one of the four stages of the algorithm separately:
+A seemingly simple way we could try to work around this problem is to split the function into smaller pieces, each handling one of the four stages of the algorithm separately:
 
 ```csharp
 public class RecommendationsProvider
