@@ -67,7 +67,7 @@ Finally, the function in the following example may seem impure at a first glance
 ```csharp
 public static bool AllFoodEdible(IReadOnlyList<DateTimeOffset> expirations, DateTimeOffset instant)
 {
-    for (var i = 0; i < products.Count; i++)
+    for (var i = 0; i < expirations.Count; i++)
     {
         if (instant >= expirations[i])
             return false;
