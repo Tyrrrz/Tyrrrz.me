@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 
-const outputDirPath = path.resolve(__dirname, '..', 'src', 'data', 'projects');
+const outputDirPath = path.resolve(__dirname, '..', 'data', 'projects');
 
 const run = async () => {
   // Fetch GitHub API to get my repos

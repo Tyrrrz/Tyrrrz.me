@@ -1,35 +1,28 @@
 const path = require('path');
+const config = require('./src/infra/config');
+const theme = require('./src/infra/theme');
+const { getAbsoluteUrl } = require('./src/infra/utils');
+const routes = require('./src/infra/routes');
 
-const config = require('./src/config');
-const theme = require('./src/theme');
-const { getAbsoluteUrl } = require('./src/utils');
-const routes = require('./src/routes');
+// Expose some external variables to the client side
+process.env.GATSBY_URL = process.env.URL;
 
-// Gatsby's default syntax for defining plugins is awful so I wrote this
+exports.siteMetadata = {
+  siteUrl: config.siteUrl,
+  title: 'Alexey Golub',
+  description: 'Alexey Golub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker'
+};
+
 const resolvePlugin = (plugin, options) => ({
   resolve: plugin,
   options: options
 });
 
-exports.siteMetadata = {
-  siteUrl: config.siteDomain,
-  title: 'Alexey Golub',
-  description: 'Alexey Golub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker',
-  email: 'tyrrrz@gmail.com',
-  twitter: 'Tyrrrz',
-  github: 'Tyrrrz',
-  instagram: 'Tyrrrz',
-  patreon: 'Tyrrrz',
-  buymeacoffee: 'Tyrrrz',
-  bitcoin: 'bc1qa3jkft6uckysrxrlc2sygguxshf7gufy0zm692',
-  ethereum: '0x00E6B59BAD5F0c887E0eBD1b7bBd7b024d0796c9'
-};
-
 exports.plugins = [
   // Source: file system
   resolvePlugin('gatsby-source-filesystem', {
     name: 'content',
-    path: path.resolve(__dirname, 'src')
+    path: path.resolve(__dirname, 'data')
   }),
 
   // Transform: images
@@ -91,7 +84,7 @@ exports.plugins = [
             }
           }
         `,
-        output: '/blog/rss.xml',
+        output: routes.dynamic.blogPost.getPath('rss.xml'),
         title: 'Blog | Alexey Golub (RSS Feed)'
       }
     ]
@@ -109,7 +102,7 @@ exports.plugins = [
   }),
 
   // Inject canonical URLs into meta tags
-  resolvePlugin('gatsby-plugin-canonical-urls', { siteUrl: config.siteDomain }),
+  resolvePlugin('gatsby-plugin-canonical-urls', { siteUrl: config.siteUrl }),
 
   // Disqus integration
   resolvePlugin('gatsby-plugin-disqus', { shortname: config.disqusId }),

@@ -1,8 +1,6 @@
 const path = require('path');
-const routes = require('./src/routes');
-
-// Expose some server-side environment variables to the client
-process.env.GATSBY_URL = process.env.URL;
+const routes = require('./src/infra/routes');
+const redirects = require('./src/infra/redirects');
 
 exports.onCreateNode = ({ actions, node }) => {
   // Add slug to markdown files
@@ -32,23 +30,21 @@ exports.createPages = async ({ actions, graphql }) => {
     }
   `);
 
-  if (queryResult.errors) throw queryResult.errors;
-
   queryResult.data.allMarkdownRemark.nodes.forEach((node) => {
     const slug = node.fields.slug;
 
     actions.createPage({
       path: routes.dynamic.blogPost.getPath(slug),
-      component: routes.dynamic.blogPost.component,
+      component: routes.dynamic.blogPost.componentPath,
       context: { slug }
     });
   });
 
   // Configure redirects
-  Object.keys(routes.redirects).forEach((from) => {
+  Object.keys(redirects).forEach((from) => {
     actions.createRedirect({
       fromPath: from,
-      toPath: routes.redirects[from],
+      toPath: redirects[from],
       force: true,
       redirectInBrowser: true
     });

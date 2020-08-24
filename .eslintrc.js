@@ -1,30 +1,25 @@
 module.exports = {
-  env: {
-    browser: true,
-    es6: true,
-    node: true
-  },
+  parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: 2020,
-    sourceType: 'module',
+    sourceType: "module",
     ecmaFeatures: {
       jsx: true
     }
   },
-  plugins: ['react', 'prettier', 'simple-import-sort', 'import'],
   settings: {
     react: {
-      version: 'detect'
+      version: "detect"
     }
   },
-  extends: ['eslint:recommended', 'plugin:react/recommended', 'plugin:react-hooks/recommended', 'plugin:prettier/recommended'],
+  extends: [
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier/@typescript-eslint",
+    "plugin:prettier/recommended"
+  ],
   rules: {
-    'simple-import-sort/sort': ['error'],
-    'sort-imports': ['off'],
-    'import/first': ['error'],
-    'import/newline-after-import': ['error'],
-    'import/no-duplicates': ['error'],
-    'react/prop-types': ['off'],
-    'react/display-name': ['off']
-  }
+    "@typescript-eslint/explicit-function-return-type": ["off"]
+  },
 };
