@@ -4,7 +4,7 @@ import { ReposGetResponseData } from '@octokit/types/dist-types/generated/Endpoi
 import fs from 'fs';
 import path from 'path';
 
-const outputDirPath = path.resolve('../data/projects/');
+const outputDirPath = path.resolve('./projects/');
 
 const run = async () => {
   const github = new Octokit();

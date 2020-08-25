@@ -1,6 +1,5 @@
 {
   "title": "Fallacies of Unit Testing",
-  "description": "Common misconceptions about unit testing and the test pyramid; important guidelines that help to write tests with the highest value",
   "event": ".NET Summit",
   "date": "2020-08-07",
   "language": "English",

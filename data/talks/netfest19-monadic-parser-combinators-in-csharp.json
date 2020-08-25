@@ -1,6 +1,5 @@
 {
   "title": "Monadic Parser Combinators in C#",
-  "description": "Overview of parsing concepts, deep dive into the use of functional approaches for building parsers, and live-coding session that showcases how to build a working JSON parser using Sprache",
   "event": ".NET Fest",
   "date": "2019-10-25",
   "language": "Russian",

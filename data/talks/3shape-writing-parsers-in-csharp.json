@@ -1,6 +1,5 @@
 {
   "title": "Writing Parsers in C#",
-  "description": "Thorough introduction to language parsing in C#, overview of different approaches, and live-coding session that showcases how to build a working JSON parser using Sprache",
   "event": "3Shape Meetup",
   "date": "2019-05-24",
   "language": "English",

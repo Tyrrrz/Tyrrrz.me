@@ -1,6 +1,5 @@
 {
   "title": "Dependency Absolution",
-  "description": "Using functional paradigms to design software systems with testability and maintenance in mind, without relying on dependency injection or layered arhictecture",
   "event": "Svitla Smart Talks",
   "date": "2019-12-12",
   "language": "Russian",
