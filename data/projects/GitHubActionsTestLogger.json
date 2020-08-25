@@ -2,6 +2,6 @@
   "name": "GitHubActionsTestLogger",
   "url": "https://github.com/Tyrrrz/GitHubActionsTestLogger",
   "description": "Test logger for .NET that reports results to GitHub Actions runner",
-  "stars": 40,
+  "stars": 43,
   "language": "C#"
 }

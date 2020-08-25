@@ -10,8 +10,8 @@ interface LinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
 
 export default function Link({ href, target, ...props }: LinkProps) {
   return isAbsoluteUrl(href) ? (
-    <ExternalLink href={href} eventLabel={href} target={target} {...props} />
+    <ExternalLink {...props} href={href} eventLabel={href} target={target} />
   ) : (
-    <InternalLink to={href} target={target} {...props} />
+    <InternalLink {...props} to={href} target={target} />
   );
 }

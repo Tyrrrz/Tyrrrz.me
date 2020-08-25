@@ -1,11 +1,9 @@
-import { graphql, useStaticQuery } from 'gatsby';
 import React from 'react';
 import Helmet from 'react-helmet';
-import config from './infra/config';
-import routes from './infra/routes';
-import { getAbsoluteUrl, isAbsoluteUrl } from './infra/utils';
+import { getAbsoluteUrl, isAbsoluteUrl } from '../infra/utils';
 import './Layout.scss';
-import Link from './shared/Link';
+import Link from './Link';
+import useSiteMetadata from './useSiteMetadata';
 
 interface Meta {
   title?: string | undefined;
@@ -19,16 +17,7 @@ interface MetaInjectorProps {
 }
 
 function MetaInjector({ meta }: MetaInjectorProps) {
-  const siteMetadata = useStaticQuery(graphql`
-    query {
-      site {
-        siteMetadata {
-          title
-          description
-        }
-      }
-    }
-  `);
+  const siteMetadata = useSiteMetadata();
 
   const actualTitle = meta?.title ? `${meta.title} | ${siteMetadata.title}` : siteMetadata.title;
 
@@ -38,7 +27,7 @@ function MetaInjector({ meta }: MetaInjectorProps) {
 
   const actualImageUrl =
     meta?.imageUrl && !isAbsoluteUrl(meta.imageUrl)
-      ? getAbsoluteUrl(config.siteUrl, meta.imageUrl)
+      ? getAbsoluteUrl(siteMetadata.siteUrl, meta.imageUrl)
       : meta?.imageUrl;
 
   return (
@@ -69,31 +58,31 @@ function Navigation() {
   return (
     <nav className="navbar" role="navigation" aria-label="main navigation">
       <div className="navbar-brand">
-        <Link className="navbar-item" href={routes.static.home.path}>
+        <Link className="navbar-item" href="/">
           Alexey Golub
         </Link>
 
         <a role="button" className="navbar-burger" aria-label="menu" aria-expanded="false">
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
         </a>
       </div>
 
       <div className="navbar-menu">
-        <Link className="navbar-item" href={routes.static.home.path}>
+        <Link className="navbar-item" href="/">
           Home
         </Link>
 
-        <Link className="navbar-item" href={routes.static.blog.path}>
+        <Link className="navbar-item" href="/blog">
           Blog
         </Link>
 
-        <Link className="navbar-item" href={routes.static.projects.path}>
+        <Link className="navbar-item" href="/projects">
           Projects
         </Link>
 
-        <Link className="navbar-item" href={routes.static.talks.path}>
+        <Link className="navbar-item" href="/talks">
           Talks
         </Link>
       </div>
