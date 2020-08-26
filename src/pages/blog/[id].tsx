@@ -1,4 +1,5 @@
 import moment from 'moment';
+import 'prismjs/themes/prism-tomorrow.css';
 import React from 'react';
 import { FiCalendar, FiClock, FiTag } from 'react-icons/fi';
 import { BlogPost, getBlogPost, getBlogPosts } from '../../infra/content';
@@ -37,7 +38,7 @@ export function getStaticProps({ params }: { params: { id: string } }) {
 export default function BlogPostPage({ blogPost }: BlogPostPageProps) {
   return (
     <Layout meta={{ title: blogPost.title, keywords: blogPost.tags }}>
-      <h1 className="title">{blogPost.title}</h1>
+      <h1>{blogPost.title}</h1>
       <div className="subtitle opacity-70">
         <span>
           <FiCalendar className="align-middle" />{' '}
@@ -56,10 +57,12 @@ export default function BlogPostPage({ blogPost }: BlogPostPageProps) {
       </div>
 
       {blogPost.translations && blogPost.translations.length > 0 && (
-        <div>
-          This article has been translated by readers into:{' '}
+        <div className="opacity-70 mt-2 mb-5">
+          Translated by readers into:{' '}
           {blogPost.translations.map((translation) => (
-            <Link href={translation.url}>{translation.language}</Link>
+            <Link key={translation.language} href={translation.url}>
+              {translation.language}
+            </Link>
           ))}
         </div>
       )}

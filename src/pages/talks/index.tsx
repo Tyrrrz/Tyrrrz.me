@@ -37,30 +37,30 @@ export default function TalksPage({ talks }: TalksPageProps) {
 
       {talksByYear.map(({ year, talks }, i) => (
         <div key={year}>
-          <div className={`is-size-4 mb-2 ${i > 0 && 'mt-5'}`}>{year}</div>
+          <div className={`fs-3 mb-2 ${i > 0 && 'mt-5'}`}>{year}</div>
 
           {talks.map((talk) => (
-            <div key={talk.id} className="my-3">
-              <div className="is-size-5">
+            <div key={talk.id} className="my-4">
+              <div className="fs-2">
                 <Link href={talk.recordingUrl || talk.presentationUrl || talk.eventUrl || '#'}>
                   {talk.title}
                 </Link>
               </div>
 
-              <div className="opacity-70">
-                <span>
+              <div className="opacity-70 mt-1 ">
+                <span className="mr-3">
                   <FiGlobe className="align-middle" />{' '}
                   <span className="align-middle">
                     <Link href={talk.eventUrl}>{talk.event}</Link>
                   </span>
                 </span>
 
-                <span className="ml-3">
+                <span className="mr-3">
                   <FiCalendar className="align-middle" />{' '}
                   <span className="align-middle">{moment(talk.date).format('DD MMM, yyyy')}</span>
                 </span>
 
-                <span className="ml-3">
+                <span>
                   <FiMessageCircle className="align-middle" />{' '}
                   <span className="align-middle">{talk.language}</span>
                 </span>

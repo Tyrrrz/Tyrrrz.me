@@ -1,8 +1,7 @@
 import Head from 'next/head';
-import React, { useState } from 'react';
+import React from 'react';
 import config from '../infra/config';
 import { getAbsoluteUrl, isAbsoluteUrl } from '../infra/utils';
-import './layout.scss';
 import Link from './link';
 
 interface Meta {
@@ -59,42 +58,28 @@ function MetaInjector({ meta }: MetaInjectorProps) {
 }
 
 function Navigation() {
-  const [navbarExpanded, setNavbarExpanded] = useState(false);
-
   return (
-    <nav className="navbar" role="navigation" aria-label="main navigation">
-      <div className="navbar-brand mr-5">
-        <Link className="navbar-item is-size-3 has-text-weight-semibold" href="/">
+    <nav className="d-flex align-items-center py-2 mobile-d-initial">
+      <div className="mr-5 mobile-align-center">
+        <Link className="fs-4 fw-bold color-inherit decoration-none" href="/">
           Alexey Golub
         </Link>
-
-        <a
-          role="button"
-          className={`navbar-burger ${navbarExpanded && 'is-active'}`}
-          aria-label="menu"
-          aria-expanded="false"
-          onClick={() => setNavbarExpanded(!navbarExpanded)}
-        >
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-        </a>
       </div>
 
-      <div className={`navbar-menu ${navbarExpanded && 'is-active'}`}>
-        <Link className="navbar-item is-size-5" href="/">
+      <div className="flex-grow mobile-align-center">
+        <Link className="button fs-2 px-1" href="/">
           Home
         </Link>
 
-        <Link className="navbar-item is-size-5" href="/blog">
+        <Link className="button fs-2 px-1" href="/blog">
           Blog
         </Link>
 
-        <Link className="navbar-item is-size-5" href="/projects">
+        <Link className="button fs-2 px-1" href="/projects">
           Projects
         </Link>
 
-        <Link className="navbar-item is-size-5" href="/talks">
+        <Link className="button fs-2 px-1" href="/talks">
           Talks
         </Link>
       </div>
@@ -113,7 +98,7 @@ export default function Layout({ meta, children }: LayoutProps) {
       <MetaInjector meta={meta} />
       <Navigation />
 
-      <main className="mt-6 pb-6">{children}</main>
+      <main className="mb-5">{children}</main>
     </div>
   );
 }

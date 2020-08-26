@@ -36,32 +36,40 @@ export default function BlogPage({ blogPosts }: BlogPageProps) {
     <Layout meta={{ title: 'Blog' }}>
       <h1 className="title">Blog</h1>
 
+      <p>
+        This blog is where I share my thoughts on programming.
+        <br />
+        If you want to know when I post a new article, follow me on{' '}
+        <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or subscribe to the{' '}
+        <Link href="/blog/rss.xml">RSS feed</Link> ✨
+      </p>
+
       {blogPostsByYear.map(({ year, blogPosts }, i) => (
         <div key={year}>
-          <div className={`is-size-4 mb-2 ${i > 0 && 'mt-5'}`}>{year}</div>
+          <div className={`fs-3 mb-2 ${i > 0 && 'mt-5'}`}>{year}</div>
 
           {blogPosts.map((blogPost) => (
-            <div key={blogPost.id} className="my-3">
-              <div className="is-size-5">
+            <div key={blogPost.id} className="my-4">
+              <div className="fs-2">
                 <Link href={`/blog/${blogPost.id}`}>{blogPost.title}</Link>
               </div>
 
-              <div className="opacity-70">
-                <span>
+              <div className="opacity-70 mt-1 ">
+                <span className="mr-3">
                   <FiCalendar className="align-middle" />{' '}
                   <span className="align-middle">
                     {moment(blogPost.date).format('DD MMM, yyyy')}
                   </span>
                 </span>
 
-                <span className="ml-3">
+                <span className="mr-3">
                   <FiClock className="align-middle" />{' '}
                   <span className="align-middle">
                     {humanizeTimeToRead(blogPost.timeToReadMins)}
                   </span>
                 </span>
 
-                <span className="ml-3">
+                <span>
                   <FiTag className="align-middle" />{' '}
                   <span className="align-middle">{blogPost.tags.join(', ')}</span>
                 </span>

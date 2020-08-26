@@ -1,9 +1,11 @@
+import rehypePrism from '@mapbox/rehype-prism';
 import fs from 'fs';
 import matter from 'gray-matter';
 import path from 'path';
 import readingTime from 'reading-time';
-import remarkHtml from 'remark-html';
+import rehypeStringify from 'rehype-stringify';
 import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
 import unified from 'unified';
 import { trimEnd } from './utils';
 
@@ -23,6 +25,7 @@ interface BlogPostMeta {
   date: string;
   tags: string[];
   translations?: BlogPostTranslation[] | undefined;
+  coverImageUrl?: string | undefined;
 }
 
 export interface BlogPost extends BlogPostMeta {
@@ -32,7 +35,7 @@ export interface BlogPost extends BlogPostMeta {
 
 export function getBlogPost(id: string) {
   const filePath = path.resolve(blogPostsDirPath, id, 'Post.md');
-  const fileContent = fs.readFileSync(filePath, 'utf8');
+  const fileContent = fs.readFileSync(filePath, 'utf-8');
 
   const frontMatter = matter(fileContent);
 
@@ -42,7 +45,9 @@ export function getBlogPost(id: string) {
 
   const html = unified()
     .use(remarkParse)
-    .use(remarkHtml)
+    .use(remarkRehype)
+    .use(rehypePrism)
+    .use(rehypeStringify)
     .processSync(frontMatter.content)
     .toString();
 

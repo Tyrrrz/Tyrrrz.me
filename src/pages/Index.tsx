@@ -9,13 +9,13 @@ export default function HomePage() {
 
   return (
     <Layout>
-      <figure className="image is-128x128 mx-auto">
-        <img className="is-rounded" src="/photo.png" />
+      <figure className="w-128 h-128 mx-auto">
+        <img className="radius-50pc" src="/photo.png" />
       </figure>
 
-      <div className="is-divider is-half-width mx-auto" data-content="BIO" />
+      <hr />
 
-      <div className="content px-5 py-2">
+      <div className="px-5 py-2">
         <p>
           Hello! My name is Alexey, also known online as Tyrrrz. I&apos;m a {myAge} y/o software
           developer based in Kyiv, Ukraine.
@@ -32,17 +32,17 @@ export default function HomePage() {
         </p>
       </div>
 
-      <div className="is-divider is-half-width mx-auto" data-content="SOCIAL" />
+      <hr />
 
-      <div className="content has-text-centered">
-        <Link className="button is-white px-2" href="https://github.com/Tyrrrz">
-          <FiGithub className="is-size-4" />
+      <div className="align-center">
+        <Link className="button" href="https://github.com/Tyrrrz">
+          <FiGithub className="fs-3" />
         </Link>
-        <Link className="button is-white px-2" href="https://twitter.com/Tyrrrz">
-          <FiTwitter className="is-size-4" />
+        <Link className="button" href="https://twitter.com/Tyrrrz">
+          <FiTwitter className="fs-3" />
         </Link>
-        <Link className="button is-white px-2" href="https://linkedin.com/in/Tyrrrz">
-          <FiLinkedin className="is-size-4" />
+        <Link className="button" href="https://linkedin.com/in/Tyrrrz">
+          <FiLinkedin className="fs-3" />
         </Link>
       </div>
     </Layout>
