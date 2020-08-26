@@ -1,10 +1,10 @@
 ---
-title: IIS Idle Timeout Workaround
-date: 2017-11-16
-cover: Cover.png
+title: 'IIS Idle Timeout Workaround'
+date: '2017-11-16'
+tags:
+  - 'web'
+  - 'azure'
 ---
-
-![cover](Cover.png)
 
 Web applications hosted in IIS adhere to the _Idle Timeout_ setting. It defines a time period of inactivity after which an application is shut down. Subsequent requests will trigger the application to start up again, but it usually takes a while -- this rather small ASP.net Core website takes around 10 seconds to start and respond to the first request.
 

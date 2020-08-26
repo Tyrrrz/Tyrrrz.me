@@ -1,5 +1,5 @@
+import Head from 'next/head';
 import React, { useState } from 'react';
-import Helmet from 'react-helmet';
 import config from '../infra/config';
 import { getAbsoluteUrl, isAbsoluteUrl } from '../infra/utils';
 import './layout.scss';
@@ -34,7 +34,7 @@ function MetaInjector({ meta }: MetaInjectorProps) {
   };
 
   return (
-    <Helmet>
+    <Head>
       <html lang="en" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -54,7 +54,7 @@ function MetaInjector({ meta }: MetaInjectorProps) {
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:description" content={actual.description} />
       <meta name="twitter:image" content={actual.imageUrl} />
-    </Helmet>
+    </Head>
   );
 }
 

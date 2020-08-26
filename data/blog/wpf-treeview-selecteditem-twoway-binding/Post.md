@@ -1,6 +1,11 @@
 ---
-title: WPF TreeView SelectedItem TwoWay Binding
-date: 2016-10-30
+title: 'WPF TreeView SelectedItem TwoWay Binding'
+date: '2016-10-30'
+tags:
+  - 'dotnet'
+  - 'xaml'
+  - 'csharp'
+  - 'wpf'
 ---
 
 The longer I work with WPF, the more I notice how many things it's missing. Recently I realized that `TreeView.SelectedItem` property is read-only and non-bindable. I think there's no point explaining why binding `SelectedItem` would be useful, so there should be no surprise in my disappointment.

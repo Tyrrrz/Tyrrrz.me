@@ -1,10 +1,11 @@
 ---
-title: Reverse-Engineering YouTube
-date: 2017-12-15
-cover: Cover.png
+title: 'Reverse-Engineering YouTube'
+date: '2017-12-15'
+tags:
+  - 'dotnet'
+  - 'csharp'
+  - 'reverse-engineering'
 ---
-
-![cover](Cover.png)
 
 Almost a year ago, I started developing [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode), a library that scraps information on YouTube videos and lets you download them. Originally, my main motivation for developing it was simply to gain experience, as the task involved a lot of research and reverse-engineering. Nowadays, YoutubeExplode is arguably the most consistent and robust .NET library for dealing with YouTube.
 

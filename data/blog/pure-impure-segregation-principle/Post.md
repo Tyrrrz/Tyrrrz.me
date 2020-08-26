@@ -1,10 +1,10 @@
 ---
-title: Pure-Impure Segregation Principle
-date: 2020-08-24
-cover: Cover.png
+title: 'Pure-Impure Segregation Principle'
+date: '2020-08-24'
+tags:
+  - 'programming'
+  - 'software-design'
 ---
-
-![cover](Cover.png)
 
 About two months ago I published an article titled ["Unit Testing is Overrated"](/blog/unit-testing-is-overrated) where I shared my thoughts on how developers place way too much faith in that testing approach and why it often isn't the best tool for the job. While I didn't expect that post to do particularly well, in three weeks it managed to get over 100K views and 1000 comments, even despite its controversial nature (or, perhaps, owing to it?).
 

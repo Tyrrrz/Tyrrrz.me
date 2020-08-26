@@ -1,5 +1,11 @@
 import fs from 'fs';
+import matter from 'gray-matter';
 import path from 'path';
+import readingTime from 'reading-time';
+import remarkHtml from 'remark-html';
+import remarkParse from 'remark-parse';
+import unified from 'unified';
+import { trimEnd } from './utils';
 
 // Paths are relative to project root
 const blogPostsDirPath = path.resolve('./data/blog/');
@@ -11,44 +17,50 @@ interface BlogPostTranslation {
   url: string;
 }
 
-export interface BlogPost {
+interface BlogPostMeta {
+  id: string;
   title: string;
   date: string;
   tags: string[];
-  translations: BlogPostTranslation[];
-  markdown: string;
+  translations?: BlogPostTranslation[] | undefined;
 }
 
-export function getBlogPosts() {
-  return [
-    {
-      title: 'Test1',
-      date: '2020-04-28',
-      tags: <string[]>[],
-      translations: <BlogPostTranslation[]>[],
-      markdown: ''
-    },
-    {
-      title: 'Test2',
-      date: '2020-04-38',
-      tags: <string[]>[''],
-      translations: <BlogPostTranslation[]>[],
-      markdown: ''
-    }
-  ] as BlogPost[];
+export interface BlogPost extends BlogPostMeta {
+  timeToReadMins: number;
+  html: string;
 }
 
 export function getBlogPost(id: string) {
+  const filePath = path.resolve(blogPostsDirPath, id, 'Post.md');
+  const fileContent = fs.readFileSync(filePath, 'utf8');
+
+  const frontMatter = matter(fileContent);
+
+  const meta = { ...frontMatter.data, id } as BlogPostMeta;
+
+  const timeToReadMins = readingTime(frontMatter.content).minutes;
+
+  const html = unified()
+    .use(remarkParse)
+    .use(remarkHtml)
+    .processSync(frontMatter.content)
+    .toString();
+
   return {
-    title: 'Test1',
-    date: '2020-04-38',
-    tags: <string[]>[],
-    translations: <BlogPostTranslation[]>[],
-    markdown: ''
+    ...meta,
+    timeToReadMins,
+    html
   } as BlogPost;
 }
 
+export function getBlogPosts() {
+  const ids = fs.readdirSync(blogPostsDirPath, 'utf-8');
+
+  return ids.map(getBlogPost);
+}
+
 export interface Project {
+  id: string;
   name: string;
   url: string;
   description: string;
@@ -56,16 +68,25 @@ export interface Project {
   language: string;
 }
 
-export function getProjects() {
-  const fileNames = fs.readdirSync(projectsDirPath);
-  const fileContents = fileNames.map((fileName) =>
-    fs.readFileSync(path.resolve(projectsDirPath, fileName), 'utf-8')
-  );
+export function getProject(id: string) {
+  const filePath = path.resolve(projectsDirPath, `${id}.json`);
+  const fileContent = fs.readFileSync(filePath, 'utf-8');
 
-  return fileContents.map((content) => JSON.parse(content)) as Project[];
+  return {
+    ...JSON.parse(fileContent),
+    id
+  } as Project;
+}
+
+export function getProjects() {
+  return fs
+    .readdirSync(projectsDirPath)
+    .map((name) => trimEnd(name, '.json'))
+    .map(getProject);
 }
 
 export interface Talk {
+  id: string;
   title: string;
   event: string;
   date: string;
@@ -75,11 +96,19 @@ export interface Talk {
   recordingUrl?: string | undefined;
 }
 
-export function getTalks() {
-  const fileNames = fs.readdirSync(talksDirPath);
-  const fileContents = fileNames.map((fileName) =>
-    fs.readFileSync(path.resolve(talksDirPath, fileName), 'utf-8')
-  );
+export function getTalk(id: string) {
+  const filePath = path.resolve(talksDirPath, `${id}.json`);
+  const fileContent = fs.readFileSync(filePath, 'utf-8');
 
-  return fileContents.map((content) => JSON.parse(content)) as Talk[];
+  return {
+    ...JSON.parse(fileContent),
+    id
+  } as Talk;
+}
+
+export function getTalks() {
+  return fs
+    .readdirSync(talksDirPath)
+    .map((name) => trimEnd(name, '.json'))
+    .map(getTalk);
 }

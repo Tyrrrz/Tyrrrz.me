@@ -1,10 +1,11 @@
 ---
-title: Monadic Parser Combinators in C#
-date: 2019-11-10
-cover: Cover.png
+title: 'Monadic Parser Combinators in C#'
+date: '2019-11-10'
+tags:
+  - 'dotnet'
+  - 'csharp'
+  - 'parsing'
 ---
-
-![cover](Cover.png)
 
 The concept of parsing has always seemed very complicated to me. I thought that to work in this area you had to have access to some secret knowledge brought by an alien race or something along those lines.
 

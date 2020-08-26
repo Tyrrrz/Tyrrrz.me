@@ -4,7 +4,7 @@ import { getProjects, Project } from '../../infra/content';
 import Layout from '../../shared/layout';
 import Link from '../../shared/link';
 
-interface ProjectsProps {
+interface ProjectsPageProps {
   projects: Project[];
 }
 
@@ -13,12 +13,12 @@ export function getStaticProps() {
 
   const props = {
     projects
-  } as ProjectsProps;
+  } as ProjectsPageProps;
 
   return { props };
 }
 
-export default function Projects({ projects }: ProjectsProps) {
+export default function ProjectsPage({ projects }: ProjectsPageProps) {
   return (
     <Layout meta={{ title: 'Projects' }}>
       <h1 className="title">Projects</h1>
@@ -26,7 +26,7 @@ export default function Projects({ projects }: ProjectsProps) {
       {projects
         .sort((a, b) => b.stars - a.stars)
         .map((project) => (
-          <div key={project.name} className="my-3">
+          <div key={project.id} className="my-3">
             <div className="is-size-4">
               <Link href={project.url}>{project.name}</Link>
             </div>
@@ -36,9 +36,14 @@ export default function Projects({ projects }: ProjectsProps) {
             <div className="opacity-70">
               <span>
                 <FiStar className="align-middle" />{' '}
-                <span className="align-middle">{project.stars}</span>
+                <span
+                  className={`align-middle ${project.stars >= 500 && 'has-text-weight-semibold'}`}
+                >
+                  {project.stars}
+                </span>
               </span>
-              <span className="ml-2">
+
+              <span className="ml-3">
                 <FiCode className="align-middle" />{' '}
                 <span className="align-middle">{project.language}</span>
               </span>

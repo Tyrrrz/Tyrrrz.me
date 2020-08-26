@@ -1,13 +1,14 @@
 ---
-title: Unit Testing is Overrated
-date: 2020-07-07
-cover: Cover.png
+title: 'Unit Testing is Overrated'
+date: '2020-07-07'
+tags:
+  - 'programming'
+  - 'software-design'
+  - 'testing'
 translations:
-  - lang: Russian
-    url: https://habr.com/ru/company/qiwi/blog/510608
+  - language: 'Russian'
+    url: 'https://habr.com/ru/company/qiwi/blog/510608'
 ---
-
-![cover](Cover.png)
 
 The importance of testing in modern software development is really hard to overstate. Delivering a successful product is not something you do once and forget about, but is rather a continuous recurring process. With every line of code that changes, software must remain in a functional state, which implies the need for rigorous testing.
 

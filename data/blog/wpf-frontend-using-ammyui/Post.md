@@ -1,10 +1,11 @@
 ---
-title: WPF Frontend Using AmmyUI
-date: 2017-11-18
-cover: Cover.png
+title: 'WPF Frontend Using AmmyUI'
+date: '2017-11-18'
+tags:
+  - 'dotnet'
+  - 'xaml'
+  - 'wpf'
 ---
-
-![cover](Cover.png)
 
 Quite a long time ago I've stumbled upon a very interesting open source project called [AmmyUI](https://github.com/AmmyUI/AmmyUI). Its main goal is to make designing XAML apps a lot better by... removing XAML from the equation.
 

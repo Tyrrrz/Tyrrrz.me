@@ -4,7 +4,7 @@ import { FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
 import Layout from '../shared/layout';
 import Link from '../shared/link';
 
-export default function Home() {
+export default function HomePage() {
   const myAge = moment().diff(moment('1995-04-28'), 'years');
 
   return (

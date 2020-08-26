@@ -1,10 +1,11 @@
 ---
-title: Hotkey Editor Control in WPF
-date: 2017-02-02
-cover: Cover.png
+title: 'Hotkey Editor Control in WPF'
+date: '2017-02-02'
+tags:
+  - 'dotnet'
+  - 'xaml'
+  - 'wpf'
 ---
-
-![cover](Cover.png)
 
 GUI applications sometimes offer a way for users to configure hotkeys, typically using a textbox that records combination of key presses inside of it. Such control doesn't come out of the box with WPF but we can implement it ourselves.
 

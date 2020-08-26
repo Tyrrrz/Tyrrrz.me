@@ -1,10 +1,10 @@
 ---
-title: Refactoring C# Code Using Partial Classes
-date: 2020-02-03
-cover: Cover.png
+title: 'Refactoring C# Code Using Partial Classes'
+date: '2020-02-03'
+tags:
+  - 'dotnet'
+  - 'csharp'
 ---
-
-![cover](Cover.png)
 
 As our code grows, we regularly find ourselves seeking new ways to keep it well structured and organized. Systematic refactoring is a necessity but often doesn't come very easily.
 
