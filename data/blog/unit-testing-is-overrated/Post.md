@@ -3,7 +3,7 @@ title: 'Unit Testing is Overrated'
 date: '2020-07-07'
 tags:
   - 'programming'
-  - 'software-design'
+  - 'software design'
   - 'testing'
 translations:
   - language: 'Russian'

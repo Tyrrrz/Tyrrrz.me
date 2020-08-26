@@ -1,5 +1,5 @@
 export default {
-  siteUrl: process.env['URL'] || 'https://localhost:3000',
+  siteUrl: process.env['URL'] || 'http://localhost:3000',
   disqusId: process.env['DISQUS'],
   googleAnalyticsId: process.env['GOOGLE_ANALYTICS']
 };

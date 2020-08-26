@@ -3,12 +3,14 @@ import React from 'react';
 import config from '../infra/config';
 import { getAbsoluteUrl, isAbsoluteUrl } from '../infra/utils';
 import Link from './link';
+import useCanonicalUrl from './useCanonicalUrl';
 
 interface Meta {
   title?: string | undefined;
   description?: string | undefined;
   keywords?: string[] | undefined;
   imageUrl?: string | undefined;
+  rssUrl?: string | undefined;
 }
 
 interface MetaInjectorProps {
@@ -16,6 +18,14 @@ interface MetaInjectorProps {
 }
 
 function MetaInjector({ meta }: MetaInjectorProps) {
+  function ensureAbsoluteUrl(url?: string | undefined) {
+    if (!url) return url;
+    if (isAbsoluteUrl(url)) return url;
+    return getAbsoluteUrl(config.siteUrl, url);
+  }
+
+  const canonicalUrl = useCanonicalUrl();
+
   const defaults = {
     title: 'Alexey Golub',
     description:
@@ -25,11 +35,9 @@ function MetaInjector({ meta }: MetaInjectorProps) {
   const actual = {
     title: meta?.title ? `${meta.title} | ${defaults.title}` : defaults.title,
     description: meta?.description || defaults.description,
-    keywords: meta?.keywords?.join(', ') ?? '',
-    imageUrl:
-      meta?.imageUrl && !isAbsoluteUrl(meta.imageUrl)
-        ? getAbsoluteUrl(config.siteUrl, meta.imageUrl)
-        : meta?.imageUrl
+    keywords: meta?.keywords?.join(', '),
+    imageUrl: ensureAbsoluteUrl(meta?.imageUrl),
+    rssUrl: ensureAbsoluteUrl(meta?.rssUrl)
   };
 
   return (
@@ -39,20 +47,26 @@ function MetaInjector({ meta }: MetaInjectorProps) {
 
       <title>{actual.title}</title>
 
+      <link rel="canonical" href={canonicalUrl} />
+
       <meta name="description" content={actual.description} />
-      <meta name="keywords" content={actual.keywords} />
+      {actual.keywords && <meta name="keywords" content={actual.keywords} />}
 
       <meta property="og:type" content="website" />
       <meta property="og:title" content={actual.title} />
       <meta property="og:description" content={actual.description} />
-      <meta property="og:image" content={actual.imageUrl} />
+      {actual.imageUrl && <meta property="og:image" content={actual.imageUrl} />}
 
       <meta name="twitter:title" content={actual.title} />
       <meta name="twitter:site" content="@Tyrrrz" />
       <meta name="twitter:creator" content="@Tyrrrz" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:description" content={actual.description} />
-      <meta name="twitter:image" content={actual.imageUrl} />
+      {actual.imageUrl && <meta name="twitter:image" content={actual.imageUrl} />}
+
+      {actual.rssUrl && (
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed" href={actual.rssUrl} />
+      )}
     </Head>
   );
 }

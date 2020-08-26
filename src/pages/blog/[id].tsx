@@ -37,7 +37,14 @@ export function getStaticProps({ params }: { params: { id: string } }) {
 
 export default function BlogPostPage({ blogPost }: BlogPostPageProps) {
   return (
-    <Layout meta={{ title: blogPost.title, keywords: blogPost.tags }}>
+    <Layout
+      meta={{
+        title: blogPost.title,
+        keywords: blogPost.tags,
+        imageUrl: blogPost.coverImageUrl || '/blog-cover-fallback.png',
+        rssUrl: '/blog/rss.xml'
+      }}
+    >
       <h1>{blogPost.title}</h1>
       <div className="subtitle opacity-70">
         <span>

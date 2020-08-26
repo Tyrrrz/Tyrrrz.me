@@ -33,7 +33,7 @@ export default function BlogPage({ blogPosts }: BlogPageProps) {
     }));
 
   return (
-    <Layout meta={{ title: 'Blog' }}>
+    <Layout meta={{ title: 'Blog', rssUrl: '/blog/rss.xml' }}>
       <h1 className="title">Blog</h1>
 
       <p>

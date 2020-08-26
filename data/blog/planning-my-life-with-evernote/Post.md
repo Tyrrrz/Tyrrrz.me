@@ -3,7 +3,7 @@ title: 'Planning My Life With Evernote'
 date: '2018-12-23'
 tags:
   - 'personal'
-  - 'time-management'
+  - 'time management'
 ---
 
 I have always been trying to be a well-organized person, but for the most part I was doing it wrong. I was lacking in ability to plan and stay focused, which made it seem like I was productive, despite not having any tangible progress towards the goals that _really_ matter.
