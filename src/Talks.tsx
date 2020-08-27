@@ -1,34 +1,50 @@
+import { graphql } from 'gatsby';
 import moment from 'moment';
 import React from 'react';
 import { FiCalendar, FiGlobe, FiMessageCircle } from 'react-icons/fi';
-import { getTalks, Talk } from '../../infra/content';
-import Layout from '../../shared/layout';
-import Link from '../../shared/link';
+import Layout from './shared/Layout';
+import Link from './shared/Link';
+
+export const query = graphql`
+  query {
+    allTalksJson {
+      nodes {
+        title
+        event
+        date
+        language
+        eventUrl
+        presentationUrl
+        recordingUrl
+      }
+    }
+  }
+`;
 
 interface TalksPageProps {
-  talks: Talk[];
+  data: { allTalksJson: GatsbyTypes.TalksJsonConnection };
 }
 
-export function getStaticProps() {
-  const talks = getTalks();
+export default function TalksPage({ data }: TalksPageProps) {
+  const talks = [...data.allTalksJson.nodes]
+    .map((node) => ({
+      title: node.title!,
+      event: node.event!,
+      date: node.date!,
+      language: node.language!,
+      eventUrl: node.eventUrl!,
+      presentationUrl: node.presentationUrl,
+      recordingUrl: node.recordingUrl
+    }))
+    .sort((a, b) => moment(b.date).unix() - moment(a.date).unix());
 
-  const props = {
-    talks
-  } as TalksPageProps;
-
-  return { props };
-}
-
-export default function TalksPage({ talks }: TalksPageProps) {
   const years = [...new Set(talks.map((talk) => moment(talk.date).year()))];
 
   const talksByYear = years
     .sort((a, b) => b - a)
     .map((year) => ({
       year,
-      talks: talks
-        .sort((a, b) => moment(b.date).unix() - moment(a.date).unix())
-        .filter((talk) => moment(talk.date).year() === year)
+      talks: talks.filter((talk) => moment(talk.date).year() === year)
     }));
 
   return (
@@ -42,7 +58,7 @@ export default function TalksPage({ talks }: TalksPageProps) {
           </div>
 
           {talks.map((talk) => (
-            <div key={talk.id} className="my-4">
+            <div key={talk.event + talk.date} className="my-4">
               <div className="fs-2">
                 <Link href={talk.recordingUrl || talk.presentationUrl || talk.eventUrl || '#'}>
                   {talk.title}

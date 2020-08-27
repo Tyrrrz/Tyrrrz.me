@@ -1,35 +1,51 @@
+import { graphql } from 'gatsby';
 import moment from 'moment';
 import React from 'react';
 import { FiCalendar, FiClock, FiTag } from 'react-icons/fi';
-import { BlogPost, getBlogPosts } from '../../infra/content';
-import { humanizeTimeToRead } from '../../infra/utils';
-import Layout from '../../shared/layout';
-import Link from '../../shared/link';
+import { humanizeTimeToRead } from './infra/utils';
+import Layout from './shared/Layout';
+import Link from './shared/Link';
+
+export const query = graphql`
+  query {
+    allMarkdownRemark {
+      nodes {
+        frontmatter {
+          title
+          date
+          tags
+        }
+        fields {
+          slug
+        }
+        timeToRead
+      }
+    }
+  }
+`;
 
 interface BlogPageProps {
-  blogPosts: BlogPost[];
+  data: { allMarkdownRemark: GatsbyTypes.MarkdownRemarkConnection };
 }
 
-export function getStaticProps() {
-  const blogPosts = getBlogPosts();
+export default function BlogPage({ data }: BlogPageProps) {
+  const blogPosts = [...data.allMarkdownRemark.nodes]
+    .map((node) => ({
+      id: node.fields?.slug!,
+      title: node.frontmatter?.title!,
+      date: node.frontmatter?.date!,
+      tags: node.frontmatter?.tags?.map((tag) => tag!)!,
+      timeToRead: node.timeToRead!
+    }))
+    .sort((a, b) => moment(b.date).unix() - moment(a.date).unix());
 
-  const props = {
-    blogPosts
-  } as BlogPageProps;
-
-  return { props };
-}
-
-export default function BlogPage({ blogPosts }: BlogPageProps) {
   const years = [...new Set(blogPosts.map((blogPost) => moment(blogPost.date).year()))];
 
   const blogPostsByYear = years
     .sort((a, b) => b - a)
     .map((year) => ({
       year,
-      blogPosts: blogPosts
-        .sort((a, b) => moment(b.date).unix() - moment(a.date).unix())
-        .filter((blogPosts) => moment(blogPosts.date).year() === year)
+      blogPosts: blogPosts.filter((blogPost) => moment(blogPost.date).year() === year)
     }));
 
   return (
@@ -66,9 +82,7 @@ export default function BlogPage({ blogPosts }: BlogPageProps) {
 
                 <span className="mr-3">
                   <FiClock className="align-middle" />{' '}
-                  <span className="align-middle">
-                    {humanizeTimeToRead(blogPost.timeToReadMins)}
-                  </span>
+                  <span className="align-middle">{humanizeTimeToRead(blogPost.timeToRead)}</span>
                 </span>
 
                 <span>

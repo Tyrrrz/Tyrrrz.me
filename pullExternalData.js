@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/no-var-requires */
 // @ts-check
 
 const { Octokit } = require('@octokit/rest');

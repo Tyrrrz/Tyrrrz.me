@@ -1,9 +1,9 @@
-import Head from 'next/head';
 import React from 'react';
-import config from '../infra/config';
-import { getAbsoluteUrl, isAbsoluteUrl } from '../infra/utils';
-import Link from './link';
-import useCanonicalUrl from './useCanonicalUrl';
+import Helmet from 'react-helmet';
+import { getAbsoluteUrl } from '../infra/utils';
+import '../styles/main.css';
+import Link from './Link';
+import useSiteMetadata from './useSiteMetadata';
 
 interface Meta {
   title?: string | undefined;
@@ -17,14 +17,8 @@ interface MetaInjectorProps {
   meta?: Meta | undefined;
 }
 
-function ensureAbsoluteUrl(url?: string | undefined) {
-  if (!url) return url;
-  if (isAbsoluteUrl(url)) return url;
-  return getAbsoluteUrl(config.siteUrl, url);
-}
-
 function MetaInjector({ meta }: MetaInjectorProps) {
-  const canonicalUrl = useCanonicalUrl();
+  const siteMetadata = useSiteMetadata();
 
   const defaults = {
     title: 'Alexey Golub',
@@ -36,18 +30,16 @@ function MetaInjector({ meta }: MetaInjectorProps) {
     title: meta?.title ? `${meta.title} | ${defaults.title}` : defaults.title,
     description: meta?.description || defaults.description,
     keywords: meta?.keywords?.join(', '),
-    imageUrl: ensureAbsoluteUrl(meta?.imageUrl),
-    rssUrl: ensureAbsoluteUrl(meta?.rssUrl)
+    imageUrl: meta?.imageUrl && getAbsoluteUrl(siteMetadata.siteUrl, meta?.imageUrl),
+    rssUrl: meta?.rssUrl && getAbsoluteUrl(siteMetadata.siteUrl, meta?.rssUrl)
   };
 
   return (
-    <Head>
+    <Helmet>
       <html lang="en" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
 
       <title>{actual.title}</title>
-
-      <link rel="canonical" href={canonicalUrl} />
 
       <meta name="description" content={actual.description} />
       {actual.keywords && <meta name="keywords" content={actual.keywords} />}
@@ -67,13 +59,13 @@ function MetaInjector({ meta }: MetaInjectorProps) {
       {actual.rssUrl && (
         <link rel="alternate" type="application/rss+xml" title="RSS Feed" href={actual.rssUrl} />
       )}
-    </Head>
+    </Helmet>
   );
 }
 
 function Navigation() {
   return (
-    <nav className="d-flex align-items-center py-2 mobile-d-initial">
+    <nav className="d-flex py-4 mobile-d-initial">
       <div className="mr-5 mobile-align-center">
         <Link className="fs-4 fw-bold color-inherit decoration-none" href="/">
           Alexey Golub
@@ -81,7 +73,7 @@ function Navigation() {
       </div>
 
       <div className="flex-grow mobile-align-center">
-        <Link className="button fs-2 px-1" activeClassName="fw-semi-bold" href="/">
+        <Link className="button fs-2 px-1" activeClassName="fw-semi-bold" activeExact href="/">
           Home
         </Link>
 

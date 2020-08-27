@@ -1,12 +1,4 @@
-.cache
-
-# Build output
-.next
-out
-
-# Env vars
-.env
-.env.build
-
-# Dependencies
+__generated__/
 node_modules/
+.cache/
+public/

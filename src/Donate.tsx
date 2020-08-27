@@ -1,7 +1,7 @@
 import React from 'react';
 import { FiCoffee, FiDollarSign } from 'react-icons/fi';
-import Layout from '../shared/layout';
-import Link from '../shared/link';
+import Layout from './shared/Layout';
+import Link from './shared/Link';
 
 export default function DonatePage() {
   return (
@@ -9,8 +9,8 @@ export default function DonatePage() {
       <h1>Donate</h1>
 
       <p>
-        If you found any of my projects useful and want to support development, please consider
-        making a donation 🙂
+        If you found any of my projects useful and want to support their development, please
+        consider making a donation 🙂
       </p>
 
       <ul>

@@ -1,21 +1,39 @@
+import { graphql } from 'gatsby';
+import Img from 'gatsby-image';
 import moment from 'moment';
 import React from 'react';
 import { FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
-import Layout from '../shared/layout';
-import Link from '../shared/link';
+import Layout from './shared/Layout';
+import Link from './shared/Link';
 
-export default function HomePage() {
+export const query = graphql`
+  query {
+    file(relativePath: { eq: "photo.png" }) {
+      childImageSharp {
+        fixed(width: 128) {
+          ...GatsbyImageSharpFixed
+        }
+      }
+    }
+  }
+`;
+
+interface HomePageProps {
+  data: { file: GatsbyTypes.File };
+}
+
+export default function HomePage({ data }: HomePageProps) {
   const myAge = moment().diff(moment('1995-04-28'), 'years');
 
   return (
     <Layout>
       <figure className="w-128 h-128 mx-auto">
-        <img className="radius-50pc" src="/photo.png" />
+        <Img className="radius-50pc mx-auto" fixed={data.file?.childImageSharp?.fixed!} />
       </figure>
 
       <hr />
 
-      <div className="px-5 py-2">
+      <div className="py-2">
         <p>
           Hello! My name is Alexey, also known online as Tyrrrz. I&apos;m a {myAge} y/o software
           developer based in Kyiv, Ukraine.
