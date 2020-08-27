@@ -17,13 +17,13 @@ interface MetaInjectorProps {
   meta?: Meta | undefined;
 }
 
-function MetaInjector({ meta }: MetaInjectorProps) {
-  function ensureAbsoluteUrl(url?: string | undefined) {
-    if (!url) return url;
-    if (isAbsoluteUrl(url)) return url;
-    return getAbsoluteUrl(config.siteUrl, url);
-  }
+function ensureAbsoluteUrl(url?: string | undefined) {
+  if (!url) return url;
+  if (isAbsoluteUrl(url)) return url;
+  return getAbsoluteUrl(config.siteUrl, url);
+}
 
+function MetaInjector({ meta }: MetaInjectorProps) {
   const canonicalUrl = useCanonicalUrl();
 
   const defaults = {
@@ -81,19 +81,19 @@ function Navigation() {
       </div>
 
       <div className="flex-grow mobile-align-center">
-        <Link className="button fs-2 px-1" href="/">
+        <Link className="button fs-2 px-1" activeClassName="fw-semi-bold" href="/">
           Home
         </Link>
 
-        <Link className="button fs-2 px-1" href="/blog">
+        <Link className="button fs-2 px-1" activeClassName="fw-semi-bold" href="/blog">
           Blog
         </Link>
 
-        <Link className="button fs-2 px-1" href="/projects">
+        <Link className="button fs-2 px-1" activeClassName="fw-semi-bold" href="/projects">
           Projects
         </Link>
 
-        <Link className="button fs-2 px-1" href="/talks">
+        <Link className="button fs-2 px-1" activeClassName="fw-semi-bold" href="/talks">
           Talks
         </Link>
       </div>

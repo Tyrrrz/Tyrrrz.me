@@ -3,12 +3,14 @@
   "private": true,
   "dependencies": {
     "@mapbox/rehype-prism": "^0.5.0",
+    "@octokit/rest": "^18.0.4",
     "@openfonts/fira-code_all": "^1.44.8",
     "@silvenon/remark-smartypants": "^1.0.0",
     "@types/node": "^14.6.0",
     "@types/react": "^16.9.47",
     "@types/react-dom": "^16.9.8",
     "@types/react-helmet": "^6.1.0",
+    "@types/rss": "0.0.28",
     "@zeit/next-css": "^1.0.1",
     "gray-matter": "^4.0.2",
     "moment": "^2.27.0",
@@ -22,15 +24,16 @@
     "react-refresh": "^0.8.3",
     "reading-time": "^1.2.0",
     "rehype-stringify": "^8.0.0",
+    "rel-to-abs": "^0.1.0",
     "remark": "^12.0.1",
     "remark-parse": "^8.0.3",
     "remark-rehype": "^7.0.0",
-    "ts-node": "^9.0.0",
+    "rss": "^1.2.2",
     "typescript": "^4.0.2",
-    "unified": "^9.2.0"
+    "unified": "^9.2.0",
+    "webpack-shell-plugin": "^0.5.0"
   },
   "devDependencies": {
-    "@octokit/rest": "^18.0.3",
     "eslint": "^7.6.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",
@@ -42,10 +45,10 @@
     "extends": "react-app"
   },
   "scripts": {
+    "lint": "eslint **/*.{js,jsx,ts,tsx} --fix --ignore-path .gitignore",
+    "pull-external-data": "node ./pullExternalData.js",
     "dev": "next dev",
     "build": "next build && next export",
-    "start": "next start",
-    "lint": "eslint **/*.{js,jsx,ts,tsx} --fix --ignore-path .gitignore",
-    "pull-data": "ts-node ./data/pullGitHubData.ts"
+    "start": "next start"
   }
 }

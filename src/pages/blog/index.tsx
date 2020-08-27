@@ -46,7 +46,9 @@ export default function BlogPage({ blogPosts }: BlogPageProps) {
 
       {blogPostsByYear.map(({ year, blogPosts }, i) => (
         <div key={year}>
-          <div className={`fs-3 mb-2 ${i > 0 && 'mt-5'}`}>{year}</div>
+          <div className={`d-flex align-items-center mb-2 ${i > 0 && 'mt-5'}`}>
+            <div className="fs-3">{year}</div> <hr className="mx-4 my-0" />
+          </div>
 
           {blogPosts.map((blogPost) => (
             <div key={blogPost.id} className="my-4">
