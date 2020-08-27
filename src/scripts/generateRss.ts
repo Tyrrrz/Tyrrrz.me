@@ -1,6 +1,4 @@
-import fs from 'fs';
 import moment from 'moment';
-import path from 'path';
 import relToAbs from 'rel-to-abs';
 import RSS from 'rss';
 import config from '../infra/config';
@@ -9,8 +7,6 @@ import { getAbsoluteUrl } from '../infra/utils';
 
 // This script will be ran in the export directory
 // Paths are relative to project root
-
-const outputFilePath = path.resolve('./public/blog/rss.xml');
 
 const blogPosts = getBlogPosts();
 
@@ -36,5 +32,4 @@ blogPosts
     });
   });
 
-fs.writeFileSync(outputFilePath, feed.xml());
-console.log(`Generated RSS feed for ${blogPosts.length} items.`);
+console.log(feed.xml());

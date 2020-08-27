@@ -12,6 +12,7 @@
     "@types/react-helmet": "^6.1.0",
     "@types/rss": "0.0.28",
     "@zeit/next-css": "^1.0.1",
+    "copy-webpack-plugin": "^6.0.3",
     "gray-matter": "^4.0.2",
     "moment": "^2.27.0",
     "next": "^9.5.2",
