@@ -22,7 +22,7 @@ Depending on who you ask, this principle may have different names, such as [func
 
 At the end of the day, just like with any other software development pattern, its usefulness is entirely situational. However, it offers a good mental model for reasoning about non-determinism in code, which is relevant regardless of context.
 
-In this article we will look at what actually makes something pure or impure, why is that important to us, and how we can leverage that knowledge to write better software. I will show examples of where applying this principle lends to better design, as well scenarios where it might not be as helpful.
+In this article we will look at what actually makes something pure or impure, why is that important to us, and how we can leverage that knowledge to write better software. I will show examples of where applying this principle lends to better design, as well as scenarios where it might not be as helpful.
 
 _Note: as usual, the code samples in this article are written in C#, but the main ideas apply to any language._
 
@@ -214,7 +214,7 @@ Note how these three classes represent a vertical slice from a potentially much 
 
 This is a very typical scenario for "classically" designed object-oriented software. You'll probably find it extremely familiar if you have experience working on code that follows the [n-tier architecture](https://en.wikipedia.org/wiki/Multitier_architecture) or any other similar pattern.
 
-If we consider this relationship from a standpoint of purity, we'll notice that the entire call chain shown previously is impure. And while for `LocationProvider` it makes sense because it performs non-deterministic I/O, the `SolarCalculator` is impure only due to its dependency on the former.
+If we consider this relationship from a standpoint of purity, we'll also notice that the entire call chain is impure. And while for `LocationProvider` it makes sense because it performs non-deterministic I/O, the `SolarCalculator` is impure only due to its dependency on the former.
 
 That design is not ideal, because we lose out on the benefits of pure functions without really getting anything in return. Now if we wanted to, for example, test `SolarCalculator.GetSolarTimesAsync` in isolation, we would only be able do that with the help of an autotelic abstraction and a mock object, which is not desirable.
 
@@ -226,6 +226,7 @@ public class LocationProvider
     /* ... */
 }
 
+// Converted to a static class because the function is now pure
 public static class SolarCalculator
 {
     public static SolarTimes GetSolarTimes(Location location, DateTimeOffset date)
@@ -440,11 +441,11 @@ public class RecommendationsProvider
 
 By extracting all of the pure code out of `GetRecommendationsAsync`, we can now write unit tests that verify that the intermediate stages of the algorithm work as intended. On the surface, it looks as though we managed to achieve exactly what we wanted.
 
-However, instead of having one cohesive element to reason about, we ended up with multiple fragments, each having no meaning or value of its own. While unit testing of individual parts may have become easier, the benefit is very questionable, as it provides no confidence in the correctness of the algorithm as a whole.
+However, instead of having one cohesive element to reason about, we ended up with multiple fragments, each having no meaning or value of their own. While unit testing of individual parts may have become easier, the benefit is very questionable, as it provides no confidence in the correctness of the algorithm as a whole.
 
 Ultimately, we weren't able to push impurities out towards the system boundaries -- what we did was simply push the pure code further in instead. In other words, the flow of data in the program remains completely unchanged.
 
-The main issue is that each stage of the recommendation algorithm depends on additional data derived from the previous stages. Since this behavior is inherently non-deterministic, it's impossible to express it using pure functions.
+The main issue is that each stage of the recommendation algorithm depends on additional data derived from the previous stages. Since this behavior is inherently non-deterministic, it's impossible to express it using pure functions alone.
 
 ## Pure "enough" code
 
@@ -469,7 +470,7 @@ public static int FindIndexOf(IEnumerable<Item> items, Item item)
 }
 ```
 
-This is a very simple function that attempts to find an index that corresponds to the position of an item in a sequence or throw an exception in case of failure. The negative outcome is assumed to be very improbable in this scenario, hence why an exception is used as opposed to a fallback value.
+This is a very simple function that attempts to find an index that corresponds to the position of an item in a sequence. The negative outcome is assumed to be very improbable in this scenario, hence why an exception is used to signify failure, as opposed to a fallback value.
 
 According to the criteria of purity, this function is not pure because the result of its evaluation is not entirely encapsulated within the returned value. Throwing an exception is an effectful operation, since it can change the behavior of the function above in the call stack, or lead to the termination of the program altogether.
 
@@ -485,7 +486,7 @@ Seeing as the above code literally just represents a mathematical expression, it
 
 The modulus operator has an exceptional outcome, which occurs when the supplied divisor is equal to _zero_. If we were to try and invoke `Wrap(123, 0)`, it would throw an exception, indicating that the function is actually impure as well.
 
-Notably, this problem could be avoided if we used something like `Option<int>` as return type instead. This approach eliminates the need for an exception (and this is how [Darklang does it](https://docs.darklang.com/languagedetails#floats)), but comes at an expense of making basic arithmetic operations appear more cumbersome.
+Notably, this problem could be avoided if we used something like `Option<int>` as return type instead. This approach eliminates the need for an exception (and this is how e.g. [Darklang does it](https://docs.darklang.com/languagedetails#floats)), but comes at an expense of making basic arithmetic operations appear more cumbersome.
 
 In any case, even though the code we wrote originally doesn't satisfy the theoretical definition of purity, it might be _pure enough_ for our usage scenario.
 
@@ -506,7 +507,7 @@ public static string GetOutputPath(Report report, string outputDir)
 
 The code above assembles a file path for the provided report by combining the output directory with the generated file name. It calls the [`Path.Combine`](https://docs.microsoft.com/en-us/dotnet/api/system.io.path.combine?view=netcore-3.1#System_IO_Path_Combine_System_String_System_String_) method, whose behavior relies on the value of the `Path.DirectorySeparatorChar` constant, as it indicates which directory separator is used by the operating system.
 
-Since it is a constant and its value is guaranteed to always be the same for the duration of the program's lifetime, our function is pure (as long as we also disregard exceptions). However, it's pure only within the current session.
+Since it is a constant and its value is guaranteed to always be the same for the duration of the program's lifetime, our function is pure (as long as we also disregard possible exceptions). However, it's pure only within the current session.
 
 If we imagine that we're building a cross-platform solution, it's logical that we treat specifics of each platform as environmental parameters. In other words, for code that is expected to run seamlessly on Windows and Linux, the path separator constant essentially acts as a global variable.
 
