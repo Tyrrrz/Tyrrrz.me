@@ -37,12 +37,10 @@ export default function ProjectsPage({ data }: ProjectsPageProps) {
     <Layout meta={{ title: 'Projects' }}>
       <h1 className="title">Projects</h1>
 
-      <p>
-        List of all open source projects that I maintain.
-        <br />
+      <div className="fs-2 mb-5">
         If you want to support development of my projects, you are welcome to{' '}
         <Link href="/donate">make a donation</Link> 💛
-      </p>
+      </div>
 
       {projects.map((project) => (
         <div key={project.name} className="my-4">

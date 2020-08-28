@@ -39,7 +39,6 @@ pre {
 }
 
 code {
-  padding: 0 0.25rem;
   border-radius: 3px;
   background-color: hsl(0, 0%, 95%);
 }
@@ -375,7 +374,7 @@ h5 {
 }
 
 h1 + .subtitle {
-  margin-top: -1.25rem;
+  margin-top: -1rem;
 }
 
 .container {

@@ -52,13 +52,11 @@ export default function BlogPage({ data }: BlogPageProps) {
     <Layout meta={{ title: 'Blog', rssUrl: '/blog/rss.xml' }}>
       <h1 className="title">Blog</h1>
 
-      <p>
-        This blog is where I share my thoughts on programming.
-        <br />
+      <div className="fs-2 mb-5">
         If you want to know when I post a new article, follow me on{' '}
         <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or subscribe to the{' '}
         <Link href="/blog/rss.xml">RSS feed</Link> ✨
-      </p>
+      </div>
 
       {blogPostsByYear.map(({ year, blogPosts }, i) => (
         <div key={year}>
