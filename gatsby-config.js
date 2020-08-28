@@ -2,14 +2,12 @@
 /* eslint-disable @typescript-eslint/camelcase */
 // @ts-check
 
-// Get configuration
+// ---
 const siteUrl = process.env['URL'] || 'http://localhost:8000';
 const disqusId = process.env['TYRRRZME_DISQUS'];
 const googleAnalyticsId = process.env['TYRRRZME_GOOGLEANALYTICS'];
+// ---
 
-/**
- * @param {string} url
- */
 function resolveRelativeUrl(url) {
   return new URL(url, siteUrl).toString();
 }
@@ -82,7 +80,6 @@ module.exports = {
             return allMarkdownRemark.edges.map((edge) => ({
               ...edge.node.frontmatter,
               description: edge.node.excerpt,
-              date: edge.node.frontmatter.date,
               url: resolveRelativeUrl('/blog/' + edge.node.fields.slug),
               guid: resolveRelativeUrl('/blog/' + edge.node.fields.slug)
             }));

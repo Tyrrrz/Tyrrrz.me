@@ -1,5 +1,4 @@
 import React from 'react';
-import { FiCoffee, FiDollarSign } from 'react-icons/fi';
 import Layout from './shared/Layout';
 import Link from './shared/Link';
 
@@ -15,16 +14,13 @@ export default function DonatePage() {
 
       <ul>
         <li>
-          <Link href="https://patreon.com/Tyrrrz">
-            <FiDollarSign /> Patreon
-          </Link>{' '}
-          (recurring)
+          <Link href="https://patreon.com/Tyrrrz">Patreon</Link> (recurring)
         </li>
         <li>
-          <Link href="https://buymeacoffee.com/Tyrrrz">
-            <FiCoffee /> BuyMeACoffee
-          </Link>{' '}
-          (one-time)
+          <Link href="https://buymeacoffee.com/Tyrrrz">BuyMeACoffee</Link> (one-time)
+        </li>
+        <li>
+          Ethereum: <code>0x00E6B59BAD5F0c887E0eBD1b7bBd7b024d0796c9</code>
         </li>
       </ul>
 

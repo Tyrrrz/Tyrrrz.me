@@ -1,12 +1,14 @@
 import { graphql } from 'gatsby';
 import Img from 'gatsby-image';
+import { Disqus } from 'gatsby-plugin-disqus';
 import moment from 'moment';
 import 'prismjs/themes/prism-tomorrow.css';
 import React from 'react';
 import { FiCalendar, FiClock, FiTag } from 'react-icons/fi';
-import { humanizeTimeToRead } from './infra/utils';
+import { getAbsoluteUrl, humanizeTimeToRead } from './infra/utils';
 import Layout from './shared/Layout';
 import Link from './shared/Link';
+import useSiteMetadata from './shared/useSiteMetadata';
 
 export const query = graphql`
   query($slug: String!, $coverImagePath: String!) {
@@ -46,6 +48,25 @@ export const query = graphql`
   }
 `;
 
+interface CommentsSectionProps {
+  id: string;
+  title: string;
+}
+
+function CommentsSection({ id, title }: CommentsSectionProps) {
+  const siteMetadata = useSiteMetadata();
+
+  return (
+    <Disqus
+      config={{
+        url: getAbsoluteUrl(siteMetadata.siteUrl, '/blog/' + id),
+        identifier: 'Blog/' + id,
+        title
+      }}
+    />
+  );
+}
+
 interface BlogPostPageProps {
   data: {
     markdownRemark: GatsbyTypes.MarkdownRemark;
@@ -56,6 +77,7 @@ interface BlogPostPageProps {
 
 export default function BlogPostPage({ data }: BlogPostPageProps) {
   const blogPost = {
+    id: data.markdownRemark.fields?.slug!,
     title: data.markdownRemark.frontmatter?.title!,
     date: data.markdownRemark.frontmatter?.date!,
     tags: data.markdownRemark.frontmatter?.tags?.map((tag) => tag!)!,
@@ -115,6 +137,8 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
       )}
 
       <article className="content" dangerouslySetInnerHTML={{ __html: blogPost.html }} />
+
+      <CommentsSection id={blogPost.id} title={blogPost.title} />
     </Layout>
   );
 }
