@@ -1,56 +1,89 @@
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable @typescript-eslint/no-var-requires */
+// @ts-check
+
 const path = require('path');
-const routes = require('./src/routes');
 
-// Expose some server-side environment variables to the client
-process.env.GATSBY_URL = process.env.URL;
+/**
+ * @type {import('gatsby').GatsbyNode}
+ */
+module.exports = {
+  onCreateNode: ({ actions, node }) => {
+    if (node.internal.type === 'MarkdownRemark') {
+      // Add slug to markdown files
+      // @ts-ignore
+      const value = path.basename(path.dirname(node.fileAbsolutePath));
 
-exports.onCreateNode = ({ actions, node }) => {
-  // Add slug to markdown files
-  if (node.internal.type === 'MarkdownRemark') {
-    actions.createNodeField({
-      node,
-      name: 'slug',
-      value: path.basename(path.dirname(node.fileAbsolutePath))
+      actions.createNodeField({
+        node,
+        name: 'slug',
+        value
+      });
+    }
+  },
+
+  createPages: async ({ actions, graphql }) => {
+    // Generate static pages
+    actions.createPage({
+      path: '/',
+      component: path.resolve('./src/Home.tsx'),
+      context: null
     });
-  }
-};
 
-exports.createPages = async ({ actions, graphql }) => {
-  // Generate pages for static routes
-  Object.keys(routes.static).forEach((routeName) => actions.createPage(routes.static[routeName]));
+    actions.createPage({
+      path: '/404',
+      component: path.resolve('./src/Error404.tsx'),
+      context: null
+    });
 
-  // Generate pages for blog posts
-  const queryResult = await graphql(`
-    query {
-      allMarkdownRemark {
-        nodes {
-          fields {
-            slug
+    actions.createPage({
+      path: '/blog',
+      component: path.resolve('./src/Blog.tsx'),
+      context: null
+    });
+
+    actions.createPage({
+      path: '/projects',
+      component: path.resolve('./src/Projects.tsx'),
+      context: null
+    });
+
+    actions.createPage({
+      path: '/talks',
+      component: path.resolve('./src/Talks.tsx'),
+      context: null
+    });
+
+    actions.createPage({
+      path: '/donate',
+      component: path.resolve('./src/Donate.tsx'),
+      context: null
+    });
+
+    // Generate pages for blog posts
+    const queryResult = await graphql(`
+      query {
+        allMarkdownRemark {
+          nodes {
+            fields {
+              slug
+            }
           }
         }
       }
-    }
-  `);
+    `);
 
-  if (queryResult.errors) throw queryResult.errors;
+    if (queryResult.errors) throw queryResult.errors;
 
-  queryResult.data.allMarkdownRemark.nodes.forEach((node) => {
-    const slug = node.fields.slug;
+    queryResult.data.allMarkdownRemark.nodes.forEach((node) => {
+      const slug = node.fields.slug;
+      const coverImagePath = `blog/${slug}/Cover.png`;
 
-    actions.createPage({
-      path: routes.dynamic.blogPost.getPath(slug),
-      component: routes.dynamic.blogPost.component,
-      context: { slug }
+      actions.createPage({
+        path: '/blog/' + slug,
+        component: path.resolve('./src/BlogPost.tsx'),
+        context: { slug, coverImagePath }
+      });
     });
-  });
-
-  // Configure redirects
-  Object.keys(routes.redirects).forEach((from) => {
-    actions.createRedirect({
-      fromPath: from,
-      toPath: routes.redirects[from],
-      force: true,
-      redirectInBrowser: true
-    });
-  });
+  }
 };
