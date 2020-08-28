@@ -31,6 +31,12 @@ module.exports = {
     });
 
     actions.createPage({
+      path: '/404',
+      component: path.resolve('./src/Error404.tsx'),
+      context: null
+    });
+
+    actions.createPage({
       path: '/blog',
       component: path.resolve('./src/Blog.tsx'),
       context: null
