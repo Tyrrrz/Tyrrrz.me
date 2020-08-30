@@ -65,27 +65,27 @@ function MetaInjector({ meta }: MetaInjectorProps) {
 
 function Navigation() {
   return (
-    <nav className="d-flex py-4 mobile-d-initial">
-      <div className="mr-5 mobile-align-center">
+    <nav className="navbar">
+      <div className="navbar-logo">
         <Link className="fs-4 fw-bold color-inherit decoration-none" href="/">
           Alexey Golub
         </Link>
       </div>
 
-      <div className="flex-grow mobile-align-center">
-        <Link className="button fs-2 px-1" activeClassName="fw-semi-bold" activeExact href="/">
+      <div className="navbar-links">
+        <Link className="navbar-link" activeClassName="fw-semi-bold" activeExact href="/">
           Home
         </Link>
 
-        <Link className="button fs-2 px-1" activeClassName="fw-semi-bold" href="/blog">
+        <Link className="navbar-link" activeClassName="fw-semi-bold" href="/blog">
           Blog
         </Link>
 
-        <Link className="button fs-2 px-1" activeClassName="fw-semi-bold" href="/projects">
+        <Link className="navbar-link" activeClassName="fw-semi-bold" href="/projects">
           Projects
         </Link>
 
-        <Link className="button fs-2 px-1" activeClassName="fw-semi-bold" href="/talks">
+        <Link className="navbar-link" activeClassName="fw-semi-bold" href="/talks">
           Talks
         </Link>
       </div>

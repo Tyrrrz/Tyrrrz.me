@@ -27,8 +27,8 @@ export default function HomePage({ data }: HomePageProps) {
 
   return (
     <Layout>
-      <figure className="w-128 h-128 mx-auto">
-        <Img className="radius-50pc mx-auto" fixed={data.file?.childImageSharp?.fixed!} />
+      <figure className="align-center">
+        <Img className="radius-50pc" fixed={data.file?.childImageSharp?.fixed!} />
       </figure>
 
       <hr />
