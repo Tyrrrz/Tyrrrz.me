@@ -25,8 +25,9 @@ export const query = graphql`
       fields {
         slug
       }
-      html
       timeToRead
+      excerpt(pruneLength: 280)
+      html
     }
     cover: file(relativePath: { eq: $coverImagePath }) {
       childImageSharp {
@@ -86,6 +87,7 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
       url: translation?.url!
     }))!,
     timeToRead: data.markdownRemark.timeToRead!,
+    excerpt: data.markdownRemark.excerpt!,
     html: data.markdownRemark.html!
   };
 
@@ -96,6 +98,7 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
     <Layout
       meta={{
         title: blogPost.title,
+        description: blogPost.excerpt,
         keywords: blogPost.tags,
         imageUrl: coverImage?.original?.src || coverImageFallback?.original?.src,
         rssUrl: '/blog/rss.xml'
