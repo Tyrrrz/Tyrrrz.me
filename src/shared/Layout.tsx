@@ -6,15 +6,15 @@ import Link from './Link';
 import useSiteMetadata from './useSiteMetadata';
 
 interface Meta {
-  title?: string | undefined;
-  description?: string | undefined;
-  keywords?: string[] | undefined;
-  imageUrl?: string | undefined;
-  rssUrl?: string | undefined;
+  title?: string;
+  description?: string;
+  keywords?: string[];
+  imageUrl?: string;
+  rssUrl?: string;
 }
 
 interface MetaInjectorProps {
-  meta?: Meta | undefined;
+  meta?: Meta;
 }
 
 function MetaInjector({ meta }: MetaInjectorProps) {
@@ -94,7 +94,7 @@ function Navigation() {
 }
 
 interface LayoutProps {
-  meta?: Meta | undefined;
+  meta?: Meta;
   children: React.ReactNode;
 }
 

@@ -71,7 +71,7 @@ function CommentsSection({ id, title }: CommentsSectionProps) {
 interface BlogPostPageProps {
   data: {
     markdownRemark: GatsbyTypes.MarkdownRemark;
-    cover?: GatsbyTypes.File | undefined;
+    cover?: GatsbyTypes.File;
     coverFallback: GatsbyTypes.File;
   };
 }
