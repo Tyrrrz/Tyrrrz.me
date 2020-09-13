@@ -52,7 +52,7 @@
   "scripts": {
     "lint": "eslint **/*.{js,jsx,ts,tsx} --fix --ignore-path .gitignore",
     "pull-external-data": "node ./pullExternalData.js",
-    "dev": "gatsby develop",
+    "start": "gatsby develop",
     "build": "gatsby build"
   }
 }
