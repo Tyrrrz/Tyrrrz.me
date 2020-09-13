@@ -61,7 +61,7 @@ export default function BlogPage({ data }: BlogPageProps) {
       {blogPostsByYear.map(({ year, blogPosts }, i) => (
         <div key={year}>
           <div className={`d-flex align-items-center mb-2 ${i > 0 && 'mt-5'}`}>
-            <div className="fs-3">{year}</div> <hr className="mx-4 my-0" />
+            <div className="fs-3 tracking-wide">{year}</div> <hr className="mx-4 my-0" />
           </div>
 
           {blogPosts.map((blogPost) => (
@@ -70,23 +70,21 @@ export default function BlogPage({ data }: BlogPageProps) {
                 <Link href={`/blog/${blogPost.id}`}>{blogPost.title}</Link>
               </div>
 
-              <div className="opacity-70 mt-1 ">
-                <span className="mr-3">
-                  <FiCalendar className="align-middle" />{' '}
-                  <span className="align-middle">
-                    {moment(blogPost.date).format('DD MMM, yyyy')}
-                  </span>
-                </span>
+              <div className="mt-1 d-flex flex-wrap fw-light">
+                <div className="mr-3 d-flex align-items-center">
+                  <FiCalendar strokeWidth={1} />
+                  <div className="ml-1">{moment(blogPost.date).format('DD MMM yyyy')}</div>
+                </div>
 
-                <span className="mr-3">
-                  <FiClock className="align-middle" />{' '}
-                  <span className="align-middle">{humanizeTimeToRead(blogPost.timeToRead)}</span>
-                </span>
+                <div className="mr-3 d-flex align-items-center">
+                  <FiClock strokeWidth={1} />
+                  <div className="ml-1">{humanizeTimeToRead(blogPost.timeToRead)}</div>
+                </div>
 
-                <span>
-                  <FiTag className="align-middle" />{' '}
-                  <span className="align-middle">{blogPost.tags.join(', ')}</span>
-                </span>
+                <div className="d-flex align-items-center">
+                  <FiTag strokeWidth={1} />
+                  <div className="ml-1">{blogPost.tags.join(', ')}</div>
+                </div>
               </div>
             </div>
           ))}

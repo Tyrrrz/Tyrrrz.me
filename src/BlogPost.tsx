@@ -105,25 +105,25 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
       }}
     >
       <h1>{blogPost.title}</h1>
-      <div className="subtitle opacity-70">
-        <span>
-          <FiCalendar className="align-middle" />{' '}
-          <span className="align-middle">{moment(blogPost.date).format('DD MMM, yyyy')}</span>
-        </span>
+      <div className="subtitle d-flex flex-wrap fw-thin">
+        <div className="mr-3 d-flex align-items-center">
+          <FiCalendar strokeWidth={1} />
+          <div className="ml-1">{moment(blogPost.date).format('DD MMM yyyy')}</div>
+        </div>
 
-        <span className="ml-3">
-          <FiClock className="align-middle" />{' '}
-          <span className="align-middle">{humanizeTimeToRead(blogPost.timeToRead)}</span>
-        </span>
+        <div className="mr-3 d-flex align-items-center">
+          <FiClock strokeWidth={1} />
+          <div className="ml-1">{humanizeTimeToRead(blogPost.timeToRead)}</div>
+        </div>
 
-        <span className="ml-3">
-          <FiTag className="align-middle" />{' '}
-          <span className="align-middle">{blogPost.tags.join(', ')}</span>
-        </span>
+        <div className="d-flex align-items-center">
+          <FiTag strokeWidth={1} />
+          <div className="ml-1">{blogPost.tags.join(', ')}</div>
+        </div>
       </div>
 
       {blogPost.translations && blogPost.translations.length > 0 && (
-        <div className="opacity-70 mt-2 mb-5">
+        <div className="mt-2 mb-5">
           Translated by readers into:{' '}
           {blogPost.translations.map((translation) => (
             <Link key={translation.language} href={translation.url}>

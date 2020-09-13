@@ -50,18 +50,16 @@ export default function ProjectsPage({ data }: ProjectsPageProps) {
 
           <div className="mt-1">{project.description}</div>
 
-          <div className="opacity-70 mt-1">
-            <span>
-              <FiStar className="align-middle" />{' '}
-              <span className={`align-middle ${project.stars >= 500 && 'fw-semi-bold'}`}>
-                {project.stars}
-              </span>
-            </span>
+          <div className="mt-1 d-flex flex-wrap fw-thin">
+            <div className="d-flex align-items-center">
+              <FiStar strokeWidth={1} fill="#ecc94b" />
+              <div className="ml-1">{project.stars}</div>
+            </div>
 
-            <span className="ml-3">
-              <FiCode className="align-middle" />{' '}
-              <span className="align-middle">{project.language}</span>
-            </span>
+            <div className="ml-3 d-flex align-items-center">
+              <FiCode strokeWidth={1} />
+              <div className="ml-1">{project.language}</div>
+            </div>
           </div>
         </div>
       ))}

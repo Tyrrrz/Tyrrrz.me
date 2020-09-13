@@ -54,7 +54,7 @@ export default function TalksPage({ data }: TalksPageProps) {
       {talksByYear.map(({ year, talks }, i) => (
         <div key={year}>
           <div className={`d-flex align-items-center mb-2 ${i > 0 && 'mt-5'}`}>
-            <div className="fs-3">{year}</div> <hr className="mx-4 my-0" />
+            <div className="fs-3 tracking-wide">{year}</div> <hr className="mx-4 my-0" />
           </div>
 
           {talks.map((talk) => (
@@ -65,23 +65,23 @@ export default function TalksPage({ data }: TalksPageProps) {
                 </Link>
               </div>
 
-              <div className="opacity-70 mt-1 ">
-                <span className="mr-3">
-                  <FiGlobe className="align-middle" />{' '}
-                  <span className="align-middle">
+              <div className="mt-1 d-flex flex-wrap fw-light">
+                <div className="mr-3 d-flex align-items-center">
+                  <FiGlobe strokeWidth={1} />
+                  <div className="ml-1">
                     <Link href={talk.eventUrl}>{talk.event}</Link>
-                  </span>
-                </span>
+                  </div>
+                </div>
 
-                <span className="mr-3">
-                  <FiCalendar className="align-middle" />{' '}
-                  <span className="align-middle">{moment(talk.date).format('DD MMM, yyyy')}</span>
-                </span>
+                <div className="mr-3 d-flex align-items-center">
+                  <FiCalendar strokeWidth={1} />
+                  <div className="ml-1">{moment(talk.date).format('DD MMM yyyy')}</div>
+                </div>
 
-                <span>
-                  <FiMessageCircle className="align-middle" />{' '}
-                  <span className="align-middle">{talk.language}</span>
-                </span>
+                <div className="d-flex align-items-center">
+                  <FiMessageCircle strokeWidth={1} />
+                  <div className="ml-1">{talk.language}</div>
+                </div>
               </div>
             </div>
           ))}

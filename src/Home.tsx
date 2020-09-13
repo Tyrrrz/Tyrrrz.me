@@ -52,15 +52,15 @@ export default function HomePage({ data }: HomePageProps) {
 
       <hr />
 
-      <div className="align-center">
+      <div className="align-center fs-4">
         <Link className="button" href="https://github.com/Tyrrrz">
-          <FiGithub className="fs-3" />
+          <FiGithub />
         </Link>
         <Link className="button" href="https://twitter.com/Tyrrrz">
-          <FiTwitter className="fs-3" />
+          <FiTwitter />
         </Link>
         <Link className="button" href="https://linkedin.com/in/Tyrrrz">
-          <FiLinkedin className="fs-3" />
+          <FiLinkedin />
         </Link>
       </div>
     </Layout>
