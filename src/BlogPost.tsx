@@ -80,7 +80,7 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
   const blogPost = {
     id: data.markdownRemark.fields?.slug!,
     title: data.markdownRemark.frontmatter?.title!,
-    date: data.markdownRemark.frontmatter?.date!,
+    date: moment(data.markdownRemark.frontmatter?.date!),
     tags: data.markdownRemark.frontmatter?.tags?.map((tag) => tag!)!,
     translations: data.markdownRemark.frontmatter?.translations?.map((translation) => ({
       language: translation?.language!,
@@ -105,10 +105,11 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
       }}
     >
       <h1>{blogPost.title}</h1>
-      <div className="subtitle d-flex flex-wrap fw-thin">
+
+      <div className="subtitle d-flex flex-wrap fw-thin tracking-wide">
         <div className="mr-3 d-flex align-items-center">
           <FiCalendar strokeWidth={1} />
-          <div className="ml-1">{moment(blogPost.date).format('DD MMM yyyy')}</div>
+          <div className="ml-1">{blogPost.date.format('DD MMM yyyy')}</div>
         </div>
 
         <div className="mr-3 d-flex align-items-center">

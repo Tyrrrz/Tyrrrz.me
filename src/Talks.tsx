@@ -30,21 +30,21 @@ export default function TalksPage({ data }: TalksPageProps) {
     .map((node) => ({
       title: node.title!,
       event: node.event!,
-      date: node.date!,
+      date: moment(node.date!),
       language: node.language!,
       eventUrl: node.eventUrl!,
       presentationUrl: node.presentationUrl,
       recordingUrl: node.recordingUrl
     }))
-    .sort((a, b) => moment(b.date).unix() - moment(a.date).unix());
+    .sort((a, b) => b.date.unix() - a.date.unix());
 
-  const years = [...new Set(talks.map((talk) => moment(talk.date).year()))];
+  const years = [...new Set(talks.map((talk) => talk.date.year()))];
 
   const talksByYear = years
     .sort((a, b) => b - a)
     .map((year) => ({
       year,
-      talks: talks.filter((talk) => moment(talk.date).year() === year)
+      talks: talks.filter((talk) => talk.date.year() === year)
     }));
 
   return (
@@ -54,7 +54,8 @@ export default function TalksPage({ data }: TalksPageProps) {
       {talksByYear.map(({ year, talks }, i) => (
         <div key={year}>
           <div className={`d-flex align-items-center mb-2 ${i > 0 && 'mt-5'}`}>
-            <div className="fs-3 tracking-wide">{year}</div> <hr className="mx-4 my-0" />
+            <div className="fs-3 fw-semi-bold tracking-wide">{year}</div>
+            <hr className="mx-4 my-0" />
           </div>
 
           {talks.map((talk) => (
@@ -65,7 +66,7 @@ export default function TalksPage({ data }: TalksPageProps) {
                 </Link>
               </div>
 
-              <div className="mt-1 d-flex flex-wrap fw-light">
+              <div className="mt-1 d-flex flex-wrap fw-light tracking-wide">
                 <div className="mr-3 d-flex align-items-center">
                   <FiGlobe strokeWidth={1} />
                   <div className="ml-1">
@@ -75,7 +76,7 @@ export default function TalksPage({ data }: TalksPageProps) {
 
                 <div className="mr-3 d-flex align-items-center">
                   <FiCalendar strokeWidth={1} />
-                  <div className="ml-1">{moment(talk.date).format('DD MMM yyyy')}</div>
+                  <div className="ml-1">{talk.date.format('DD MMM yyyy')}</div>
                 </div>
 
                 <div className="d-flex align-items-center">

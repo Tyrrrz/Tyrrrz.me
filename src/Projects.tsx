@@ -1,6 +1,6 @@
 import { graphql } from 'gatsby';
 import React from 'react';
-import { FiCode, FiStar } from 'react-icons/fi';
+import { FiPackage, FiStar } from 'react-icons/fi';
 import Layout from './shared/Layout';
 import Link from './shared/Link';
 
@@ -50,14 +50,14 @@ export default function ProjectsPage({ data }: ProjectsPageProps) {
 
           <div className="mt-1">{project.description}</div>
 
-          <div className="mt-1 d-flex flex-wrap fw-thin">
+          <div className="mt-1 d-flex flex-wrap fw-thin tracking-wide">
             <div className="d-flex align-items-center">
               <FiStar strokeWidth={1} fill="#ecc94b" />
               <div className="ml-1">{project.stars}</div>
             </div>
 
             <div className="ml-3 d-flex align-items-center">
-              <FiCode strokeWidth={1} />
+              <FiPackage strokeWidth={1} />
               <div className="ml-1">{project.language}</div>
             </div>
           </div>

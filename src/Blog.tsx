@@ -33,19 +33,19 @@ export default function BlogPage({ data }: BlogPageProps) {
     .map((node) => ({
       id: node.fields?.slug!,
       title: node.frontmatter?.title!,
-      date: node.frontmatter?.date!,
+      date: moment(node.frontmatter?.date!),
       tags: node.frontmatter?.tags?.map((tag) => tag!)!,
       timeToRead: node.timeToRead!
     }))
-    .sort((a, b) => moment(b.date).unix() - moment(a.date).unix());
+    .sort((a, b) => b.date.unix() - a.date.unix());
 
-  const years = [...new Set(blogPosts.map((blogPost) => moment(blogPost.date).year()))];
+  const years = [...new Set(blogPosts.map((blogPost) => blogPost.date.year()))];
 
   const blogPostsByYear = years
     .sort((a, b) => b - a)
     .map((year) => ({
       year,
-      blogPosts: blogPosts.filter((blogPost) => moment(blogPost.date).year() === year)
+      blogPosts: blogPosts.filter((blogPost) => blogPost.date.year() === year)
     }));
 
   return (
@@ -61,7 +61,8 @@ export default function BlogPage({ data }: BlogPageProps) {
       {blogPostsByYear.map(({ year, blogPosts }, i) => (
         <div key={year}>
           <div className={`d-flex align-items-center mb-2 ${i > 0 && 'mt-5'}`}>
-            <div className="fs-3 tracking-wide">{year}</div> <hr className="mx-4 my-0" />
+            <div className="fs-3 fw-semi-bold tracking-wide">{year}</div>
+            <hr className="mx-4 my-0" />
           </div>
 
           {blogPosts.map((blogPost) => (
@@ -70,10 +71,10 @@ export default function BlogPage({ data }: BlogPageProps) {
                 <Link href={`/blog/${blogPost.id}`}>{blogPost.title}</Link>
               </div>
 
-              <div className="mt-1 d-flex flex-wrap fw-light">
+              <div className="mt-1 d-flex flex-wrap fw-light tracking-wide">
                 <div className="mr-3 d-flex align-items-center">
                   <FiCalendar strokeWidth={1} />
-                  <div className="ml-1">{moment(blogPost.date).format('DD MMM yyyy')}</div>
+                  <div className="ml-1">{blogPost.date.format('DD MMM yyyy')}</div>
                 </div>
 
                 <div className="mr-3 d-flex align-items-center">
