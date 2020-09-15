@@ -31,7 +31,7 @@ export const query = graphql`
     }
     cover: file(relativePath: { eq: $coverImagePath }) {
       childImageSharp {
-        fluid(maxWidth: 1024) {
+        fluid(maxWidth: 1024, quality: 100) {
           ...GatsbyImageSharpFluid
         }
         original {
@@ -135,7 +135,7 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
       )}
 
       {coverImage?.fluid && (
-        <figure className="mx-auto my-5">
+        <figure className="w-75pc mx-auto my-5">
           <Img fluid={coverImage.fluid} alt={blogPost.title} />
         </figure>
       )}

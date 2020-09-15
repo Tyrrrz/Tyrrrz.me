@@ -90,6 +90,10 @@ h5 {
   width: 50%;
 }
 
+.w-75pc {
+  width: 75%;
+}
+
 .ml-0 {
   margin-left: 0;
 }
