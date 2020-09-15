@@ -38,8 +38,8 @@ export default function ProjectsPage({ data }: ProjectsPageProps) {
       <h1 className="title">Projects</h1>
 
       <div className="fs-2 mb-5">
-        If you want to support development of my projects, you are welcome to{' '}
-        <Link href="/donate">make a donation</Link> 💛
+        If you want to support development of my projects, please consider{' '}
+        <Link href="/donate">making a donation</Link> 💛
       </div>
 
       {projects.map((project) => (

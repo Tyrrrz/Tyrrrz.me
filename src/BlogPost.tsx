@@ -124,7 +124,7 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
       </div>
 
       {blogPost.translations && blogPost.translations.length > 0 && (
-        <div className="mt-2 mb-5">
+        <div className="mt-1 mb-5">
           Translated by readers into:{' '}
           {blogPost.translations.map((translation) => (
             <Link key={translation.language} href={translation.url}>
@@ -144,7 +144,7 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
 
       <hr />
 
-      <div className="fs-2">
+      <div className="px-5 fs-2">
         Want to know when I post a new article? Follow me on{' '}
         <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or subscribe to the{' '}
         <Link href="/blog/rss.xml">RSS Feed</Link> ✨

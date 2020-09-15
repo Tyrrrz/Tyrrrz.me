@@ -67,7 +67,7 @@ function Navigation() {
   return (
     <nav className="navbar">
       <div className="navbar-logo">
-        <Link className="fs-4 fw-bold color-inherit decoration-none" href="/">
+        <Link className="color-inherit decoration-none" href="/">
           Alexey Golub
         </Link>
       </div>
