@@ -12,6 +12,10 @@ Value provided by such tests is directly dependent on how well the scenarios the
 
 Ideally, we would want our tests to be as close as possible to reality. This is not always practical, however, as the system may rely on components that are difficult to test, either because they are not always available or because their behavior is too slow or inconsistent.
 
-A common practice in such cases is to replace these components with lightweight substitutes, also known as [_test doubles_](https://en.wikipedia.org/wiki/Test_double). While their use also leads to lower confidence, they are often integral for a robust and predictable test suite.
+A common practice in such cases is to replace these components with lightweight substitutes, colloquially known as [_test doubles_](https://en.wikipedia.org/wiki/Test_double). While their usage also leads to lower confidence, they are often necessary for a robust and predictable test suite.
 
-However, similarly to how developers conflate [unit testing with automated testing](/blog/unit-testing-is-overrated), the concept of test doubles seemingly appears synonymous with _mocking_.
+However, similarly to how developers tend to conflate [unit testing with automated testing](/blog/unit-testing-is-overrated), the concept of test doubles usually gets reduced to simply _mock objects_. This confusion leads overuse of mocking in tests where other forms of substitutes are more applicable, causing them to become more implementation-aware and fragile as a result.
+
+In this article, we will look into _fakes_ -- another implementation of test doubles that can often be used as an alternative to mocks, without suffering from many of the same issues that they have.
+
+## Fakes vs mocks
