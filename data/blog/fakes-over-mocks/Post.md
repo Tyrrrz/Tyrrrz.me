@@ -14,11 +14,11 @@ Ideally, our test scenarios, including the environment they execute in, should p
 
 A common practice in cases like this is to replace such dependencies with lightweight substitutes that act as [_test doubles_](https://en.wikipedia.org/wiki/Test_double). While their usage does lead to lower confidence, they are often essential in making a robust and predictable test suite.
 
-Unfortunately, many developers get confused by the terminology and think that the concept of test doubles specifically refers to _mocking_. This misconception leads to overuse of mocks in tests where other forms of substitutes are more applicable, causing them to become more [implementation-aware and fragile as a result](/blog/unit-testing-is-overrated).
+Unfortunately, many developers get confused by the terminology and think that the concept of test doubles specifically refers to _mocking_. This misconception leads to overuse of mocks in tests, where other forms of substitutes are usually more suitable, causing them to become [implementation-aware and fragile as a result](/blog/unit-testing-is-overrated).
 
-???
+Most of the time when designing tests, I prefer to rely on _fake_ implementations instead. They require a bit more of an initial investment, but when used correctly can provide greater benefits than mocks, without causing the same design issues.
 
-In this article I will explain the difference between the two, how using one over the other impacts test design, and why you should prefer
+In this article we will look at the differences between fakes and mocks, how using one over the other impacts test design, and why I believe that fakes should be the default choice wherever possible. I will show examples of tests written using both approaches so that we can identify the advantages.
 
 ## Fakes vs mocks
 
