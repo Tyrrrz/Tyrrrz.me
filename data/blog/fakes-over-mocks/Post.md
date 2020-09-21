@@ -12,7 +12,7 @@ Value provided by such tests is directly dependent on how well the scenarios the
 
 Ideally, our test scenarios, including the environment they execute in, should perfectly match real-life conditions. This might not always be practical, however, as the system may rely on components that are difficult to test with, either because they are not available or because their behavior is inconsistent or slow.
 
-A common practice in cases like this is to replace such dependencies with lightweight substitutes that act as [_test doubles_](https://en.wikipedia.org/wiki/Test_double). While doing that does lead to lower confidence, it's often essential in establishing a robust and predictable test suite.
+A common practice in cases like this is to replace such dependencies with lightweight substitutes that act as _test doubles_. While doing that does lead to lower confidence, it's often essential in establishing a robust and predictable test suite.
 
 Unfortunately, many developers get confused by the terminology and think that the concept of test doubles specifically refers to _mocking_. This misconception leads to overuse of mocks in tests, even when other forms of substitutes are usually more suitable, causing them to become [implementation-aware and fragile as a result](/blog/unit-testing-is-overrated).
 
@@ -22,10 +22,18 @@ In this article we will look at the differences between fakes and mocks, how usi
 
 ## Fakes vs mocks
 
-As we enter the realm of software development terminology, we need to define the meaning behind these words in order to avoid confusion. This topic is
+As we enter the realm of software terminology, words slowly start to lose their meaning. Testing jargon is exceptionally [notorious for creating confusion](https://stackoverflow.com/questions/346372/whats-the-difference-between-faking-mocking-and-stubbing) among developers, to the point where there are probably as many definitions as there are people.
 
-Both fakes and mocks work through a layer of indirection established between the system and the component that needs to be replaced. This is can be an interface, an abstract class, a function type, or other tool available within the language.
+What the concept of mock or fake means to one person can be completely different from what it means to someone else. In order to keep things simple, I'm going to establish the definitions of those concepts in the context of modern software development. I'm not claiming that these definitions are "correct", but we're going to stick to them for this article.
 
-The difference between the two, however, is in
+Simply put, a _mock_ is an implementation that pretends to do work, but instead returns predefined results. Mock objects typically don't have any logic and their configuration is specific to only a single test scenario.
+
+In object-oriented programming, mocks are rarely created manually due to the overhead of defining new type for each case. Instead, they are often generated dynamically with the help of frameworks such as [Moq](https://github.com/moq/moq4), [Mockito](https://github.com/mockito/mockito), [Jest](https://github.com/facebook/jest), and others.
+
+Besides returning predefined results for query operations, mocks can also be used to test side-effects as well. This is done by recording calls to specific methods or functions and then validating that those calls were made with correct parameters and the correct number of times.
+
+A _fake_, on the other hand, is an implementation that is complete and valid, but is much more simple than the production counterpart.
+
+When it comes to fakes and mocks, the distinction between them is quite nuanced, as both of them can be used to replace dependencies and both operate against abstractions. The difference, however, lies in the way this is accomplished.
 
 ## Summary
