@@ -32,7 +32,7 @@ Under this understanding, a **mock is a substitute that pretends to function lik
 
 Besides returning predefined results, mocks can also record method calls. While the former is used to facilitate _indirect input_ when the system under test requires data from a dependency, the latter is used to verify produced side-effects by observing _indirect output_.
 
-As an example, let's consider the following interface of some database component, which has operations to both query and push data:
+As an example, let's consider the following interface of some database component, which has operations to store and query mail letters:
 
 ```csharp
 public interface IMailDatabase
@@ -45,7 +45,7 @@ public interface IMailDatabase
 }
 ```
 
-The database is a dependency to another component...:
+This database is a dependency to another component that is used to read, search, and send mail:
 
 ```csharp
 public class MailManager
@@ -54,7 +54,14 @@ public class MailManager
 
     /* ... */
 
-    public
+    public Task SendMailAsync(string emailFrom, string emailTo, string content)
+    {
+        var mail = new Mail(emailFrom, emailTo, content);
+
+        // ...send the mail...
+
+        await _database.StoreMailAsync(mail);
+    }
 }
 ```
 
