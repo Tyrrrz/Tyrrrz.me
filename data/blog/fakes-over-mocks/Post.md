@@ -30,9 +30,9 @@ Nowadays, when we say "mocking", we usually refer to the technique of creating d
 
 With this understanding, a **mock is a substitute, that pretends to function like its real counterpart, but returns predefined responses instead**. Although a mock object does implement the same interface as the actual component, that implementation is entirely superficial.
 
-The main purpose of a mock is to serve as a controlled layer of indirection
+In fact, a mock is not intended to replicate or even resemble the behavior of a real dependency. Its main purpose is rather to simulate specific preconditions in the system under test, by providing input in a roundabout way.
 
-Besides returning preconfigured results, mocks may also be used to record method calls. This allows us to observe any side-effects that the system produces and verify them against expectations.
+Besides that, mocks are also often used to record outgoing interactions, such as method calls. This makes it possible to observe any side-effects that took place within the system and verify them against expectations.
 
 As an example, let's consider the following interface of some database component, which is used to persist users in an application:
 
