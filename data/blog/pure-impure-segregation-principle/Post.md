@@ -6,9 +6,7 @@ tags:
   - 'software design'
 ---
 
-About two months ago I published an article titled ["Unit Testing is Overrated"](/blog/unit-testing-is-overrated) where I shared my thoughts on how developers place way too much faith in that testing approach and why it often isn't the best tool for the job. While I didn't expect that post to do particularly well, in three weeks it managed to get over 100K views and 1000 comments, even despite its controversial nature (or, perhaps, owing to it?).
-
-It was really interesting to follow the discussions that unfolded, given the vast contrast of opinions people seemed to have on the subject. And while most commenters mainly shared their personal experiences, a few have also voiced criticism of the way some arguments were presented.
+Two months ago I posted an article detailing why I think [unit testing is overrated](/blog/unit-testing-is-overrated), which seemed to resonate quite a lot with the readers, prompting very involved and interesting discussions. And although most commenters mainly shared their personal experiences, a few have also voiced criticism of the way some arguments were presented.
 
 In particular, one person mentioned that the drawbacks I've described, especially those pertaining to abstractions and mocking, are really just a byproduct of object-oriented programming and its inherent flaws. Had my examples been designed with functional principles in mind, many of the outlined problems would never have surfaced.
 
@@ -16,15 +14,13 @@ More specifically, the suggested solution was to refactor the presented class hi
 
 This exact approach was actually mentioned in later parts of the post as well, albeit in a slightly different context. Although it does make isolated testing easier for that particular snippet of code, it doesn't actually invalidate the main issues raised by the article.
 
-That said, I also think that the underlying principle of code separation based on purity is very important and often overlooked. When used correctly, it can positively influence software design, providing benefits in terms of readability, portability and, as mentioned, unit testing.
+That said, I also think that the underlying principle of code separation based on purity is very important and often overlooked. When used correctly, it can guide software design, providing benefits in terms of readability, portability and, as mentioned, unit testing.
 
 Depending on who you ask, this principle may have different names, such as [functional core, imperative shell](https://destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell), [impure-pure-impure sandwich](https://blog.ploeh.dk/2017/02/02/dependency-rejection), and some others. And while most developers seem to agree on its value, there's still some misunderstanding remaining as to how it's applied beyond simple academic examples.
 
 At the end of the day, just like with any other software development pattern, its usefulness is entirely situational. However, it offers a good mental model for reasoning about non-determinism in code, which is relevant regardless of context.
 
 In this article we will look at what actually makes something pure or impure, why is that important to us, and how we can leverage that knowledge to write better software. I will show examples of where applying this principle lends to better design, as well as scenarios where it might not be as helpful.
-
-_Note: as usual, the code samples in this article are written in C#, but the main ideas apply to any language._
 
 ## Pure vs impure
 
