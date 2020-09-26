@@ -111,14 +111,26 @@ public async Task I_can_upload_a_photo()
     var photoManager = new PhotoManager(blobStorage.Object);
 
     // Act
-    await photoManager.UploadPhotoAsync(
-        new Photo("My vacation", photoData)
-    );
+    await photoManager.UploadPhotoAsync(new Photo(photoData));
 
     // Assert
     blobStorage.Verify(bs => bs.UploadFileAsync(It.IsAny<Stream>()), Times.Once());
 }
 ```
+
+As we know, the danger of relying on mocked behavior is that it becomes painfully easy to write implementation-aware tests. Let's go over the scenarios above to identify their issues.
+
+The first test attempts to verify that calling `photoManager.GetPhotoAsync()` does return a valid photo, given that it exists in the blob storage. To facilitate that precondition, we configure the mocked `IBlobStorage` so that it returns a prearranged stream when its `ReadFileAsync()` is called.
+
+In doing so, we are inherently making an assumption about how `PhotoManager.GetPhotoAsync()` is implemented, specifically that it calls `IBlobStorage.ReadFileAsync()`. This may be true at the time the test is written, but such things can easily change in the future. It's not a stretch to imagine that a more sophisticated implementation may be using `IBlobStorage.DownloadFileAsync()` instead to avoid redundant requests by caching photos on the file system.
+
+The second test verifies that calling `photoManager.UploadPhotoAsync()` successfully pushed the contents of the photo to the remote server. Since this scenario does not involve any specific preconditions, the mock is used only as a means to record interactions between `photoManager` and `blobStorage`.
+
+Similarly, this test suffers from the same issues, as it relies on the assumption that `blobStorage.UploadFileAsync()` will be called once, or that it will be called at all.
+
+These kind of assumptions make these tests very frail, because any significant change in the implementation of `PhotoManager` will cause the suite to start failing, even though no bugs were introduced. This makes it very difficult to introduce changes in code, including refactoring, as instead of providing a safety net against regressions, these tests lock us into a specific implementation.
+
+What can we do to fix this?
 
 ## Testing test doubles
 
