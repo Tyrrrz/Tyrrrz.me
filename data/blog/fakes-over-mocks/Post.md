@@ -32,90 +32,91 @@ With this understanding, a **mock is a substitute, that pretends to function lik
 
 In fact, a mock is not intended to replicate or even resemble the behavior of a real dependency. Its main purpose is rather to simulate specific preconditions in the system under test, by providing input in a roundabout way.
 
-Besides that, mocks are also often used to record outgoing interactions, such as method calls. This makes it possible to observe any side-effects that took place within the system and verify them against expectations.
+Besides that, mocks can also be used to record outgoing interactions, such as method calls, including the number of times they appear as well as the passed parameters. This makes it possible to observe any side-effects that take place within the system and verify them against expectations.
 
-As an example, let's consider the following interface that represents a client of some external chatting service:
+As an example, let's consider the following interface that represents some external binary file storage:
 
 ```csharp
-public interface IChatClient
+public interface IBlobStorage
 {
-    Task<IReadOnlyList<Message>> GetMessagesAsync(
-        int channelId,
-        DateTimeOffset after
-    );
+    Task<Stream> ReadFileAsync(int fileId);
 
-    Task SendMessageAsync(
-        int channelId,
-        Message message
-    );
+    Task DownloadFileAsync(int fileId, string outputFilePath);
+
+    Task<int> UploadFileAsync(Stream stream);
+
+    Task<IReadOnlyList<int>> UploadManyFilesAsync(IReadOnlyList<Stream> streams);
 }
 ```
 
-We can see that this module exposes simple operations to retrieve and post messages in a channel. For the sake of complexity, we may pretend that the real implementation relies on some bespoke proprietary technology which is very difficult to use in testing.
+Looking at `IBlobStorage`, we can see that this module provides various operations to read, download, and upload files. It's not clear what the real implementation of this interface looks like, but for the sake of complexity we may pretend that it relies on some expensive cloud provider that doesn't lend itself well for testing.
 
-The chat client is in turn passed as a dependency to another component which encapsulates behaviors related to a single channel:
+The storage client is in turn referenced as a dependency in another component, called `PhotoManager`. This class is responsible for keeping track of user photos and persisting them online:
 
 ```csharp
-public class ChatChannel
+public class PhotoManager
 {
-    private readonly IChatClient _client;
-    private readonly int _channelId;
+    private readonly IBlobStorage _storage;
 
-    public ChatChannel(IChatClient client, int channelId) =>
-        (_client, _channelId) = (client, channelId);
+    public PhotoManager(IBlobStorage storage) =>
+        _storage = storage;
 
+    /* ... */
 
+    public async Task<Photo> GetPhotoAsync(int photoId)
+    {
+        /* ... */
+    }
+
+    public async Task UploadPhotoAsync(Photo photo)
+    {
+        /* ... */
+    }
 }
 ```
 
-For the sake of the argument, we can pretend that the real implementation of `IUserDatabase` relies on a bulky and outdated engine that does not run in a Docker container, is hard to automate, and generally does not lend itself to testing very well. In order to work around this problem, we need to use test doubles.
+In a real world, there would probably be many other components as well, including the entry point through which the user interacts with the application. When testing software, it's very important to account for all pieces of the pipeline, but to keep the example simple we will focus only on `PhotoManager` and `IBlobStorage`.
 
-With an approach based on mocking, our tests could look like this:
+Now, we've already decided that we can't use the real implementation of `IBlobStorage` in our tests, so we have to employ test doubles instead. Once way to approach this is, of course, by mocking `IBlobStorage` and its interactions:
 
 ```csharp
 [Fact]
-public async Task Sign_in_with_valid_credentials_returns_a_valid_jwt()
+public async Task I_can_get_a_photo_by_its_ID()
 {
     // Arrange
-    var user = new User(
-        "TestUser",
-        "NmVlYTliN2VmMTkxNzlhMDY5NTRlZGQwZjZjMDVjZWI="
+    var photoData = new byte[] {1, 2, 3, 4, 5};
+    await using var photoStream = new MemoryStream(photoData);
+
+    var blobStorage = Mock.Of<IBlobStorage>(bs =>
+        bs.ReadFileAsync(It.IsAny<int>()) == Task.FromResult(photoStream)
     );
 
-    var database = Mock.Of<IUserDatabase>(db =>
-        db.RetrieveUserAsync(It.IsAny<string>()) == Task.FromResult(user)
-    );
-
-    var userManager = new UserManager(database.Object);
+    var photoManager = new PhotoManager(blobStorage.Object);
 
     // Act
-    var jwt = await userManager.SignInAsync(new SignInRequest
-    {
-        Username = "TestUser",
-        Password = "qwertyuiop"
-    });
+    var photo = await photoManager.GetPhotoAsync(1);
 
     // Assert
-    jwt.GetClaim("preferred_username").Should().Be("TestUser");
+    photo.Data.Should().Equal(photoData);
 }
 
 [Fact]
-public async Task Sign_up_stores_a_user_in_the_database()
+public async Task I_can_upload_a_photo()
 {
     // Arrange
-    var database = Mock.Of<IUserDatabase>();
+    var photoData = new byte[] {1, 2, 3, 4, 5};
 
-    var userManager = new UserManager(database.Object);
+    var blobStorage = Mock.Of<IBlobStorage>();
+
+    var photoManager = new PhotoManager(blobStorage.Object);
 
     // Act
-    await userManager.SignUpAsync(new SignUpRequest
-    {
-        Username = "TestUser",
-        Password = "qwertyuiop"
-    });
+    await photoManager.UploadPhotoAsync(
+        new Photo("My vacation", photoData)
+    );
 
     // Assert
-    database.Verify(db => db.StoreUserAsync(It.IsAny<User>()), Times.Once());
+    blobStorage.Verify(bs => bs.UploadFileAsync(It.IsAny<Stream>()), Times.Once());
 }
 ```
 
