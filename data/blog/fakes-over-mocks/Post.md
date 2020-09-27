@@ -30,9 +30,9 @@ Nowadays, when we say "mocking", we usually refer to the technique of creating d
 
 With this understanding, a **mock is a substitute, that pretends to function like its real counterpart, but returns predefined responses instead**. Although a mock object does implement the same interface as the actual component, that implementation is entirely superficial.
 
-In fact, a mock is not intended to replicate or even resemble the behavior of a real dependency. Its main purpose is rather to simulate specific preconditions in the system under test, by providing input in a roundabout way.
+In fact, **a mock is not intended to have valid functionality at all**. Its purpose is rather to mimic the outcomes of various operations, so that the system under test exercises the behavior required by the given scenario.
 
-Besides that, mocks can also be used to record outgoing interactions, such as method calls, including the number of times they appear as well as the passed parameters. This makes it possible to observe any side-effects that take place within the system and verify them against expectations.
+Besides that, mocks can also be used to record method calls, including the number of times they appear and the passed parameters. This makes it possible to observe any side-effects that take place within the system and verify them against expectations.
 
 As an example, let's consider the following interface that represents some external binary file storage:
 
@@ -49,9 +49,9 @@ public interface IBlobStorage
 }
 ```
 
-Looking at `IBlobStorage`, we can see that this module provides various operations to read, download, and upload files. It's not clear what the real implementation of this interface looks like, but for the sake of complexity we may pretend that it relies on some expensive cloud provider that doesn't lend itself well for testing.
+This module provides basic operations to read and upload files, as well as a few more specialized methods. The actual implementation of the above interface does not concern us, but for the sake of complexity we may pretend that it relies on some expensive cloud vendor and doesn't lend itself well for testing.
 
-The storage client is in turn referenced as a dependency in another component, called `PhotoManager`. This class is responsible for keeping track of user photos and persisting them online:
+The file storage is in turn referenced as a dependency in another component, which is responsible for managing photos:
 
 ```csharp
 public class PhotoManager
@@ -61,27 +61,29 @@ public class PhotoManager
     public PhotoManager(IBlobStorage storage) =>
         _storage = storage;
 
-    /* ... */
-
     public async Task<Photo> GetPhotoAsync(int photoId)
     {
-        /* ... */
+        await using var stream = await _storage.ReadFileAsync(photoId);
+        return await Photo.FromStreamAsync(stream);
     }
 
-    public async Task UploadPhotoAsync(Photo photo)
+    public async Task AddPhotoAsync(Photo photo)
     {
-        /* ... */
+        await using var stream = photo.GetStream();
+        await _storage.UploadFileAsync(stream);
     }
 }
 ```
 
+This class gives us an abstraction over raw file access and exposes methods that work with photos directly.
+
 In a real world, there would probably be many other components as well, including the entry point through which the user interacts with the application. When testing software, it's very important to account for all pieces of the pipeline, but to keep the example simple we will focus only on `PhotoManager` and `IBlobStorage`.
 
-Now, we've already decided that we can't use the real implementation of `IBlobStorage` in our tests, so we have to employ test doubles instead. Once way to approach this is, of course, by mocking `IBlobStorage` and its interactions:
+Previously, we've already identified that using the real implementation of `IBlobStorage` in our tests would be troublesome, so that means we have to resort to test doubles. One way to approach this is, of course, by mocking the dependency:
 
 ```csharp
 [Fact]
-public async Task I_can_get_a_photo_by_its_ID()
+public async Task I_can_get_an_existing_photo()
 {
     // Arrange
     var photoData = new byte[] {1, 2, 3, 4, 5};
@@ -97,40 +99,99 @@ public async Task I_can_get_a_photo_by_its_ID()
     var photo = await photoManager.GetPhotoAsync(1);
 
     // Assert
-    photo.Data.Should().Equal(photoData);
+    photo.Serialize().Should().Equal(photoData);
 }
 
 [Fact]
-public async Task I_can_upload_a_photo()
+public async Task I_can_upload_a_new_photo()
 {
     // Arrange
-    var photoData = new byte[] {1, 2, 3, 4, 5};
-
     var blobStorage = Mock.Of<IBlobStorage>();
-
     var photoManager = new PhotoManager(blobStorage.Object);
 
+    var photo = Photo.CreatePng(
+        "My dog",
+        new byte[] {1,2,3,4,5}
+    );
+
     // Act
-    await photoManager.UploadPhotoAsync(new Photo(photoData));
+    await photoManager.AddPhotoAsync(photo);
 
     // Assert
-    blobStorage.Verify(bs => bs.UploadFileAsync(It.IsAny<Stream>()), Times.Once());
+    blobStorage.Verify(bs => bs.UploadFileAsync(It.IsAny<Stream>()));
 }
 ```
 
-As we know, the danger of relying on mocked behavior is that it becomes painfully easy to write implementation-aware tests. Let's go over the scenarios above to identify their issues.
+In the above snippet, the first test attempts to verify that the consumer can retrieve a photo, given it already exists in the storage. To facilitate this precondition, we configure the mock in such a way that makes it return a hardcoded byte stream on every call to `ReadFileAsync()`.
 
-The first test attempts to verify that calling `photoManager.GetPhotoAsync()` does return a valid photo, given that it exists in the blob storage. To facilitate that precondition, we configure the mocked `IBlobStorage` so that it returns a prearranged stream when its `ReadFileAsync()` is called.
+However, by doing that, we are implicitly making an assumption about how `PhotoManager` is implemented, specifically that it calls the `ReadFileAsync()` method. This assumption may be true now, but there's no guarantee that it will stay so in the future.
 
-In doing so, we are inherently making an assumption about how `PhotoManager.GetPhotoAsync()` is implemented, specifically that it calls `IBlobStorage.ReadFileAsync()`. This may be true at the time the test is written, but such things can easily change in the future. It's not a stretch to imagine that a more sophisticated implementation may be using `IBlobStorage.DownloadFileAsync()` instead to avoid redundant requests by caching photos on the file system.
+For example, it's not a stretch to imagine that a more sophisticated implementation may instead use `DownloadFileAsync()`, as a means to avoid redundant network requests by preemptively caching photos on the local file system. If we decide to adapt the code to this behavior at some point, our test will break.
 
-The second test verifies that calling `photoManager.UploadPhotoAsync()` successfully pushed the contents of the photo to the remote server. Since this scenario does not involve any specific preconditions, the mock is used only as a means to record interactions between `photoManager` and `blobStorage`.
+The second scenario suffers from the same issues, even though it doesn't need to set up any specific preconditions. Instead, we're using a mock here to record interactions between the dependency and its consumer, which allows us to ensure that `UploadFileAsync()` gets called when we add a new photo.
 
-Similarly, this test suffers from the same issues, as it relies on the assumption that `blobStorage.UploadFileAsync()` will be called once, or that it will be called at all.
+Just like in the other scenario, the test relies on an assumption that a specific method should be called. This is not stipulated by the contract of the dependency, so we can't know this unless we infer it from the implementation of `PhotoManager`.
 
-These kind of assumptions make these tests very frail, because any significant change in the implementation of `PhotoManager` will cause the suite to start failing, even though no bugs were introduced. This makes it very difficult to introduce changes in code, including refactoring, as instead of providing a safety net against regressions, these tests lock us into a specific implementation.
+It's also worth pointing out that the tests shown in the example above or comparably "light" in regards to their reliance on implementation details. In a more complex system, it might be necessary to have stricter mocks that match only on specific parameters and verify the number of method calls. That, in turn, makes the test more implementation-aware.
 
-What can we do to fix this?
+Of course, the problem with tests that depend on internal specifics of the system is that they are fragile, as any significant change will inevitably cause them to fail even without introducing actual bugs. Instead of providing a safety net against regressions, these tests lock us into the existing implementation and make it much harder for the code to evolve.
+
+---
+
+In order to solve this issue, it's clear that our test doubles must provide an independent implementation which is not coupled to any particular test. This is exactly where fake implementations come in.
+
+Fakes are fully valid...
+
+Instead of relying on mocking frameworks, we will create our test double manually.
+
+```csharp
+public class FakeBlobStorage : IBlobStorage
+{
+    private readonly Dictionary<int, byte[]> _files = new Dictionary<int, byte[]>();
+    private int _lastId;
+
+    public Task<Stream> ReadFileAsync(int fileId)
+    {
+        var data = _files[fileId];
+        var stream = new MemoryStream(data);
+
+        return Task.FromResult(stream);
+    }
+
+    public Task DownloadFileAsync(int fileId, string outputFilePath)
+    {
+        var data = _files[fileId];
+        File.WriteAllBytes(outputFilePath, data);
+
+        return Task.CompletedTask;
+    }
+
+    public Task<int> UploadFileAsync(Stream stream)
+    {
+        var data = stream.GetBytes();
+        var id = _lastId++;
+        _files[id] = data;
+
+        return Task.FromResult(id);
+    }
+
+    public Task<IReadOnlyList<int>> UploadManyFilesAsync(IReadOnlyList<Stream> streams)
+    {
+        var ids = streams
+            .Select(s =>
+            {
+                var data = s.GetBytes();
+                var id = _lastId++;
+                _files[id] = data;
+
+                return id;
+            })
+            .ToArray();
+
+        return Task.FromResult(ids);
+    }
+}
+```
 
 ## Testing test doubles
 
