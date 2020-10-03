@@ -20,13 +20,15 @@ When writing tests, I prefer to rely on _fake_ implementations instead. They req
 
 In this article we will look at the differences between fakes and mocks, how using one over the other impacts test design, and why I believe that fakes should be the default choice wherever possible. I will show examples of tests written with both approaches so that we can compare them and identify the benefits.
 
-## Fakes vs mocks
+## Mocks
 
-As we enter the realm of software terminology, words slowly start to lose their meaning. Testing jargon is exceptionally notorious in this regard, as it seems to always create a lot of confusion among developers.
+As we enter the realm of software terminology, words slowly start to lose their meaning. Testing jargon is exceptionally notorious in this regard, as it always seems to create a lot of confusion among developers.
 
-The concept of test doubles and the distinction between them is [no different](https://stackoverflow.com/questions/346372/whats-the-difference-between-faking-mocking-and-stubbing). However, I think this is mainly caused by the fact that the original definitions, [as they were introduced around two decades ago](https://en.wikipedia.org/wiki/Mock_object#Mocks.2C_fakes.2C_and_stubs), don't hold as much value in the context of modern software development anymore.
+Coincidentally, the concept of test doubles also has no universally accepted interpretation. So if you asked a hundred different people what the distinction between fakes, mocks, and other types of substitutes is, [you would likely get a hundred different answers](https://stackoverflow.com/questions/346372/whats-the-difference-between-faking-mocking-and-stubbing).
 
-Nowadays, when we say "mocking", we usually refer to the technique of creating dynamic replacements using frameworks such as [Moq](https://github.com/moq/moq4), [Mockito](https://github.com/mockito/mockito), [Jest](https://github.com/facebook/jest), and others. Such objects may not necessarily be mocks under the original meaning, but everyone calls them that anyway, so we may as well stick to it.
+However, I think that this problem is mainly caused by the fact that the original definitions, [as they were introduced around two decades ago](https://en.wikipedia.org/wiki/Mock_object#Mocks.2C_fakes.2C_and_stubs), don't hold as much value in the context of modern software development anymore. Nowadays, when we say "mocking", we usually refer to the technique of creating dynamic replacements using frameworks such as [Moq](https://github.com/moq/moq4), [Mockito](https://github.com/mockito/mockito), [Jest](https://github.com/facebook/jest), and others.
+
+Such objects may not necessarily be mocks according to the original meaning, but there is very little practical benefit in acknowledging those technicalities. So to make matters simpler, we will stick to the more contemporary vocabulary.
 
 With this understanding, a **mock is a substitute, that pretends to function like its real counterpart, but returns predefined responses instead**. Although a mock object does implement the same interface as the actual component, that implementation is entirely superficial.
 
@@ -39,156 +41,159 @@ As an example, let's consider the following interface that represents some exter
 ```csharp
 public interface IBlobStorage
 {
-    Task<Stream> ReadFileAsync(int fileId);
+    Task<Stream> ReadFileAsync(string fileName);
 
-    Task DownloadFileAsync(int fileId, string outputFilePath);
+    Task DownloadFileAsync(string fileName, string outputFilePath);
 
-    Task<int> UploadFileAsync(Stream stream);
+    Task UploadFileAsync(string fileName, Stream stream);
 
-    Task<IReadOnlyList<int>> UploadManyFilesAsync(IReadOnlyList<Stream> streams);
+    Task UploadManyFilesAsync(IReadOnlyDictionary<string, Stream> fileNameStreamMap);
 }
 ```
 
 This module provides basic operations to read and upload files, as well as a few more specialized methods. The actual implementation of the above interface does not concern us, but for the sake of complexity we may pretend that it relies on some expensive cloud vendor and doesn't lend itself well for testing.
 
-The file storage is in turn referenced as a dependency in another component, which is responsible for managing photos:
+The file storage module is in turn referenced as a dependency in another component, which is responsible for managing text documents:
 
 ```csharp
-public class PhotoManager
+public class DocumentManager
 {
     private readonly IBlobStorage _storage;
 
-    public PhotoManager(IBlobStorage storage) =>
+    public DocumentManager(IBlobStorage storage) =>
         _storage = storage;
 
-    public async Task<Photo> GetPhotoAsync(int photoId)
+    private static string GetFileName(string documentName) =>
+        $"docs/{documentName}";
+
+    public async Task<string> GetContentAsync(string documentName)
     {
-        await using var stream = await _storage.ReadFileAsync(photoId);
-        return await Photo.FromStreamAsync(stream);
+        var fileName = GetFileName(documentName);
+
+        await using var stream = await _storage.ReadFileAsync(fileName);
+        await using var streamReader = new StreamReader(stream);
+
+        return await streamReader.ReadToEndAsync();
     }
 
-    public async Task AddPhotoAsync(Photo photo)
+    public async Task UpdateContentAsync(string documentName, string content)
     {
-        await using var stream = photo.GetStream();
-        await _storage.UploadFileAsync(stream);
+        var fileName = GetFileName(documentName);
+
+        var data = Encoding.UTF8.GetBytes(content);
+        await using var stream = new MemoryStream(data);
+
+        await _storage.UploadFileAsync(fileName, stream);
     }
 }
 ```
 
-This class gives us an abstraction over raw file access and exposes methods that work with photos directly.
+This class gives us an abstraction over raw file access and exposes methods that work with encoded text content directly. Its implementation isn't particularly complicated, but let's imagine we still want to test it.
 
-In a real world, there would probably be many other components as well, including the entry point through which the user interacts with the application. When testing software, it's very important to account for all pieces of the pipeline, but to keep the example simple we will focus only on `PhotoManager` and `IBlobStorage`.
+In a real world, there would probably be many other components as well, including the entry point through which the user interacts with the application. When testing software, it's very important to account for all pieces of the pipeline, but to keep the example simple we will focus only on `DocumentManager` and `IBlobStorage`.
 
-Previously, we've already identified that using the real implementation of `IBlobStorage` in our tests would be troublesome, so that means we have to resort to test doubles. One way to approach this is, of course, by mocking the dependency:
+As we've identified previously, using the real implementation of `IBlobStorage` in our tests would be troublesome, which means we have to resort to test doubles. One way to approach this is, of course, by mocking the dependency:
 
 ```csharp
 [Fact]
-public async Task I_can_get_an_existing_photo()
+public async Task I_can_get_the_content_of_an_existing_document()
 {
     // Arrange
-    var photoData = new byte[] {1, 2, 3, 4, 5};
-    await using var photoStream = new MemoryStream(photoData);
-
-    var blobStorage = Mock.Of<IBlobStorage>(bs =>
-        bs.ReadFileAsync(It.IsAny<int>()) == Task.FromResult(photoStream)
+    await using var documentStream = new MemoryStream(
+        new byte[] {0x68, 0x65, 0x6c, 0x6c, 0x6f}
     );
 
-    var photoManager = new PhotoManager(blobStorage.Object);
+    var blobStorage = Mock.Of<IBlobStorage>(bs =>
+        bs.ReadFileAsync("docs/test.txt") == Task.FromResult(documentStream)
+    );
+
+    var documentManager = new DocumentManager(blobStorage.Object);
 
     // Act
-    var photo = await photoManager.GetPhotoAsync(1);
+    var content = await documentManager.GetContentAsync("test.txt");
 
     // Assert
-    photo.Serialize().Should().Equal(photoData);
+    content.Should().Be("hello");
 }
 
 [Fact]
-public async Task I_can_upload_a_new_photo()
+public async Task I_can_update_the_content_of_a_document()
 {
     // Arrange
     var blobStorage = Mock.Of<IBlobStorage>();
-    var photoManager = new PhotoManager(blobStorage.Object);
-
-    var photo = Photo.CreatePng(
-        "My dog",
-        new byte[] {1,2,3,4,5}
-    );
+    var documentManager = new DocumentManager(blobStorage.Object);
 
     // Act
-    await photoManager.AddPhotoAsync(photo);
+    await documentManager.UpdateContentAsync("test.txt", "hello");
 
     // Assert
-    blobStorage.Verify(bs => bs.UploadFileAsync(It.IsAny<Stream>()));
+    blobStorage.Verify(bs => bs.UploadFileAsync("docs/test.txt", It.IsAny<Stream>()));
 }
 ```
 
-In the above snippet, the first test attempts to verify that the consumer can retrieve a photo, given it already exists in the storage. To facilitate this precondition, we configure the mock in such a way that makes it return a hardcoded byte stream on every call to `ReadFileAsync()`.
+In the above snippet, the first test attempts to verify that the consumer can retrieve a document, given it already exists in the storage. To facilitate this precondition, we configure the mock such that it returns a hardcoded byte stream when `ReadFileAsync()` is called with the expected file name.
 
-However, by doing that, we are implicitly making an assumption about how `PhotoManager` is implemented, specifically that it calls the `ReadFileAsync()` method. This assumption may be true now, but there's no guarantee that it will stay so in the future.
+However, in doing so, we are inadvertently making some very strong assumptions about how `DocumentManager` works under the hood. More specifically, we assume that:
 
-For example, it's not a stretch to imagine that a more sophisticated implementation may instead use `DownloadFileAsync()`, as a means to avoid redundant network requests by preemptively caching photos on the local file system. If we decide to adapt the code to this behavior at some point, our test will break.
+- Calling `GetContentAsync()` in turn calls `ReadFileAsync()`
+- File name is formed by prepending `docs/` to the name of the document
 
-The second scenario suffers from the same issues, even though it doesn't need to set up any specific preconditions. Instead, we're using a mock here to record interactions between the dependency and its consumer, which allows us to ensure that `UploadFileAsync()` gets called when we add a new photo.
+These particular expectations may be true now, but they can easily change in the future. For example, it's not a stretch to imagine that, down the line, we may make the implementation more sophisticated by including a UUID in the file name. In a similar vein, we could also replace the call to `ReadFileAsync()` with `DownloadFileAsync()`, in order to cache content locally and avoid redundant network requests.
 
-Just like in the other scenario, the test relies on an assumption that a specific method should be called. This is not stipulated by the contract of the dependency, so we can't know this unless we infer it from the implementation of `PhotoManager`.
+In both cases, the changes in the implementation won't be observable from the user perspective as the surface-level behavior will remain the same. However, because our test relies on internal specifics of the system, it will start failing, indicating that there's an error in our code, when in reality there isn't.
 
-It's also worth pointing out that the tests shown in the example above or comparably "light" in regards to their reliance on implementation details. In a more complex system, it might be necessary to have stricter mocks that match only on specific parameters and verify the number of method calls. That, in turn, makes the test more implementation-aware.
+The second scenario suffers from the same issue. It doesn't have any preconditions, but instead it attempts to validate side-effects, by checking that `UploadFileAsync()` gets called when the content of a document is updated.
 
-Of course, the problem with tests that depend on internal specifics of the system is that they are fragile, as any significant change will inevitably cause them to fail even without introducing actual bugs. Instead of providing a safety net against regressions, these tests lock us into the existing implementation and make it much harder for the code to evolve.
+Since this is not stipulated by the contract of the type, we cannot reliably make such an assumption. For example, we may decide in the future to change the underlying logic, so that calling `UpdateContentAsync()` stores the documents in-memory until a certain point, after which they are uploaded in one request using `UploadManyFilesAsync()`.
 
----
+Ultimately, tests that depend on implementation specifics are fragile and are going to break sooner than later. These kind of tests don't provide us with the level of confidence we need to perform substantial changes or refactoring, as they fail way more often than they should.
 
-In order to solve this issue, it's clear that our test doubles must provide an independent implementation which is not coupled to any particular test. This is exactly where fake implementations come in.
+## Fakes
 
-Fakes are fully valid...
+It's pretty clear that in order to avoid coupling tests with implementation details, our test doubles need to be completely independent from the scenarios they're used in. That's exactly what fakes are used for.
+
+In essence, a **fake is a substitute that represents a completely functional (albeit simpler) alternative to its real counterpart**. It provides a valid end-to-end implementation of the same interface that the real component uses, but takes shortcuts to make it more lightweight.
+
+Unlike mocks, fakes actually work
 
 Instead of relying on mocking frameworks, we will create our test double manually.
 
 ```csharp
 public class FakeBlobStorage : IBlobStorage
 {
-    private readonly Dictionary<int, byte[]> _files = new Dictionary<int, byte[]>();
-    private int _lastId;
+    private readonly Dictionary<string, byte[]> _files = new Dictionary<string, byte[]>();
 
-    public Task<Stream> ReadFileAsync(int fileId)
+    public Task<Stream> ReadFileAsync(string fileName)
     {
-        var data = _files[fileId];
+        var data = _files[fileName];
         var stream = new MemoryStream(data);
 
         return Task.FromResult(stream);
     }
 
-    public Task DownloadFileAsync(int fileId, string outputFilePath)
+    public async Task DownloadFileAsync(string fileName, string outputFilePath)
     {
-        var data = _files[fileId];
-        File.WriteAllBytes(outputFilePath, data);
+        await using var input = await ReadFileAsync(fileName);
+        await using var output = File.Create(outputFilePath);
 
-        return Task.CompletedTask;
+        await input.CopyToAsync(output);
     }
 
-    public Task<int> UploadFileAsync(Stream stream)
+    public async Task UploadFileAsync(string fileName, Stream stream)
     {
-        var data = stream.GetBytes();
-        var id = _lastId++;
-        _files[id] = data;
+        await using var buffer = new MemoryStream();
+        await stream.CopyToAsync(buffer);
 
-        return Task.FromResult(id);
+        var data = buffer.ToArray();
+        _files[fileName] = data;
     }
 
-    public Task<IReadOnlyList<int>> UploadManyFilesAsync(IReadOnlyList<Stream> streams)
+    public async Task UploadManyFilesAsync(IReadOnlyDictionary<string, Stream> fileNameStreamMap)
     {
-        var ids = streams
-            .Select(s =>
-            {
-                var data = s.GetBytes();
-                var id = _lastId++;
-                _files[id] = data;
-
-                return id;
-            })
-            .ToArray();
-
-        return Task.FromResult(ids);
+        foreach (var (fileName, stream) in fileNameStreamMap)
+        {
+            await UploadFileAsync(fileName, stream);
+        }
     }
 }
 ```
