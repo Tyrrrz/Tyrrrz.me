@@ -24,15 +24,13 @@ In this article we will look at the differences between fakes and mocks, how usi
 
 As we enter the realm of software terminology, words slowly start to lose their meaning. Testing jargon is exceptionally notorious in this regard, as it always seems to create a lot of confusion among developers.
 
-Coincidentally, the concept of test doubles also has no universally accepted interpretation. So if you asked a hundred different people what the distinction between fakes, mocks, and other types of substitutes is, [you would likely get a hundred different answers](https://stackoverflow.com/questions/346372/whats-the-difference-between-faking-mocking-and-stubbing).
+The concept of test doubles is one such example, as it doesn't have a universally accepted interpretation despite its ubiquitous usage. If you went and asked a hundred people what the distinction between fakes, mocks, and other types of substitutes is, [you would probably end up with a hundred different answers](https://stackoverflow.com/questions/346372/whats-the-difference-between-faking-mocking-and-stubbing).
 
-However, I think that this problem is mainly caused by the fact that the original definitions, [as they were introduced around two decades ago](https://en.wikipedia.org/wiki/Mock_object#Mocks.2C_fakes.2C_and_stubs), don't hold as much value in the context of modern software development anymore. Nowadays, when we say "mocking", we usually refer to the technique of creating dynamic replacements using frameworks such as [Moq](https://github.com/moq/moq4), [Mockito](https://github.com/mockito/mockito), [Jest](https://github.com/facebook/jest), and others.
+This problem likely stems from the fact that most of the popular definitions, for example [the ones introduced by Gerard Meszaros](https://martinfowler.com/bliki/TestDouble.html), suffer from being too abstract and largely outdated. Nowadays, the term "mocks" is not used to refer to a specific type of test doubles, but rather to a broader class of objects that can be created using frameworks such as [Moq](https://github.com/moq/moq4), [Mockito](https://github.com/mockito/mockito), [Jest](https://github.com/facebook/jest), and others.
 
-Such objects may not necessarily be mocks according to the original meaning, but there is very little practical benefit in acknowledging those technicalities. So to make matters simpler, we will stick to the more contemporary vocabulary.
+According to this more colloquial meaning, a **mock is a substitute, that pretends to function like its real counterpart, but returns predefined responses instead**. Although a mock object does implement the same interface as the actual component, that implementation is entirely superficial.
 
-With this understanding, a **mock is a substitute, that pretends to function like its real counterpart, but returns predefined responses instead**. Although a mock object does implement the same interface as the actual component, that implementation is entirely superficial.
-
-In fact, **a mock is not intended to have valid functionality at all**. Its purpose is rather to mimic the outcomes of various operations, so that the system under test exercises the behavior required by the given scenario.
+In fact, **a mock is not intended to have valid functionality at all**. Its purpose is rather to mimic the outcomes of various operations, so that the system under test exercises the behavior required by a given scenario.
 
 Besides that, mocks can also be used to record method calls, including the number of times they appear and the passed parameters. This makes it possible to observe any side-effects that take place within the system and verify them against expectations.
 
@@ -66,7 +64,7 @@ public class DocumentManager
     private static string GetFileName(string documentName) =>
         $"docs/{documentName}";
 
-    public async Task<string> GetContentAsync(string documentName)
+    public async Task<string> GetDocumentAsync(string documentName)
     {
         var fileName = GetFileName(documentName);
 
@@ -76,7 +74,7 @@ public class DocumentManager
         return await streamReader.ReadToEndAsync();
     }
 
-    public async Task UpdateContentAsync(string documentName, string content)
+    public async Task SaveDocumentAsync(string documentName, string content)
     {
         var fileName = GetFileName(documentName);
 
@@ -88,11 +86,9 @@ public class DocumentManager
 }
 ```
 
-This class gives us an abstraction over raw file access and exposes methods that work with encoded text content directly. Its implementation isn't particularly complicated, but let's imagine we still want to test it.
+This class gives us an abstraction over raw file access and exposes methods that work with encoded text content directly. Its implementation may not be particularly complicated, but let's imagine we want to test it anyway.
 
-In a real world, there would probably be many other components as well, including the entry point through which the user interacts with the application. When testing software, it's very important to account for all pieces of the pipeline, but to keep the example simple we will focus only on `DocumentManager` and `IBlobStorage`.
-
-As we've identified previously, using the real implementation of `IBlobStorage` in our tests would be troublesome, which means we have to resort to test doubles. One way to approach this is, of course, by mocking the dependency:
+As we've identified earlier, using the real implementation of `IBlobStorage` in our tests would be troublesome, so we have to resort to test doubles. One way to approach this is, of course, by creating mock implementations:
 
 ```csharp
 [Fact]
@@ -110,7 +106,7 @@ public async Task I_can_get_the_content_of_an_existing_document()
     var documentManager = new DocumentManager(blobStorage.Object);
 
     // Act
-    var content = await documentManager.GetContentAsync("test.txt");
+    var content = await documentManager.GetDocumentAsync("test.txt");
 
     // Assert
     content.Should().Be("hello");
@@ -124,39 +120,43 @@ public async Task I_can_update_the_content_of_a_document()
     var documentManager = new DocumentManager(blobStorage.Object);
 
     // Act
-    await documentManager.UpdateContentAsync("test.txt", "hello");
+    await documentManager.SaveDocumentAsync("test.txt", "hello");
 
     // Assert
     blobStorage.Verify(bs => bs.UploadFileAsync("docs/test.txt", It.IsAny<Stream>()));
 }
 ```
 
-In the above snippet, the first test attempts to verify that the consumer can retrieve a document, given it already exists in the storage. To facilitate this precondition, we configure the mock such that it returns a hardcoded byte stream when `ReadFileAsync()` is called with the expected file name.
+In the above snippet, the first test attempts to verify that the consumer can retrieve a document, given it already exists in the storage. To facilitate this precondition, we configure the mock in such way that it returns a hardcoded byte stream when `ReadFileAsync()` is called with the expected file name.
 
-However, in doing so, we are inadvertently making some very strong assumptions about how `DocumentManager` works under the hood. More specifically, we assume that:
+However, in doing so, we are inadvertently making a few very strong assumptions about how `DocumentManager` works under the hood. In particular, we assume that:
 
-- Calling `GetContentAsync()` in turn calls `ReadFileAsync()`
+- Calling `GetDocumentAsync()` in turn calls `ReadFileAsync()`
 - File name is formed by prepending `docs/` to the name of the document
 
-These particular expectations may be true now, but they can easily change in the future. For example, it's not a stretch to imagine that, down the line, we may make the implementation more sophisticated by including a UUID in the file name. In a similar vein, we could also replace the call to `ReadFileAsync()` with `DownloadFileAsync()`, in order to cache content locally and avoid redundant network requests.
+These specifics may be true now, but they can easily change in the future. For example, it's not a stretch to imagine that we may decide to store files under a different path or implement some sort of local caching by replacing `ReadFileAsync()` with `DownloadFileAsync()`.
 
-In both cases, the changes in the implementation won't be observable from the user perspective as the surface-level behavior will remain the same. However, because our test relies on internal specifics of the system, it will start failing, indicating that there's an error in our code, when in reality there isn't.
+In both cases, the changes in the implementation won't be observable from the user perspective as the surface-level behavior will remain the same. However, because the test we wrote relies on internal details of the system, it will start failing, incorrectly indicating that there's an error in our code.
 
-The second scenario suffers from the same issue. It doesn't have any preconditions, but instead it attempts to validate side-effects, by checking that `UploadFileAsync()` gets called when the content of a document is updated.
+The second scenario works a bit differently, but also suffers from the same issue. It attempts to verify that saving a document correctly persists it in the storage, which is done by checking if a call to `UploadFileAsync()` took place.
 
-Since this is not stipulated by the contract of the type, we cannot reliably make such an assumption. For example, we may decide in the future to change the underlying logic, so that calling `UpdateContentAsync()` stores the documents in-memory until a certain point, after which they are uploaded in one request using `UploadManyFilesAsync()`.
+Again, it's not hard to imagine a situation where the underlying implementation might change in way that breaks this test. For example, we may decide to optimize the behavior slightly by not uploading the documents immediately, but instead keeping them in memory to later send in bulk using `UploadManyFilesAsync()`.
 
-Ultimately, tests that depend on implementation specifics are fragile and are going to break sooner than later. These kind of tests don't provide us with the level of confidence we need to perform substantial changes or refactoring, as they fail way more often than they should.
+One way or another, tests that rely on internal specifics are inherently fragile and will break very often. This does not only impose an additional maintenance cost as they need to be constantly updated, but makes them considerably less valuable as well.
+
+Instead of providing us a safety net in the face of potential regressions, they lock us into the existing implementation and discourage evolution. Because of that, it becomes unnecessarily difficult to introduce substantial changes and perform regular code refactoring.
 
 ## Fakes
 
-It's pretty clear that in order to avoid coupling tests with implementation details, our test doubles need to be completely independent from the scenarios they're used in. That's exactly what fakes are used for.
+Logically, in order to avoid strong coupling between tests and the underlying implementations, our test doubles need to be completely independent from the scenarios they're used in. As you can probably guess, that's exactly where fakes come in.
 
-In essence, a **fake is a substitute that represents a completely functional (albeit simpler) alternative to its real counterpart**. It provides a valid end-to-end implementation of the same interface that the real component uses, but takes shortcuts to make it more lightweight.
+In essence, a **fake is a substitute that represents a lightweight but completely functional alternative to its real counterpart**. Instead of merely implementing the interface with preconfigured responses, it provides an actually valid end-to-end behavior.
 
-Unlike mocks, fakes actually work
+Although its functionality resembles that of the real component, a **fake implementation is intentionally made simpler by taking certain shortcuts**. For example, rather than relying on a remote web service, an in-memory controller may be used instead.
 
-Instead of relying on mocking frameworks, we will create our test double manually.
+In contrast to mocks, fakes are not created in runtime using dynamic proxies, but defined statically like regular types. While it's technically possible to also create a fake implementation using mocking frameworks and closures, it's practically never worth doing.
+
+Let's come back to our file storage interface and make a fake implementation for usage in tests. A very simple approach could be to use a simple dictionary to keep a list of uploaded files:
 
 ```csharp
 public class FakeBlobStorage : IBlobStorage
@@ -198,9 +198,63 @@ public class FakeBlobStorage : IBlobStorage
 }
 ```
 
-## Testing test doubles
+```csharp
+[Fact]
+public async Task I_can_get_the_content_of_an_existing_document()
+{
+    // Arrange
+    var blobStorage = new FakeBlobStorage();
 
-Testing relies on validating complex code through simple assertions.
+    await using var documentStream = new MemoryStream(
+        new byte[] {0x68, 0x65, 0x6c, 0x6c, 0x6f}
+    );
+
+    await blobStorage.UploadFileAsync("docs/test.txt");
+
+    var documentManager = new DocumentManager(blobStorage);
+
+    // Act
+    var content = await documentManager.GetDocumentAsync("test.txt");
+
+    // Assert
+    content.Should().Be("hello");
+}
+```
+
+```csharp
+[Fact]
+public async Task I_can_get_the_content_of_an_existing_document()
+{
+    // Arrange
+    var blobStorage = new FakeBlobStorage();
+    var documentManager = new DocumentManager(blobStorage);
+
+    await documentManager.SaveDocumentAsync("test.txt", "hello");
+
+    // Act
+    var content = await documentManager.GetDocumentAsync("test.txt");
+
+    // Assert
+    content.Should().Be("hello");
+}
+```
+
+```csharp
+[Fact]
+public async Task I_can_update_the_content_of_a_document()
+{
+    // Arrange
+    var blobStorage = new FakeBlobStorage();
+    var documentManager = new DocumentManager(blobStorage);
+
+    // Act
+    await documentManager.SaveDocumentAsync("test.txt", "hello");
+    var content = await documentManager.GetDocumentAsync("test.txt");
+
+    // Assert
+    content.Should().Be("hello");
+}
+```
 
 ## Summary
 
