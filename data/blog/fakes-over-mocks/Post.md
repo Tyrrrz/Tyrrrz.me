@@ -6,27 +6,27 @@ tags:
   - 'testing'
 ---
 
-The primary purpose of software testing is to ensure that a program works exactly how the user expects it to. This is achieved by formalizing intended user interactions into functional requirements, and then validating them using (automated) tests.
+The primary purpose of software testing is to detect any potential defects in a program before it reaches its intended consumers. This is typically achieved by establishing functional requirements which define supported user interactions as well as expected outcomes, and then validating them using (automated) tests.
 
-Value provided by such tests is directly dependent on how well the scenarios they simulate resemble the way the software is actually used. Any deviation therein diminishes that value, as it becomes harder to reason about the state of the would-be production system based on the result of a test run.
+Consequentially, the value provided by such tests is directly dependent on how well the scenarios they simulate resemble the way the software is actually used. Any deviation therein diminishes that value, as it becomes harder to reason about the state of the would-be production system based on the result of a test run.
 
-Ideally, our test scenarios, including the environment they execute in, should perfectly match real-life conditions. This might not always be practical, however, as the system may rely on components that are difficult to test with, either because they are not available or because their behavior is inconsistent or slow.
+In an ideal world, our test scenarios, including the environment they execute in, should perfectly match real-life conditions. This is always desirable, but might not always be practical, as the system may rely on components that are difficult to test with, either because they are not available or because their behavior is inconsistent or slow.
 
-A common practice in cases like this is to replace such dependencies with lightweight substitutes that act as _test doubles_. While doing that does lead to lower confidence, it's often essential in establishing a robust and predictable test suite.
+A common practice in cases like this is to replace such dependencies with lightweight substitutes that act as _test doubles_. While doing so does lead to lower derived confidence, it's often a trade-off between usefulness and usability, which is essential in designing a robust and consistent test suite.
 
-Unfortunately, many developers get confused by the terminology and think that the concept of test doubles specifically refers to _mocking_. This misconception leads to overuse of mocks in tests, even when other forms of substitutes are usually more suitable, causing them to become [implementation-aware and fragile as a result](/blog/unit-testing-is-overrated).
+Although there are different ways test doubles can be implemented, most of the time developers resort to _mocking_ as the default solution. This is unfortunate, as it typically leads to overuse of mocks in tests, even when other forms of substitutes are usually more suitable, causing them to become [implementation-aware and fragile as a result](https://en.wikipedia.org/wiki/Mock_object#Limitations).
 
-When writing tests, I prefer to rely on _fake_ implementations instead. They require a bit more upfront investment compared to mocks, but provide important practical advantages, without suffering from the same problems.
+When writing tests, I prefer to follow a different approach and rely on _fake_ implementations wherever possible. They require a bit more upfront investment compared to mocks, but provide many practical advantages which are important to consider.
 
-In this article we will look at the differences between fakes and mocks, how using one over the other impacts test design, and why I believe that fakes should be the default choice wherever possible. I will show examples of tests written with both approaches so that we can compare them and identify the benefits.
+In this article we will look at the differences between these two variants of test doubles, identify how using one over the other impacts test design, and why using fakes can often be beneficial.
 
 ## Mocks
 
-As we enter the realm of software terminology, words slowly start to lose their meaning. Testing jargon is exceptionally notorious in this regard, as it always seems to create a lot of confusion among developers.
+As we enter the realm of software terminology, words slowly start to lose their meaning. Testing jargon is exceptionally notorious in this regard, as it always seems to create a lot of uncertainty among developers.
 
-The concept of test doubles is one such example, as it doesn't have a universally accepted interpretation despite its ubiquitous usage. If you went and asked a hundred people what the distinction between fakes, mocks, and other types of substitutes is, [you would probably end up with a hundred different answers](https://stackoverflow.com/questions/346372/whats-the-difference-between-faking-mocking-and-stubbing).
+Unsurprisingly, the concept of "mock" or how it's fundamentally different from other types of substitutes is also one of those cases. Despite its highly ubiquitous usage in literature and online, this term doesn't have a single universally accepted interpretation. So if you asked a hundred people what it means, [you'd probably end up with a hundred different answers](https://stackoverflow.com/questions/346372/whats-the-difference-between-faking-mocking-and-stubbing).
 
-This problem likely stems from the fact that most of the popular definitions, for example [the ones introduced by Gerard Meszaros](https://martinfowler.com/bliki/TestDouble.html), suffer from being too abstract and largely outdated. Nowadays, the term "mocks" is not used to refer to a specific type of test doubles, but rather to a broader class of objects that can be created using frameworks such as [Moq](https://github.com/moq/moq4), [Mockito](https://github.com/mockito/mockito), [Jest](https://github.com/facebook/jest), and others.
+According to one of the more [popular definitions introduced by Gerard Meszaros](https://martinfowler.com/bliki/TestDouble.html), a mock is a very specific type of substitute which is used to verify interactions. This is less relevant in the context of modern software development, where a mock is often used to refer to a broader class of dynamic replacements created using frameworks such as [Moq](https://github.com/moq/moq4), [Mockito](https://github.com/mockito/mockito), [Jest](https://github.com/facebook/jest), and others.
 
 According to this more colloquial meaning, a **mock is a substitute, that pretends to function like its real counterpart, but returns predefined responses instead**. Although a mock object does implement the same interface as the actual component, that implementation is entirely superficial.
 
@@ -255,6 +255,8 @@ public async Task I_can_update_the_content_of_a_document()
     content.Should().Be("hello");
 }
 ```
+
+## Testing the test doubles
 
 ## Summary
 
