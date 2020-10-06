@@ -1,5 +1,5 @@
 import { Link as InternalLink } from 'gatsby';
-import { OutboundLink as ExternalLink } from 'gatsby-plugin-google-analytics';
+import { OutboundLink as ExternalLink } from 'gatsby-plugin-gtag';
 import React from 'react';
 import { isAbsoluteUrl } from '../infra/utils';
 

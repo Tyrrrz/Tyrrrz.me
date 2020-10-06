@@ -125,14 +125,10 @@ module.exports = {
     resolvePlugin('gatsby-plugin-disqus', { shortname: disqusId }),
 
     // Google Analytics integration
-    resolvePlugin('gatsby-plugin-google-analytics', {
+    resolvePlugin('gatsby-plugin-gtag', {
       trackingId: googleAnalyticsId,
-      anonymize: false,
-      respectDNT: false,
-      sampleRate: 100,
-      siteSpeedSampleRate: 10,
-      alwaysSendReferrer: true,
-      head: true
+      head: true,
+      anonymize: false
     }),
 
     // Netlify platform integration
