@@ -10,31 +10,33 @@ The primary purpose of software testing is to detect any potential defects in a 
 
 Consequentially, the value provided by such tests is directly dependent on how well the scenarios they simulate resemble the way the software is actually used. Any deviation therein diminishes that value, as it becomes harder to reason about the state of the would-be production system based on the result of a test run.
 
-In an ideal world, our test scenarios, including the environment they execute in, should perfectly match real-life conditions. This is always desirable, but might not always be practical, as the system may rely on components that are difficult to test with, either because they are not available or because their behavior is inconsistent or slow.
+In an ideal world, our test scenarios, including the environment they execute in, should perfectly match real-life conditions. This is always desirable, but might not always be practical, as the system can rely on components that are difficult to test with, either because they are not available or because their behavior is inconsistent or slow.
 
-A common practice in cases like this is to replace such dependencies with lightweight substitutes that act as _test doubles_. While doing so does lead to lower derived confidence, it's often a trade-off between usefulness and usability, which is essential in designing a robust and consistent test suite.
+A common practice in cases like this is to replace such dependencies with lightweight substitutes that act as _test doubles_. Although doing so does lead to lower derived confidence, it's often a trade-off between usefulness and usability, which is essential in designing a robust and consistent test suite.
 
-Although there are different ways test doubles can be implemented, most of the time developers resort to _mocking_ as the default solution. This is unfortunate, as it typically leads to overuse of mocks in tests, even when other forms of substitutes are usually more suitable, causing them to become [implementation-aware and fragile as a result](https://en.wikipedia.org/wiki/Mock_object#Limitations).
+That said, while test doubles can be implemented in different ways, most of the time developers tend to resort to _mocking_ as the default choice. This is unfortunate, as it typically leads to overuse of mocks where other forms of substitutes are more suitable, making tests [implementation-aware and fragile](https://en.wikipedia.org/wiki/Mock_object#Limitations) as a result.
 
-When writing tests, I prefer to follow a different approach and rely on _fake_ implementations wherever possible. They require a bit more upfront investment compared to mocks, but provide many practical advantages which are important to consider.
+When writing tests, I prefer to avoid mocks as much as possible and rely on _fake_ implementations instead. They require a bit of upfront investment, but provide many practical advantages which are very important to consider.
 
-In this article we will look at the differences between these two variants of test doubles, identify how using one over the other impacts test design, and why using fakes can often be beneficial.
+In this article we will look at the differences between these two variants of test doubles, identify how using one over the other impacts test design, and why using fakes often results in more manageable test suites.
 
 ## Mocks
 
 As we enter the realm of software terminology, words slowly start to lose their meaning. Testing jargon is exceptionally notorious in this regard, as it always seems to create a lot of uncertainty among developers.
 
-Unsurprisingly, the concept of "mock" or how it's fundamentally different from other types of substitutes is also one of those cases. Despite its highly ubiquitous usage in literature and online, this term doesn't have a single universally accepted interpretation. So if you asked a hundred people what it means, [you'd probably end up with a hundred different answers](https://stackoverflow.com/questions/346372/whats-the-difference-between-faking-mocking-and-stubbing).
+Unsurprisingly, the concept of "mock" or how it's fundamentally different from other types of substitutes is also one of those cases. Despite its highly ubiquitous usage, this term [doesn't have a single universally accepted interpretation](https://stackoverflow.com/questions/346372/whats-the-difference-between-faking-mocking-and-stubbing).
 
-According to one of the more [popular definitions introduced by Gerard Meszaros](https://martinfowler.com/bliki/TestDouble.html), a mock is a very specific type of substitute which is used to verify interactions. This is less relevant in the context of modern software development, where a mock is often used to refer to a broader class of dynamic replacements created using frameworks such as [Moq](https://github.com/moq/moq4), [Mockito](https://github.com/mockito/mockito), [Jest](https://github.com/facebook/jest), and others.
+According to the [original definitions introduced by Gerard Meszaros](https://martinfowler.com/bliki/TestDouble.html), a mock is a very specific type of substitute which is used to verify interactions between the system under test and its dependencies. However, this distinction is not as relevant nowadays, as the term is instead used to refer to a broader class of substitutes created with frameworks such as [Moq](https://github.com/moq/moq4), [Mockito](https://github.com/mockito/mockito), [Jest](https://github.com/facebook/jest), and others.
 
-According to this more colloquial meaning, a **mock is a substitute, that pretends to function like its real counterpart, but returns predefined responses instead**. Although a mock object does implement the same interface as the actual component, that implementation is entirely superficial.
+Such objects may not necessarily be mocks under the original definition, but there's very little benefit in acknowledging these technicalities. So to make matters simpler, we will stick to this more colloquial understanding of the term throughout the article.
+
+Generally speaking, a **mock is a substitute, that pretends to function like its real counterpart, but returns predefined responses instead**. From a structural standpoint, it does implement the same external interface as the actual component, however that implementation is entirely superficial.
 
 In fact, **a mock is not intended to have valid functionality at all**. Its purpose is rather to mimic the outcomes of various operations, so that the system under test exercises the behavior required by a given scenario.
 
-Besides that, mocks can also be used to record method calls, including the number of times they appear and the passed parameters. This makes it possible to observe any side-effects that take place within the system and verify them against expectations.
+Besides that, mocks can also be used to observe any side-effects that take place within the system. This is achieved by recording method calls and verifying if the number of times they appear and their parameters match the expectations.
 
-As an example, let's consider the following interface that represents some external binary file storage:
+Let's take a look at how all of this works in practice. As an example, imagine that we're building a system that relies on some binary file storage dependency represented by the following interface:
 
 ```csharp
 public interface IBlobStorage
@@ -49,9 +51,9 @@ public interface IBlobStorage
 }
 ```
 
-This module provides basic operations to read and upload files, as well as a few more specialized methods. The actual implementation of the above interface does not concern us, but for the sake of complexity we may pretend that it relies on some expensive cloud vendor and doesn't lend itself well for testing.
+This module provides basic operations to read and upload files, as well as a few more specialized methods. The actual implementation of the above abstraction does not concern us, but for the sake of complexity we can pretend that it relies on some expensive cloud vendor and doesn't lend itself well for testing.
 
-The file storage module is in turn referenced as a dependency in another component, which is responsible for managing text documents:
+Built on top of it, we also have another component which is responsible for loading and saving text documents:
 
 ```csharp
 public class DocumentManager
@@ -86,7 +88,7 @@ public class DocumentManager
 }
 ```
 
-This class gives us an abstraction over raw file access and exposes methods that work with encoded text content directly. Its implementation may not be particularly complicated, but let's imagine we want to test it anyway.
+This class gives us an abstraction over raw file access and exposes methods that work with text content directly. Its implementation is not particularly complex, but let's imagine we want to test it anyway.
 
 As we've identified earlier, using the real implementation of `IBlobStorage` in our tests would be troublesome, so we have to resort to test doubles. One way to approach this is, of course, by creating mock implementations:
 
@@ -129,22 +131,22 @@ public async Task I_can_update_the_content_of_a_document()
 
 In the above snippet, the first test attempts to verify that the consumer can retrieve a document, given it already exists in the storage. To facilitate this precondition, we configure the mock in such way that it returns a hardcoded byte stream when `ReadFileAsync()` is called with the expected file name.
 
-However, in doing so, we are inadvertently making a few very strong assumptions about how `DocumentManager` works under the hood. In particular, we assume that:
+However, in doing so, we are inadvertently making a few very strong assumptions about how `DocumentManager` works under the hood. Namely, we assume that:
 
 - Calling `GetDocumentAsync()` in turn calls `ReadFileAsync()`
 - File name is formed by prepending `docs/` to the name of the document
 
 These specifics may be true now, but they can easily change in the future. For example, it's not a stretch to imagine that we may decide to store files under a different path or implement some sort of local caching by replacing `ReadFileAsync()` with `DownloadFileAsync()`.
 
-In both cases, the changes in the implementation won't be observable from the user perspective as the surface-level behavior will remain the same. However, because the test we wrote relies on internal details of the system, it will start failing, incorrectly indicating that there's an error in our code.
+In both cases, the changes in the implementation won't be observable from the user perspective as the surface-level behavior will remain the same. However, because the test we wrote relies on internal details of the system, it will start failing, indicating that there's an error in our code, when in reality there isn't.
 
-The second scenario works a bit differently, but also suffers from the same issue. It attempts to verify that saving a document correctly persists it in the storage, which is done by checking if a call to `UploadFileAsync()` took place.
+The second scenario works a bit differently, but also suffers from the same issue. To verify that a document is correctly persisted in the storage when it gets saved, it checks that a call to `UploadFileAsync()` takes place in the process.
 
 Again, it's not hard to imagine a situation where the underlying implementation might change in way that breaks this test. For example, we may decide to optimize the behavior slightly by not uploading the documents immediately, but instead keeping them in memory to later send in bulk using `UploadManyFilesAsync()`.
 
-One way or another, tests that rely on internal specifics are inherently fragile and will break very often. This does not only impose an additional maintenance cost as they need to be constantly updated, but makes them considerably less valuable as well.
+One way or another, tests that rely on mocks are inherently coupled to the implementation of the system and will often break when it changes. This does not only impose an additional maintenance cost as such tests need to be constantly updated, but makes them considerably less valuable as well.
 
-Instead of providing us a safety net in the face of potential regressions, they lock us into the existing implementation and discourage evolution. Because of that, it becomes unnecessarily difficult to introduce substantial changes and perform regular code refactoring.
+Instead of providing us with a safety net in the face of potential regressions, they lock us into an existing implementation and discourage evolution. Because of that, introducing substantial changes and refactoring code becomes a much more difficult and ultimately discouraging experience.
 
 ## Fakes
 
