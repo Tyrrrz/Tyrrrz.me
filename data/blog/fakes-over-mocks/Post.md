@@ -12,7 +12,7 @@ Consequentially, the value provided by such tests is directly dependent on how w
 
 In an ideal world, our test scenarios, including the environment they execute in, should perfectly match real-life conditions. This is always desirable, but might not always be practical, as the system can rely on components that are difficult to test with, either because they are not available or because their behavior is inconsistent or slow.
 
-A common practice in cases like this is to replace such dependencies with lightweight substitutes that act as _test doubles_. Although doing so does lead to lower derived confidence, it's often a trade-off between usefulness and usability, which is essential in designing a robust and consistent test suite.
+A common practice in cases like this is to replace such dependencies with lightweight substitutes that act as _test doubles_. Although doing so does lead to lower confidence, it's often a trade-off between usefulness and usability, which is essential in designing a robust and consistent test suite.
 
 That said, while test doubles can be implemented in different ways, most of the time developers tend to resort to _mocking_ as the default choice. This is unfortunate, as it typically leads to overuse of mocks where other forms of substitutes are more suitable, making tests [implementation-aware and fragile](https://en.wikipedia.org/wiki/Mock_object#Limitations) as a result.
 
@@ -34,9 +34,9 @@ Generally speaking, a **mock is a substitute, that pretends to function like its
 
 In fact, **a mock is not intended to have valid functionality at all**. Its purpose is rather to mimic the outcomes of various operations, so that the system under test exercises the behavior required by a given scenario.
 
-Besides that, mocks can also be used to observe any side-effects that take place within the system. This is achieved by recording method calls and verifying if the number of times they appear and their parameters match the expectations.
+Besides that, mocks can also be used to verify side-effects that take place within the system. This is achieved by recording method calls and checking if the number of times they appear and their parameters match the expectations.
 
-Let's take a look at how all of this works in practice. As an example, imagine that we're building a system that relies on some binary file storage dependency represented by the following interface:
+Let's take a look at how all of this works in practice. As an example, imagine that we're building a system that relies on some binary file storage represented by the following interface:
 
 ```csharp
 public interface IBlobStorage
@@ -51,7 +51,7 @@ public interface IBlobStorage
 }
 ```
 
-This module provides basic operations to read and upload files, as well as a few more specialized methods. The actual implementation of the above abstraction does not concern us, but for the sake of complexity we can pretend that it relies on some expensive cloud vendor and doesn't lend itself well for testing.
+As we can see, it provides basic operations to read and upload files, as well as a few more specialized methods. The actual implementation of the above abstraction does not concern us, but for the sake of complexity we can pretend that it relies on some expensive cloud vendor and doesn't lend itself well for testing.
 
 Built on top of it, we also have another component which is responsible for loading and saving text documents:
 
@@ -90,7 +90,7 @@ public class DocumentManager
 
 This class gives us an abstraction over raw file access and exposes methods that work with text content directly. Its implementation is not particularly complex, but let's imagine we want to test it anyway.
 
-As we've identified earlier, using the real implementation of `IBlobStorage` in our tests would be troublesome, so we have to resort to test doubles. One way to approach this is, of course, by creating mock implementations:
+As we've identified earlier, using the real implementation of `IBlobStorage` in our tests would be troublesome, so we have to resort to test doubles. One of the simpler ways to approach this is, of course, by creating mock implementations:
 
 ```csharp
 [Fact]
@@ -129,14 +129,14 @@ public async Task I_can_update_the_content_of_a_document()
 }
 ```
 
-In the above snippet, the first test attempts to verify that the consumer can retrieve a document, given it already exists in the storage. To facilitate this precondition, we configure the mock in such way that it returns a hardcoded byte stream when `ReadFileAsync()` is called with the expected file name.
+In the above code snippet, the first test attempts to verify that the consumer can retrieve a document, given it already exists in the storage. To facilitate this precondition, we configure the mock in such way that it returns a hardcoded byte stream when `ReadFileAsync()` is called with the expected file name.
 
 However, in doing so, we are inadvertently making a few very strong assumptions about how `DocumentManager` works under the hood. Namely, we assume that:
 
 - Calling `GetDocumentAsync()` in turn calls `ReadFileAsync()`
 - File name is formed by prepending `docs/` to the name of the document
 
-These specifics may be true now, but they can easily change in the future. For example, it's not a stretch to imagine that we may decide to store files under a different path or implement some sort of local caching by replacing `ReadFileAsync()` with `DownloadFileAsync()`.
+These specifics may be true now, but they can easily change in the future. For example, it's not a stretch to imagine that we may decide to store files under a different path or replace calls to `ReadFileAsync()` with `DownloadFileAsync()` (as a means to preemptively cache files locally).
 
 In both cases, the changes in the implementation won't be observable from the user perspective as the surface-level behavior will remain the same. However, because the test we wrote relies on internal details of the system, it will start failing, indicating that there's an error in our code, when in reality there isn't.
 
