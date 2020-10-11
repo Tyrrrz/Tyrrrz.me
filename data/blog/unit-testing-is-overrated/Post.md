@@ -136,7 +136,7 @@ public class SolarCalculatorTests
             lp.GetLocationAsync() == Task.FromResult(location)
         );
 
-        var solarCalculator = new SolarCalculator(locationProvider.Object);
+        var solarCalculator = new SolarCalculator(locationProvider);
 
         // Act
         var solarTimes = await solarCalculator.GetSolarTimesAsync(date);

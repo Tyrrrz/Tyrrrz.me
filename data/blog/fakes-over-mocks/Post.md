@@ -105,7 +105,7 @@ public async Task I_can_get_the_content_of_an_existing_document()
         bs.ReadFileAsync("docs/test.txt") == Task.FromResult(documentStream)
     );
 
-    var documentManager = new DocumentManager(blobStorage.Object);
+    var documentManager = new DocumentManager(blobStorage);
 
     // Act
     var content = await documentManager.GetDocumentAsync("test.txt");
@@ -119,13 +119,13 @@ public async Task I_can_update_the_content_of_a_document()
 {
     // Arrange
     var blobStorage = Mock.Of<IBlobStorage>();
-    var documentManager = new DocumentManager(blobStorage.Object);
+    var documentManager = new DocumentManager(blobStorage);
 
     // Act
     await documentManager.SaveDocumentAsync("test.txt", "hello");
 
     // Assert
-    blobStorage.Verify(bs => bs.UploadFileAsync(
+    Mock.Get(blobStorage).Verify(bs => bs.UploadFileAsync(
         "docs/test.txt",
         // Omitted: proper verification of the passed stream
         It.Is<Stream>(s => s.CanRead)
@@ -140,15 +140,15 @@ However, in doing so, we are inadvertently making a few very strong assumptions 
 - Calling `GetDocumentAsync()` in turn calls `ReadFileAsync()`
 - File name is formed by prepending `docs/` to the name of the document
 
-These specifics may be true now, but they can easily change in the future. For example, it's not a stretch to imagine that we may decide to store files under a different path or replace calls to `ReadFileAsync()` with `DownloadFileAsync()` (as a means to preemptively cache files locally).
+These specifics may be true now, but they can easily change in the future. For example, it's not a stretch to imagine that we may decide to store files under a different path or replace the call to `ReadFileAsync()` with `DownloadFileAsync()`, as a means to preemptively cache files locally.
 
 In both cases, the changes in the implementation won't be observable from the user perspective as the surface-level behavior will remain the same. However, because the test we wrote relies on internal details of the system, it will start failing, indicating that there's an error in our code, when in reality there isn't.
 
 The second scenario works a bit differently, but also suffers from the same issue. To verify that a document is correctly persisted in the storage when it gets saved, it checks that a call to `UploadFileAsync()` takes place in the process.
 
-Again, it's not hard to imagine a situation where the underlying implementation might change in way that breaks this test. For example, we may decide to optimize the behavior slightly by not uploading the documents immediately, but instead keeping them in memory to later send in bulk using `UploadManyFilesAsync()`.
+Again, it's not hard to imagine a situation where the underlying implementation might change in way that breaks this test. For example, we may decide to optimize the behavior slightly by not uploading the documents straight away, but instead keeping them in memory and sending in batches using `UploadManyFilesAsync()`.
 
-An experienced mocking practitioner may also point out that some of these shortcomings can be avoided: we can provide stubs for all methods on the interface, rather than just the ones that are expected to be called, and also could avoid using specific arguments:
+An experienced mocking practitioner might argue that some of these shortcomings can be mitigated if we configure our mocks to be less strict. In this instance, we can modify the test so it expects a call to any of the upload methods rather than a specific one, while also not checking the parameters at all:
 
 ```csharp
 [Fact]
@@ -159,16 +159,17 @@ public async Task I_can_update_the_content_of_a_document()
 
     var blobStorage = Mock.Of<IBlobStorage>();
 
-    blobStorage.Setup(bs => bs.UploadFileAsync(
-        It.IsAny<string>(),
-        It.IsAny<Stream>()
+    Mock.Get(blobStorage).Setup(bs => bs.UploadFileAsync(
+        It.IsAny<string>(), // any parameter -> OK
+        It.IsAny<Stream>()  // any parameter -> OK
     )).Callback(() => eitherUploadMethodCalled = true);
 
-    blobStorage.Setup(bs => bs.UploadManyFilesAsync(
+    Mock.Get(blobStorage).Setup(bs => bs.UploadManyFilesAsync(
+        // any parameter -> OK
         It.IsAny<IReadOnlyDictionary<string, Stream>>()
     )).Callback(() => eitherUploadMethodCalled = true);
 
-    var documentManager = new DocumentManager(blobStorage.Object);
+    var documentManager = new DocumentManager(blobStorage);
 
     // Act
     await documentManager.SaveDocumentAsync("test.txt", "hello");
@@ -178,11 +179,13 @@ public async Task I_can_update_the_content_of_a_document()
 }
 ```
 
-Imagine doing this for dozens or hundreds of tests.
+The mocking framework we're using ([Moq](https://github.com/Moq/moq4)) doesn't allow us to directly verify that either one of the given methods was called, so we need a workaround. To do this, we inject a callback that sets the value of a variable to `true` and then use it to check the outcome accordingly.
 
-When we rewrite the tests like this, they become more resilient, but it comes at a cost of complexity. Additionally, since we're also no longer validating that the passed file name is correct, we may potentially allow a bug where the implementation generates it incorrectly.
+As you can probably see, this change increased the complexity of the test rather significantly, as suddenly we find ourselves dealing with some additional state and a much more involved mocking setup. It also became less clear what exactly is it that we're trying to verify or whether we're doing it correctly, making the whole scenario harder to reason about.
 
-One way or another, tests that rely on mocks are inherently coupled to the implementation of the system and will often break when it changes. This does not only impose an additional maintenance cost as such tests need to be constantly updated, but makes them considerably less valuable as well.
+Even despite all that effort, this test is still not as resilient as we would've wanted. For example, adding another method to `IBlobStorage` and calling it from `DocumentManager` will cause the test to break as the mock wasn't previously taught how to deal with it. You can see how all of these issues and complexity can only extrapolate poorly in real projects with large test suites.
+
+One way or another, tests that rely on mocks are inherently coupled to the implementation of the system and are fragile as the result. This does not only impose an additional maintenance cost, as such tests need to be constantly updated, but makes them considerably less valuable as well.
 
 Instead of providing us with a safety net in the face of potential regressions, they lock us into an existing implementation and discourage evolution. Because of that, introducing substantial changes and refactoring code becomes a much more difficult and ultimately discouraging experience.
 
@@ -192,11 +195,11 @@ Logically, in order to avoid strong coupling between tests and the underlying im
 
 In essence, a **fake is a substitute that represents a lightweight but otherwise completely functional alternative to its real counterpart**. Instead of merely trying to fulfil the contract with preconfigured responses, it provides an actually valid end-to-end implementation.
 
-Although its functionality resembles that of the real component, a **fake implementation is intentionally made simpler by taking certain shortcuts**. For example, rather than relying on a remote database server, the fake can be programmed to use an in-memory provider instead. This makes it more accessible in testing, while also retaining most of its important behavior.
+Although its functionality resembles that of the real component, a **fake implementation is intentionally made simpler by taking certain shortcuts**. For example, rather than relying on a remote database server, the fake can be programmed to use an in-memory provider instead. This makes it more accessible in testing, while retaining most of its core behavior.
 
 In contrast to mocks, fakes are usually not created in runtime via dynamic proxies, but defined statically like other regular types. While it is technically possible to generate a fake implementation using mocking frameworks as well, there are rarely any benefits in doing so.
 
-Now let's come back to our file storage interface and make a fake implementation that we can use in tests. There are many different ways to do it, but using a dictionary to maintain the list of files is probably the easiest:
+Now let's come back to our file storage interface and make a fake implementation that we can use in tests. Here's one of the ways that we can do it:
 
 ```csharp
 public class FakeBlobStorage : IBlobStorage
@@ -239,23 +242,23 @@ public class FakeBlobStorage : IBlobStorage
 }
 ```
 
-As you can see, our fake blob storage uses a hash map to keep track of uploaded files and their content. More advanced methods such as `DownloadFileAsync()` and `UploadManyFilesAsync()` are implemented simply by composing existing functionality, while a real implementation could be using optimized routines for these.
+As seen above, our fake blob storage uses a hash map to keep track of uploaded files and their content. For the more high-level operations such as `DownloadFileAsync()` and `UploadManyFilesAsync()`, the real implementation may be using some optimized routines, but here we are just composing existing functionality.
 
-Note that the above implementation doesn't make any assumptions about how it's going to be used in tests. Instead it provides what effectively can be a drop-in replacement for the actual blob storage component in our system.
+Note that the above implementation doesn't make any assumptions about how it's going to be used in tests. Instead it provides what can effectively be a drop-in replacement for the actual blob storage component in our system.
 
-That said, if we consider the behavior of the real dependency, there maybe a few other aspects that we may want to replicate. Those can include:
+Because of that, it's also important that the fake replicates the behavior of the real dependency as closely as possible. This means that we might have to consider various nuances, some of which are:
 
-- Whether the file names are case-sensitive or not
-- Whether `ReadFileAsync()` throws an exception for a non-existent files or returns an empty stream
-- Whether `UploadFileAsync()` throws an exception when trying to upload the same file or overwrites it
+- Whether the file names are treated as case-sensitive
+- Whether `ReadFileAsync()` throws on a non-existing file or returns an empty stream
+- Whether `UploadFileAsync()` throws on an existing file or just overwrites it
 
-Of course, we would want all of these things to reflect the behavior of the real component as much as possible. This can be difficult to do which is why end-to-end testing is still required.
+Not getting these aspects right doesn't invalidate the implementation altogether, but can make it less valuable in specific edge-case scenarios. At the end of the day, even when using fakes, we won't be able to gain the same level of confidence as we would by testing in a real environment, which is why proper end-to-end is still necessary.
 
-It may seem like the effort in trying to accommodate these behavior specifics which are not constrained by the interface is not much different than the implementation-specific assumptions we've made when using mocks. However, there is an important distinction: by replicating the behavior of the component, we are coupling the implementation of the fake to the implementation of the actual component, rather than to the implementation of its consumer as is the case with mocks.
+It may also appear that the details we have to take into account here are not that different from the implementation-aware assumptions we were making when using mocks, as neither are actually governed by the interface of the component. However, the major distinction is that the coupling we institute here is between the test double and the real implementation of the component, rather than between the test double and the internal specifics of its consumer.
 
-Ideally, because the fake implementation doesn't know in which context it's going to be used, it can't make any assumptions about it. As a result, changing the part of the system that depends on it, should not result in failing tests.
+Since our fake is defined separately from the tests themselves, its design doesn't rely on any particular interactions with the rest of the system. As a result, changing the implementation of `DocumentManager` should not cause the test suite to fail.
 
-With that aside, let's consider how we can actually write a test scenario that relies on a fake. The initial instinct would probably be to change it to something like this:
+With that out of the way, let's consider how incorporating fakes actually affects the design of our scenarios. The initial instinct would probably be to convert it over to something like this:
 
 ```csharp
 [Fact]
@@ -280,9 +283,9 @@ public async Task I_can_get_the_content_of_an_existing_document()
 }
 ```
 
-We took the existing scenario we had and instead of configuring a mock to return canned data, we create a fake blob storage and fill it with data. This way we don't make the assumption that retrieving a document should call a certain method, but instead rely on the completeness of the behavior provided by our fake.
+Here we took an existing test and rather than configure a mock to return a preconfigured response, we create a fake blob storage and fill it with data directly. This way we don't need to assume that retrieving a document should call a certain method, but instead just rely on the completeness of the behavior provided by our fake.
 
-However, despite being able to eliminate one of the assumptions, we are still left with the other one, namely that we rely on a particular filename pattern to be used for storing documents.
+However, despite being able to eliminate one of the assumptions, we are still left with another one. Our test still expects that calling `GetDocumentAsync()` should look for the document inside the `docs/` namespace.
 
 Even though we replaced a mock with a fake, we are still relying on internal interactions between `DocumentManager` and `IBlobStorage` as a means to facilitate preconditions in our test. In other words, our test still verifies internal specifics, rather than the behavior.
 
@@ -381,8 +384,8 @@ With the tests above, we can outline the types of behaviors and properties that 
 
 Due to the popularity of mocking frameworks and the convenience they provide, many developers find that there is very little incentive to write test doubles by hand. However, relying on dynamically-generated mocks can be dangerous, as it typically leads to implementation-aware testing.
 
-In many cases, it may be a better idea to use fakes instead. These are test doubles that, unlike mocks, represent complete but simplified implementations of their real-life counterparts, rather than just a set of predefined responses.
+In many cases, it may be a better idea to use fakes instead. These are test doubles that represent complete but simplified implementations of their real-life counterparts, rather than just a set of predefined responses.
 
-Because fakes are naturally decoupled from the test scenarios in which they are used in, it's much more difficult to create accidental dependencies on internal specifics of the system. Besides that, their self-contained nature also makes them reusable, which lends itself to better maintainability.
+Because fakes are naturally decoupled from the scenarios in which they are used, it's easier to design tests without accidentally depending on internal specifics of the system. Besides that, their self-contained nature makes them reusable, which lends itself to better maintainability as well.
 
-Using fakes also pushes developers to focus on the behavior of the system under test, rather than how it communicates with other components. This helps in designing test cases that more accurately reflect the way an actual user would interact with the software.
+Using fakes also pushes developers to focus on the behavior of the system, rather than how it communicates with other components. This helps in writing test cases that more accurately reflect how an actual user interacts with the software.
