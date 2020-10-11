@@ -285,11 +285,11 @@ public async Task I_can_get_the_content_of_an_existing_document()
 
 Here we took an existing test and rather than configure a mock to return a preconfigured response, we create a fake blob storage and fill it with data directly. This way we don't need to assume that retrieving a document should call a certain method, but instead just rely on the completeness of the behavior provided by our fake.
 
-However, despite being able to eliminate one of the assumptions, we are still left with another one. Our test still expects that calling `GetDocumentAsync()` should look for the document inside the `docs/` namespace.
+However, despite being able to eliminate most of the assumptions, we didn't get rid of all of them. Namely, our test still expects that calling `GetDocumentAsync()` should look for the file inside the `docs/` namespace, as that's where we're uploading it to in the arrange phase.
 
-Even though we replaced a mock with a fake, we are still relying on internal interactions between `DocumentManager` and `IBlobStorage` as a means to facilitate preconditions in our test. In other words, our test still verifies internal specifics, rather than the behavior.
+This problem stems from the fact that we are yet again relying on how `DocumentManager` interacts with `IBlobStorage`, but this time it's not caused by the test double but by the design of the test itself. To avoid it, we need to adapt the scenario so that it revolves around the external behavior of the system and not its relationship with the dependencies.
 
-To avoid this, we need to redesign the scenario so it only relies on the top level interface:
+Here is how we can achieve that:
 
 ```csharp
 [Fact]
@@ -309,25 +309,25 @@ public async Task I_can_get_the_content_of_a_previously_saved_document()
 }
 ```
 
-As you can see, now instead of creating a file via `FakeBlobStorage` in the arrange phase, we create it directly using `DocumentManager` instead. Now the scenario properly resembles user behavior, as the consumer of this module would use these exact methods to create documents.
+Now, instead of creating a file directly through `FakeBlobStorage`, we do it using `DocumentManager`. This brings the scenario closer to how an actual consumer would interact with the class that we are testing.
 
-We don't care about file names, encoding, etc.
+As a result, we don't have to worry about where the file is persisted inside the storage, how exactly it gets uploaded, which format or encoding is used, and other similar implementation details. Because the test above only validates the behavior of the system, it doesn't have any overreaching assumptions about internal specifics.
 
-Note that this is not unit testing.
+If you are used to purist unit testing, this approach may seem a little bit weird, since we're no longer verifying the outcomes of individual operations, but rather how they fit together to create cohesive functionality. In the grand scheme of things, this is [far more important](/blog/unit-testing-is-overrated) and leads to tests that provide higher confidence.
 
-Reusability!
+It is also worth noting how little code we had to write, comparing to our previous attempts when we relied on mocking. This additional benefit comes from the fact that well-designed fakes are inherently reusable, which helps a lot with maintainability.
 
 ## Testing the test doubles
 
-Since fakes are used to provide a realistic and potentially non-trivial implementation, it makes sense that their behavior should also be tested to make sure it matches that of the actual component. This idea may seem a bit odd, especially coming from mock-based testing.
+Since fakes are used to provide a realistic and potentially non-trivial implementation, it makes sense that their behavior should be tested as well. The idea of testing test doubles may seem bizarre, as we never do it with mocks, but here it is actually perfectly reasonable.
 
-In fact, it's not unusual for fakes to be located in the same project as the actual implementation. Many libraries and frameworks often provide fakes as part of the main package to make it easier for developers to write tests. For example, [CliFx](https://github.com/Tyrrrz/CliFx) provides a fake instance of [`IConsole`](https://github.com/Tyrrrz/CliFx/blob/5e53107deffd4ef0795fb7fd7ccb9d790cfb66c8/CliFx/IConsole.cs) called [`VirtualConsole`](https://github.com/Tyrrrz/CliFx/blob/5e53107deffd4ef0795fb7fd7ccb9d790cfb66c8/CliFx/VirtualConsole.cs), which it also uses for testing itself as well.
+In fact, it's even common to define fakes as part of the main project, where the rest of the code resides, rather than with the tests. Many libraries and frameworks often also provide fake implementations as part of their core package, in order to make it easier for developers to write their own tests as well.
 
-Testing fakes is not much different from testing anything else, the important thing is to actually do it. In case with our `FakeBlobStorage`, we can write tests like these:
+The process of testing fakes is not different from testing anything else, as long as you remember to actually do it. In case with our `FakeBlobStorage`, we can write a few scenarios that verify important aspects of its behavior:
 
 ```csharp
 [Fact]
-public async Task I_can_retrieve_previously_uploaded_file()
+public async Task Previously_uploaded_file_can_be_retrieved()
 {
     // Arrange
     var blobStorage = new FakeBlobStorage();
@@ -345,7 +345,7 @@ public async Task I_can_retrieve_previously_uploaded_file()
 }
 
 [Fact]
-public async Task I_can_try_to_retrieve_a_non_existing_file_and_get_an_exception()
+public async Task Trying_to_retrieve_non_existing_file_throws()
 {
     // Arrange
     var blobStorage = new FakeBlobStorage();
@@ -378,7 +378,7 @@ public async Task File_names_are_case_sensitive()
 }
 ```
 
-With the tests above, we can outline the types of behaviors and properties that our fake is expected to posses and verify them. That we can use the fake in other tests and be confident that it works as needed.
+These tests make sure that the fake implementation we've built actually works like it's supposed to. As long as they pass, we can be confident that using `FakeBlobStorage` doesn't produce incorrect results in other scenarios.
 
 ## Summary
 
