@@ -136,7 +136,7 @@ public class SolarCalculatorTests
             lp.GetLocationAsync() == Task.FromResult(location)
         );
 
-        var solarCalculator = new SolarCalculator(locationProvider.Object);
+        var solarCalculator = new SolarCalculator(locationProvider);
 
         // Act
         var solarTimes = await solarCalculator.GetSolarTimesAsync(date);
@@ -950,4 +950,4 @@ Here are the main takeaways:
 2. Separate tests by functionality, rather than by classes, modules, or scope
 3. Aim for the highest level of integration while maintaining reasonable speed and cost
 4. Avoid sacrificing software design for testability
-5. Consider mocking only as a last resort
+5. Consider mocking only as a [last resort](/blog/fakes-over-mocks)
