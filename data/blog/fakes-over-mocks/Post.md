@@ -1,6 +1,6 @@
 ---
 title: 'Prefer Fakes Over Mocks'
-date: '2020-10-12'
+date: '2020-10-13'
 tags:
   - 'programming'
   - 'testing'
@@ -12,11 +12,11 @@ Consequentially, the value provided by such tests is directly dependent on how w
 
 In an ideal world, our test scenarios, including the environment they execute in, should perfectly match real-life conditions. This is always desirable, but might not always be practical, as the system can rely on components that are difficult to test with, either because they are not available or because their behavior is inconsistent or slow.
 
-A common practice in cases like this is to replace such dependencies with lightweight substitutes that act as _test doubles_. Although doing so does lead to lower confidence, it's often a trade-off between usefulness and usability, which is essential in designing a robust and consistent test suite.
+A common practice in cases like this is to replace such dependencies with lightweight substitutes that act as _test doubles_. Although doing so does lead to lower confidence, it's often an unavoidable trade-off when it comes to designing a robust and consistent test suite.
 
-That said, while test doubles can be implemented in different ways, most of the time developers tend to resort to _mocking_ as the default choice. This is unfortunate, as it typically leads to overuse of mocks where other forms of substitutes are more suitable, making tests [implementation-aware and fragile](https://en.wikipedia.org/wiki/Mock_object#Limitations) as a result.
+That said, while test doubles can be implemented in different ways, most of the time developers tend to resort to _mocking_ as the default choice. This is unfortunate, as it leads to overuse of mocks where other forms of substitutes are typically more suitable, making tests [implementation-aware and fragile](https://en.wikipedia.org/wiki/Mock_object#Limitations) as a result.
 
-When writing tests, I prefer to avoid mocks as much as possible and rely on _fake_ implementations instead. They require a bit of upfront investment, but provide many practical advantages which are very important to consider.
+When writing tests, I prefer to avoid mocks as much as possible and rely on _fake_ implementations instead. They require a bit of additional upfront investment, but provide many practical advantages which are important to consider.
 
 In this article we will look at the differences between these two variants of test doubles, identify how using one over the other impacts test design, and why using fakes often results in more manageable test suites.
 
@@ -26,15 +26,15 @@ As we enter the realm of software terminology, words slowly start to lose their 
 
 Unsurprisingly, the concept of "mock" or how it's fundamentally different from other types of substitutes is also one of those cases. Despite its highly ubiquitous usage, this term [doesn't have a single universally accepted interpretation](https://stackoverflow.com/questions/346372/whats-the-difference-between-faking-mocking-and-stubbing).
 
-According to the [original definitions introduced by Gerard Meszaros](https://martinfowler.com/bliki/TestDouble.html), a mock is a very specific type of substitute which is used to verify interactions between the system under test and its dependencies. However, this distinction is not as relevant nowadays, as the term is instead used to refer to a broader class of substitutes created with frameworks such as [Moq](https://github.com/moq/moq4), [Mockito](https://github.com/mockito/mockito), [Jest](https://github.com/facebook/jest), and others.
+According to the [original definitions introduced by Gerard Meszaros](https://martinfowler.com/bliki/TestDouble.html), a mock is a very specific type of substitutes which is used to verify interactions between the system under test and its dependencies. Nowadays, however, the distinction has become a bit blurry, as this term is commonly used to refer to a broader class of objects created with frameworks such as [Moq](https://github.com/moq/moq4), [Mockito](https://github.com/mockito/mockito), [Jest](https://github.com/facebook/jest), and others.
 
-Such objects may not necessarily be mocks under the original definition, but there's very little benefit in acknowledging these technicalities. So to make matters simpler, we will stick to this more colloquial understanding of the term throughout the article.
+Such substitutes may not necessarily be mocks under the original definition, but there's very little benefit in acknowledging these technicalities. So to make matters simpler, we will stick to this more colloquial understanding of the term throughout the article.
 
-Generally speaking, a **mock is a substitute, that pretends to function like its real counterpart, but returns predefined responses instead**. From a structural standpoint, it does implement the same external interface as the actual component, however that implementation is entirely superficial.
+Generally speaking, a **mock is a substitute, that pretends to function like its real counterpart, but returns predefined responses instead**. From a structural standpoint, it does implement the same external interface as the actual component, however that **implementation is entirely superficial**.
 
 In fact, **a mock is not intended to have valid functionality at all**. Its purpose is rather to mimic the outcomes of various operations, so that the system under test exercises the behavior required by a given scenario.
 
-Besides that, mocks can also be used to verify side-effects that take place within the system. This is achieved by recording method calls and checking if the number of times they appear and their parameters match the expectations.
+Besides that, **mocks can also be used to verify side-effects** that take place within the system. This is achieved by recording method calls and checking if the number of times they appear and their parameters match the expectations.
 
 Let's take a look at how all of this works in practice. As an example, imagine that we're building a system that relies on some binary file storage represented by the following interface:
 
@@ -146,7 +146,7 @@ In both cases, the changes in the implementation won't be observable from the us
 
 The second scenario works a bit differently, but also suffers from the same issue. To verify that a document is correctly persisted in the storage when it gets saved, it checks that a call to `UploadFileAsync()` takes place in the process.
 
-Again, it's not hard to imagine a situation where the underlying implementation might change in way that breaks this test. For example, we may decide to optimize the behavior slightly by not uploading the documents straight away, but instead keeping them in memory and sending in batches using `UploadManyFilesAsync()`.
+Again, it's not hard to imagine a situation where the underlying implementation can change in way that breaks this test. For example, we may decide to optimize the behavior slightly by not uploading the documents straight away, but instead keeping them in memory and sending in batches using `UploadManyFilesAsync()`.
 
 An experienced mocking practitioner might argue that some of these shortcomings can be mitigated if we configure our mocks to be less strict. In this instance, we can modify the test so it expects a call to any of the upload methods rather than a specific one, while also not checking the parameters at all:
 
@@ -185,9 +185,9 @@ As you can probably see, this change increased the complexity of the test rather
 
 Even despite all that effort, this test is still not as resilient as we would've wanted. For example, adding another method to `IBlobStorage` and calling it from `DocumentManager` will cause the test to break as the mock wasn't previously taught how to deal with it. You can see how all of these issues and complexity can only extrapolate poorly in real projects with large test suites.
 
-One way or another, tests that rely on mocks are inherently coupled to the implementation of the system and are fragile as the result. This does not only impose an additional maintenance cost, as such tests need to be constantly updated, but makes them considerably less valuable as well.
+One way or another, **tests that rely on mocks are inherently coupled to the implementation of the system and are fragile as the result**. This does not only impose an additional maintenance cost, as such tests need to be constantly updated, but makes them considerably less valuable as well.
 
-Instead of providing us with a safety net in the face of potential regressions, they lock us into an existing implementation and discourage evolution. Because of that, introducing substantial changes and refactoring code becomes a much more difficult and ultimately discouraging experience.
+Instead of providing us with a safety net in the face of potential regressions, they **lock us into an existing implementation and discourage evolution**. Because of that, introducing substantial changes and refactoring code becomes a much more difficult and ultimately discouraging experience.
 
 ## Behavioral testing with fakes
 
@@ -256,7 +256,7 @@ Not getting these aspects right doesn't invalidate the implementation altogether
 
 It may also appear that the details we have to take into account here are not that different from the implementation-aware assumptions we were making when using mocks, as neither are actually governed by the interface of the component. However, the major distinction is that the coupling we institute here is between the test double and the real implementation of the component, rather than between the test double and the internal specifics of its consumer.
 
-Since our fake is defined separately from the tests themselves, its design doesn't rely on any particular interactions with the rest of the system. As a result, changing the implementation of `DocumentManager` should not cause the test suite to fail.
+Since our fake is defined separately from the tests themselves, its design doesn't rely on any particular interactions with the rest of the system. As a result, changing the implementation of `DocumentManager` should not cause the tests to fail.
 
 With that out of the way, let's consider how incorporating fakes actually affects the design of our scenarios. The initial instinct would probably be to convert it over to something like this:
 
@@ -283,7 +283,7 @@ public async Task I_can_get_the_content_of_an_existing_document()
 }
 ```
 
-Here we took an existing test and rather than configure a mock to return a preconfigured response, we create a fake blob storage and fill it with data directly. This way we don't need to assume that retrieving a document should call a certain method, but instead just rely on the completeness of the behavior provided by our fake.
+Here we take an existing test and rather than configure a mock to return a preconfigured response, we create a fake blob storage and fill it with data directly. This way we don't need to assume that retrieving a document should call a certain method, but instead just rely on the completeness of the behavior provided by our fake.
 
 However, despite being able to eliminate most of the assumptions, we didn't get rid of all of them. Namely, our test still expects that calling `GetDocumentAsync()` should look for the file inside the `docs/` namespace, as that's where we're uploading it to in the arrange phase.
 
@@ -309,21 +309,23 @@ public async Task I_can_get_the_content_of_a_previously_saved_document()
 }
 ```
 
-Now, instead of creating a file directly through `FakeBlobStorage`, we do it using `DocumentManager`. This brings the scenario closer to how an actual consumer would interact with the class that we are testing.
+Now, rather than create a file directly through `FakeBlobStorage`, we do it using `DocumentManager` instead. This brings the scenario closer to how an actual consumer would interact with the class that we are testing.
 
-As a result, we don't have to worry about where the file is persisted inside the storage, how exactly it gets uploaded, which format or encoding is used, and other similar implementation details. Because the test above only validates the behavior of the system, it doesn't have any overreaching assumptions about internal specifics.
+From the perspective of the behavior of the system, the only thing we care about is whether a document that was saved can be retrieved afterwards. Any unrelated details do not concern us, so there is no reason to be testing them.
 
-If you are used to purist unit testing, this approach may seem a little bit weird, since we're no longer verifying the outcomes of individual operations, but rather how they fit together to create cohesive functionality. In the grand scheme of things, this is [far more important](/blog/unit-testing-is-overrated) and leads to tests that provide higher confidence.
+Because of this, we don't have to worry about where the file is persisted inside the storage, how exactly it gets uploaded, which format or encoding is used, and other similar aspects. Since the test above only validates the external behavior, it doesn't have any overreaching assumptions about internal specifics.
 
 It is also worth noting how little code we had to write, comparing to our previous attempts when we relied on mocking. This additional benefit comes from the fact that well-designed fakes are inherently reusable, which helps a lot with maintainability.
 
+If you are used to purist unit testing, this approach may seem a little bit weird at first, since we're not verifying the outcomes of individual operations, but rather how they fit together to create cohesive functionality. In the grand scheme of things, the latter is [far more important](/blog/unit-testing-is-overrated), as the confidence we derive directly depends on how accurately our tests match the way the software is actually used.
+
 ## Testing the test doubles
 
-Since fakes are used to provide a realistic and potentially non-trivial implementation, it makes sense that their behavior should be tested as well. The idea of testing test doubles may seem bizarre, as we never do it with mocks, but here it is actually perfectly reasonable.
+Since fakes are used to provide a realistic and potentially non-trivial implementation, it makes sense that their behavior should be tested as well. The idea of testing test doubles may appear bizarre, as we never do it with mocks, but in this case it is actually perfectly reasonable.
 
-In fact, it's even common to define fakes as part of the main project, where the rest of the code resides, rather than with the tests. Many libraries and frameworks often also provide fake implementations as part of their core package, in order to make it easier for developers to write their own tests as well.
+In fact, it's even common to define fakes as part of the main project, where the rest of the code resides, rather than with the tests. Many libraries and frameworks often also provide fake implementations as part of their core package, in order to make it easier for other developers to write their own tests as well.
 
-The process of testing fakes is not different from testing anything else, as long as you remember to actually do it. In case with our `FakeBlobStorage`, we can write a few scenarios that verify important aspects of its behavior:
+The process of testing fakes is not in any way different from testing normal production code. For example, in case with our `FakeBlobStorage`, we can verify important aspects of its behavior like so:
 
 ```csharp
 [Fact]
@@ -384,8 +386,6 @@ These tests make sure that the fake implementation we've built actually works li
 
 Due to the popularity of mocking frameworks and the convenience they provide, many developers find that there is very little incentive to write test doubles by hand. However, relying on dynamically-generated mocks can be dangerous, as it typically leads to implementation-aware testing.
 
-In many cases, it may be a better idea to use fakes instead. These are test doubles that represent complete but simplified implementations of their real-life counterparts, rather than just a set of predefined responses.
+In many cases, it may be a better idea to use fakes instead. These are test doubles that represent complete but simplified implementations of their real-life counterparts, rather than just a set of prearranged responses.
 
-Because fakes are naturally decoupled from the scenarios in which they are used, it's easier to design tests without accidentally depending on internal specifics of the system. Besides that, their self-contained nature makes them reusable, which lends itself to better maintainability as well.
-
-Using fakes also pushes developers to focus on the behavior of the system, rather than how it communicates with other components. This helps in writing test cases that more accurately reflect how an actual user interacts with the software.
+Because fakes are naturally separate from the scenarios in which they are used, it's easier to design tests that are not coupled to internal specifics of the system. Besides that, their self-contained nature makes them reusable as well, which lends itself to better long-term maintainability.
