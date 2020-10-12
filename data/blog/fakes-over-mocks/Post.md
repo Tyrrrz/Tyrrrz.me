@@ -71,7 +71,7 @@ public class DocumentManager
         var fileName = GetFileName(documentName);
 
         await using var stream = await _storage.ReadFileAsync(fileName);
-        await using var streamReader = new StreamReader(stream);
+        using var streamReader = new StreamReader(stream);
 
         return await streamReader.ReadToEndAsync();
     }
@@ -101,9 +101,11 @@ public async Task I_can_get_the_content_of_an_existing_document()
         new byte[] {0x68, 0x65, 0x6c, 0x6c, 0x6f}
     );
 
-    var blobStorage = Mock.Of<IBlobStorage>(bs =>
-        bs.ReadFileAsync("docs/test.txt") == Task.FromResult(documentStream)
-    );
+    var blobStorage = Mock.Of<IBlobStorage>();
+
+    Mock.Get(blobStorage)
+        .Setup(bs => bs.ReadFileAsync("docs/test.txt"))
+        .ReturnsAsync(documentStream);
 
     var documentManager = new DocumentManager(blobStorage);
 
@@ -127,8 +129,7 @@ public async Task I_can_update_the_content_of_a_document()
     // Assert
     Mock.Get(blobStorage).Verify(bs => bs.UploadFileAsync(
         "docs/test.txt",
-        // Omitted: proper verification of the passed stream
-        It.Is<Stream>(s => s.CanRead)
+        It.Is<Stream>(s => /* stream verification */)
     ));
 }
 ```
@@ -212,7 +213,7 @@ public class FakeBlobStorage : IBlobStorage
         var data = _files[fileName];
         var stream = new MemoryStream(data);
 
-        return Task.FromResult(stream);
+        return Task.FromResult<Stream>(stream);
     }
 
     public async Task DownloadFileAsync(string fileName, string outputFilePath)
@@ -353,7 +354,7 @@ public async Task Trying_to_retrieve_non_existing_file_throws()
     var blobStorage = new FakeBlobStorage();
 
     // Act & assert
-    await Assert.ThrowsAnyAsync(() => blobStorage.ReadFileAsync("test.txt"));
+    await Assert.ThrowsAnyAsync<Exception>(() => blobStorage.ReadFileAsync("test.txt"));
 }
 
 [Fact]
