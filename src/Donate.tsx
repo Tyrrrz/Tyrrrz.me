@@ -29,14 +29,18 @@ export default function DonatePage() {
       <ul>
         <li>Peter Wesselius</li>
         <li>Mark Ledwich</li>
-        <li>BouncingWalrus</li>
         <li>Thomas C</li>
+        <li>BouncingWalrus</li>
         <li>Dominic Maas</li>
+        <li>Victor Smith</li>
+        <li>A dude</li>
+        <li>Greg Engle</li>
+        <li>Samuel Morris</li>
         <li>lupus</li>
         <li>Richard</li>
         <li>Foritus</li>
+        <li>Vince</li>
         <li>Michael Dayah</li>
-        <li>Victor Smith</li>
         <li>Sprocketman1981</li>
         <li>Jim Wilson</li>
       </ul>
