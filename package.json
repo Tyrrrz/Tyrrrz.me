@@ -6,7 +6,7 @@
     "@types/react": "^16.9.51",
     "@types/react-dom": "^16.9.8",
     "@types/react-helmet": "^6.1.0",
-    "gatsby": "^2.24.68",
+    "gatsby": "^2.24.80",
     "gatsby-image": "^2.4.21",
     "gatsby-plugin-canonical-urls": "^2.3.13",
     "gatsby-plugin-catch-links": "^2.3.15",
@@ -46,11 +46,8 @@
     "prettier": "^2.1.2",
     "prettier-plugin-organize-imports": "^1.1.1"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
   "scripts": {
-    "lint": "eslint **/*.{js,jsx,ts,tsx} --fix --ignore-path .gitignore",
+    "lint": "eslint **/*.{js,jsx,ts,tsx} --fix",
     "pull-external-data": "node ./pullExternalData.js",
     "start": "gatsby develop",
     "build": "gatsby build"

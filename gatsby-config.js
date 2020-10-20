@@ -8,10 +8,17 @@ const disqusId = process.env['TYRRRZME_DISQUS'];
 const googleAnalyticsId = process.env['TYRRRZME_GOOGLEANALYTICS'];
 // ---
 
+/**
+ * @param {string} url
+ */
 function resolveRelativeUrl(url) {
   return new URL(url, siteUrl).toString();
 }
 
+/**
+ * @param {string} plugin
+ * @param {object} [options]
+ */
 function resolvePlugin(plugin, options) {
   return {
     resolve: plugin,
@@ -76,7 +83,9 @@ module.exports = {
     resolvePlugin('gatsby-plugin-feed', {
       feeds: [
         {
+          // @ts-expect-error
           serialize: ({ query: { allMarkdownRemark } }) => {
+            // @ts-expect-error
             return allMarkdownRemark.edges.map((edge) => ({
               ...edge.node.frontmatter,
               description: edge.node.excerpt,

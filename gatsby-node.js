@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
 /* eslint-disable @typescript-eslint/no-var-requires */
 // @ts-check
 
@@ -11,7 +10,7 @@ module.exports = {
   onCreateNode: ({ actions, node }) => {
     if (node.internal.type === 'MarkdownRemark') {
       // Add slug to markdown files
-      // @ts-ignore
+      // @ts-expect-error
       const value = path.basename(path.dirname(node.fileAbsolutePath));
 
       actions.createNodeField({
@@ -75,7 +74,13 @@ module.exports = {
 
     if (queryResult.errors) throw queryResult.errors;
 
-    queryResult.data.allMarkdownRemark.nodes.forEach((node) => {
+    /**
+     * @type {GatsbyTypes.MarkdownRemarkConnection}
+     */
+    const blogPostConnection = queryResult.data.allMarkdownRemark;
+
+    blogPostConnection.nodes.forEach((node) => {
+      // @ts-expect-error
       const slug = node.fields.slug;
       const coverImagePath = `blog/${slug}/Cover.png`;
 

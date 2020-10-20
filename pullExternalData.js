@@ -11,6 +11,10 @@ const outputDirPath = path.resolve('./data/projects/');
 async function run() {
   const github = new Octokit();
 
+  /**
+   * @typedef {import('@octokit/types').ReposListForOrgResponseData} ReposList
+   * @type {import('@octokit/types').OctokitResponse<ReposList>}
+   */
   const { data: repos } = await github.repos.listForUser({
     username: 'Tyrrrz',
     type: 'owner',
