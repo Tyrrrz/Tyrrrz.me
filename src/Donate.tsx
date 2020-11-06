@@ -1,10 +1,10 @@
 import React from 'react';
-import Layout from './shared/Layout';
 import Link from './shared/Link';
+import Page from './shared/Page';
 
 export default function DonatePage() {
   return (
-    <Layout meta={{ title: 'Donate' }}>
+    <Page title="Donate">
       <h1>Donate</h1>
 
       <p>
@@ -44,6 +44,6 @@ export default function DonatePage() {
         <li>Sprocketman1981</li>
         <li>Jim Wilson</li>
       </ul>
-    </Layout>
+    </Page>
   );
 }

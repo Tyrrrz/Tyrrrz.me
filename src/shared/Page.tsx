@@ -5,7 +5,7 @@ import '../styles/main.css';
 import Link from './Link';
 import useSiteMetadata from './useSiteMetadata';
 
-interface Meta {
+interface MetaProps {
   title?: string;
   description?: string;
   keywords?: string[];
@@ -13,11 +13,7 @@ interface Meta {
   rssUrl?: string;
 }
 
-interface MetaInjectorProps {
-  meta?: Meta;
-}
-
-function MetaInjector({ meta }: MetaInjectorProps) {
+function Meta({ title, description, keywords, imageUrl, rssUrl }: MetaProps) {
   const siteMetadata = useSiteMetadata();
 
   const defaults = {
@@ -27,11 +23,11 @@ function MetaInjector({ meta }: MetaInjectorProps) {
   };
 
   const actual = {
-    title: meta?.title ? `${meta.title} | ${defaults.title}` : defaults.title,
-    description: meta?.description || defaults.description,
-    keywords: meta?.keywords?.join(', '),
-    imageUrl: meta?.imageUrl && getAbsoluteUrl(siteMetadata.siteUrl, meta?.imageUrl),
-    rssUrl: meta?.rssUrl && getAbsoluteUrl(siteMetadata.siteUrl, meta?.rssUrl)
+    title: title ? `${title} | ${defaults.title}` : defaults.title,
+    description: description || defaults.description,
+    keywords: keywords?.join(', '),
+    imageUrl: imageUrl && getAbsoluteUrl(siteMetadata.siteUrl, imageUrl),
+    rssUrl: rssUrl && getAbsoluteUrl(siteMetadata.siteUrl, rssUrl)
   };
 
   return (
@@ -93,15 +89,14 @@ function Navigation() {
   );
 }
 
-interface LayoutProps {
-  meta?: Meta;
+interface PageProps extends MetaProps {
   children: React.ReactNode;
 }
 
-export default function Layout({ meta, children }: LayoutProps) {
+export default function Page({ children, ...props }: PageProps) {
   return (
     <div className="container">
-      <MetaInjector meta={meta} />
+      <Meta {...props} />
       <Navigation />
 
       <main className="mb-5">{children}</main>

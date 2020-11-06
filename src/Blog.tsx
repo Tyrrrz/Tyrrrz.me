@@ -3,8 +3,8 @@ import moment from 'moment';
 import React from 'react';
 import { FiCalendar, FiClock, FiTag } from 'react-icons/fi';
 import { humanizeTimeToRead } from './infra/utils';
-import Layout from './shared/Layout';
 import Link from './shared/Link';
+import Page from './shared/Page';
 
 export const query = graphql`
   query {
@@ -49,7 +49,7 @@ export default function BlogPage({ data }: BlogPageProps) {
     }));
 
   return (
-    <Layout meta={{ title: 'Blog', rssUrl: '/blog/rss.xml' }}>
+    <Page title="Blog" rssUrl="/blog/rss.xml">
       <h1 className="title">Blog</h1>
 
       <div className="fs-2 mb-5">
@@ -91,6 +91,6 @@ export default function BlogPage({ data }: BlogPageProps) {
           ))}
         </div>
       ))}
-    </Layout>
+    </Page>
   );
 }

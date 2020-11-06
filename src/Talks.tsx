@@ -2,8 +2,8 @@ import { graphql } from 'gatsby';
 import moment from 'moment';
 import React from 'react';
 import { FiCalendar, FiGlobe, FiMessageCircle } from 'react-icons/fi';
-import Layout from './shared/Layout';
 import Link from './shared/Link';
+import Page from './shared/Page';
 
 export const query = graphql`
   query {
@@ -48,7 +48,7 @@ export default function TalksPage({ data }: TalksPageProps) {
     }));
 
   return (
-    <Layout meta={{ title: 'Talks' }}>
+    <Page title="Talks">
       <h1 className="title">Talks</h1>
 
       {talksByYear.map(({ year, talks }, i) => (
@@ -88,6 +88,6 @@ export default function TalksPage({ data }: TalksPageProps) {
           ))}
         </div>
       ))}
-    </Layout>
+    </Page>
   );
 }

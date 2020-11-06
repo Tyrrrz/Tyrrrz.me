@@ -6,8 +6,8 @@ import 'prismjs/themes/prism-tomorrow.css';
 import React from 'react';
 import { FiCalendar, FiClock, FiTag } from 'react-icons/fi';
 import { getAbsoluteUrl, humanizeTimeToRead } from './infra/utils';
-import Layout from './shared/Layout';
 import Link from './shared/Link';
+import Page from './shared/Page';
 import useSiteMetadata from './shared/useSiteMetadata';
 
 export const query = graphql`
@@ -95,14 +95,12 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
   const coverImageFallback = data.coverFallback.childImageSharp!;
 
   return (
-    <Layout
-      meta={{
-        title: blogPost.title,
-        description: blogPost.excerpt,
-        keywords: blogPost.tags,
-        imageUrl: coverImage?.original?.src || coverImageFallback?.original?.src,
-        rssUrl: '/blog/rss.xml'
-      }}
+    <Page
+      title={blogPost.title}
+      description={blogPost.excerpt}
+      keywords={blogPost.tags}
+      imageUrl={coverImage?.original?.src || coverImageFallback?.original?.src}
+      rssUrl="/blog/rss.xml"
     >
       <h1>{blogPost.title}</h1>
 
@@ -153,6 +151,6 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
       <hr />
 
       <CommentsSection id={blogPost.id} title={blogPost.title} />
-    </Layout>
+    </Page>
   );
 }

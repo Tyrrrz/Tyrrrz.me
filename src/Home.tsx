@@ -3,8 +3,8 @@ import Img from 'gatsby-image';
 import moment from 'moment';
 import React from 'react';
 import { FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
-import Layout from './shared/Layout';
 import Link from './shared/Link';
+import Page from './shared/Page';
 
 export const query = graphql`
   query {
@@ -26,7 +26,7 @@ export default function HomePage({ data }: HomePageProps) {
   const myAge = moment().diff(moment('1995-04-28'), 'years');
 
   return (
-    <Layout>
+    <Page>
       <figure className="align-center">
         <Img className="radius-50pc" fixed={data.file?.childImageSharp?.fixed!} />
       </figure>
@@ -63,6 +63,6 @@ export default function HomePage({ data }: HomePageProps) {
           <FiLinkedin />
         </Link>
       </div>
-    </Layout>
+    </Page>
   );
 }

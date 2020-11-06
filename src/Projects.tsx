@@ -1,8 +1,8 @@
 import { graphql } from 'gatsby';
 import React from 'react';
 import { FiPackage, FiStar } from 'react-icons/fi';
-import Layout from './shared/Layout';
 import Link from './shared/Link';
+import Page from './shared/Page';
 
 export const query = graphql`
   query {
@@ -34,7 +34,7 @@ export default function ProjectsPage({ data }: ProjectsPageProps) {
     .sort((a, b) => b.stars - a.stars);
 
   return (
-    <Layout meta={{ title: 'Projects' }}>
+    <Page title="Projects">
       <h1 className="title">Projects</h1>
 
       <div className="fs-2 mb-5">
@@ -63,6 +63,6 @@ export default function ProjectsPage({ data }: ProjectsPageProps) {
           </div>
         </div>
       ))}
-    </Layout>
+    </Page>
   );
 }
