@@ -12,7 +12,7 @@ Even though generics have been in C# for a while now, I still sometimes manage t
 
 Recently, I was also working on some code involving generics and faced another problem: I needed to define a signature where all of the type arguments were optional, but usable in arbitrary combinations with each other. After a bit of time, I found a way to achieve that by using an approach similar to the [_fluent interface_](https://en.wikipedia.org/wiki/Fluent_interface) design pattern, but applied in relation to types instead of objects.
 
-In this article, I will explain the problem I was trying to solve and how I was ultimately able to do it with the help of that approach. Besides that, I'll show how this pattern can be also applied in some other cases to make generic types more discoverable and easier to use.
+In this article, I will explain the problem I was trying to solve and how I was ultimately able to do it with the help of that approach. Besides that, I'll show how this pattern can also be applied in some other scenarios to make generic types more discoverable and easier to use.
 
 ## Fluent interfaces
 
