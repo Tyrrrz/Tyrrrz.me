@@ -8,11 +8,11 @@ tags:
 
 Generics is a powerful feature available in many statically typed languages. It offers a way to write code capable of operating against a wide category of types rather than just a specific one, allowing us to build flexible and reusable components without sacrificing type safety.
 
-Even though generics have been in C# for a while now, I still sometimes manage to find new and interesting ways to use them. In one of my previous articles, I wrote about a neat trick I found that helps achieve [return type inference](/blog/return-type-inference) for generic types, through an unconventional use of implicit conversion operators.
+Even though generics have been in C# for a while now, I still sometimes manage to find new and interesting ways to use them. In one of my previous articles, I wrote about a neat trick I came up with that helps achieve [generic return type inference](/blog/return-type-inference) through an unconventional use of implicit conversion operators.
 
-Recently, I was working on a project of mine and faced another problem involving generics: I needed to define a signature where all of the type arguments were optional, but usable in arbitrary combinations with each other. After a bit of time, I came up with a way to achieve that by using an approach similar to the [_fluent interface_](https://en.wikipedia.org/wiki/Fluent_interface) design pattern, but applied in relation to types instead of objects.
+Recently, I was also working on some code involving generics and faced another problem: I needed to define a signature where all of the type arguments were optional, but usable in arbitrary combinations with each other. After a bit of time, I found a way to achieve that by using an approach similar to the [_fluent interface_](https://en.wikipedia.org/wiki/Fluent_interface) design pattern, but applied in relation to types instead of objects.
 
-In this article, I will explain the problem I was trying to solve and how this approach helped me do it. I will also share some other scenarios where I think this pattern could be useful in designing interfaces that rely heavily on generics.
+In this article, I will explain the problem I was trying to solve and how I was ultimately able to do it with the help of that approach. Besides that, I'll show how this pattern can be also applied in some other cases to make generic types more discoverable and easier to use.
 
 ## Fluent interfaces
 
