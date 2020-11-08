@@ -22,7 +22,31 @@ In object-oriented programming, _fluent interface_ design is a popular pattern f
 
 Fluent interfaces are used quite commonly to simplify operations that require a large set of inputs by deferring them into multiple sequential steps. This is often the case when initializing or configuring objects that have multiple inputs, many of which are optional.
 
-Essentially, instead of having one method that takes many parameters, fluent interfaces typically have many chainable methods, each taking a small portion of the parameters.
+Essentially, instead of having one method that takes many parameters, fluent interfaces typically have many chainable methods, each taking a small portion of the parameters:
+
+```csharp
+// Non-fluent (input -> output)
+var result = RunProcess(
+    "git", // executable
+    "pull", // args
+    "/my/repository", // working dir
+    new Dictionary<string, string> // env vars
+    {
+        ["GIT_AUTHOR_NAME"] = "John",
+        ["GIT_AUTHOR_EMAIL"] = "john@email.com"
+    }
+);
+
+// Fluent (deferred input)
+var result = new Process("git")
+    .WithArguments("pull")
+    .WithWorkingDirectory("/my/repository")
+    .WithEnvironmentVariable("GIT_AUTHOR_NAME", "John")
+    .WithEnvironmentVariable("GIT_AUTHOR_EMAIL", "john@email.com")
+    .Run();
+```
+
+Given that we've established that generic types are basically just functions that return normal types, it makes sense to question whether something like this is also possible there.
 
 ```csharp
 [ApiController]
@@ -139,6 +163,13 @@ public static class Endpoint
         }
     }
 }
+```
+
+```csharp
+class NormalEndpoint = Endpoint.ForRequest<SomeRequest>.WithResponse<SomeResponse> { /* ... */ }
+class EndpointWithoutResponse = Endpoint.ForRequest<SomeRequest>.WithoutResponse { /* ... */ }
+class EndpointWithoutRequest = Endpoint.ForAnyRequest.WithResponse<SomeResponse> { /* ... */ }
+class EndpointWithoutEither = Endpoint.ForAnyRequest.WithoutResponse { /* ... */ }
 ```
 
 ```csharp
