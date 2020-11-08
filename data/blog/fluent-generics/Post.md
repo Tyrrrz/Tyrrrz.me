@@ -6,15 +6,13 @@ tags:
   - 'csharp'
 ---
 
-Generics is a powerful tool available in many statically-typed high level programming languages. They allows us to write code which operates on a category of allowed types, rather than specific ones. This makes such code more portable while still retaining its type safety.
+Generics is a powerful feature available in many statically typed languages. It offers a way to write code capable of operating against a wide category of types rather than just a specific one, allowing us to build flexible and reusable components without sacrificing type safety.
 
-Essentially, **generic type to a normal type is the same as a function to a value**. In order to create an instance of such type, we first need to pass it a set of inputs known as generic arguments, which resolves it to an actual static type.
+Even though generics have been in C# for a while now, I still sometimes manage to find new and interesting ways to use them. In one of my previous articles, I wrote about a neat trick I found that helps achieve [return type inference](/blog/return-type-inference) for generic types, through an unconventional use of implicit conversion operators.
 
-In some scenarios, consuming generics may be a bit difficult. Previously, I have [already written](/blog/return-type-inference) about an interesting trick that allows you to decomposition generic types to simulate return type inference in C#.
+Recently, I was working on a project of mine and faced another problem involving generics: I needed to define a signature where all of the type arguments were optional, but usable in arbitrary combinations with each other. After a bit of time, I came up with a way to achieve that by using an approach similar to the [_fluent interface_](https://en.wikipedia.org/wiki/Fluent_interface) design pattern, but applied in relation to types instead of objects.
 
-Last week I was also doing some stuff with generics and came up with an interesting pattern that simplifies creation of generic types.
-
-In this article, I will show how we can model stuff using this pattern.
+In this article, I will explain the problem I was trying to solve and how this approach helped me do it. I will also share some other scenarios where I think this pattern could be useful in designing interfaces that rely heavily on generics.
 
 ## Fluent interfaces
 
@@ -26,7 +24,7 @@ Essentially, instead of having one method that takes many parameters, fluent int
 
 ```csharp
 // Non-fluent (input -> output)
-var result = RunProcess(
+var result = RunCommand(
     "git", // executable
     "pull", // args
     "/my/repository", // working dir
@@ -38,7 +36,7 @@ var result = RunProcess(
 );
 
 // Fluent (deferred input)
-var result = new Process("git")
+var result = new Command("git")
     .WithArguments("pull")
     .WithWorkingDirectory("/my/repository")
     .WithEnvironmentVariable("GIT_AUTHOR_NAME", "John")
@@ -193,4 +191,14 @@ public class MyEndpoint : Endpoint { /* ... */ }
 
 // Error: Class Endpoint.ForRequest<T> is sealed
 public class MyEndpoint : Endpoint.ForRequest<SignInRequest> { /* ... */ }
+```
+
+```csharp
+public class Context<T>
+{
+    public class Provider
+    {
+
+    }
+}
 ```
