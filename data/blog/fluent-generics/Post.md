@@ -6,15 +6,21 @@ tags:
   - 'csharp'
 ---
 
-Generics is a powerful feature available in many statically typed languages. It offers a way to write code capable of operating against a wide category of types rather than just a specific one, allowing us to build flexible and reusable components without sacrificing type safety.
+Generics is a powerful feature available in many statically typed languages. It offers a way to write code that seamlessly operates against many different types, by defining a common constraint that they all adhere to. This provides the means for building flexible and reusable components without having to sacrifice type safety or introduce unnecessary duplication.
 
-Even though generics have been in C# for a while now, I still sometimes manage to find new and interesting ways to use them. In one of my previous articles, I wrote about a neat trick I came up with that helps achieve [generic return type inference](/blog/return-type-inference) through an unconventional use of implicit conversion operators.
+Even though generics have been around in C# for a while now, I still sometimes manage to find new and interesting ways to use them. For example, in one of my [previous articles](/blog/return-type-inference) I wrote about a trick I came up with that helps achieve return type inference for generics, providing an easier way to work with container union types.
 
-Recently, I was also working on some code involving generics and faced another problem: I needed to define a signature where all of the type arguments were optional, but usable in arbitrary combinations with each other. After a bit of time, I found a way to achieve that by using an approach similar to the [_fluent interface_](https://en.wikipedia.org/wiki/Fluent_interface) design pattern, but applied in relation to types instead of objects.
+Recently, I was also working on some code involving generics and had an unusual challenge: I needed to define a signature where all type arguments were optional, but usable in arbitrary combinations and arities. Initially I attempted to do it by introducing type overloads, but that led to an impractical design that I wasn't very fond of.
 
-In this article, I will explain the problem I was trying to solve and how I was ultimately able to do it with the help of that approach. Besides that, I'll show how this pattern can also be applied in some other scenarios to make generic types more discoverable and easier to use.
+After a bit of experimentation, I found a way to solve this problem by using an approach similar to the [_fluent interface_](https://en.wikipedia.org/wiki/Fluent_interface) design pattern, except applied in relation to types instead of objects. The design I arrived at features a domain-specific language that allows consumers to resolve the type they need by "configuring" it in a serious of logical steps.
 
-## Fluent interfaces
+In this article, I will show the original problem I was trying to solve and how this approach helped me solve it. I will also share some other scenarios where I think this pattern may come in useful.
+
+## The endpoint problem
+
+Historically, when building web applications using the [ASP.NET](http://asp.net) framework,...
+
+## Deferred configuration
 
 In object-oriented programming, _fluent interface_ design is a popular pattern for building interfaces that relies heavily on method chaining. It works by establishing a domain language in a form of a sequence of operations that represent human-legible, _fluent_ instructions.
 
