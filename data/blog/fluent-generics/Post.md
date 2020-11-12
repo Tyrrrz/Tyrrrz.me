@@ -16,13 +16,13 @@ After a bit of experimentation, I found a way to solve this problem by using an 
 
 In this article, I will show what this approach is all about, how it helped me solve my original issue, as well as some other scenarios where I think it may be useful.
 
-## Fluency
+## Fluent interfaces
 
-In object-oriented programming, _fluent interface_ design is a popular pattern for building convenient and flexible interaction layers. Its core idea revolves around using method chaining to express behaviors in a form of a continuous flow of simple human-readable instructions.
+In object-oriented programming, _fluent interface_ design is a popular pattern for building flexible and convenient interfaces. Its core idea revolves around using method chaining to express interactions through a continuous flow of human-readable instructions.
 
-Fluent interfaces are commonly used when modeling complex operations that rely on a large set of (often optional) input parameters. Instead of supplying all inputs in a single transaction, this pattern can be used to split the configuration up into multiple deferred steps, making the experience much smoother.
+Among other things, this pattern is commonly used to simplify operations that rely on large sets of (potentially optional) input parameters. Instead of expecting all of the inputs upfront, interfaces designed in a fluent manner provide a way to configure each of the relevant aspects separately from each other.
 
-As an example, consider the sample code below:
+As an example, let's consider the following example:
 
 ```csharp
 var result = RunCommand(
@@ -37,27 +37,11 @@ var result = RunCommand(
 );
 ```
 
-Here we are calling the `RunCommand` method to spawn a child process with the specified command line arguments and some other options. It's pretty clear that this expression is not very human-readable, as it requires comments to explain what each parameter in the method stands for.
+In the snippet above, we are calling the `RunCommand` method to spawn a child process. As the input, we specify the executable we want to execute, the command line arguments we want to pass, and some other related settings.
 
-To improve on this we can, of course, replace the long list of parameters with a single [object parameter](https://refactoring.guru/introduce-parameter-object), like so:
+It's pretty clear that this method invocation expression is not very human-readable, as it requires comments to even understand what each of the parameters stands for. Additionally, omitting some of the optional settings is cumbersome, as it requires either the use of default values, named parameters, or relying on overloads for every possible permutation.
 
-```csharp
-var result = RunCommand(
-    "git",
-    new CommandOptions
-    {
-        Arguments = "pull",
-        WorkingDir = "/my/repository",
-        Environment = new Dictionary<string, string>
-        {
-            ["GIT_AUTHOR_NAME"] = "John",
-            ["GIT_AUTHOR_EMAIL"] = "john@email.com"
-        }
-    }
-);
-```
-
-This change improves the readability and flexibility of `RunCommand` quite significantly, albeit at the cost of additional noise. However, we can go one step further and clean it up even more by establishing a fluent interface:
+The experience can be greatly improved by refactoring this interaction into a fluent interface:
 
 ```csharp
 var result = new Command("git")
@@ -68,7 +52,9 @@ var result = new Command("git")
     .Run();
 ```
 
-The above design provides the best ergonomics.
+Unlike the previous example, this is a lot more readable.
+
+## Fluent type definitions
 
 Now, at this point you may be wondering how any of this may be related to generics. Well, it's directly related because **generics are essentially functions for types**.
 
