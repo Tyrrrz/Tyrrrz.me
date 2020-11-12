@@ -16,36 +16,50 @@ After a bit of experimentation, I found a way to solve this problem by using an 
 
 In this article, I will show what this approach is all about, how it helped me solve my original issue, as well as some other scenarios where I think it may be useful.
 
-## Endpoint architecture
+## Fluency
 
-Traditionally, web applications built with the [ASP.NET](http://asp.net) framework are architected according to the [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller) pattern. Each individual HTTP operation is represented by a method on a controller class, which is used to group related routes together.
+In object-oriented programming, _fluent interface_ design is a popular pattern for building convenient and flexible interaction layers. Its core idea revolves around using method chaining to express behaviors in a form of a continuous flow of simple human-readable instructions.
 
-ASP.NET does support [other types of routing](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/routing) out of the box, such as Razor Pages, SignalR hubs, gRPC services, and ad-hoc delegate endpoints. That being said, if you are building a typical REST API backend, your options will be mostly limited to controllers.
+Fluent interfaces are commonly used when modeling complex operations that rely on a large set of (often optional) input parameters. Instead of supplying all inputs in a single transaction, this pattern can be used to split the configuration up into multiple deferred steps, making the experience much smoother.
 
-This type of architecture may seem like a convenient way to model your applications, but many find that it leads to an unnecessarily complicated design, imposes inconvenient file structure, and creates code bloat. Steve Smith has written [an article](https://ardalis.com/moving-from-controllers-and-actions-to-endpoints-with-mediatr) about it and I believe he explained these issues really well.
-
-## Deferred configuration
-
-In object-oriented programming, _fluent interface_ design is a popular pattern for building interfaces that relies heavily on method chaining. It works by establishing a domain language in a form of a sequence of operations that represent human-legible, _fluent_ instructions.
-
-Fluent interfaces are used quite commonly to simplify operations that require a large set of inputs by deferring them into multiple sequential steps. This is often the case when initializing or configuring objects that have multiple inputs, many of which are optional.
-
-Essentially, instead of having one method that takes many parameters, fluent interfaces typically have many chainable methods, each taking a small portion of the parameters:
+As an example, consider the sample code below:
 
 ```csharp
-// Non-fluent (input -> output)
 var result = RunCommand(
-    "git", // executable
-    "pull", // args
-    "/my/repository", // working dir
-    new Dictionary<string, string> // env vars
+    "git", // executable (required)
+    "pull", // args (optional)
+    "/my/repository", // working dir (optional)
+    new Dictionary<string, string> // env vars (optional)
     {
         ["GIT_AUTHOR_NAME"] = "John",
         ["GIT_AUTHOR_EMAIL"] = "john@email.com"
     }
 );
+```
 
-// Fluent (deferred input)
+Here we are calling the `RunCommand` method to spawn a child process with the specified command line arguments and some other options. It's pretty clear that this expression is not very human-readable, as it requires comments to explain what each parameter in the method stands for.
+
+To improve on this we can, of course, replace the long list of parameters with a single [object parameter](https://refactoring.guru/introduce-parameter-object), like so:
+
+```csharp
+var result = RunCommand(
+    "git",
+    new CommandOptions
+    {
+        Arguments = "pull",
+        WorkingDir = "/my/repository",
+        Environment = new Dictionary<string, string>
+        {
+            ["GIT_AUTHOR_NAME"] = "John",
+            ["GIT_AUTHOR_EMAIL"] = "john@email.com"
+        }
+    }
+);
+```
+
+This change improves the readability and flexibility of `RunCommand` quite significantly, albeit at the cost of additional noise. However, we can go one step further and clean it up even more by establishing a fluent interface:
+
+```csharp
 var result = new Command("git")
     .WithArguments("pull")
     .WithWorkingDirectory("/my/repository")
@@ -54,18 +68,28 @@ var result = new Command("git")
     .Run();
 ```
 
-Given that we've established that generic types are basically just functions that return normal types, it makes sense to question whether something like this is also possible there.
+The above design provides the best ergonomics.
+
+Now, at this point you may be wondering how any of this may be related to generics. Well, it's directly related because **generics are essentially functions for types**.
+
+In fact, you can consider the relationship between generic types and normal types as the same type of relationship that functions and values have. In order to use a generic type, we must first provide it with a set of required type arguments, after which we get a regular resolved type that we can instantiate or derive from.
+
+The similarity between functions and generics is also evident in the design problems that you can experience in both. For example, imagine we're working on a web framework and want to define an `Endpoint` type that represents an operation that maps a request object to the resulting response object.
+
+We can model such a type with the following signature:
 
 ```csharp
-[ApiController]
-public abstract class Endpoint<TReq, TRes> : ControllerBase
+public abstract class Endpoint<TReq, TRes> : EndpointBase
 {
+    // This method gets called by the framework
     public abstract Task<ActionResult<TRes>> ExecuteAsync(
         TReq request,
         CancellationToken cancellationToken = default
     );
 }
 ```
+
+This allows us to implement our route handlers like so:
 
 ```csharp
 public class SignInRequest
@@ -86,17 +110,30 @@ public class SignInEndpoint : Endpoint<SignInRequest, SignInResponse>
         SignInRequest request,
         CancellationToken cancellationToken = default)
     {
-        // ...
+        var user = await Database.GetUserAsync(request.Username);
+
+        if (!user.CheckPassword(request.Password))
+        {
+            return Unauthorized();
+        }
+
+        return Ok(new SignInResponse
+        {
+            Token = user.GenerateToken()
+        });
     }
 }
 ```
 
-Signup doesn't take paramters
-Signout also has no response
+By inheriting from `Endpoint<SignInRequest, SignInResponse>`, the compiler automatically enforces the corresponding signature on our `ExecuteAsync` method. This is nice as it enforces a consistent and strict design.
+
+However, while the `SignInEndpoint` fits perfectly in this design, not all endpoints need to have a typed request and response. For example, a similar `SignUpEndpoint` will likely not have any response besides a status code, while `SignOutEndpoint` won't have a request either.
+
+In order to properly support endpoints like that, we need to extend our generic class declaration with a few additional overloads:
 
 ```csharp
 // Endpoint that expects a typed request and provides a typed response
-public abstract class Endpoint<TReq, TRes>
+public abstract class Endpoint<TReq, TRes> : EndpointBase
 {
     public abstract Task<ActionResult<TRes>> ExecuteAsync(
         TReq request,
@@ -105,7 +142,7 @@ public abstract class Endpoint<TReq, TRes>
 }
 
 // Endpoint that expects a typed request but does not provide a typed response (*)
-public abstract class Endpoint<TReq>
+public abstract class Endpoint<TReq> : EndpointBase
 {
     public abstract Task<ActionResult> ExecuteAsync(
         TReq request,
@@ -114,7 +151,7 @@ public abstract class Endpoint<TReq>
 }
 
 // Endpoint that does not expect a typed request but provides a typed response (*)
-public abstract class Endpoint<TRes>
+public abstract class Endpoint<TRes> : EndpointBase
 {
     public abstract Task<ActionResult<TRes>> ExecuteAsync(
         CancellationToken cancellationToken = default
@@ -122,15 +159,13 @@ public abstract class Endpoint<TRes>
 }
 
 // Endpoint that neither expects a typed request nor provides a typed response
-public abstract class Endpoint
+public abstract class Endpoint : EndpointBase
 {
     public abstract Task<ActionResult> ExecuteAsync(
         CancellationToken cancellationToken = default
     );
 }
 ```
-
-`(*)` -
 
 ```csharp
 public static class Endpoint
