@@ -12,13 +12,17 @@ Even though generics have been around in C# for a while now, I still sometimes m
 
 Recently, I was also working on some code involving generics and had an unusual challenge: I needed to define a signature where all type arguments were optional, but usable in arbitrary combinations and arities. Initially I attempted to do it by introducing type overloads, but that led to an impractical design that I wasn't very fond of.
 
-After a bit of experimentation, I found a way to solve this problem by using an approach similar to the [_fluent interface_](https://en.wikipedia.org/wiki/Fluent_interface) design pattern, except applied in relation to types instead of objects. The design I arrived at features a domain-specific language that allows consumers to resolve the type they need by "configuring" it in a serious of logical steps.
+After a bit of experimentation, I found a way to solve this problem by using an approach similar to the [_fluent interface_](https://en.wikipedia.org/wiki/Fluent_interface) design pattern, except applied in relation to types instead of objects. The design I arrived at features a domain-specific language that allows consumers to resolve the type they need by "configuring" it in a sequence of logical steps.
 
-In this article, I will show the original problem I was trying to solve and how this approach helped me solve it. I will also share some other scenarios where I think this pattern may come in useful.
+In this article, I will show what this approach is all about, how it helped me solve my original issue, as well as some other scenarios where I think it may be useful.
 
-## The endpoint problem
+## Endpoint architecture
 
-Historically, when building web applications using the [ASP.NET](http://asp.net) framework,...
+Traditionally, web applications built with the [ASP.NET](http://asp.net) framework are architected according to the [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller) pattern. Each individual HTTP operation is represented by a method on a controller class, which is used to group related routes together.
+
+ASP.NET does support [other types of routing](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/routing) out of the box, such as Razor Pages, SignalR hubs, gRPC services, and ad-hoc delegate endpoints. That being said, if you are building a typical REST API backend, your options will be mostly limited to controllers.
+
+This type of architecture may seem like a convenient way to model your applications, but many find that it leads to an unnecessarily complicated design, imposes inconvenient file structure, and creates code bloat. Steve Smith has written [an article](https://ardalis.com/moving-from-controllers-and-actions-to-endpoints-with-mediatr) about it and I believe he explained these issues really well.
 
 ## Deferred configuration
 
