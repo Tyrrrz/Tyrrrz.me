@@ -6,13 +6,13 @@ tags:
   - 'csharp'
 ---
 
-Generics is a powerful feature available in many statically typed languages. It offers a way to write code that seamlessly operates against many different types, by defining a common constraint that they all adhere to. This provides the means for building flexible and reusable components without having to sacrifice type safety or introduce unnecessary duplication.
+Generics is a powerful feature available in many statically typed languages. It offers a way to write code that seamlessly operates against many different types, by targeting the features they share rather than the types themselves. This provides the means for building flexible and reusable components without having to sacrifice type safety or introduce unnecessary duplication.
 
-Even though generics have been around in C# for a while now, I still sometimes manage to find new and interesting ways to use them. For example, in one of my [previous articles](/blog/return-type-inference) I wrote about a trick I came up with that helps achieve return type inference for generics, providing an easier way to work with container union types.
+Even though generics have been around in C# for a while, I still sometimes manage to find new and interesting ways to use them. For example, in one of my [previous articles](/blog/return-type-inference) I wrote about a trick I came up with that helps achieve return type inference for generics, providing an easier way to work with container union types.
 
 Recently, I was also working on some code involving generics and had an unusual challenge: I needed to define a signature where all type arguments were optional, but usable in arbitrary combinations and arities. Initially I attempted to do it by introducing type overloads, but that led to an impractical design that I wasn't very fond of.
 
-After a bit of experimentation, I found a way to solve this problem by using an approach similar to the [_fluent interface_](https://en.wikipedia.org/wiki/Fluent_interface) design pattern, except applied in relation to types instead of objects. The design I arrived at features a domain-specific language that allows consumers to resolve the type they need by "configuring" it in a sequence of logical steps.
+After a bit of experimentation, I found a way to solve this problem elegantly by using an approach similar to the [_fluent interface_](https://en.wikipedia.org/wiki/Fluent_interface) design pattern, except applied in relation to types instead of objects. The design I arrived at features a domain-specific language that allows consumers to resolve the type they need by "configuring" it in a sequence of logical steps.
 
 In this article, I will show what this approach is all about, how it helped me solve my original issue, as well as some other scenarios where I think it may be useful.
 
@@ -22,7 +22,7 @@ In object-oriented programming, _fluent interface_ design is a popular pattern f
 
 Among other things, this pattern is commonly used to simplify operations that rely on large sets of (potentially optional) input parameters. Instead of expecting all of the inputs upfront, interfaces designed in a fluent manner provide a way to configure each of the relevant aspects separately from each other.
 
-As an example, let's consider the following example:
+As an example, let's consider the following code:
 
 ```csharp
 var result = RunCommand(
@@ -37,9 +37,9 @@ var result = RunCommand(
 );
 ```
 
-In the snippet above, we are calling the `RunCommand` method to spawn a child process. As the input, we specify the executable we want to execute, the command line arguments we want to pass, and some other related settings.
+In this snippet, we are calling the `RunCommand` method to spawn a child process with the specified settings and block until it completes.
 
-It's pretty clear that this method invocation expression is not very human-readable, as it requires comments to even understand what each of the parameters stands for. Additionally, omitting some of the optional settings is cumbersome, as it requires either the use of default values, named parameters, or relying on overloads for every possible permutation.
+It's pretty clear that this method invocation expression is not very human-readable, as it requires comments to even understand what each parameter does. Additionally, omitting some of the optional settings is cumbersome, as it requires either the use of default values, named parameters, or relying on overloads for every possible permutation.
 
 The experience can be greatly improved by refactoring this interaction into a fluent interface:
 
