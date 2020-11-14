@@ -4,6 +4,7 @@ date: '2020-11-25'
 tags:
   - 'dotnet'
   - 'csharp'
+  - 'tricks'
 ---
 
 Generics is a powerful feature available in many statically typed languages. It offers a way to write code that seamlessly operates against many different types, by targeting the features they share rather than the types themselves. This provides the means for building flexible and reusable components without having to sacrifice type safety or introduce unnecessary duplication.
