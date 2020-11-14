@@ -14,7 +14,7 @@ Recently, I was also working on some code involving generics and had an unusual 
 
 After a bit of experimentation, I found a way to solve this problem elegantly by using an approach similar to the [_fluent interface_](https://en.wikipedia.org/wiki/Fluent_interface) design pattern, except applied in relation to types instead of objects. The design I arrived at features a domain-specific language that allows consumers to resolve the type they need by "configuring" it in a sequence of logical steps.
 
-In this article, I will show what this approach is all about, how it helped me solve my original issue, as well as some other scenarios where I think it may be useful.
+In this article, I will show what this approach is all about, what relation it has to fluency, and how you can use it to design cleaner generic types.
 
 ## Fluent interfaces
 
@@ -242,24 +242,31 @@ public static class Endpoint
 
 The above design retains the original four types from earlier, but organizes them in a hierarchical structure rather than a flat one. This is possible to achieve because C# allows type definitions to be nested within each other, even if they are generic.
 
-In fact, types contained within generics are special because they also gain access to the type arguments specified on their parent. It allows us to put `WithResponse<TRes>` class inside `WithRequest<TReq>` and use both `TReq` and `TRes` to define the `ExecuteAsync` method.
+In fact, **types contained within generics are special because they also gain access to the type arguments specified on their parent**. It allows us to put `WithResponse<TRes>` inside `WithRequest<TReq>` and use both `TReq` and `TRes` to define the `ExecuteAsync` method.
 
 Functionally, the approach shown above and the one from earlier are exactly the same. However, the structure employed here completely eliminates the discoverability issues, while still offering the same level of flexibility.
 
-Now, if the user wanted to implement an endpoint, they would always start from the `Endpoint` class and configure what they need in a fluent manner:
+Now, if the user wanted to implement an endpoint, they would do it like this:
 
 ```csharp
-class MyEndpoint : Endpoint.WithRequest<SomeRequest>.WithResponse<SomeResponse> { /* ... */ }
-class MyEndpointWithoutResponse : Endpoint.WithRequest<SomeRequest>.WithoutResponse { /* ... */ }
-class MyEndpointWithoutRequest : Endpoint.WithoutRequest.WithResponse<SomeResponse> { /* ... */ }
-class MyEndpointWithoutNeither : Endpoint.WithoutRequest.WithoutResponse { /* ... */ }
+public class MyEndpoint
+    : Endpoint.WithRequest<SomeRequest>.WithResponse<SomeResponse> { /* ... */ }
+
+public class MyEndpointWithoutResponse
+    : Endpoint.WithRequest<SomeRequest>.WithoutResponse { /* ... */ }
+
+public class MyEndpointWithoutRequest
+    : Endpoint.WithoutRequest.WithResponse<SomeResponse> { /* ... */ }
+
+public class MyEndpointWithoutNeither
+    : Endpoint.WithoutRequest.WithoutResponse { /* ... */ }
 ```
 
 And here is how the updated `SingInEndpoint` would look like:
 
 ```csharp
 public class SignInEndpoint : Endpoint
-    .ForRequest<SignInRequest>
+    .WithRequest<SignInRequest>
     .WithResponse<SignInResponse>
 {
     [HttpPost("auth/signin")]
@@ -272,22 +279,19 @@ public class SignInEndpoint : Endpoint
 }
 ```
 
-As you can see, this approach leads to type signatures which are very expressive and clean.
+As you can see, this approach leads to a very expressive and clean type signature. Regardless of what kind of endpoint the user wants to implement, they will always start from the `Endpoint` class and compose the capabilities they need in a fluent manner.
+
+Besides that, since our type structure essentially represents a finite state machine, it's deterministic and fully safe. For example, the following incorrect attempts to create an endpoint all result in compile-time errors:
 
 ```csharp
 // Error: Class Endpoint is sealed
 public class MyEndpoint : Endpoint { /* ... */ }
 
-// Error: Class Endpoint.ForRequest<T> is sealed
-public class MyEndpoint : Endpoint.ForRequest<SignInRequest> { /* ... */ }
+// Error: Class Endpoint.WithRequest<TReq> is sealed
+public class MyEndpoint : Endpoint.WithRequest<MyRequest> { /* ... */ }
+
+// Error: Class Endpoint.WithoutRequest.WithRequest<T> does not exist
+public class MyEndpoint : Endpoint.WithoutRequest.WithRequest<MyRequest> { /* ... */ }
 ```
 
-```csharp
-public class Context<T>
-{
-    public class Provider
-    {
-
-    }
-}
-```
+## Summary
