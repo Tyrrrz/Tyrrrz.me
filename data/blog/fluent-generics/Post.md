@@ -37,11 +37,13 @@ var result = RunCommand(
 );
 ```
 
-In this snippet, we are calling the `RunCommand` method to spawn a child process with the specified settings and block until it completes.
+In this snippet, we are calling the `RunCommand` method to spawn a child process and block until it completes. Relevant settings, such as command line arguments, working directory, and environment variables are specified through input parameters.
 
-It's pretty clear that this method invocation expression is not very human-readable, as it requires comments to even understand what each parameter does. Additionally, omitting some of the optional settings is cumbersome, as it requires either the use of default values, named parameters, or relying on overloads for every possible permutation.
+Although completely functional, the method invocation expression above is not very human-readable. At a glance, it's hard to even tell what each of the parameters does without relying on code comments.
 
-The experience can be greatly improved by refactoring this interaction into a fluent interface:
+Additionally, since most of the parameters are optional, the method definition has to account for it too. There are different ways to achieve that, including overloads, named parameters with default values, etc., but they are all rather clunky and offer suboptimal experience.
+
+We can improve on this design, however, by reworking the method into a fluent interface:
 
 ```csharp
 var result = new Command("git")
@@ -52,17 +54,17 @@ var result = new Command("git")
     .Run();
 ```
 
-Unlike the previous example, this is a lot more readable.
+With this approach, the consumer can create a stateful `Command` object by specifying the required executable name, after which they may use the available methods to freely configure additional options they may need. The resulting expression is not only significantly more readable, but is also much more flexible due to not being constrained by the inherent limitations of method parameters.
 
 ## Fluent type definitions
 
-Now, at this point you may be wondering how any of this may be related to generics. Well, it's directly related because **generics are essentially functions for types**.
+At this point you may be curious how is any of that related to generics. After all, these are just functions and we are supposed to be talking about extending the type system instead.
 
-In fact, you can consider the relationship between generic types and normal types as the same type of relationship that functions and values have. In order to use a generic type, we must first provide it with a set of required type arguments, after which we get a regular resolved type that we can instantiate or derive from.
+Well, the interesting thing is that **generics are just functions, except for types**. In fact, you may consider a generic type as a special higher-order construct that resolves to a regular type after you supply it with the required generic arguments. This is analogous to the relationship between functions and values, where a function needs to be provided with the corresponding arguments to resolve to a concrete value.
 
-The similarity between functions and generics is also evident in the design problems that you can experience in both. For example, imagine we're working on a web framework and want to define an `Endpoint` type that represents an operation that maps a request object to the resulting response object.
+Because of their similarity, using generic types can also sometimes be inconvenient in much the same way. As an example, let's imagine we're building a web framework and want to define an `Endpoint` type, which represents an entry point through which the user can send HTTP requests and receive responses.
 
-We can model such a type with the following signature:
+Such a type can be modeled using the following signature:
 
 ```csharp
 public abstract class Endpoint<TReq, TRes> : EndpointBase
@@ -75,7 +77,9 @@ public abstract class Endpoint<TReq, TRes> : EndpointBase
 }
 ```
 
-This allows us to implement our route handlers like so:
+Here we have a basic generic class which takes a type argument corresponding to the request object it's meant to receive and another type argument that specifies the response format it's expected to provide. This type defines the `ExecuteAsync` which the user will need to override to implement the logic relevant to a particular endpoint.
+
+We can use this as foundation to implement our route handlers like so:
 
 ```csharp
 public class SignInRequest
@@ -111,11 +115,11 @@ public class SignInEndpoint : Endpoint<SignInRequest, SignInResponse>
 }
 ```
 
-By inheriting from `Endpoint<SignInRequest, SignInResponse>`, the compiler automatically enforces the corresponding signature on our `ExecuteAsync` method. This is nice as it enforces a consistent and strict design.
+By inheriting from `Endpoint<SignInRequest, SignInResponse>`, the compiler automatically enforces the matching signature on our `ExecuteAsync` method. This is very convenient as it helps avoid potential mistakes and makes the structure of the application more consistent.
 
-However, while the `SignInEndpoint` fits perfectly in this design, not all endpoints need to have a typed request and response. For example, a similar `SignUpEndpoint` will likely not have any response besides a status code, while `SignOutEndpoint` won't have a request either.
+However, even though the `SignInEndpoint` fits perfectly in this design, not all endpoints are going to need a request and response. For example, an analogous `SignUpEndpoint` will likely not provide a response beyond a status code, while `SignOutEndpoint` won't even expect a specific request either.
 
-In order to properly support endpoints like that, we need to extend our generic class declaration with a few additional overloads:
+In order to properly support endpoints like that, we could try to extend our model by adding a few additional generic type overloads:
 
 ```csharp
 // Endpoint that expects a typed request and provides a typed response
@@ -153,10 +157,52 @@ public abstract class Endpoint : EndpointBase
 }
 ```
 
+At a glance, this may appear to have solved this problem, however the code above does not compile. The reason for that is the fact that the `Endpoint<TReq>` and `Endpoint<TRes>` are ambiguous, since there is no way to determine whether a single provided type argument specifies a request or a response.
+
+Just like with the `RunCommand` method earlier in the article, there are a couple ways to solve this, but they are not nice. For example, the most straightforward approach would be to change the types so that their capabilities are reflected in the name:
+
+```csharp
+public abstract class Endpoint<TReq, TRes> : EndpointBase
+{
+    public abstract Task<ActionResult<TRes>> ExecuteAsync(
+        TReq request,
+        CancellationToken cancellationToken = default
+    );
+}
+
+public abstract class EndpointWithoutResponse<TReq> : EndpointBase
+{
+    public abstract Task<ActionResult> ExecuteAsync(
+        TReq request,
+        CancellationToken cancellationToken = default
+    );
+}
+
+public abstract class EndpointWithoutRequest<TRes> : EndpointBase
+{
+    public abstract Task<ActionResult<TRes>> ExecuteAsync(
+        CancellationToken cancellationToken = default
+    );
+}
+
+public abstract class Endpoint : EndpointBase
+{
+    public abstract Task<ActionResult> ExecuteAsync(
+        CancellationToken cancellationToken = default
+    );
+}
+```
+
+This addresses the issue, but creates another one in its place: now some of the types are less discoverable than they were before, due to being named differently. If you consider that we may also want to have additional overloads for non-async variants of the method, this can end up being a significant drawback.
+
+Now, of course, it may seem like a rather contrived problem and there might be no reason to attempt to solve it. However, I personally believe that developer experience is extremely important when developing libraries like this.
+
+Luckily, we can employ the same approach we did earlier and turn our type overloads into a fluent schema. Here's the same code after a small refactor:
+
 ```csharp
 public static class Endpoint
 {
-    public static class ForRequest<TReq>
+    public static class WithRequest<TReq>
     {
         public abstract class WithResponse<TRes>
         {
@@ -175,7 +221,7 @@ public static class Endpoint
         }
     }
 
-    public static class ForAnyRequest
+    public static class WithoutRequest
     {
         public abstract class WithResponse<TRes>
         {
@@ -202,6 +248,14 @@ class EndpointWithoutEither = Endpoint.ForAnyRequest.WithoutResponse { /* ... */
 ```
 
 ```csharp
+// Error: Class Endpoint is sealed
+public class MyEndpoint : Endpoint { /* ... */ }
+
+// Error: Class Endpoint.ForRequest<T> is sealed
+public class MyEndpoint : Endpoint.ForRequest<SignInRequest> { /* ... */ }
+```
+
+```csharp
 public class SignInEndpoint : Endpoint
   .ForRequest<SignInRequest>
   .WithResponse<SignInResponse>
@@ -214,14 +268,6 @@ public class SignInEndpoint : Endpoint
         // ...
     }
 }
-```
-
-```csharp
-// Error: Class Endpoint is sealed
-public class MyEndpoint : Endpoint { /* ... */ }
-
-// Error: Class Endpoint.ForRequest<T> is sealed
-public class MyEndpoint : Endpoint.ForRequest<SignInRequest> { /* ... */ }
 ```
 
 ```csharp
