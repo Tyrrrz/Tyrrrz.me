@@ -77,7 +77,7 @@ public abstract class Endpoint<TReq, TRes> : EndpointBase
 }
 ```
 
-Here we have a basic generic class which takes a type argument corresponding to the request object it's meant to receive and another type argument that specifies the response format it's expected to provide. This type defines the `ExecuteAsync` which the user will need to override to implement the logic relevant to a particular endpoint.
+Here we have a basic generic class which takes a type argument corresponding to the request object it's meant to receive and another type argument that specifies the response format it's expected to provide. This type defines the `ExecuteAsync` method which the user will need to override to implement the logic relevant to a particular endpoint.
 
 We can use this as foundation to implement our route handlers like so:
 
@@ -115,11 +115,11 @@ public class SignInEndpoint : Endpoint<SignInRequest, SignInResponse>
 }
 ```
 
-By inheriting from `Endpoint<SignInRequest, SignInResponse>`, the compiler automatically enforces the matching signature on our `ExecuteAsync` method. This is very convenient as it helps avoid potential mistakes and makes the structure of the application more consistent.
+By inheriting from `Endpoint<SignInRequest, SignInResponse>`, the compiler automatically enforces the correct signature on the entry point method. This is very convenient as it helps avoid potential mistakes and also makes the structure of the application more consistent.
 
-However, even though the `SignInEndpoint` fits perfectly in this design, not all endpoints are going to need a request and response. For example, an analogous `SignUpEndpoint` will likely not provide a response beyond a status code, while `SignOutEndpoint` won't even expect a specific request either.
+However, even though the `SignInEndpoint` fits perfectly in this design, not all endpoints are necessarily going to have a request and a response. For example, an analogous `SignUpEndpoint` will likely just return a status code and not include a response body, while `SignOutEndpoint` won't even need a specific request either.
 
-In order to properly support endpoints like that, we could try to extend our model by adding a few additional generic type overloads:
+In order to properly accommodate endpoints like that, we could try to extend our model by adding a few additional generic type overloads:
 
 ```csharp
 // Endpoint that expects a typed request and provides a typed response
@@ -157,9 +157,9 @@ public abstract class Endpoint : EndpointBase
 }
 ```
 
-At a glance, this may appear to have solved this problem, however the code above does not compile. The reason for that is the fact that the `Endpoint<TReq>` and `Endpoint<TRes>` are ambiguous, since there is no way to determine whether a single provided type argument specifies a request or a response.
+At a glance, this may appear to have solved this problem, however the code above does not actually compile. The reason for that is the fact that the `Endpoint<TReq>` and `Endpoint<TRes>` are ambiguous, since there is no way to determine whether a single unconstrained type argument is meant to specify a request or a response.
 
-Just like with the `RunCommand` method earlier in the article, there are a couple ways to solve this, but they are not nice. For example, the most straightforward approach would be to change the types so that their capabilities are reflected in the name:
+Just like with the `RunCommand` method earlier in the article, there are a couple of straightforward ways to work around this, but they are not particularly elegant. For example, the simplest solution would be to rename the types so that their capabilities are reflected in their names:
 
 ```csharp
 public abstract class Endpoint<TReq, TRes> : EndpointBase
@@ -193,11 +193,11 @@ public abstract class Endpoint : EndpointBase
 }
 ```
 
-This addresses the issue, but creates another one in its place: now some of the types are less discoverable than they were before, due to being named differently. If you consider that we may also want to have additional overloads for non-async variants of the method, this can end up being a significant drawback.
+This addresses the ambiguity issue, but results in a rather ugly design. Because half of the types are named differently, the user of the library might have a harder time finding them or even knowing about their existence in the first place. Moreover, if we consider that we may want to add more variants in the future (e.g. non-async handlers in addition to async), it becomes clear that this approach doesn't scale very well.
 
-Now, of course, it may seem like a rather contrived problem and there might be no reason to attempt to solve it. However, I personally believe that developer experience is extremely important when developing libraries like this.
+Of course, all of the problems above may seem a bit contrived and there might be no reason to attempt to solve them. However, I personally believe that optimizing developer experience is an extremely important aspect of writing library code.
 
-Luckily, we can employ the same approach we did earlier and turn our type overloads into a fluent schema. Here's the same code after a small refactor:
+Luckily, there is a better solution that we can use. Drawing on the parallels between functions and generic types, we can get rid of our type overloads and replace them with a fluent schema instead:
 
 ```csharp
 public static class Endpoint
@@ -240,25 +240,27 @@ public static class Endpoint
 }
 ```
 
-```csharp
-class NormalEndpoint = Endpoint.ForRequest<SomeRequest>.WithResponse<SomeResponse> { /* ... */ }
-class EndpointWithoutResponse = Endpoint.ForRequest<SomeRequest>.WithoutResponse { /* ... */ }
-class EndpointWithoutRequest = Endpoint.ForAnyRequest.WithResponse<SomeResponse> { /* ... */ }
-class EndpointWithoutEither = Endpoint.ForAnyRequest.WithoutResponse { /* ... */ }
-```
+The above design retains the original four types from earlier, but organizes them in a hierarchical structure rather than a flat one. This is possible to achieve because C# allows type definitions to be nested within each other, even if they are generic.
+
+In fact, types contained within generics are special because they also gain access to the type arguments specified on their parent. It allows us to put `WithResponse<TRes>` class inside `WithRequest<TReq>` and use both `TReq` and `TRes` to define the `ExecuteAsync` method.
+
+Functionally, the approach shown above and the one from earlier are exactly the same. However, the structure employed here completely eliminates the discoverability issues, while still offering the same level of flexibility.
+
+Now, if the user wanted to implement an endpoint, they would always start from the `Endpoint` class and configure what they need in a fluent manner:
 
 ```csharp
-// Error: Class Endpoint is sealed
-public class MyEndpoint : Endpoint { /* ... */ }
-
-// Error: Class Endpoint.ForRequest<T> is sealed
-public class MyEndpoint : Endpoint.ForRequest<SignInRequest> { /* ... */ }
+class MyEndpoint : Endpoint.WithRequest<SomeRequest>.WithResponse<SomeResponse> { /* ... */ }
+class MyEndpointWithoutResponse : Endpoint.WithRequest<SomeRequest>.WithoutResponse { /* ... */ }
+class MyEndpointWithoutRequest : Endpoint.WithoutRequest.WithResponse<SomeResponse> { /* ... */ }
+class MyEndpointWithoutNeither : Endpoint.WithoutRequest.WithoutResponse { /* ... */ }
 ```
+
+And here is how the updated `SingInEndpoint` would look like:
 
 ```csharp
 public class SignInEndpoint : Endpoint
-  .ForRequest<SignInRequest>
-  .WithResponse<SignInResponse>
+    .ForRequest<SignInRequest>
+    .WithResponse<SignInResponse>
 {
     [HttpPost("auth/signin")]
     public override async Task<ActionResult<SignInResponse>> ExecuteAsync(
@@ -268,6 +270,16 @@ public class SignInEndpoint : Endpoint
         // ...
     }
 }
+```
+
+As you can see, this approach leads to type signatures which are very expressive and clean.
+
+```csharp
+// Error: Class Endpoint is sealed
+public class MyEndpoint : Endpoint { /* ... */ }
+
+// Error: Class Endpoint.ForRequest<T> is sealed
+public class MyEndpoint : Endpoint.ForRequest<SignInRequest> { /* ... */ }
 ```
 
 ```csharp
