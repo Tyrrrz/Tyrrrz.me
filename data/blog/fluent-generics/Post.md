@@ -1,6 +1,6 @@
 ---
 title: 'Fluent Generics in C#'
-date: '2020-11-25'
+date: '2020-11-17'
 tags:
   - 'dotnet'
   - 'csharp'
@@ -15,7 +15,7 @@ Recently, I was also working on some code involving generics and had an unusual 
 
 After a bit of experimentation, I found a way to solve this problem elegantly by using an approach similar to the [_fluent interface_](https://en.wikipedia.org/wiki/Fluent_interface) design pattern, except applied in relation to types instead of objects. The design I arrived at features a domain-specific language that allows consumers to resolve the type they need by "configuring" it in a sequence of logical steps.
 
-In this article, I will show what this approach is all about, what relation it has to fluency, and how you can use it to design cleaner generic types.
+In this article, I will show what this approach is all about and how you can use it to design cleaner generic types.
 
 ## Fluent interfaces
 
@@ -296,3 +296,7 @@ public class MyEndpoint : Endpoint.WithoutRequest.WithRequest<MyRequest> { /* ..
 ```
 
 ## Summary
+
+Although generic types are incredibly useful, their rigid nature can make them difficult to consume in some scenarios. In particular, when we need to define a signature that encapsulates multiple different combinations of type arguments, we usually resort to overloading, but that can impose certain limitations.
+
+As an alternative solution, we can nest generic types within each other, creating a hierarchical structure that allows users to compose them in a fluent manner. This provides the means to achieve much greater customization, while still retaining optimal usability.
