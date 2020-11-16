@@ -4,6 +4,7 @@ date: '2020-03-10'
 tags:
   - 'dotnet'
   - 'csharp'
+  - 'tricks'
 ---
 
 Above everything else in software development, I really enjoy building frameworks that enable other developers to create something cool. Sometimes, when chasing that perfect design I have in mind, I find myself coming up with weird hacks that really push the C# language to the limit.

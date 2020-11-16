@@ -4,6 +4,7 @@ date: '2019-01-26'
 tags:
   - 'dotnet'
   - 'csharp'
+  - 'tricks'
 ---
 
 I'm sure everyone with at least some background in C# is aware of extension methods -- a nice feature that lets developers extend existing types with new methods.
