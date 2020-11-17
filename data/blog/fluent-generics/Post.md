@@ -263,7 +263,7 @@ public class MyEndpointWithoutNeither
     : Endpoint.WithoutRequest.WithoutResponse { /* ... */ }
 ```
 
-And here is how the updated `SingInEndpoint` would look like:
+And here is how the updated `SignInEndpoint` would look like:
 
 ```csharp
 public class SignInEndpoint : Endpoint
