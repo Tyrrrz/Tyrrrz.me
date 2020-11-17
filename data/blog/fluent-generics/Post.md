@@ -9,13 +9,13 @@ tags:
 
 Generics is a powerful feature available in many statically typed languages. It offers a way to write code that seamlessly operates against many different types, by targeting the features they share rather than the types themselves. This provides the means for building flexible and reusable components without having to sacrifice type safety or introduce unnecessary duplication.
 
-Even though generics have been around in C# for a while, I still sometimes manage to find new and interesting ways to use them. For example, in one of my [previous articles](/blog/return-type-inference) I wrote about a trick I came up with that helps achieve return type inference for generics, providing an easier way to work with container union types.
+Even though generics have been around in C# for a while, I still sometimes manage to find new and interesting ways to use them. For example, in one of my [previous articles](/blog/return-type-inference) I wrote about a trick I came up with that helps achieve return type inference, providing an easier way to work with container union types.
 
 Recently, I was also working on some code involving generics and had an unusual challenge: I needed to define a signature where all type arguments were optional, but usable in arbitrary combinations with each other. Initially I attempted to do it by introducing type overloads, but that led to an impractical design that I wasn't very fond of.
 
-After a bit of experimentation, I found a way to solve this problem elegantly by using an approach similar to the [_fluent interface_](https://en.wikipedia.org/wiki/Fluent_interface) design pattern, except applied in relation to types instead of objects. The design I arrived at features a domain-specific language that allows consumers to resolve the type they need by "configuring" it in a sequence of logical steps.
+After a bit of experimentation, I found a way to solve this problem elegantly by using an approach similar to the [_fluent interface_](https://en.wikipedia.org/wiki/Fluent_interface) design pattern, except applied in relation to types instead of objects. The design I arrived at features a domain-specific language that allows consumers to resolve the type they need, by "configuring" it in a sequence of logical steps.
 
-In this article, I will show what this approach is about and how you can use it to compose generic type overloads in a more accessible way.
+In this article, I will explain what this approach is about and how you can use it to organize complex generic types in a more accessible way.
 
 ## Fluent interfaces
 
@@ -63,7 +63,7 @@ At this point you may be curious how is any of that related to generics. After a
 
 Well, the connection lies in the fact that **generics are also just functions, except for types**. In fact, you may consider a generic type as a special higher-order construct that resolves to a regular type after you supply it with the required generic arguments. This is analogous to the relationship between functions and values, where a function needs to be provided with the corresponding arguments to resolve to a concrete value.
 
-Because of their similarity, generic types may also sometimes suffer from the same design issues. As an example, let's imagine we're building a web framework and want to define a high-level `Endpoint` type, which represents an entry point that maps deserialized requests into responses.
+Because of their similarity, generic types may also sometimes suffer from the same design issues. To illustrate this, let's imagine we're building a web framework and want to define an `Endpoint` interface, responsible for mapping deserialized requests into corresponding response objects.
 
 Such a type can be modeled using the following signature:
 
@@ -78,7 +78,7 @@ public abstract class Endpoint<TReq, TRes> : EndpointBase
 }
 ```
 
-Here we have a basic generic class that takes a type argument corresponding to the request object it's meant to receive and another type argument that specifies the response format it's expected to provide. This type defines the `ExecuteAsync` method which the user will need to override to implement the logic relevant to a particular endpoint.
+Here we have a basic generic class that takes a type argument corresponding to the request it's meant to receive and another type argument that specifies the response format it's expected to provide. This class also defines the `ExecuteAsync` method which the user will need to override to implement the logic relevant to a particular endpoint.
 
 We can use this as foundation to build our route handlers like so:
 
@@ -194,7 +194,7 @@ public abstract class Endpoint : EndpointBase
 }
 ```
 
-This addresses the issue, but results in a rather ugly design. Because half of the types are named differently, the user of the library might have a harder time finding them or even knowing about their existence in the first place. Moreover, if we consider that we may want to add more variants in the future (e.g. non-async handlers in addition to async), it becomes clear that this approach doesn't scale very well.
+This addresses the issue, but results in a rather ugly design. Because half of the types are named differently, the user of the library might have a harder time finding them or even knowing about their existence in the first place. Moreover, if we consider that we may want to add more variants in the future (e.g. non-async handlers in addition to async), it also becomes clear that this approach doesn't scale very well.
 
 Of course, all of the problems above may seem a bit contrived and there might be no reason to attempt to solve them. However, I personally believe that optimizing developer experience is an extremely important aspect of writing library code.
 
@@ -243,11 +243,11 @@ public static class Endpoint
 
 The above design retains the original four types from earlier, but organizes them in a hierarchical structure rather than a flat one. This is possible to achieve because C# allows type definitions to be nested within each other, even if they are generic.
 
-In fact, **types contained within generics are special because they also gain access to the type arguments specified on their parent**. It allows us to put `WithResponse<TRes>` inside `WithRequest<TReq>` and use both `TReq` and `TRes` to define the `ExecuteAsync` method.
+In fact, **types contained within generics are special because they also gain access to the type arguments specified on their parent**. It allows us to put `WithResponse<TRes>` inside `WithRequest<TReq>` and use both `TReq` and `TRes` to define the inner `ExecuteAsync` method.
 
-Functionally, the approach shown above and the one from earlier are exactly the same. However, the structure employed here completely eliminates the discoverability issues, while still offering the same level of flexibility.
+Functionally, the approach shown above and the one from earlier are identical. However, the unconventional structure employed here completely eliminates the discoverability issues, while still offering the same level of flexibility.
 
-Now, if the user wanted to implement an endpoint, they would do it like this:
+Now, if the user wanted to implement an endpoint, they would be able to do it like this:
 
 ```csharp
 public class MyEndpoint
@@ -280,9 +280,9 @@ public class SignInEndpoint : Endpoint
 }
 ```
 
-As you can see, this approach leads to a very expressive and clean type signature. Regardless of what kind of endpoint the user wants to implement, they will always start from the `Endpoint` class and compose the capabilities they need in a fluent manner.
+As you can see, this approach leads to a very expressive and clean type signature. Regardless of what kind of endpoint the user wanted to implement, they would always start from the `Endpoint` class and compose the capabilities they need in a fluent and human-readable manner.
 
-Besides that, since our type structure essentially represents a finite state machine, it's safe against misuse. For example, the following incorrect attempts to create an endpoint all result in compile-time errors:
+Besides that, since our type structure essentially represents a finite state machine, it's safe against accidental misuse. For example, the following incorrect attempts to create an endpoint all result in compile-time errors:
 
 ```csharp
 // Incomplete signature
@@ -300,6 +300,6 @@ public class MyEndpoint : Endpoint.WithoutRequest.WithRequest<MyRequest> { /* ..
 
 ## Summary
 
-Although generic types are incredibly useful, their rigid nature can make them difficult to consume in some scenarios. In particular, when we need to define a signature that encapsulates multiple different combinations of type arguments, we usually resort to overloading, but that imposes certain limitations.
+Although generic types are incredibly useful, their rigid nature can make them difficult to consume in some scenarios. In particular, when we need to define a signature that encapsulates multiple different combinations of type arguments, we may resort to overloading, but that imposes certain limitations.
 
 As an alternative solution, we can nest generic types within each other, creating a hierarchical structure that allows users to compose them in a fluent manner. This provides the means to achieve much greater customization, while still retaining optimal usability.
