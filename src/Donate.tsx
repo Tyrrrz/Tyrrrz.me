@@ -20,7 +20,10 @@ export default function DonatePage() {
           <Link href="https://buymeacoffee.com/Tyrrrz">BuyMeACoffee</Link> (one-time)
         </li>
         <li>
-          Ethereum: <code>0x4E099F98530a59E2e480707F9FF7648057ccd32c</code>
+          Ethereum: <code>0xE52F3BD5375DB842e20c86f13dE99717929DE730</code>
+        </li>
+        <li>
+          Bitcoin: <code>3HtgWiio8fzMpYTXiZVNrKiQSdXAEf7xet</code>
         </li>
       </ul>
 
