@@ -1,7 +1,7 @@
 {
   "name": "MiniRazor",
   "url": "https://github.com/Tyrrrz/MiniRazor",
-  "description": "Tiny Razor wrapper for non-web apps",
-  "stars": 92,
+  "description": "Portable Razor compiler & code generator",
+  "stars": 119,
   "language": "C#"
 }
