@@ -36,6 +36,7 @@ export default function DonatePage() {
         <li>BouncingWalrus</li>
         <li>Dominic Maas</li>
         <li>Victor Smith</li>
+        <li>CCRed95</li>
         <li>A dude</li>
         <li>Greg Engle</li>
         <li>Samuel Morris</li>
@@ -46,6 +47,7 @@ export default function DonatePage() {
         <li>Michael Dayah</li>
         <li>Sprocketman1981</li>
         <li>Jim Wilson</li>
+        <li>Montegro</li>
       </ul>
     </Page>
   );
