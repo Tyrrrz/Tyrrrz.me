@@ -1,8 +1,7 @@
-import { compareDesc as compareDatesDesc, format as formatDate } from 'date-fns';
+import { compareDesc as compareDatesDesc, format as formatDate, formatDuration } from 'date-fns';
 import { graphql } from 'gatsby';
 import React from 'react';
 import { FiCalendar, FiClock, FiTag } from 'react-icons/fi';
-import { humanizeTimeToRead } from './infra/utils';
 import Link from './shared/Link';
 import Page from './shared/Page';
 
@@ -50,41 +49,41 @@ export default function BlogPage({ data }: BlogPageProps) {
 
   return (
     <Page title="Blog" rssUrl="/blog/rss.xml">
-      <h1 className="title">Blog</h1>
+      <div className="section-header">Blog</div>
 
-      <div className="fs-2 mb-5">
+      <div className="section-prelude">
         If you want to know when I post a new article, follow me on{' '}
         <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or subscribe to the{' '}
         <Link href="/blog/rss.xml">RSS feed</Link> ✨
       </div>
 
-      {blogPostsByYear.map(({ year, blogPosts }, i) => (
-        <div key={year}>
-          <div className={`d-flex align-items-center mb-2 ${i > 0 && 'mt-5'}`}>
-            <div className="fs-3 fw-semi-bold tracking-wide">{year}</div>
-            <hr className="mx-4 my-0" />
+      {blogPostsByYear.map(({ year, blogPosts }) => (
+        <div key={year} className="group">
+          <div className="group-header">
+            <div>{year}</div>
+            <hr className="group-header-line" />
           </div>
 
           {blogPosts.map((blogPost) => (
-            <div key={blogPost.id} className="my-4">
-              <div className="fs-2">
+            <div key={blogPost.id} className="entry">
+              <div className="entry-name">
                 <Link href={`/blog/${blogPost.id}`}>{blogPost.title}</Link>
               </div>
 
-              <div className="mt-1 d-flex flex-wrap fw-light tracking-wide">
-                <div className="mr-3 d-flex align-items-center">
+              <div className="entry-info">
+                <div className="label">
                   <FiCalendar strokeWidth={1} />
-                  <div className="ml-1">{formatDate(blogPost.date, 'dd MMM yyyy')}</div>
+                  <div>{formatDate(blogPost.date, 'dd MMM yyyy')}</div>
                 </div>
 
-                <div className="mr-3 d-flex align-items-center">
+                <div className="label">
                   <FiClock strokeWidth={1} />
-                  <div className="ml-1">{humanizeTimeToRead(blogPost.timeToRead)}</div>
+                  <div>{formatDuration({ minutes: blogPost.timeToRead })} to read</div>
                 </div>
 
-                <div className="d-flex align-items-center">
+                <div className="label">
                   <FiTag strokeWidth={1} />
-                  <div className="ml-1">{blogPost.tags.join(', ')}</div>
+                  <div>{blogPost.tags.join(', ')}</div>
                 </div>
               </div>
             </div>

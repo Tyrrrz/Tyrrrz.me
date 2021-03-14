@@ -49,39 +49,39 @@ export default function TalksPage({ data }: TalksPageProps) {
 
   return (
     <Page title="Talks">
-      <h1 className="title">Talks</h1>
+      <div className="section-header">Talks</div>
 
-      {talksByYear.map(({ year, talks }, i) => (
-        <div key={year}>
-          <div className={`d-flex align-items-center mb-2 ${i > 0 && 'mt-5'}`}>
-            <div className="fs-3 fw-semi-bold tracking-wide">{year}</div>
-            <hr className="mx-4 my-0" />
+      {talksByYear.map(({ year, talks }) => (
+        <div key={year} className="group">
+          <div className="group-header">
+            <div>{year}</div>
+            <hr className="group-header-line" />
           </div>
 
           {talks.map((talk) => (
-            <div key={talk.event + talk.date} className="my-4">
-              <div className="fs-2">
+            <div key={talk.event + talk.date} className="entry">
+              <div className="entry-name">
                 <Link href={talk.recordingUrl || talk.presentationUrl || talk.eventUrl || '#'}>
                   {talk.title}
                 </Link>
               </div>
 
-              <div className="mt-1 d-flex flex-wrap fw-light tracking-wide">
-                <div className="mr-3 d-flex align-items-center">
+              <div className="entry-info">
+                <div className="label">
                   <FiGlobe strokeWidth={1} />
-                  <div className="ml-1">
+                  <div>
                     <Link href={talk.eventUrl}>{talk.event}</Link>
                   </div>
                 </div>
 
-                <div className="mr-3 d-flex align-items-center">
+                <div className="label">
                   <FiCalendar strokeWidth={1} />
-                  <div className="ml-1">{formatDate(talk.date, 'dd MMM yyyy')}</div>
+                  <div>{formatDate(talk.date, 'dd MMM yyyy')}</div>
                 </div>
 
-                <div className="d-flex align-items-center">
+                <div className="label">
                   <FiMessageCircle strokeWidth={1} />
-                  <div className="ml-1">{talk.language}</div>
+                  <div>{talk.language}</div>
                 </div>
               </div>
             </div>

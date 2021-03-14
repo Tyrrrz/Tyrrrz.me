@@ -5,10 +5,11 @@ import Page from './shared/Page';
 export default function Error404Page() {
   return (
     <Page title="Not Found">
-      <h1>Page not found</h1>
-      <p>
+      <div className="section-header">Page not found</div>
+
+      <div className="section-prelude">
         Go to <Link href="/">home page</Link>
-      </p>
+      </div>
     </Page>
   );
 }

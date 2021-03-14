@@ -10,10 +10,10 @@ export default function HomePage() {
 
   return (
     <Page>
-      <figure className="align-center">
+      <figure className="avatar">
         <StaticImage
-          className="radius-50pc"
-          src="images/photo.png"
+          className="avatar-image"
+          src="./images/photo.png"
           width={128}
           height={128}
           placeholder="blurred"
@@ -23,7 +23,7 @@ export default function HomePage() {
 
       <hr />
 
-      <div className="py-2">
+      <div>
         <p>
           Hello! My name is Alexey, also known online as Tyrrrz. I&apos;m a {myAge} y/o software
           developer based in Kyiv, Ukraine.
@@ -42,14 +42,14 @@ export default function HomePage() {
 
       <hr />
 
-      <div className="align-center fs-4">
-        <Link className="button" href="https://github.com/Tyrrrz">
+      <div className="social-links">
+        <Link className="social-link" href="https://github.com/Tyrrrz">
           <FiGithub />
         </Link>
-        <Link className="button" href="https://twitter.com/Tyrrrz">
+        <Link className="social-link" href="https://twitter.com/Tyrrrz">
           <FiTwitter />
         </Link>
-        <Link className="button" href="https://linkedin.com/in/Tyrrrz">
+        <Link className="social-link" href="https://linkedin.com/in/Tyrrrz">
           <FiLinkedin />
         </Link>
       </div>

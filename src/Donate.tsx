@@ -5,12 +5,12 @@ import Page from './shared/Page';
 export default function DonatePage() {
   return (
     <Page title="Donate">
-      <h1>Donate</h1>
+      <div className="section-header">Donate</div>
 
-      <p>
+      <div className="section-prelude">
         If you found any of my projects useful and want to support their development, please
         consider making a donation 🙂
-      </p>
+      </div>
 
       <ul>
         <li>

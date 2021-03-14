@@ -35,30 +35,30 @@ export default function ProjectsPage({ data }: ProjectsPageProps) {
 
   return (
     <Page title="Projects">
-      <h1 className="title">Projects</h1>
+      <div className="section-header">Projects</div>
 
-      <div className="fs-2 mb-5">
+      <div className="section-prelude">
         If you want to support development of my projects, please consider{' '}
         <Link href="/donate">making a donation</Link> 💛
       </div>
 
       {projects.map((project) => (
-        <div key={project.name} className="my-4">
-          <div className="fs-2">
+        <div key={project.name} className="entry">
+          <div className="entry-name">
             <Link href={project.url}>{project.name}</Link>
           </div>
 
-          <div className="mt-1">{project.description}</div>
+          <div className="entry-description">{project.description}</div>
 
-          <div className="mt-1 d-flex flex-wrap fw-thin tracking-wide">
-            <div className="d-flex align-items-center">
+          <div className="entry-info">
+            <div className="label">
               <FiStar strokeWidth={1} fill="#ecc94b" />
-              <div className="ml-1">{project.stars}</div>
+              <div>{project.stars}</div>
             </div>
 
-            <div className="ml-3 d-flex align-items-center">
+            <div className="label">
               <FiPackage strokeWidth={1} />
-              <div className="ml-1">{project.language}</div>
+              <div>{project.language}</div>
             </div>
           </div>
         </div>

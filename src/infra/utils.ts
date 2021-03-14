@@ -15,9 +15,3 @@ export function trimEnd(str: string, end: string) {
 
   return temp;
 }
-
-export function humanizeTimeToRead(timeToReadMins: number) {
-  const timeToReadRoundMins = Math.round(timeToReadMins);
-  const unit = timeToReadRoundMins === 1 ? 'minute' : 'minutes';
-  return `${timeToReadRoundMins} ${unit} to read`;
-}

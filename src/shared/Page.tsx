@@ -63,25 +63,25 @@ function Navigation() {
   return (
     <nav className="navbar">
       <div className="navbar-logo">
-        <Link className="color-inherit decoration-none" href="/">
+        <Link className="navbar-logo-link" href="/">
           Alexey Golub
         </Link>
       </div>
 
       <div className="navbar-links">
-        <Link className="navbar-link" activeClassName="fw-semi-bold" activeExact href="/">
+        <Link className="navbar-link" activeClassName="navbar-link--active" activeExact href="/">
           Home
         </Link>
 
-        <Link className="navbar-link" activeClassName="fw-semi-bold" href="/blog">
+        <Link className="navbar-link" activeClassName="navbar-link--active" href="/blog">
           Blog
         </Link>
 
-        <Link className="navbar-link" activeClassName="fw-semi-bold" href="/projects">
+        <Link className="navbar-link" activeClassName="navbar-link--active" href="/projects">
           Projects
         </Link>
 
-        <Link className="navbar-link" activeClassName="fw-semi-bold" href="/talks">
+        <Link className="navbar-link" activeClassName="navbar-link--active" href="/talks">
           Talks
         </Link>
       </div>
@@ -95,11 +95,11 @@ interface PageProps extends MetaProps {
 
 export default function Page({ children, ...props }: PageProps) {
   return (
-    <div className="container">
+    <div className="page-container">
       <Meta {...props} />
       <Navigation />
 
-      <main className="mb-5">{children}</main>
+      <main>{children}</main>
     </div>
   );
 }

@@ -1,11 +1,11 @@
-import { format as formatDate } from 'date-fns';
+import { format as formatDate, formatDuration } from 'date-fns';
 import { graphql } from 'gatsby';
 import { Disqus } from 'gatsby-plugin-disqus';
 import { GatsbyImage, getSrc } from 'gatsby-plugin-image';
 import 'prismjs/themes/prism-tomorrow.css';
 import React from 'react';
 import { FiCalendar, FiClock, FiTag } from 'react-icons/fi';
-import { getAbsoluteUrl, humanizeTimeToRead } from './infra/utils';
+import { getAbsoluteUrl } from './infra/utils';
 import Link from './shared/Link';
 import Page from './shared/Page';
 import useSiteMetadata from './shared/useSiteMetadata';
@@ -95,27 +95,33 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
       imageUrl={getSrc(coverImage?.gatsbyImageData || coverImageFallback.gatsbyImageData)}
       rssUrl="/blog/rss.xml"
     >
-      <h1>{blogPost.title}</h1>
+      <div className="section-header">{blogPost.title}</div>
 
-      <div className="subtitle d-flex flex-wrap fw-thin tracking-wide">
-        <div className="mr-3 d-flex align-items-center">
+      <div className="section-info">
+        <div className="label">
           <FiCalendar strokeWidth={1} />
-          <div className="ml-1">{formatDate(blogPost.date, 'dd MMM yyyy')}</div>
+          <div>{formatDate(blogPost.date, 'dd MMM yyyy')}</div>
         </div>
 
-        <div className="mr-3 d-flex align-items-center">
+        <div className="label">
           <FiClock strokeWidth={1} />
-          <div className="ml-1">{humanizeTimeToRead(blogPost.timeToRead)}</div>
+          <div>{formatDuration({ minutes: blogPost.timeToRead })} to read</div>
         </div>
 
-        <div className="d-flex align-items-center">
+        <div className="label">
           <FiTag strokeWidth={1} />
-          <div className="ml-1">{blogPost.tags.join(', ')}</div>
+          <div>{blogPost.tags.join(', ')}</div>
         </div>
       </div>
 
+      {coverImage?.gatsbyImageData && (
+        <figure className="section-cover">
+          <GatsbyImage image={coverImage.gatsbyImageData} alt={blogPost.title} />
+        </figure>
+      )}
+
       {blogPost.translations && blogPost.translations.length > 0 && (
-        <div className="mt-1 mb-5">
+        <div className="section-misc">
           Translated by readers into:{' '}
           {blogPost.translations.map((translation) => (
             <Link key={translation.language} href={translation.url}>
@@ -125,17 +131,11 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
         </div>
       )}
 
-      {coverImage?.gatsbyImageData && (
-        <figure className="w-75pc mx-auto my-5">
-          <GatsbyImage image={coverImage.gatsbyImageData} alt={blogPost.title} />
-        </figure>
-      )}
-
       <article dangerouslySetInnerHTML={{ __html: blogPost.html }} />
 
       <hr />
 
-      <div className="px-5 fs-2">
+      <div className="section-postlude">
         Want to know when I post a new article? Follow me on{' '}
         <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or subscribe to the{' '}
         <Link href="/blog/rss.xml">RSS Feed</Link> ✨
