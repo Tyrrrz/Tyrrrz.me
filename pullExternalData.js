@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable @typescript-eslint/no-var-requires */
 // @ts-check
 
@@ -11,10 +10,6 @@ const outputDirPath = path.resolve('./data/projects/');
 async function run() {
   const github = new Octokit();
 
-  /**
-   * @typedef {import('@octokit/types').ReposListForOrgResponseData} ReposList
-   * @type {import('@octokit/types').OctokitResponse<ReposList>}
-   */
   const { data: repos } = await github.repos.listForUser({
     username: 'Tyrrrz',
     type: 'owner',
@@ -27,7 +22,7 @@ async function run() {
       name: repo.name,
       url: repo.html_url,
       description: repo.description,
-      stars: repo.stargazers_count,
+      stars: repo.stargazers_count || 0,
       language: repo.language
     }))
     .filter((project) => project.stars >= 35);

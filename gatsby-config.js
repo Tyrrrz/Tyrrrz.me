@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable @typescript-eslint/camelcase */
 // @ts-check
 
 // ---
@@ -44,10 +43,10 @@ module.exports = {
       path: './data/'
     }),
 
-    // Source: file system (static)
+    // Source: file system (images)
     resolvePlugin('gatsby-source-filesystem', {
-      name: 'static',
-      path: './static/'
+      name: 'images',
+      path: './src/images/'
     }),
 
     // Transform: images
@@ -83,9 +82,9 @@ module.exports = {
     resolvePlugin('gatsby-plugin-feed', {
       feeds: [
         {
-          // @ts-expect-error
+          // @ts-expect-error: I have no idea what the type is
           serialize: ({ query: { allMarkdownRemark } }) => {
-            // @ts-expect-error
+            // @ts-expect-error: I have no idea what the type is
             return allMarkdownRemark.edges.map((edge) => ({
               ...edge.node.frontmatter,
               description: edge.node.excerpt,
@@ -122,7 +121,7 @@ module.exports = {
       short_name: 'Tyrrrzme',
       theme_color: '#343838',
       background_color: '#343838',
-      icon: './static/favicon.png',
+      icon: './src/images/favicon.png',
       start_url: '/',
       display: 'browser'
     }),
@@ -144,6 +143,7 @@ module.exports = {
     resolvePlugin('gatsby-plugin-netlify'),
 
     // Misc plugins/dependencies
+    resolvePlugin('gatsby-plugin-image'),
     resolvePlugin('gatsby-plugin-sharp'),
     resolvePlugin('gatsby-plugin-react-helmet'),
     resolvePlugin('gatsby-plugin-catch-links'),

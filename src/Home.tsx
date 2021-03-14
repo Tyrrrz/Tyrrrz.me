@@ -1,34 +1,24 @@
-import { graphql } from 'gatsby';
-import Img from 'gatsby-image';
+import { StaticImage } from 'gatsby-plugin-image';
 import moment from 'moment';
 import React from 'react';
 import { FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
 import Link from './shared/Link';
 import Page from './shared/Page';
 
-export const query = graphql`
-  query {
-    file(relativePath: { eq: "photo.png" }) {
-      childImageSharp {
-        fixed(width: 128) {
-          ...GatsbyImageSharpFixed
-        }
-      }
-    }
-  }
-`;
-
-interface HomePageProps {
-  data: { file: GatsbyTypes.File };
-}
-
-export default function HomePage({ data }: HomePageProps) {
+export default function HomePage() {
   const myAge = moment().diff(moment('1995-04-28'), 'years');
 
   return (
     <Page>
       <figure className="align-center">
-        <Img className="radius-50pc" fixed={data.file?.childImageSharp?.fixed!} />
+        <StaticImage
+          className="radius-50pc"
+          src="images/photo.png"
+          width={128}
+          height={128}
+          placeholder="blurred"
+          alt="Alexey Golub"
+        />
       </figure>
 
       <hr />

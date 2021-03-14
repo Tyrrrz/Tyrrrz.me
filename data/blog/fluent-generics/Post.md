@@ -63,7 +63,7 @@ At this point you may be curious how is any of that related to generics. After a
 
 Well, the connection lies in the fact that **generics are also just functions, except for types**. In fact, you may consider a generic type as a special higher-order construct that resolves to a regular type after you supply it with the required generic arguments. This is analogous to the relationship between functions and values, where a function needs to be provided with the corresponding arguments to resolve to a concrete value.
 
-Because of their similarity, generic types may also sometimes suffer from the same design issues. To illustrate this, let's imagine we're building a web framework and want to define an `Endpoint` interface, responsible for mapping deserialized requests into corresponding response objects.
+Because of their similarity, generic types may also sometimes suffer from the same design issues. To illustrate this, let's imagine we're building a web framework and want to define an `Endpoint` interface responsible for mapping deserialized requests into corresponding response objects.
 
 Such a type can be modeled using the following signature:
 

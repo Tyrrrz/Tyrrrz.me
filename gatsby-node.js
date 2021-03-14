@@ -10,7 +10,7 @@ module.exports = {
   onCreateNode: ({ actions, node }) => {
     if (node.internal.type === 'MarkdownRemark') {
       // Add slug to markdown files
-      // @ts-expect-error
+      // @ts-expect-error: node.fileAbsolutePath is unknown
       const value = path.basename(path.dirname(node.fileAbsolutePath));
 
       actions.createNodeField({
@@ -80,8 +80,12 @@ module.exports = {
     const blogPostConnection = queryResult.data.allMarkdownRemark;
 
     blogPostConnection.nodes.forEach((node) => {
-      // @ts-expect-error
+      if (!node.fields) {
+        return;
+      }
+
       const slug = node.fields.slug;
+
       const coverImagePath = `blog/${slug}/Cover.png`;
 
       actions.createPage({

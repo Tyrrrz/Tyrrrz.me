@@ -38,7 +38,9 @@ We still need to set the value for the third required parameter, `currency`. I'm
 
 Our final URL with all the parameters set should look like this:
 
-`http://steamcommunity.com/market/priceoverview/?market_hash_name=AK-47%20%7C%20Redline%20%28Field-Tested%29&appid=730&currency=1`
+```text
+http://steamcommunity.com/market/priceoverview/?market_hash_name=AK-47%20%7C%20Redline%20%28Field-Tested%29&appid=730&currency=1
+```
 
 If we send a GET request with this URL we will get a response such as this one:
 
@@ -84,7 +86,9 @@ By setting `start` to `0` and `count` to `1` we are limiting the response to one
 
 Finally, the fully formed URL should look something like this:
 
-`http://steamcommunity.com/market/listings/730/AK-47%20%7C%20Redline%20%28Field-Tested%29/render?start=0&count=1&currency=1&format=json`
+```text
+http://steamcommunity.com/market/listings/730/AK-47%20%7C%20Redline%20%28Field-Tested%29/render?start=0&count=1&currency=1&format=json
+```
 
 A GET request with this URL will return a rather large JSON response that contains raw HTML inside (I truncated most of it for brevity):
 
@@ -100,7 +104,9 @@ A GET request with this URL will return a rather large JSON response that contai
 
 To get the image, we need to parse the HTML inside `results_html` and find an `<img>` element with `class="market_listing_item_img"`. We can do that by querying the DOM with a CSS selector `img.market_listing_item_img`. The URL, which is the value of `src` attribute, should look like this:
 
-`http://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpKKqPrxN7LEmyVQ7MEpiLuSrYmnjQO3-UdsZGHyd4_Bd1RvNQ7T_FDrw-_ng5Pu75iY1zI97bhLsvQz/62fx62f/`
+```text
+http://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpKKqPrxN7LEmyVQ7MEpiLuSrYmnjQO3-UdsZGHyd4_Bd1RvNQ7T_FDrw-_ng5Pu75iY1zI97bhLsvQz/62fx62f/
+```
 
 ![AK 47 | Redline](https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpKKqPrxN7LEmyVQ7MEpiLuSrYmnjQO3-UdsZGHyd4_Bd1RvNQ7T_FDrw-_ng5Pu75iY1zI97bhLsvQz/256fx128f/)
 

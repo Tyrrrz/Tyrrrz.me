@@ -1,6 +1,6 @@
 import { graphql } from 'gatsby';
-import Img from 'gatsby-image';
 import { Disqus } from 'gatsby-plugin-disqus';
+import { GatsbyImage, getSrc } from 'gatsby-plugin-image';
 import moment from 'moment';
 import 'prismjs/themes/prism-tomorrow.css';
 import React from 'react';
@@ -31,19 +31,12 @@ export const query = graphql`
     }
     cover: file(relativePath: { eq: $coverImagePath }) {
       childImageSharp {
-        fluid(maxWidth: 1024, quality: 100) {
-          ...GatsbyImageSharpFluid
-        }
-        original {
-          src
-        }
+        gatsbyImageData(layout: CONSTRAINED, width: 1024, quality: 100, placeholder: BLURRED)
       }
     }
     coverFallback: file(relativePath: { eq: "blog-cover-fallback.png" }) {
       childImageSharp {
-        original {
-          src
-        }
+        gatsbyImageData(layout: CONSTRAINED, width: 1024, quality: 100, placeholder: BLURRED)
       }
     }
   }
@@ -99,7 +92,7 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
       title={blogPost.title}
       description={blogPost.excerpt}
       keywords={blogPost.tags}
-      imageUrl={coverImage?.original?.src || coverImageFallback?.original?.src}
+      imageUrl={getSrc(coverImage?.gatsbyImageData || coverImageFallback.gatsbyImageData)}
       rssUrl="/blog/rss.xml"
     >
       <h1>{blogPost.title}</h1>
@@ -132,9 +125,9 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
         </div>
       )}
 
-      {coverImage?.fluid && (
+      {coverImage?.gatsbyImageData && (
         <figure className="w-75pc mx-auto my-5">
-          <Img fluid={coverImage.fluid} alt={blogPost.title} />
+          <GatsbyImage image={coverImage.gatsbyImageData} alt={blogPost.title} />
         </figure>
       )}
 
