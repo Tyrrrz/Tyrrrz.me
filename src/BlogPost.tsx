@@ -1,7 +1,7 @@
+import { format as formatDate } from 'date-fns';
 import { graphql } from 'gatsby';
 import { Disqus } from 'gatsby-plugin-disqus';
 import { GatsbyImage, getSrc } from 'gatsby-plugin-image';
-import moment from 'moment';
 import 'prismjs/themes/prism-tomorrow.css';
 import React from 'react';
 import { FiCalendar, FiClock, FiTag } from 'react-icons/fi';
@@ -73,7 +73,7 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
   const blogPost = {
     id: data.markdownRemark.fields?.slug!,
     title: data.markdownRemark.frontmatter?.title!,
-    date: moment(data.markdownRemark.frontmatter?.date!),
+    date: new Date(data.markdownRemark.frontmatter?.date!),
     tags: data.markdownRemark.frontmatter?.tags?.map((tag) => tag!)!,
     translations: data.markdownRemark.frontmatter?.translations?.map((translation) => ({
       language: translation?.language!,
@@ -100,7 +100,7 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
       <div className="subtitle d-flex flex-wrap fw-thin tracking-wide">
         <div className="mr-3 d-flex align-items-center">
           <FiCalendar strokeWidth={1} />
-          <div className="ml-1">{blogPost.date.format('DD MMM yyyy')}</div>
+          <div className="ml-1">{formatDate(blogPost.date, 'dd MMM yyyy')}</div>
         </div>
 
         <div className="mr-3 d-flex align-items-center">

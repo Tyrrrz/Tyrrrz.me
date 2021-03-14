@@ -1,12 +1,12 @@
+import { differenceInYears } from 'date-fns';
 import { StaticImage } from 'gatsby-plugin-image';
-import moment from 'moment';
 import React from 'react';
 import { FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
 import Link from './shared/Link';
 import Page from './shared/Page';
 
 export default function HomePage() {
-  const myAge = moment().diff(moment('1995-04-28'), 'years');
+  const myAge = differenceInYears(new Date(), new Date(1995, 3, 28));
 
   return (
     <Page>

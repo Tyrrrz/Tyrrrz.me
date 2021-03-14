@@ -1,5 +1,5 @@
+import { compareDesc as compareDatesDesc, format as formatDate } from 'date-fns';
 import { graphql } from 'gatsby';
-import moment from 'moment';
 import React from 'react';
 import { FiCalendar, FiGlobe, FiMessageCircle } from 'react-icons/fi';
 import Link from './shared/Link';
@@ -30,21 +30,21 @@ export default function TalksPage({ data }: TalksPageProps) {
     .map((node) => ({
       title: node.title!,
       event: node.event!,
-      date: moment(node.date!),
+      date: new Date(node.date!),
       language: node.language!,
       eventUrl: node.eventUrl!,
       presentationUrl: node.presentationUrl,
       recordingUrl: node.recordingUrl
     }))
-    .sort((a, b) => b.date.unix() - a.date.unix());
+    .sort((a, b) => compareDatesDesc(a.date, b.date));
 
-  const years = [...new Set(talks.map((talk) => talk.date.year()))];
+  const years = [...new Set(talks.map((talk) => talk.date.getFullYear()))];
 
   const talksByYear = years
     .sort((a, b) => b - a)
     .map((year) => ({
       year,
-      talks: talks.filter((talk) => talk.date.year() === year)
+      talks: talks.filter((talk) => talk.date.getFullYear() === year)
     }));
 
   return (
@@ -76,7 +76,7 @@ export default function TalksPage({ data }: TalksPageProps) {
 
                 <div className="mr-3 d-flex align-items-center">
                   <FiCalendar strokeWidth={1} />
-                  <div className="ml-1">{talk.date.format('DD MMM yyyy')}</div>
+                  <div className="ml-1">{formatDate(talk.date, 'dd MMM yyyy')}</div>
                 </div>
 
                 <div className="d-flex align-items-center">

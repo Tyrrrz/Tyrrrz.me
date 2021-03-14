@@ -1,5 +1,5 @@
+import { compareDesc as compareDatesDesc, format as formatDate } from 'date-fns';
 import { graphql } from 'gatsby';
-import moment from 'moment';
 import React from 'react';
 import { FiCalendar, FiClock, FiTag } from 'react-icons/fi';
 import { humanizeTimeToRead } from './infra/utils';
@@ -33,19 +33,19 @@ export default function BlogPage({ data }: BlogPageProps) {
     .map((node) => ({
       id: node.fields?.slug!,
       title: node.frontmatter?.title!,
-      date: moment(node.frontmatter?.date!),
+      date: new Date(node.frontmatter?.date!),
       tags: node.frontmatter?.tags?.map((tag) => tag!)!,
       timeToRead: node.timeToRead!
     }))
-    .sort((a, b) => b.date.unix() - a.date.unix());
+    .sort((a, b) => compareDatesDesc(a.date, b.date));
 
-  const years = [...new Set(blogPosts.map((blogPost) => blogPost.date.year()))];
+  const years = [...new Set(blogPosts.map((blogPost) => blogPost.date.getFullYear()))];
 
   const blogPostsByYear = years
     .sort((a, b) => b - a)
     .map((year) => ({
       year,
-      blogPosts: blogPosts.filter((blogPost) => blogPost.date.year() === year)
+      blogPosts: blogPosts.filter((blogPost) => blogPost.date.getFullYear() === year)
     }));
 
   return (
@@ -74,7 +74,7 @@ export default function BlogPage({ data }: BlogPageProps) {
               <div className="mt-1 d-flex flex-wrap fw-light tracking-wide">
                 <div className="mr-3 d-flex align-items-center">
                   <FiCalendar strokeWidth={1} />
-                  <div className="ml-1">{blogPost.date.format('DD MMM yyyy')}</div>
+                  <div className="ml-1">{formatDate(blogPost.date, 'dd MMM yyyy')}</div>
                 </div>
 
                 <div className="mr-3 d-flex align-items-center">
