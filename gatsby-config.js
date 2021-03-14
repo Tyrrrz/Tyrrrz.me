@@ -2,7 +2,7 @@
 // @ts-check
 
 // ---
-const siteUrl = process.env['URL'] || 'http://localhost:8000';
+const siteUrl = process.env['SITE_URL'] || 'http://localhost:8000';
 const disqusId = process.env['TYRRRZME_DISQUS'];
 const googleAnalyticsId = process.env['TYRRRZME_GOOGLEANALYTICS'];
 // ---
