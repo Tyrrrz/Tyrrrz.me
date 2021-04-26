@@ -26,7 +26,9 @@ export default function HomePage() {
       <div>
         <p>
           Hello! My name is Alexey, also known online as Tyrrrz. I&apos;m a {myAge} y/o software
-          developer based in Kyiv, Ukraine.
+          developer based in Kyiv, Ukraine. I&apos;m also a{' '}
+          <Link href="https://mvp.microsoft.com/en-us/PublicProfile/5004136">Microsoft MVP</Link>{' '}
+          and a <Link href="https://stars.github.com/profiles/tyrrrz">GitHub Star</Link>.
         </p>
         <p>
           Most of my endeavors are in C#, but every now and then I code in F# and TypeScript as
@@ -35,7 +37,7 @@ export default function HomePage() {
         </p>
         <p>
           My professional hobbies involve open source, conference speaking, and blogging. Outside of
-          that I&apos;m also into outdoor photography, playing guitar, and learning foreign
+          that I&apos;m also into outdoor photography, digital art, playing guitar, and foreign
           languages.
         </p>
       </div>
