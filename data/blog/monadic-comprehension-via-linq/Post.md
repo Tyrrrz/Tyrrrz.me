@@ -195,28 +195,28 @@ Think of `from x in y` as "using value x of y" and `select` as "combine".
 
 ```ini
 [ Match first operand ]
-      |
-      +--- < Has value? > --- ( no ) --- [ Exit ]
-                 |
-                 |
-              ( yes )
-                 |
-                 |
-        [ Get second operand ]
-                 |
-                 |
-       [ Match second operand ]
-                 |
-                 +--- < Has value? > --- ( no ) --- [ Exit ]
-                            |
-                            |
-                         ( yes )
-                            |
-                            |
-           [ Compute result from both values ]
-                            |
-                            |
-                  [ Return the result ]
+          |
+          +--- < Has value? > --- ( no )
+                     |              |
+                     |              |
+                  ( yes )        [ Exit ]
+                     |
+                     |
+            [ Get second operand ]
+                     |
+                     |
+           [ Match second operand ]
+                     |
+                     +--- < Has value? > --- ( no )
+                                |              |
+                                |              |
+                             ( yes )        [ Exit ]
+                                |
+                                |
+               [ Compute result from both values ]
+                                |
+                                |
+                      [ Return the result ]
 ```
 
 ```csharp
