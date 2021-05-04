@@ -7,42 +7,44 @@ tags:
   - 'tricks'
 ---
 
-// Outline:
-- LINQ via extension methods
-- LINQ via query syntax
-- How to enable query syntax
-- Using LINQ for Tasks
-- Using LINQ for Option
-- Using LINQ for Task of Option
+If you ask a C# developer to list all the reasons why they enjoy working with the language, they will probably put LINQ somewhere at the top. LINQ is a set of language tools that, in combination with the `IEnumerable<T>` and `IQueryable<T>` interfaces, enable developers to query data from arbitrary data sources in a fluent and (mostly) efficient manner.
 
-LINQ is a...
+As far as the language feature is concerned, LINQ comes in two forms: extension methods from `System.Linq` namespace and the actual language-integrated query syntax that they power. Interestingly enough, the query syntax is rarely used in practice as most developers prefer extension methods due to their flexibility and overall homogeneity with the rest of the language.
 
-Comprehension syntax let us express happy path scenarios, with implicit failure.
+That said, I believe the query syntax is a particularly interesting feature because it allows us to think about operations on data in a clearer way. Some operations, especially those involving collections embedded inside other collections, can appear rather convoluted in their method form, but much more legible when written using query syntax.
 
-## LINQ with Collections
+However, few developers are aware of this, but C#'s query syntax is not actually tied to `IEnumerable<T>` -- it can be extended to work with any other type as well, by implementing a few specific methods. This presents an interesting opportunity where we can use this feature to enhance our own types with custom domain specific language, similar to [https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions](computation expressions in F#) or [`do` notation in Haskell](https://en.wikibooks.org/wiki/Haskell/do_notation).
+
+In this article, I will explain how LINQ's query syntax works and what it takes to enable it for custom types. We will look at some real world scenarios that can benefit from custom query syntax.
+
+## LINQ with collections
 
 ```csharp
-var collection = new[] {1, 2, 3, 4, 5};
-var oddNumbers = collection.Where(i => i % 2 != 0);
+var source = new[] {1, 2, 3, 4, 5};
+
+var output = source
+    .Where(i => i % 2 != 0)
+    .OrderByDescending(i => i);
 ```
 
 ```csharp
-var collection = new[] {1, 2, 3, 4, 5};
-var oddNumbers =
-    from i in collection
+var source = new[] {1, 2, 3, 4, 5};
+
+var output =
+    from i in source
     where i % 2 != 0
+    orderby i descending
     select i;
 ```
 
 ```csharp
-var directories = Directory.EnumerateDirectories("foo/");
-var subdirectories = directories.SelectMany(d => Directory.EnumerateDirectories(d));
+var dirs = Directory.EnumerateDirectories("foo/")
+    .SelectMany(dir => Directory.EnumerateDirectories(dir));
 ```
 
 ```csharp
-var directories = Directory.EnumerateDirectories("foo/");
-var subdirectories =
-    from dir in directories
+var dirs =
+    from dir in Directory.EnumerateDirectories("foo/")
     from subdir in Directory.EnumerateDirectories(dir)
     select subdir;
 ```
@@ -95,6 +97,8 @@ var subdirectories = directories
     .SelectMany(o => Directory.EnumerateDirectories(o.subdir));
 ```
 
+## Query syntax for Task type
+
 ```csharp
 public static class TaskComprehensionExtensions
 {
@@ -126,6 +130,8 @@ public static async Task Main()
 ```
 
 Think of `from x in y` as "from result x of y" and `select` as "return".
+
+## Query syntax for Option type
 
 ```csharp
 public readonly struct Option<T>
@@ -246,6 +252,10 @@ public static void Main()
     );
 }
 ```
+
+Comprehension syntax let us express happy path scenarios, with implicit failure.
+
+## Query syntax for Option inside a Task
 
 ```csharp
 public static class OptionTaskComprehensionExtensions
