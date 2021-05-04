@@ -19,37 +19,49 @@ In this article, I will explain how LINQ's query syntax works and what it takes 
 
 ## LINQ with collections
 
-```csharp
-var source = new[] {1, 2, 3, 4, 5};
-
-var output = source
-    .Where(i => i % 2 != 0)
-    .OrderByDescending(i => i);
-```
+To understand how the internals of LINQ's query syntax, let's start by taking a look at how it works with regular collections. For example, given an array of numbers, we can filter and reorder it using the following expression:
 
 ```csharp
 var source = new[] {1, 2, 3, 4, 5};
 
-var output =
+var result =
     from i in source
     where i % 2 != 0
     orderby i descending
     select i;
 ```
 
+This is effectively identical to the code below, which uses method syntax instead:
+
 ```csharp
-var dirs = Directory.EnumerateDirectories("foo/")
-    .SelectMany(dir => Directory.EnumerateDirectories(dir));
+var source = new[] {1, 2, 3, 4, 5};
+
+var result = source
+    .Where(i => i % 2 != 0)
+    .OrderByDescending(i => i);
 ```
+
+When comparing the two approaches in the above examples, the difference is rather minimal and, in fact, the method syntax probably looks a bit cleaner.
+
+However the query syntax shines in certain scenarios, such as when dealing with sequences nested within other sequences:
 
 ```csharp
 var dirs =
-    from dir in Directory.EnumerateDirectories("foo/")
+    from dir in Directory.EnumerateDirectories("/some/dir/")
     from subdir in Directory.EnumerateDirectories(dir)
-    select subdir;
+    from subdirOfSubdir in Directory.EnumerateDirectories(subdir)
+    select subdirOfSubdir;
 ```
 
-The query syntax works by looking for `Where(...)`, `Select(...)`, `SelectMany(...)` and similar methods.
+```csharp
+var dirs = Directory.EnumerateDirectories("/some/dir/")
+    .SelectMany(dir => Directory.EnumerateDirectories(dir))
+    .SelectMany(subdir => Directory.EnumerateDirectories(subdir));
+```
+
+The query syntax works by looking for `Where(...)`, `OrderBy(...)`, `Select(...)`, `SelectMany(...)` and similar methods.
+
+Below is .NET's implementation of `SelectMany(...)` which is used by the query syntax:
 
 ```csharp
 // https://source.dot.net/#System.Linq/System/Linq/SelectMany.cs,bc79a642e00b8681
@@ -68,6 +80,10 @@ public static IEnumerable<TResult> SelectMany<TSource, TCollection, TResult>(
 }
 ```
 
+## Query syntax for Task type
+
+Can be generalized to this signature:
+
 ```csharp
 public static Container<TResult> SelectMany<TFirst, TSecond, TResult>(
     this Container<TFirst> first, // first operand
@@ -85,48 +101,27 @@ public static Container<TResult> SelectMany<TFirst, TSecond, TResult>(
 ```
 
 ```csharp
-var subdirectories =
-    from dir in directories
-    from subdir in Directory.EnumerateDirectories(dir)
-    from subdirOfSubdir in Directory.EnumerateDirectories(subdir)
-    select subdirOfSubdir;
-
-// Equivalent to:
-var subdirectories = directories
-    .SelectMany(dir => Directory.EnumerateDirectories(dir), (dir, subdir) => new {dir, subdir})
-    .SelectMany(o => Directory.EnumerateDirectories(o.subdir));
-```
-
-## Query syntax for Task type
-
-```csharp
-public static class TaskComprehensionExtensions
+public static async Task<TOut> SelectMany<TFirst, TSecond, TResult>(
+    this Task<TFirst> first,
+    Func<TFirst, Task<TSecond>> getSecond,
+    Func<TFirst, TSecond, TResult> getResult)
 {
-    public static async Task<TOut> SelectMany<TFirst, TSecond, TResult>(
-        this Task<TFirst> first,
-        Func<TFirst, Task<TSecond>> getSecond,
-        Func<TFirst, TSecond, TResult> getResult)
-    {
-        var firstResult = await first;
-        var secondResult = await getSecond(firstResult);
-        return getResult(firstResult, secondResult);
-    }
+    var firstResult = await first;
+    var secondResult = await getSecond(firstResult);
+    return getResult(firstResult, secondResult);
 }
 ```
 
 ```csharp
-public static async Task Main()
-{
-    var task =
-        from first in Task.Run(() => 1 + 1)
-        from second in Task.Run(() => 2 + 2)
-        select first + second;
+var task =
+    from first in Task.Run(() => 1 + 1)
+    from second in Task.Run(() => 2 + 2)
+    select first + second;
 
-    var result = await task;
+var result = await task;
 
-    // Prints "6"
-    Console.WriteLine(result);
-}
+// Prints "6"
+Console.WriteLine(result);
 ```
 
 Think of `from x in y` as "from result x of y" and `select` as "return".
@@ -165,29 +160,26 @@ public readonly struct Option<T>
 ```
 
 ```csharp
-public static class OptionComprehensionExtensions
+public static Option<TResult> SelectMany<TFirst, TSecond, TResult>(
+    this Option<TFirst> first,
+    Func<TFirst, Option<TSecond>> getSecond,
+    Func<TFirst, TSecond, TResult> getResult)
 {
-    public static Option<TResult> SelectMany<TFirst, TSecond, TResult>(
-        this Option<TFirst> first,
-        Func<TFirst, Option<TSecond>> getSecond,
-        Func<TFirst, TSecond, TResult> getResult)
-    {
-        return first.Match(
+    return first.Match(
 
-            // First operand has value - continue to the second operand
-            firstValue => getSecond(firstValue).Match(
+        // First operand has value - continue to the second operand
+        firstValue => getSecond(firstValue).Match(
 
-                // Second operand has value - get the result from the first and second operands
-                secondValue => Option<TResult>.Some(getResult(firstValue, secondValue)),
+            // Second operand has value - get the result from the first and second operands
+            secondValue => Option<TResult>.Some(getResult(firstValue, secondValue)),
 
-                // Second operand is empty - exit
-                () => Option<TResult>.None()
-            ),
-
-            // First operand is empty - exit
+            // Second operand is empty - exit
             () => Option<TResult>.None()
-        );
-    }
+        ),
+
+        // First operand is empty - exit
+        () => Option<TResult>.None()
+    );
 }
 ```
 
@@ -220,37 +212,36 @@ Think of `from x in y` as "using value x of y" and `select` as "combine".
 ```
 
 ```csharp
-private static Option<int> ParseInt(string str) =>
+public static Option<int> ParseInt(string str) =>
     int.TryParse(str, out var result)
         ? Option<int>.Some(result)
         : Option<int>.None();
+```
 
-public static void Main()
-{
-    var result1 =
-        from first in ParseInt("5")
-        from second in ParseInt("2")
-        select first + second;
+```csharp
+var result =
+    from first in ParseInt("5")
+    from second in ParseInt("2")
+    select first + second;
 
-    // Prints "7"
-    result1.Match(
-        value => Console.WriteLine(value),
-        () => Console.WriteLine("Parsing error")
-    );
+// Prints "7"
+result.Match(
+    value => Console.WriteLine(value),
+    () => Console.WriteLine("Parsing error")
+);
+```
 
-    // ------------------------------
+```csharp
+var result =
+    from first in ParseInt("foo") // this will fail
+    from second in ParseInt("2")
+    select first + second;
 
-    var result2 =
-        from first in ParseInt("foo") // this will fail
-        from second in ParseInt("2")
-        select first + second;
-
-    // Prints "Parsing error"
-    result2.Match(
-        value => Console.WriteLine(value),
-        () => Console.WriteLine("Parsing error")
-    );
-}
+// Prints "Parsing error"
+result.Match(
+    value => Console.WriteLine(value),
+    () => Console.WriteLine("Parsing error")
+);
 ```
 
 Comprehension syntax let us express happy path scenarios, with implicit failure.
@@ -284,64 +275,76 @@ public static class OptionTaskComprehensionExtensions
 ```
 
 ```csharp
-static async Task<Option<string>> GetIbanAsync(string userEmail)
+public class PaymentProcessor
 {
-    // Pretend that we are talking to some external server or database here
-    await Task.Delay(1000);
-
-    var userIbans = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    public async Task<Option<string>> GetIbanAsync(string userEmail)
     {
-        ["levi@gmail.com"] = "NL18INGB9971485915",
-        ["olena@hotmail.com"] = "UA131174395738584578471957518"
-    };
+        // Pretend that we are talking to some external server or database here
+        await Task.Delay(1000);
 
-    if (userIbans.TryGetValue(userEmail, out var iban))
-    {
-        return Option<string>.Some(iban);
+        var userIbans = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["levi@gmail.com"] = "NL18INGB9971485915",
+            ["olena@hotmail.com"] = "UA131174395738584578471957518"
+        };
+
+        if (userIbans.TryGetValue(userEmail, out var iban))
+        {
+            return Option<string>.Some(iban);
+        }
+
+        return Option<string>.None();
     }
 
-    return Option<string>.None();
-}
+    public async Task<Option<Guid>> SendPaymentAsync(
+        string ibanFrom,
+        string ibanTo,
+        decimal amount)
+    {
+        // Again, sending payments through a very real payment gateway
+        await Task.Delay(1000);
 
-static async Task<Option<Guid>> SendPaymentAsync(string ibanFrom, string ibanTo, decimal amount)
-{
-    // Again, sending payments through a very real payment gateway
-    await Task.Delay(1000);
-
-    // This method doesn't have any checks, just to show that the
-    // execution won't even reach it in case one of the earlier
-    // steps have failed.
-    return Option<Guid>.Some(Guid.NewGuid());
-}
-
-static async Task Main(string[] args)
-{
-    var result1 = await
-        from leviIban in GetIbanAsync("levi@gmail.com")
-        from olenaIban in GetIbanAsync("olena@hotmail.com")
-        from paymentId in SendPaymentAsync(leviIban, olenaIban, 100)
-        select paymentId;
-
-    // Prints "d56a5b86-f55b-4707-be4f-138a19272f47"
-    result1.Match(
-        value => Console.WriteLine(value),
-        () => Console.WriteLine("Failed to send payment")
-    );
-
-    // ------------------------------
-
-    var result2 = await
-        from joshIban in GetIbanAsync("josh@yahoo.com") // this will fail
-        from olenaIban in GetIbanAsync("olena@hotmail.com")
-        from paymentId in SendPaymentAsync(joshIban, olenaIban, 100)
-        select paymentId;
-
-    // Prints "Failed to send payment"
-    result2.Match(
-        value => Console.WriteLine(value),
-        () => Console.WriteLine("Failed to send payment")
-    );
+        // This method doesn't have any checks, just to show that the
+        // execution won't even reach here in case one of the earlier
+        // steps have failed.
+        return Option<Guid>.Some(Guid.NewGuid());
+    }
 }
 ```
 
+```csharp
+var paymentProcessor = new PaymentProcessor();
+
+// Note the `await` in the beginning of the expression
+var result = await
+    from leviIban in paymentProcessor.GetIbanAsync("levi@gmail.com")
+    from olenaIban in paymentProcessor.GetIbanAsync("olena@hotmail.com")
+    from paymentId in paymentProcessor.SendPaymentAsync(leviIban, olenaIban, 100)
+    select paymentId;
+
+// Prints "d56a5b86-f55b-4707-be4f-138a19272f47"
+result.Match(
+    value => Console.WriteLine(value),
+    () => Console.WriteLine("Failed to send payment")
+);
+```
+
+```csharp
+var paymentProcessor = new PaymentProcessor();
+
+var result = await
+    from joshIban in paymentProcessor.GetIbanAsync("josh@yahoo.com") // this will fail
+    from olenaIban in paymentProcessor.GetIbanAsync("olena@hotmail.com")
+    from paymentId in paymentProcessor.SendPaymentAsync(joshIban, olenaIban, 100)
+    select paymentId;
+
+// Prints "Failed to send payment"
+result.Match(
+    value => Console.WriteLine(value),
+    () => Console.WriteLine("Failed to send payment")
+);
+```
+
 ## Summary
+
+Failure short-circuiting without using exceptions.
