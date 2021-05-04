@@ -389,3 +389,5 @@ paymentId.Match(
 ## Summary
 
 Failure short-circuiting without using exceptions.
+
+More in depth: https://weblogs.asp.net/dixin/Tags/Category%20Theory
