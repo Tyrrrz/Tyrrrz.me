@@ -13,7 +13,7 @@ As far as the language feature is concerned, LINQ comes in two forms: extension 
 
 That said, I believe the query syntax is a particularly interesting feature because it allows us to think about operations on data in a clearer way. Some operations, especially those involving collections embedded inside other collections, can appear rather convoluted in their method form, but much more legible when written using query syntax.
 
-However, few developers are aware of this, but C#'s query syntax is not actually tied to `IEnumerable<T>` -- it can be extended to work with any other type as well, by implementing a few specific methods. This presents an interesting opportunity where we can use this feature to enhance our own types with custom domain specific language, similar to [https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions](computation expressions in F#) or [`do` notation in Haskell](https://en.wikibooks.org/wiki/Haskell/do_notation).
+However, few developers are aware of this, but C#'s query syntax is not actually tied to `IEnumerable<T>` -- it can be extended to work with any other type as well, by implementing a few specific methods. This presents an interesting opportunity where we can use this feature to enhance our own types with custom domain specific language, similar to [computation expressions in F#](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions) or [`do` notation in Haskell](https://en.wikibooks.org/wiki/Haskell/do_notation).
 
 In this article, I will explain how LINQ's query syntax works and what it takes to enable it for custom types. We will look at some real world scenarios that can benefit from custom query syntax.
 
@@ -126,6 +126,10 @@ Console.WriteLine(result);
 
 Think of `from x in y` as "from result x of y" and `select` as "return".
 
+This is not particularly useful because we already have `async`/`await` which already fulfills the role of comprehension syntax for `Task<T>`. If all we had was `ContinueWith(...)` then this would have been a different story.
+
+That said, let's look at how we can utilize query syntax for something a bit more interesting.
+
 ## Query syntax for Option type
 
 ```csharp
@@ -183,7 +187,7 @@ public static Option<TResult> SelectMany<TFirst, TSecond, TResult>(
 }
 ```
 
-Think of `from x in y` as "using value x of y" and `select` as "combine".
+Above logic may be better explained with a flowchart:
 
 ```ini
 [ Match first operand ]
@@ -244,33 +248,32 @@ result.Match(
 );
 ```
 
+Think of `from x in y` as "using value x of y" and `select` as "combine".
+
 Comprehension syntax let us express happy path scenarios, with implicit failure.
 
 ## Query syntax for Option inside a Task
 
 ```csharp
-public static class OptionTaskComprehensionExtensions
+public static async Task<Option<TResult>> SelectMany<TFirst, TSecond, TResult>(
+    this Task<Option<TFirst>> first,
+    Func<TFirst, Task<Option<TSecond>>> getSecond,
+    Func<TFirst, TSecond, TResult> getResult)
 {
-    public static async Task<Option<TResult>> SelectMany<TFirst, TSecond, TResult>(
-        this Task<Option<TFirst>> first,
-        Func<TFirst, Task<Option<TSecond>>> getSecond,
-        Func<TFirst, TSecond, TResult> getResult)
-    {
-        var firstOption = await first;
+    var firstOption = await first;
 
-        return await firstOption.Match(
-            async firstValue =>
-            {
-                var secondOption = await getSecond(firstValue);
+    return await firstOption.Match(
+        async firstValue =>
+        {
+            var secondOption = await getSecond(firstValue);
 
-                return secondOption.Match(
-                    secondValue => Option<TResult>.Some(getResult(firstValue, secondValue)),
-                    () => Option<TResult>.None()
-                );
-            },
-            () => Task.FromResult(Option<TResult>.None())
-        );
-    }
+            return secondOption.Match(
+                secondValue => Option<TResult>.Some(getResult(firstValue, secondValue)),
+                () => Option<TResult>.None()
+            );
+        },
+        () => Task.FromResult(Option<TResult>.None())
+    );
 }
 ```
 
