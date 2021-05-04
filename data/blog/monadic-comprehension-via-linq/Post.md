@@ -7,19 +7,19 @@ tags:
   - 'tricks'
 ---
 
-If you ask a C# developer to list all the reasons why they enjoy working with the language, they will probably put LINQ somewhere at the top. LINQ is a set of language tools that, in combination with the `IEnumerable<T>` and `IQueryable<T>` interfaces, enable developers to query data from arbitrary data sources in a fluent and (mostly) efficient manner.
+If you ask a C# developer to list all the reasons why they enjoy working with the language, they will probably put LINQ somewhere at the top. LINQ is a set of language tools that, in combination with the `IEnumerable<T>` and `IQueryable<T>` interfaces, enable developers to query data from arbitrary sources in a fluent, lazy, and efficient manner.
 
-As far as the language feature is concerned, LINQ comes in two forms: extension methods from `System.Linq` namespace and the actual language-integrated query syntax that they power. Interestingly enough, the query syntax is rarely used in practice as most developers prefer extension methods due to their flexibility and overall homogeneity with the rest of the language.
+LINQ itself comes in two forms: extension methods from `System.Linq` namespace and the actual language-integrated query syntax that they power. Interestingly enough, the query syntax is rarely used in practice as most developers prefer extension methods due to their flexibility and overall homogeneity with the rest of the language.
 
 That said, I believe the query syntax is a particularly interesting feature because it allows us to think about operations on data in a clearer way. Some operations, especially those involving collections embedded inside other collections, can appear rather convoluted in their method form, but much more legible when written using query syntax.
 
-However, few developers are aware of this, but C#'s query syntax is not actually tied to `IEnumerable<T>` -- it can be extended to work with any other type as well, by implementing a few specific methods. This presents an interesting opportunity where we can use this feature to enhance our own types with custom domain specific language, similar to [computation expressions in F#](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions) or [`do` notation in Haskell](https://en.wikibooks.org/wiki/Haskell/do_notation).
+However, few developers are aware of this, but C#'s query syntax is not actually tied to a particular interface -- it can be extended to work with any other type as well, by implementing a few specific methods. This presents an interesting opportunity where we can use this feature to enhance our own types with custom domain specific language, similar to [computation expressions in F#](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions) or [`do` notation in Haskell](https://en.wikibooks.org/wiki/Haskell/do_notation).
 
 In this article, I will explain how LINQ's query syntax works and what it takes to enable it for custom types. We will look at some real world scenarios that can benefit from custom query syntax.
 
 ## LINQ with collections
 
-To understand how the internals of LINQ's query syntax, let's start by taking a look at how it works with regular collections. For example, given an array of numbers, we can filter and reorder it using the following expression:
+To understand the internals of LINQ's query syntax, let's start by taking a look at how it works with regular collections. For example, given an array of numbers, we can filter and reorder it using the following expression:
 
 ```csharp
 var source = new[] {1, 2, 3, 4, 5};
@@ -31,7 +31,7 @@ var result =
     select i;
 ```
 
-This is effectively identical to the code below, which uses method syntax instead:
+This is effectively identical to the code below, which uses the more common method syntax instead:
 
 ```csharp
 var source = new[] {1, 2, 3, 4, 5};
@@ -41,9 +41,9 @@ var result = source
     .OrderByDescending(i => i);
 ```
 
-When comparing the two approaches in the above examples, the difference is rather minimal and, in fact, the method syntax probably looks a bit cleaner.
+If we were to compare the two approaches, there's not much that can be said in favor of the query syntax. It's more noisy, takes up more lines, looks foreign, and doesn't really achieve anything beyond what LINQ's extension methods can already do.
 
-However the query syntax shines in certain scenarios, such as when dealing with sequences nested within other sequences:
+There are also cases where the query syntax can lead to more appealing code, however. For example, consider the following scenario where we can use expression syntax to query directories within other directories:
 
 ```csharp
 var dirs =
@@ -52,6 +52,8 @@ var dirs =
     from subdirOfSubdir in Directory.EnumerateDirectories(subdir)
     select subdirOfSubdir;
 ```
+
+Compare that with the method form, which is structurally very different:
 
 ```csharp
 var dirs = Directory.EnumerateDirectories("/some/dir/")
@@ -100,6 +102,8 @@ public static Container<TResult> SelectMany<TFirst, TSecond, TResult>(
 */
 ```
 
+In essence, this method works with three generic arguments, `TFirst` representing the type of the first `from` expression, `TSecond` representing the type of the second `from` expression, and `TResult` which is the type of the output value produced by `select`. It takes the first operand, uses it to resolve the second, and finally applies a function to reduce them to a single result.
+
 ```csharp
 public static async Task<TOut> SelectMany<TFirst, TSecond, TResult>(
     this Task<TFirst> first,
@@ -111,6 +115,8 @@ public static async Task<TOut> SelectMany<TFirst, TSecond, TResult>(
     return getResult(firstResult, secondResult);
 }
 ```
+
+The extension method we implemented allows us to use query syntax with tasks to write code like this:
 
 ```csharp
 var task =
@@ -124,13 +130,19 @@ var result = await task;
 Console.WriteLine(result);
 ```
 
-Think of `from x in y` as "from result x of y" and `select` as "return".
+All this does is create two tasks and combine them into a third task.
 
 This is not particularly useful because we already have `async`/`await` which already fulfills the role of comprehension syntax for `Task<T>`. If all we had was `ContinueWith(...)` then this would have been a different story.
 
 That said, let's look at how we can utilize query syntax for something a bit more interesting.
 
 ## Query syntax for Option type
+
+Different programming paradigms utilize different ways of handling and representing failures. Object-oriented languages traditionally employ exceptions and `try`/`catch` blocks for this purpose.
+
+However, exceptions are not encoded in method signatures in C# which makes them impractical in certain scenarios. As an alternative, it's a common approach to use an `Option<T>` type to represent a container that may or may not contain a value.
+
+This is how we may design a simple but safe option type in C#:
 
 ```csharp
 public readonly struct Option<T>
@@ -163,6 +175,41 @@ public readonly struct Option<T>
 }
 ```
 
+Note that this container does not expose a way to retrieve the value directly, but instead provides the `Match(...)` method that can be used to unwrap the value by handling both of each potential states. This makes the design safe as it prevents accidental misuse where a user may attempt to get the value when it does not actually exist.
+
+That said, using `Match(...)` like that is not entirely pleasant when dealing with multiple instances of `Option<T>`. For example, let's imagine we have the following method that tries to parse an integer with a potential failure:
+
+```csharp
+public static Option<int> ParseInt(string str) =>
+    int.TryParse(str, out var result)
+        ? Option<int>.Some(result)
+        : Option<int>.None();
+```
+
+```csharp
+var sum = ParseInt("5").Match(
+    // Success (continue)
+    firstValue => ParseInt("2").Match(
+        // Success (finish)
+        secondValue => firstValue + secondValue,
+
+        // Failure (short-circuit)
+        () => Option<int>.None()
+    ),
+
+    // Failure (short-circuit)
+    () => Option<int>.None()
+);
+
+// Prints "7"
+sum.Match(
+    value => Console.WriteLine(value),
+    () => Console.WriteLine("Parsing error")
+);
+```
+
+We can make this a lot simpler if we enable query syntax:
+
 ```csharp
 public static Option<TResult> SelectMany<TFirst, TSecond, TResult>(
     this Option<TFirst> first,
@@ -170,10 +217,8 @@ public static Option<TResult> SelectMany<TFirst, TSecond, TResult>(
     Func<TFirst, TSecond, TResult> getResult)
 {
     return first.Match(
-
         // First operand has value - continue to the second operand
         firstValue => getSecond(firstValue).Match(
-
             // Second operand has value - get the result from the first and second operands
             secondValue => Option<TResult>.Some(getResult(firstValue, secondValue)),
 
@@ -216,33 +261,26 @@ Above logic may be better explained with a flowchart:
 ```
 
 ```csharp
-public static Option<int> ParseInt(string str) =>
-    int.TryParse(str, out var result)
-        ? Option<int>.Some(result)
-        : Option<int>.None();
-```
-
-```csharp
-var result =
+var sum =
     from first in ParseInt("5")
     from second in ParseInt("2")
     select first + second;
 
 // Prints "7"
-result.Match(
+sum.Match(
     value => Console.WriteLine(value),
     () => Console.WriteLine("Parsing error")
 );
 ```
 
 ```csharp
-var result =
+var sum =
     from first in ParseInt("foo") // this will fail
     from second in ParseInt("2")
     select first + second;
 
 // Prints "Parsing error"
-result.Match(
+sum.Match(
     value => Console.WriteLine(value),
     () => Console.WriteLine("Parsing error")
 );
@@ -319,14 +357,14 @@ public class PaymentProcessor
 var paymentProcessor = new PaymentProcessor();
 
 // Note the `await` in the beginning of the expression
-var result = await
+var paymentId = await
     from leviIban in paymentProcessor.GetIbanAsync("levi@gmail.com")
     from olenaIban in paymentProcessor.GetIbanAsync("olena@hotmail.com")
     from paymentId in paymentProcessor.SendPaymentAsync(leviIban, olenaIban, 100)
     select paymentId;
 
 // Prints "d56a5b86-f55b-4707-be4f-138a19272f47"
-result.Match(
+paymentId.Match(
     value => Console.WriteLine(value),
     () => Console.WriteLine("Failed to send payment")
 );
@@ -335,14 +373,14 @@ result.Match(
 ```csharp
 var paymentProcessor = new PaymentProcessor();
 
-var result = await
+var paymentId = await
     from joshIban in paymentProcessor.GetIbanAsync("josh@yahoo.com") // this will fail
     from olenaIban in paymentProcessor.GetIbanAsync("olena@hotmail.com")
     from paymentId in paymentProcessor.SendPaymentAsync(joshIban, olenaIban, 100)
     select paymentId;
 
 // Prints "Failed to send payment"
-result.Match(
+paymentId.Match(
     value => Console.WriteLine(value),
     () => Console.WriteLine("Failed to send payment")
 );
