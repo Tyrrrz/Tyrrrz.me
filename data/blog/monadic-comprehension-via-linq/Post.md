@@ -175,7 +175,7 @@ public readonly struct Option<T>
 }
 ```
 
-Note that this container does not expose a way to retrieve the value directly, but instead provides the `Match(...)` method that can be used to unwrap the value by handling both of each potential states. This makes the design safe as it prevents accidental misuse where a user may attempt to get the value when it does not actually exist.
+Note that this container does not expose a way to retrieve the value directly, but instead provides the `Match(...)` method that can be used to unwrap the value by handling both of its potential states. This makes the design safe as it prevents accidental misuse where a user may attempt to get the value when it does not actually exist.
 
 That said, using `Match(...)` like that is not entirely pleasant when dealing with multiple instances of `Option<T>`. For example, let's imagine we have the following method that tries to parse an integer with a potential failure:
 
@@ -191,7 +191,7 @@ var sum = ParseInt("5").Match(
     // Success (continue)
     firstValue => ParseInt("2").Match(
         // Success (finish)
-        secondValue => firstValue + secondValue,
+        secondValue => Option<int>.Some(firstValue + secondValue),
 
         // Failure (short-circuit)
         () => Option<int>.None()
