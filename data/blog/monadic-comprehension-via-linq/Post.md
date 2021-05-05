@@ -7,15 +7,15 @@ tags:
   - 'tricks'
 ---
 
-If you ask a C# developer to list all the reasons why they enjoy working with the language, they will probably put LINQ somewhere at the top. LINQ is a set of language tools that, in combination with the `IEnumerable<T>` and `IQueryable<T>` interfaces, enable developers to query data from arbitrary sources in a fluent, lazy, and efficient manner.
+If you ask a C# developer to list the reasons why they enjoy working with the language, they will most likely put LINQ somewhere at the top. LINQ is an extremely convenient set of language tools that provide ways to query and transform data sequences of arbitrary shapes and origins, in a fluent, lazy, and efficient manner.
 
-LINQ itself comes in two forms: extension methods from `System.Linq` namespace and the actual language-integrated query syntax that they power. Interestingly enough, the query syntax is rarely used in practice as most developers prefer extension methods due to their flexibility and overall homogeneity with the rest of the language.
+LINQ itself is made up of multiple pieces, but from the consumer perspective it mainly comes in two forms: extension methods for `IEnumerable<T>` and `IQueryable<T>` interfaces, and the language-integrated query syntax which is built upon them. Interestingly enough, despite arguably being the most important part of the feature as a whole, query syntax sees very little use in practice, as most developers prefer to rely on extension methods directly due to their flexibility and overall homogeny with the rest of the language.
 
-That said, I believe the query syntax is a particularly interesting feature because it allows us to think about operations on data in a clearer way. Some operations, especially those involving collections embedded inside other collections, can appear rather convoluted in their method form, but much more legible when written using query syntax.
+However, there is one aspect of query syntax that makes it particularly intriguing in my opinion, and that's the fact that **its usage is actually not limited to collections**. As long as a specific type implements a few key methods required by the compiler, C#'s query syntax can be enabled on virtually any type.
 
-However, few developers are aware of this, but C#'s query syntax is not actually tied to a particular interface -- it can be extended to work with any other type as well, by implementing a few specific methods. This presents an interesting opportunity where we can use this feature to enhance our own types with custom domain specific language, similar to [computation expressions in F#](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions) or [`do` notation in Haskell](https://en.wikibooks.org/wiki/Haskell/do_notation).
+This presents a very interesting opportunity where we can use this feature to enhance other types (including our own) with a special comprehension syntax that can help express certain operations in a more concise and clear way. Effectively, it allows us to achieve something similar to [F#'s computation expressions](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions) or [Haskell's `do` notation](https://en.wikibooks.org/wiki/Haskell/do_notation).
 
-In this article, I will explain how LINQ's query syntax works and what it takes to enable it for custom types. We will look at some real world scenarios that can benefit from custom query syntax.
+In this article we will see how the LINQ query syntax works under the hood, how to make it work with custom types, and look at some practical scenarios where that can actually be useful.
 
 ## LINQ with collections
 
