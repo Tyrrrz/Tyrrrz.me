@@ -105,7 +105,7 @@ public static Container<TResult> SelectMany<TFirst, TSecond, TResult>(
 In essence, this method works with three generic arguments, `TFirst` representing the type of the first `from` expression, `TSecond` representing the type of the second `from` expression, and `TResult` which is the type of the output value produced by `select`. It takes the first operand, uses it to resolve the second, and finally applies a function to reduce them to a single result.
 
 ```csharp
-public static async Task<TOut> SelectMany<TFirst, TSecond, TResult>(
+public static async Task<TResult> SelectMany<TFirst, TSecond, TResult>(
     this Task<TFirst> first,
     Func<TFirst, Task<TSecond>> getSecond,
     Func<TFirst, TSecond, TResult> getResult)
