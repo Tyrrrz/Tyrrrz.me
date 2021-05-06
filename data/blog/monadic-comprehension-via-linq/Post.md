@@ -11,39 +11,42 @@ If you ask a C# developer to list the reasons why they enjoy working with the la
 
 LINQ itself is made up of multiple pieces, but from the consumer perspective it mainly comes in two forms: extension methods for `IEnumerable<T>` and `IQueryable<T>` interfaces, and the language-integrated query syntax which is built upon them. Interestingly enough, despite arguably being the most important part of the feature as a whole, query syntax sees very little use in practice, as most developers prefer to rely on extension methods directly due to their flexibility and overall homogeny with the rest of the language.
 
-However, there is one aspect of query syntax that makes it particularly intriguing in my opinion, and that's the fact that **its usage is actually not limited to collections**. As long as a specific type implements a few key methods required by the compiler, C#'s query syntax can be enabled on virtually any type.
+However, there is one aspect of query syntax that makes it particularly intriguing in my opinion, and that's the fact that **its usage is actually not limited to collections**. As long as a specific type implements a few key methods required by the compiler, C#'s query notation can be enabled on virtually any type.
 
-This presents a very interesting opportunity where we can use this feature to enhance other types (including our own) with a special comprehension syntax that can help express certain operations in a more concise and clear way. Effectively, it allows us to achieve something similar to [F#'s computation expressions](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions) or [Haskell's `do` notation](https://en.wikibooks.org/wiki/Haskell/do_notation).
+This presents a very interesting opportunity where we can use this feature to enhance other types (including our own) with a special comprehension syntax that can help express certain operations in a more concise and clear way. In practice, it allows us to achieve something similar to [F#'s computation expressions](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions) and [Haskell's `do` notation](https://en.wikibooks.org/wiki/Haskell/do_notation).
 
 In this article we will see how the LINQ query syntax works under the hood, how to make it work with custom types, and look at some practical scenarios where that can actually be useful.
 
 ## LINQ with collections
 
-To understand the internals of LINQ's query syntax, let's start by taking a look at how it works with regular collections. For example, given an array of numbers, we can filter and reorder it using the following expression:
+To understand how to repurpose LINQ query syntax for other types, let's start by taking a look at how it already works with regular collections. For example, imagine we have a sequence of numbers that we want to filter, reorder, and transform. Using LINQ we can do it like this:
 
 ```csharp
 var source = new[] {1, 2, 3, 4, 5};
 
-var result =
+var results =
     from i in source
     where i % 2 != 0
     orderby i descending
-    select i;
+    select i * 10;
+
+// results = [50,30,10]
 ```
 
-This is effectively identical to the code below, which uses the more common method syntax instead:
+The query notation above works by enumerating the `source` collection, applying a predicate function to filter out some of the elements, and then ordering and projecting out the results. When compiled, this expression gets converted to the following chain of method calls:
 
 ```csharp
 var source = new[] {1, 2, 3, 4, 5};
 
-var result = source
+var results = source
     .Where(i => i % 2 != 0)
-    .OrderByDescending(i => i);
+    .OrderByDescending(i => i)
+    .Select(i => i * 10);
 ```
 
-If we were to compare the two approaches, there's not much that can be said in favor of the query syntax. It's more noisy, takes up more lines, looks foreign, and doesn't really achieve anything beyond what LINQ's extension methods can already do.
+Now, if we were to compare the two approaches, there's not much that can be said in favor of the query syntax. It looks rather foreign amidst the rest of C# code and doesn't really achieve anything beyond what extension methods can already do.
 
-There are also cases where the query syntax can lead to more appealing code, however. For example, consider the following scenario where we can use expression syntax to query directories within other directories:
+However, there are also a few cases where writing LINQ operations using query syntax may actually lead to more appealing code. As an example, consider the following scenario where we need to query directories within other directories:
 
 ```csharp
 var dirs =
@@ -53,13 +56,17 @@ var dirs =
     select subdirOfSubdir;
 ```
 
-Compare that with the method form, which is structurally very different:
+Note how the query notation allows us to express derived sequences (which are effectively nested iterations) in a more natural serial form. This is possible simply by stacking multiple `from`s on top of each other.
+
+Compare this to the equivalent code using methods, which has a slightly different structure:
 
 ```csharp
 var dirs = Directory.EnumerateDirectories("/some/dir/")
     .SelectMany(dir => Directory.EnumerateDirectories(dir))
     .SelectMany(subdir => Directory.EnumerateDirectories(subdir));
 ```
+
+Now, whether 
 
 The query syntax works by looking for `Where(...)`, `OrderBy(...)`, `Select(...)`, `SelectMany(...)` and similar methods.
 
@@ -178,6 +185,8 @@ public readonly struct Option<T>
 Note that this container does not expose a way to retrieve the value directly, but instead provides the `Match(...)` method that can be used to unwrap the value by handling both of its potential states. This makes the design safe as it prevents accidental misuse where a user may attempt to get the value when it does not actually exist.
 
 That said, using `Match(...)` like that is not entirely pleasant when dealing with multiple instances of `Option<T>`. For example, let's imagine we have the following method that tries to parse an integer with a potential failure:
+
+// TODO: add more than just ParseInt()
 
 ```csharp
 public static Option<int> ParseInt(string str) =>
@@ -391,3 +400,5 @@ paymentId.Match(
 Failure short-circuiting without using exceptions.
 
 More in depth: https://weblogs.asp.net/dixin/Tags/Category%20Theory
+
+[parsing in C#](/blog/monadic-parser-combinators)
