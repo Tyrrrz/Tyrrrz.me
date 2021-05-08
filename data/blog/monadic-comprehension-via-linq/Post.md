@@ -17,7 +17,7 @@ This presents a very interesting opportunity where we can use this feature to en
 
 In this article we will see how the LINQ query syntax works under the hood, how to make it work with custom types, and look at some practical scenarios where that can actually be useful.
 
-## LINQ with collections
+## Query syntax internals
 
 To understand how to repurpose LINQ query syntax for other types, let's start by taking a look at how it already works with regular collections. For example, imagine we have a sequence of numbers that we want to filter, reorder, and transform. Using LINQ we can do it like this:
 
@@ -44,33 +44,29 @@ var results = source
     .Select(i => i * 10);
 ```
 
-Now, if we were to compare the two approaches, there's not much that can be said in favor of the query syntax. It looks rather foreign amidst the rest of C# code and doesn't really achieve anything beyond what extension methods can already do.
+Now, if we were to compare the two approaches, there's not much that can be said in favor of the query syntax. It looks rather foreign amidst the rest of C# code and doesn't really accomplish anything beyond what extension methods can already do.
 
-However, there are also a few cases where writing LINQ operations using query syntax may actually lead to more appealing code. As an example, consider the following scenario where we need to query directories within other directories:
+However, there are also some cases where writing LINQ operations using query syntax may actually lead to more appealing code. As an example, consider a scenario where we need to get a list of subdirectories inside a specific directory and then enumerate the files within them in a single sequence:
 
 ```csharp
-var dirs =
+var files =
     from dir in Directory.EnumerateDirectories("/some/dir/")
-    from subdir in Directory.EnumerateDirectories(dir)
-    from subdirOfSubdir in Directory.EnumerateDirectories(subdir)
-    select subdirOfSubdir;
+    from file in Directory.EnumerateFiles(dir)
+    select file;
 ```
 
-Note how the query notation allows us to express derived sequences (which are effectively nested iterations) in a more natural serial form. This is possible simply by stacking multiple `from`s on top of each other.
+Note how the query notation allows us to express derived sequences (which are essentially nested iterations) in a naturally comprehensible serial form. This is possible to do by simply combining multiple `from` operators together.
 
-Compare this to the equivalent code using methods, which has a slightly different structure:
+For comparison, an equivalent code relying on method syntax lends to a somewhat less legible structure:
 
 ```csharp
-var dirs = Directory.EnumerateDirectories("/some/dir/")
-    .SelectMany(dir => Directory.EnumerateDirectories(dir))
-    .SelectMany(subdir => Directory.EnumerateDirectories(subdir));
+var files = Directory.EnumerateDirectories("/some/dir/")
+    .SelectMany(dir => Directory.EnumerateFiles(dir));
 ```
 
-Now, whether 
+In this case, the query notation form doesn't just present another way of writing the same thing, but **offers an alternative mental model for approaching the problem**. Interestingly enough, such mental model can be useful in many different domains, not just when dealing with collections.
 
-The query syntax works by looking for `Where(...)`, `OrderBy(...)`, `Select(...)`, `SelectMany(...)` and similar methods.
-
-Below is .NET's implementation of `SelectMany(...)` which is used by the query syntax:
+Fundamentally, all query operators function based on simple mapping rules which decide how they get translated to their equivalent extension methods. Nested `from` clauses, in particular, are evaluated by calling a specific overload of `SelectMany(...)` that accepts a collection selector and a result selector. For `IEnumerable<T>`, this method is defined in the standard library as follows:
 
 ```csharp
 // https://source.dot.net/#System.Linq/System/Linq/SelectMany.cs,bc79a642e00b8681
@@ -89,27 +85,28 @@ public static IEnumerable<TResult> SelectMany<TSource, TCollection, TResult>(
 }
 ```
 
-## Query syntax for Task type
-
-Can be generalized to this signature:
+As mentioned in the beginning, LINQ query syntax is not restricted to types implementing `IEnumerable<T>`. The same notation we've seen earlier can also be applied to any other type as long as there is a corresponding `SelectMany(...)` method defined for it. In a more generalized form, the compiler expects a method that looks like this:
 
 ```csharp
 public static Container<TResult> SelectMany<TFirst, TSecond, TResult>(
-    this Container<TFirst> first, // first operand
-    Func<TFirst, Container<TSecond>> getSecond, // resolve second operand (based on first)
-    Func<TFirst, TSecond, TResult> getResult) // resolve result (based on both operands, unwrapped)
+    // First operand
+    this Container<TFirst> first,
+    // Function to resolve the second operand (based on first)
+    Func<TFirst, Container<TSecond>> getSecond,
+    // Function to resolve the result (based on both operands)
+    Func<TFirst, TSecond, TResult> getResult)
 {
-    // ...
+    /*
+        from {TFirst} in {Container<TFirst>}
+        from {TSecond} in {TFirst -> Container<TSecond>}
+        select {TFirst * TSecond -> TResult}
+    */
 }
-
-/*
-    from {TFirst} in {Container<TFirst>}
-    from {TSecond} in {TFirst -> Container<TSecond>}
-    select {TFirst + TSecond -> TResult}
-*/
 ```
 
-In essence, this method works with three generic arguments, `TFirst` representing the type of the first `from` expression, `TSecond` representing the type of the second `from` expression, and `TResult` which is the type of the output value produced by `select`. It takes the first operand, uses it to resolve the second, and finally applies a function to reduce them to a single result.
+Logically speaking, if such `SelectMany(...)` method (more colloquially known as [_monadic bind operator_](https://en.wikipedia.org/wiki/Monad_(functional_programming)#Overview)) can be reasonably defined for a particular type, then that type can also benefit from the comprehension syntax provided by the query notation. Let's take a look at some examples where that can be useful.
+
+## Query syntax for the Task type
 
 ```csharp
 public static async Task<TResult> SelectMany<TFirst, TSecond, TResult>(
