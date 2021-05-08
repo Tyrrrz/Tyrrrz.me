@@ -88,6 +88,7 @@ public static IEnumerable<TResult> SelectMany<TSource, TCollection, TResult>(
 As mentioned in the beginning, LINQ query syntax is not inherently restricted to just enumerable types. The same notation we've seen earlier can also be applied to any other type as long as there is a corresponding `SelectMany(...)` method defined for it. Generally speaking, the compiler expects a method that looks like this:
 
 ```csharp
+// Container<T> is a generic abstract container that encapsulates value(s) of type T
 public static Container<TResult> SelectMany<TFirst, TSecond, TResult>(
     // First operand
     this Container<TFirst> first,
@@ -97,50 +98,80 @@ public static Container<TResult> SelectMany<TFirst, TSecond, TResult>(
     Func<TFirst, TSecond, TResult> getResult)
 {
     /*
-        from {TFirst} in {Container<TFirst>}
-        from {TSecond} in {TFirst -> Container<TSecond>}
-        select {TFirst * TSecond -> TResult}
+        In query syntax:
+
+        from {firstValue} in {first}
+        from {secondValue} in {getSecond(first)}
+        select {getResult(firstValue, secondValue)}
     */
 }
 ```
 
 In academic terms, this method signature actually represents a slightly more elaborate version of the [_monadic bind function_](https://en.wikipedia.org/wiki/Monad_(functional_programming)#Overview), which is used to sequence monadic operations together. Knowing that is not very important, but it helps us understand that LINQ query syntax (specifically the part involving multiple `from` clauses) is effectively a general-purpose monadic comprehension notation.
 
-Consequentially, any type for which an appropriate `SelectMany(...)` may be defined, can benefit from the alternative mental model provided by LINQ that we've noted earlier. Moving on, let's take a look at some practical examples of where that can be useful.
+Consequentially, any type for which an appropriate `SelectMany(...)` may be defined, can benefit from the alternative mental model provided by LINQ that we've noted earlier. Moving on, let's take a look at some scenarios of where that can be useful.
 
 ## Query syntax for the Task type
 
+When it comes to container types, `Task<T>` is probably the most ubiquitous example that can be found in C# code. Conceptually, this type encapsulates an eventual result of an asynchronous computation, which can also be sequenced in a chain to create an ordered pipeline of deferred operations.
+
+In this case, an implementation of `SelectMany(...)` can provide us with a comprehension syntax that can help us lazily aggregate multiple tasks. Of course, C# already has its own syntax for this exact purpose in the form of `async` and `await` keywords, but for the sake of exercise let's forget about it for the moment.
+
+Following the shape we've established previously, this is how an equivalent `SelectMany(...)` method would look like for `Task<T>`:
+
 ```csharp
-public static async Task<TResult> SelectMany<TFirst, TSecond, TResult>(
+public static Task<TResult> SelectMany<TFirst, TSecond, TResult>(
     this Task<TFirst> first,
     Func<TFirst, Task<TSecond>> getSecond,
     Func<TFirst, TSecond, TResult> getResult)
 {
-    var firstResult = await first;
-    var secondResult = await getSecond(firstResult);
-    return getResult(firstResult, secondResult);
+    // Not using async/await deliberately to illustrate a point
+    return first.ContinueWith(_ =>
+    {
+        // At this point the result has already been evaluated
+        var firstResult = first.Result;
+
+        // Chain second task
+        var second = getSecond(firstResult);
+        return second.ContinueWith(_ =>
+        {
+            // Unwrap the second task and assemble the result
+            var secondResult = second.Result;
+            return getResult(firstResult, secondResult);
+        });
+    }).Unwrap();
 }
 ```
 
-The extension method we implemented allows us to use query syntax with tasks to write code like this:
+Note how the implementation of this method represents a complicated set of nested callbacks. Much like `SelectMany(...)` dealt with derived collections in case with `IEnumerable<T>`, here it fulfills a similar purpose of binding a chain of dependent operations.
+
+Now that we have defined our extension method, we can use query syntax with tasks to write code like this:
 
 ```csharp
-var task =
+var result = await
     from first in Task.Run(() => 1 + 1)
-    from second in Task.Run(() => 2 + 2)
+    from second in Task.Run(() => 2 * first)
     select first + second;
-
-var result = await task;
 
 // Prints "6"
 Console.WriteLine(result);
 ```
 
-All this does is create two tasks and combine them into a third task.
+Effectively, what this code does is that it creates a task that itself represents a sequential execution of two inner tasks. The first of those tasks calculates the result based on a mathematical expression and the second one uses that result.
 
-This is not particularly useful because we already have `async`/`await` which already fulfills the role of comprehension syntax for `Task<T>`. If all we had was `ContinueWith(...)` then this would have been a different story.
+Of course, this is not particularly exciting because we already have `async` and `await`, which allow us to express the same thing like so:
 
-That said, let's look at how we can utilize query syntax for something a bit more interesting.
+```csharp
+var first = await Task.Run(() => 1 + 1);
+var second = await Task.Run(() => 2 * first);
+
+var result = first + second;
+
+// Prints "6"
+Console.WriteLine(result);
+```
+
+Nevertheless, this exercise shows how easy it is to extend other types with the query syntax.
 
 ## Query syntax for Option type
 
