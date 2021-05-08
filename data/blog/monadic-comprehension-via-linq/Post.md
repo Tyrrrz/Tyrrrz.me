@@ -46,7 +46,7 @@ var results = source
 
 Now, if we were to compare the two approaches, there's not much that can be said in favor of the query syntax. It looks rather foreign amidst the rest of C# code and doesn't really accomplish anything beyond what extension methods can already do.
 
-However, there are also some cases where writing LINQ operations using query syntax may actually lead to more appealing code. As an example, consider a scenario where we need to get a list of subdirectories inside a specific directory and then enumerate the files within them in a single sequence:
+However, there are also some cases where writing LINQ operations using query syntax may actually lead to more appealing code. As an example, consider a scenario where we need to get a list of subdirectories inside a specific directory, and then enumerate the files within them in a single sequence:
 
 ```csharp
 var files =
@@ -85,7 +85,7 @@ public static IEnumerable<TResult> SelectMany<TSource, TCollection, TResult>(
 }
 ```
 
-As mentioned in the beginning, LINQ query syntax is not restricted to types implementing `IEnumerable<T>`. The same notation we've seen earlier can also be applied to any other type as long as there is a corresponding `SelectMany(...)` method defined for it. Generally speaking, the compiler expects a method that looks like this:
+As mentioned in the beginning, LINQ query syntax is not inherently restricted to just enumerable types. The same notation we've seen earlier can also be applied to any other type as long as there is a corresponding `SelectMany(...)` method defined for it. Generally speaking, the compiler expects a method that looks like this:
 
 ```csharp
 public static Container<TResult> SelectMany<TFirst, TSecond, TResult>(
