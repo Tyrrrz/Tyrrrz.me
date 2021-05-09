@@ -109,13 +109,13 @@ public static Container<TResult> SelectMany<TFirst, TSecond, TResult>(
 
 In academic terms, this method signature actually represents a slightly more elaborate version of the [_monadic bind function_](https://en.wikipedia.org/wiki/Monad_(functional_programming)#Overview), which is used to sequence monadic operations together. Knowing that is not very important, but it helps us understand that LINQ query syntax (specifically the part involving multiple `from` clauses) is effectively a general-purpose monadic comprehension notation.
 
-Consequentially, any type for which an appropriate `SelectMany(...)` may be defined, can benefit from the alternative mental model provided by LINQ that we've noted earlier. Moving on, let's take a look at some scenarios of where that can be useful.
+Consequentially, any container type for which an appropriate `SelectMany(...)` may be reasonably defined, can benefit from the alternative mental model provided by LINQ. Moving on, let's take a look at some potential candidates.
 
-## Query syntax for the Task type
+## Query syntax for Task
 
-When it comes to container types, `Task<T>` is probably the most ubiquitous example that can be found in C# code. Conceptually, this type represents an operation that executes asynchronously and encapsulates its current state along with its eventual result value. Additionally, it also offers a way to queue continuation callbacks that will trigger once the task has completed.
+When it comes to container types, `Task<T>` is probably the most ubiquitous example that can be found in C# code. Conceptually, this type represents an operation that executes asynchronously and encapsulates its current state along with its eventual result. Additionally, it also provides a way to queue continuation callbacks that will trigger once the task has completed.
 
-An implementation of `SelectMany(...)`, in this case, can provide comprehension syntax to express pipelines of asynchronous operations made up by chaining tasks together in a sequence. Following the shape we've established previously, below is how this method would look like:
+An implementation of `SelectMany(...)`, in this case, can leverage the callback API to enable comprehension syntax for chaining tasks into pipelines of asynchronous operations. Following the shape we've established previously, here is how this method would look like:
 
 ```csharp
 public static Task<TResult> SelectMany<TFirst, TSecond, TResult>(
@@ -141,40 +141,43 @@ public static Task<TResult> SelectMany<TFirst, TSecond, TResult>(
 }
 ```
 
-Note how the implementation of this method represents a complicated set of nested callbacks. Much like `SelectMany(...)` dealt with derived collections in case with `IEnumerable<T>`, here it fulfills a similar purpose of binding a chain of dependent operations.
+The usage of nested `ContinueWith(...)` callbacks allows us to sequence derived tasks and lazily compose their results without actually waiting for the entire process to complete. Calling `SelectMany(...)` will effectively produce a new higher-order task that has all the specified transformations encoded within it, and whose result can be observed once all of the dependent operations have finished.
 
-Now that we have defined our extension method, we can use query syntax with tasks to write code like this:
+Having that extension method defined, we can use query syntax on tasks to write code similar to this:
 
 ```csharp
-var result = await
-    from first in Task.Run(() => 1 + 1)
-    from second in Task.Run(() => 2 * first)
-    select first + second;
+// Lazily compose tasks
+var task =
+    from sum in Task.Run(() => 1 + 1) // Task<int>
+    from div in Task.Run(() => sum / 1.5) // Task<double>
+    select sum + (int) div; // Task<int>
 
-// Prints "6"
+// Observe the actual result
+var result = await task;
+
+// Prints "3"
 Console.WriteLine(result);
 ```
 
-Here, the range variable...
-Exceptions are propagated...
+Although the syntax for the query operators remains the same, the semantics are a little different from what we're used to when dealing with collections. Here, the range variable (the part between `from` and `in`) only has a single possible value -- the eventual result of the task on the right. The terminal `select` clause is then used to transform and aggregate results from individual operations to produce a single top-level task.
 
-Effectively, what this code does is that it creates a task that itself represents a sequential execution of two inner tasks. The first of those tasks calculates the result based on a mathematical expression and the second one uses that result.
+Just like the `SelectMany(...)` method that this notation internally relies on, every action is encoded in a lazy manner. To get the final result, the composed task needs to be awaited.
 
-Of course, this is not particularly exciting because we already have `async` and `await`, which allow us to express the same thing like so:
+Of course, while it does look interesting, this comprehension syntax isn't actually very useful. After all, C# already has its  own syntax for this exact purpose in the form of the well-known `async`/`await` keywords:
 
 ```csharp
-var first = await Task.Run(() => 1 + 1);
-var second = await Task.Run(() => 2 * first);
+var sum = await Task.Run(() => 1 + 1);
+var div = await Task.Run(() => sum / 1.5);
 
-var result = first + second;
+var result = sum + (int) div;
 
-// Prints "6"
+// Prints "3"
 Console.WriteLine(result);
 ```
 
-Nevertheless, this exercise shows how easy it is to extend other types with the query syntax.
+Nevertheless, this example does show that implementing custom LINQ notation is a rather simple exercise. Let's explore some other types where doing that is a bit more useful.
 
-## Query syntax for Option type
+## Query syntax for Option
 
 Different programming paradigms utilize different ways of handling and representing failures. Object-oriented languages traditionally employ exceptions and `try`/`catch` blocks for this purpose.
 
@@ -330,7 +333,7 @@ Think of `from x in y` as "using value x of y" and `select` as "combine".
 
 Comprehension syntax let us express happy path scenarios, with implicit failure.
 
-## Query syntax for Option inside a Task
+## Extrapolating further
 
 ```csharp
 public static async Task<Option<TResult>> SelectMany<TFirst, TSecond, TResult>(
