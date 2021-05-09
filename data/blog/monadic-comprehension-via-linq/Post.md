@@ -113,11 +113,9 @@ Consequentially, any type for which an appropriate `SelectMany(...)` may be defi
 
 ## Query syntax for the Task type
 
-When it comes to container types, `Task<T>` is probably the most ubiquitous example that can be found in C# code. Conceptually, this type encapsulates an eventual result of an asynchronous computation, which can also be sequenced in a chain to create an ordered pipeline of deferred operations.
+When it comes to container types, `Task<T>` is probably the most ubiquitous example that can be found in C# code. Conceptually, this type represents an operation that executes asynchronously and encapsulates its current state along with its eventual result value. Additionally, it also offers a way to queue continuation callbacks that will trigger once the task has completed.
 
-In this case, an implementation of `SelectMany(...)` can provide us with a comprehension syntax that can help us lazily aggregate multiple tasks. Of course, C# already has its own syntax for this exact purpose in the form of `async` and `await` keywords, but for the sake of exercise let's forget about it for the moment.
-
-Following the shape we've established previously, this is how an equivalent `SelectMany(...)` method would look like for `Task<T>`:
+An implementation of `SelectMany(...)`, in this case, can provide comprehension syntax to express pipelines of asynchronous operations made up by chaining tasks together in a sequence. Following the shape we've established previously, below is how this method would look like:
 
 ```csharp
 public static Task<TResult> SelectMany<TFirst, TSecond, TResult>(
@@ -156,6 +154,9 @@ var result = await
 // Prints "6"
 Console.WriteLine(result);
 ```
+
+Here, the range variable...
+Exceptions are propagated...
 
 Effectively, what this code does is that it creates a task that itself represents a sequential execution of two inner tasks. The first of those tasks calculates the result based on a mathematical expression and the second one uses that result.
 
