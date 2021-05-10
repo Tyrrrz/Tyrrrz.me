@@ -109,13 +109,13 @@ public static Container<TResult> SelectMany<TFirst, TSecond, TResult>(
 
 In academic terms, this method signature actually represents a slightly more elaborate version of the [_monadic bind function_](https://en.wikipedia.org/wiki/Monad_(functional_programming)#Overview), which is used to sequence monadic operations together. Knowing that is not very important, but it helps us understand that LINQ query syntax (specifically the part involving multiple `from` clauses) is effectively a general-purpose monadic comprehension notation.
 
-Consequentially, any container type for which an appropriate `SelectMany(...)` may be reasonably defined, can benefit from the alternative mental model provided by LINQ. Moving on, let's take a look at some potential candidates.
+Consequentially, any container type for which an appropriate `SelectMany(...)` may be reasonably defined, can benefit from the alternative mental model provided by LINQ. Moving on, let's explore some potential candidates.
 
 ## Query syntax for Task
 
-When it comes to container types, `Task<T>` is probably the most ubiquitous example that can be found in C# code. Conceptually, this type represents an operation that executes asynchronously and encapsulates its current state along with its eventual result. Additionally, it also provides a way to queue continuation callbacks that will trigger once the task has completed.
+When it comes to container types, `Task<T>` is probably the most ubiquitous example that can be found in C# code. Conceptually, this type represents an operation that executes asynchronously and encapsulates its current state along with its eventual result. Additionally, it also provides a way to queue up continuation callbacks that will trigger once the task has completed.
 
-An implementation of `SelectMany(...)`, in this case, can leverage the callback API to enable comprehension syntax for chaining tasks into pipelines of asynchronous operations. Following the shape we've established previously, here is how this method would look like:
+An implementation of `SelectMany(...)`, in this case, can leverage the callback API to enable comprehension syntax for chaining tasks into pipelines of asynchronous operations. Following the shape we've established previously, here is how that method would look like:
 
 ```csharp
 public static Task<TResult> SelectMany<TFirst, TSecond, TResult>(
@@ -163,7 +163,7 @@ Although the syntax for the query operators remains the same, the semantics are 
 
 Just like the `SelectMany(...)` method that this notation internally relies on, every action is encoded in a lazy manner. To get the final result, the composed task needs to be awaited.
 
-Of course, while it does look interesting, this comprehension syntax isn't actually very useful. After all, C# already has its  own syntax for this exact purpose in the form of the well-known `async`/`await` keywords:
+Of course, while it does look interesting, this comprehension syntax isn't particularly useful. After all, C# already has specialized syntax for this exact purpose in the form of the well-known `async` and `await` keywords. The code we wrote above is mostly equivalent to the following, more familiar snippet:
 
 ```csharp
 var sum = await Task.Run(() => 1 + 1);
@@ -175,7 +175,7 @@ var result = sum + (int) div;
 Console.WriteLine(result);
 ```
 
-Nevertheless, this example does show that implementing custom LINQ notation is a rather simple exercise. Let's explore some other types where doing that is a bit more useful.
+Nevertheless, this example should hopefully highlight the primary use case for introducing custom LINQ notations: expressing pipelines with types that have chainable semantics. Going further, let's take a look at a few more complicated but also more practical scenarios.
 
 ## Query syntax for Option
 
