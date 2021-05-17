@@ -111,7 +111,7 @@ In academic terms, this method signature actually represents a slightly more ela
 
 Consequentially, any container type for which an appropriate `SelectMany(...)` may be reasonably defined, can benefit from the alternative mental model provided by LINQ. Moving on, let's explore some potential candidates.
 
-## Query syntax for Task
+## Composing tasks
 
 When it comes to container types, `Task<T>` is probably the most ubiquitous example that can be found in C# code. Conceptually, this type represents an operation that executes asynchronously and encapsulates its current state along with its eventual result. Additionally, it also provides a way to queue up continuation callbacks that will trigger once the task has completed.
 
@@ -177,13 +177,17 @@ Console.WriteLine(result);
 
 Nevertheless, this example should hopefully highlight the primary use case for introducing custom LINQ notations: expressing pipelines with types that have chainable semantics. Going further, let's take a look at a few more complicated but also more practical scenarios.
 
-## Query syntax for Option
+## Chaining operations with optional return values
 
-Different programming paradigms utilize different ways of handling and representing failures. Object-oriented languages traditionally employ exceptions and `try`/`catch` blocks for this purpose.
+Different programming paradigms utilize different ways of representing and handling failures. Object-oriented languages, traditionally, employ exceptions and `try`/`catch` blocks for this purpose -- a very convenient approach that helps keep the code focused on the happy path, while implicitly routing potential errors towards dedicated handlers at the top of the call stack.
 
-However, exceptions are not encoded in method signatures in C# which makes them impractical in certain scenarios. As an alternative, it's a common approach to use an `Option<T>` type to represent a container that may or may not contain a value.
+In functional languages, on the other hand, failures are encoded directly within the signature of a function using container types such as `Option<T>` and `Result<TValue, TError>`. Doing so makes the representation of error states explicit, which forces the caller to properly account for each of them in order to proceed further with the execution.
 
-This is how we may design a simple but safe option type in C#:
+Even in primarily object-oriented settings, such as C#, optional types are still commonly used to communicate expected, predictable, or otherwise non-fatal errors, for which exceptions are often impractical. For example, when building a web service we may opt to express domain-level failures explicitly to ensure they are correctly mapped to corresponding HTTP status codes upon reaching the system boundary.
+
+One downside of the functional representation, however, is that unlike exceptions it doesn't provide the convenient bubbling behavior that would allow us to easily defer the responsibility of dealing with errors upstream. Being explicit means we have to handle both the optimistic and pessimistic outcomes simultaneously which can lead to noisy and messy code. After all, no one would want to write in a [language where you have to constantly check whether the last executed operation completed with an error](https://golang.org).
+
+Luckily, this is something that LINQ query syntax can actually help us with. To illustrate, let's imagine that we have an option type defined as shown below:
 
 ```csharp
 public readonly struct Option<T>
