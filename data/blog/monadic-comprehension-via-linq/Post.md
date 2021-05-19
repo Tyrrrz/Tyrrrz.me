@@ -435,8 +435,8 @@ paymentId.Match(
 
 ## Summary
 
-Failure short-circuiting without using exceptions.
+C#'s language integrated query syntax provides an alternative way to reason about sequences of data, but it can actually be used for more than just that. By implementing extension methods with specific signatures, we can repurpose LINQ operators for other types as well.
 
-More in depth: https://weblogs.asp.net/dixin/Tags/Category%20Theory
+This is particularly beneficial for types whose instances can be naturally composed together, such as `Task<T>`, `Option<T>`, or other similar structures. In these scenarios, query notation can be leveraged to establish a dedicated comprehension model that makes working with such types easier.
 
-[parsing in C#](/blog/monadic-parser-combinators)
+In case you are interested in learning a bit more in-depth about LINQ's application within the context of functional programming, check out Dixin Yan's excellent series of articles titled [Category Theory via C#](https://weblogs.asp.net/dixin/Tags/Category%20Theory). If you are curious about other practical scenarios where query syntax can be used, see also my older post on [Monadic Parser Combinators in C#](/blog/monadic-parser-combinators).
