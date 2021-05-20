@@ -435,8 +435,8 @@ paymentId.Match(
 
 ## Summary
 
-C#'s language integrated query syntax provides an alternative way to reason about sequences of data, but it can actually be used for more than just that. By implementing extension methods with specific signatures, we can repurpose LINQ operators for other types as well.
+C#'s language integrated query syntax provides an alternative way to reason about and manipulate sequences of data, but it may actually be used for more than just that. By implementing the corresponding extension methods, we can overload query operators with custom semantics and apply them to other types as well.
 
-This is particularly beneficial for types whose instances can be naturally composed together, such as `Task<T>`, `Option<T>`, or other similar structures. In these scenarios, query notation can be leveraged to establish a dedicated comprehension model that makes working with such types easier.
+This is particularly beneficial for types whose instances can be naturally composed together in a lazy manner. In such scenarios, query notation can be leveraged to establish a dedicated comprehension syntax that makes working with these structures a lot easier.
 
-In case you are interested in learning a bit more in-depth about LINQ's application within the context of functional programming, check out Dixin Yan's excellent series of articles titled [Category Theory via C#](https://weblogs.asp.net/dixin/Tags/Category%20Theory). If you are curious about other practical scenarios where query syntax can be used, see also my older post on [Monadic Parser Combinators in C#](/blog/monadic-parser-combinators).
+In case you are curious about other situations where custom query syntax may be useful, see also [my older blog post](/blog/monadic-parser-combinators) that shows how [Sprache](https://github.com/sprache/Sprache) relies on this feature to create complex grammar rules from smaller parsers. Alternatively, if you want to learn more about LINQ's application within the context of functional programming in general, check out Dixin Yan's excellent series of articles titled [Category Theory via C#](https://weblogs.asp.net/dixin/Tags/Category%20Theory).
