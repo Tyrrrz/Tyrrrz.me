@@ -181,13 +181,13 @@ Nevertheless, this example should hopefully highlight the primary use case for i
 
 Different programming paradigms utilize different ways of representing and handling failures. Object-oriented languages, traditionally, employ exceptions and `try`/`catch` blocks for this purpose -- a very convenient approach that helps keep the code focused on the happy path, while implicitly routing potential errors towards dedicated handlers at the top of the call stack.
 
-In functional languages, on the other hand, failures are encoded directly within the signature of a function using container types such as `Option<T>` and `Result<TValue, TError>`. Doing so makes the representation of error states explicit, which forces the caller to properly account for each of them in order to proceed further with the execution.
+When writing in a functional style, on the other hand, failures are typically encoded directly within function signatures using container types such as `Option<T>` and `Result<TValue, TError>`. This makes the representation of error states explicit and forces the caller to properly account for each of them before proceeding further with the execution.
 
-Even in primarily object-oriented settings, such as C#, optional types are still commonly used to communicate expected, predictable, or otherwise non-fatal errors, for which exceptions are often impractical. For example, when building a web service we may opt to express domain-level failures explicitly to ensure they are correctly mapped to corresponding HTTP status codes upon reaching the system boundary.
+Even in primarily object-oriented environments, such as C#, optional types are still commonly used to communicate expected, predictable, or otherwise non-fatal errors, for which exceptions may often be impractical. For example, when building a web service, we can choose to express domain-level failures this way to ensure that they are always correctly handled and mapped to corresponding HTTP status codes upon reaching the system boundary.
 
-One downside of the functional representation, however, is that unlike exceptions it doesn't provide the convenient bubbling behavior that would allow us to easily defer the responsibility of dealing with errors upstream. Being explicit means we have to handle both the optimistic and pessimistic outcomes simultaneously which can lead to noisy and messy code. After all, no one would want to write in a [language where you have to constantly check whether the last executed operation completed with an error](https://golang.org).
+One downside of the functional approach, however, is that it doesn't allow us to easily defer the responsibility of dealing with an error to upstream callers, which is something exceptions provide in a form of their bubbling behavior. Being explicit means we have to handle both the optimistic and pessimistic outcomes simultaneously, which can often cause unnecessary noise. After all, [no one would want to write code where you have to constantly check to see if the last executed operation completed successfully](https://golang.org).
 
-Luckily, this is something that LINQ query syntax can actually help us with. To illustrate, let's imagine that we have an option type defined as shown below:
+Luckily, this is a problem that can actually be solved with the help of custom LINQ query syntax. First, let's imagine we have an `Option<T>` type implemented as shown below:
 
 ```csharp
 public readonly struct Option<T>
