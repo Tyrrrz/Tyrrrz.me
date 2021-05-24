@@ -175,7 +175,7 @@ var result = sum + (int) div;
 Console.WriteLine(result);
 ```
 
-Nevertheless, this example should hopefully highlight the primary use case for introducing custom LINQ notations: expressing pipelines with types that have chainable semantics. Going further, let's take a look at a few more complicated but also more practical scenarios.
+Nevertheless, this example should hopefully highlight the primary use case for introducing custom LINQ notations: **expressing pipelines with types that have chainable semantics**. Going further, let's take a look at a few more complicated but also more practical scenarios.
 
 ## Chaining operations with optional return values
 
@@ -185,11 +185,12 @@ When writing in a functional style, on the other hand, failures are typically en
 
 Even in primarily object-oriented environments, such as C#, optional types are still commonly used to communicate expected, predictable, or otherwise non-fatal errors, for which exceptions may often be impractical. For example, when building a web service, we can choose to express domain-level failures this way to ensure that they are always correctly handled and mapped to corresponding HTTP status codes upon reaching the system boundary.
 
-One downside of the functional approach, however, is that it doesn't allow us to easily defer the responsibility of dealing with an error to upstream callers, which is something exceptions provide in a form of their bubbling behavior. Being explicit means we have to handle both the optimistic and pessimistic outcomes simultaneously, which can often cause unnecessary noise. After all, [no one would want to write code where you have to constantly check to see if the last executed operation completed successfully](https://golang.org).
+One downside of the functional approach, however, is that it doesn't allow us to easily defer the responsibility of dealing with an error to upstream callers, which is something exceptions provide in a form of their bubbling behavior. Being explicit means we have to handle both the optimistic and pessimistic outcomes simultaneously, which can often be a bit cumbersome. After all, [no one would want to write code where you have to constantly manually verify if the last executed operation has completed successfully](https://golang.org).
 
-Luckily, this is a problem that can actually be solved with the help of custom LINQ query syntax. First, let's imagine we have an `Option<T>` type implemented as shown below:
+Luckily, this is just the kind of problem that can be solved by introducing a specialized LINQ query syntax. First, let's imagine we have an `Option<T>` type already implemented as shown below:
 
 ```csharp
+// Encapsulates a single value or lack thereof
 public readonly struct Option<T>
 {
     private readonly T _value;
@@ -220,42 +221,57 @@ public readonly struct Option<T>
 }
 ```
 
-Note that this container does not expose a way to retrieve the value directly, but instead provides the `Match(...)` method that can be used to unwrap the value by handling both of its potential states. This makes the design safe as it prevents accidental misuse where a user may attempt to get the value when it does not actually exist.
+Since C# doesn't [yet](https://github.com/dotnet/csharplang/issues/113) offer a way to define discriminated unions directly, this type is implemented as a `struct` that encapsulates a value and a boolean flag used as a discriminator for its two potential states. Importantly, both the value and the flag are intentionally kept private, leaving the `Match(...)` method as the only way to observe the contents of an `Option<T>` instance from outside. This makes the design safer as it prevents possible runtime errors which would otherwise occur if the consumer tried to unwrap a container that didn't actually have a value.
 
-That said, using `Match(...)` like that is not entirely pleasant when dealing with multiple instances of `Option<T>`. For example, let's imagine we have the following method that tries to parse an integer with a potential failure:
-
-// TODO: add more than just ParseInt()
+However, that safety does come at a cost, as the usage of `Match(...)` method becomes noticeably convoluted when there are multiple dependent operations involved. For example, let's say we have a couple of functions that return optional results:
 
 ```csharp
+// Resolves an environment variable, or returns 'none' if it's not set
+public static Option<string> GetEnvironmentVariable(string name)
+{
+    var value = Environment.GetEnvironmentVariable();
+    if (value is null)
+        return Option<string>.None();
+
+    return Option<string>.Some(value);
+}
+
+// Converts a string to integer, or returns 'none' in case of failure
 public static Option<int> ParseInt(string str) =>
     int.TryParse(str, out var result)
         ? Option<int>.Some(result)
         : Option<int>.None();
 ```
 
-```csharp
-var sum = ParseInt("5").Match(
-    // Success (continue)
-    firstValue => ParseInt("2").Match(
-        // Success (finish)
-        secondValue => Option<int>.Some(firstValue + secondValue),
+In order to chain them together, we need to write code that looks like this:
 
-        // Failure (short-circuit)
+TODO: make the result dependent on the first operand
+```csharp
+var maxInstances = GetEnvironmentVariable("MYAPP_MAXALLOWEDINSTANCES").Match(
+    // Environment variable is set -> continue
+    envVar => ParseInt(envVar).Match(
+        // Parsing succeeded -> continue
+        maxInstances =>
+            // Perform some additional validation and finalize the result
+            maxInstances >= 1
+                ? Option<int>.Some(maxInstances)
+                : Option<int>.None(),
+
+        // Parsing failed -> short-circuit
         () => Option<int>.None()
     ),
 
-    // Failure (short-circuit)
+    // Environment variable is NOT set -> short-circuit
     () => Option<int>.None()
 );
 
-// Prints "7"
-sum.Match(
-    value => Console.WriteLine(value),
-    () => Console.WriteLine("Parsing error")
+maxInstances.Match(
+    value => Console.WriteLine(value), // do something with the value
+    () => Console.WriteLine("Value not set or invalid") // handle failure
 );
 ```
 
-We can make this a lot simpler if we enable query syntax:
+There are a few different ways to simplify this, but as already mentioned before, this is an ideal use case for LINQ query syntax. Just like `Task<T>` in the earlier example, `Option<T>` represents a type with chainable semantics in the form of nested `Match(...)` calls, meaning that it's a perfect candidate for a custom `SelectMany(...)` implementation:
 
 ```csharp
 public static Option<TResult> SelectMany<TFirst, TSecond, TResult>(
@@ -307,30 +323,13 @@ Above logic may be better explained with a flowchart:
                       [ Return the result ]
 ```
 
-```csharp
-var sum =
-    from first in ParseInt("5")
-    from second in ParseInt("2")
-    select first + second;
-
-// Prints "7"
-sum.Match(
-    value => Console.WriteLine(value),
-    () => Console.WriteLine("Parsing error")
-);
-```
+Now, without any change in the original two methods, we can rewrite our original piece of code to the following:
 
 ```csharp
-var sum =
-    from first in ParseInt("foo") // this will fail
-    from second in ParseInt("2")
+var maxInstances =
+    from envVar in GetEnvironmentVariable("MYAPP_MAXALLOWEDINSTANCES")
+    from value in ParseInt(envVar)
     select first + second;
-
-// Prints "Parsing error"
-sum.Match(
-    value => Console.WriteLine(value),
-    () => Console.WriteLine("Parsing error")
-);
 ```
 
 Think of `from x in y` as "using value x of y" and `select` as "combine".
