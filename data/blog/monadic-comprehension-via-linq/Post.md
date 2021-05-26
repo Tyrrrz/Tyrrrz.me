@@ -375,11 +375,17 @@ public Option<int> GetMaxInstances() =>
     select value >= 1 ? value : 1;
 ```
 
-The range variables in this syntax refer to the actual values within the optional containers. If any stage of the pipeline returns an empty value, the execution will short circuit without proceeding further.
+The range variables in this syntax refer to the actual values within the optional containers. If any stage of the pipeline returns an empty value, the execution will short circuit without proceeding further. An easy way to understand this form is by treating an instance of `Option<T>` as just a special case of `IEnumerable<T>` where there can only be either zero or a single element.
 
 Of course, on the surface this resulted in more succinct and readable code, but more importantly this syntax provides us with a convenient mental model that allows us to focus on the happy path of optional operations.
 
 ## Extrapolating further
+
+Of course there are also other ways we can combine different types using `SelectMany(...)`. Given that we've already implemented LINQ expressions for both `Task<T>` and `Option<T>`, the next logical step is to do the same for `Task<Option<T>>`.
+
+Such comprehension syntax will be useful when dealing with operations that return optional values and do that asynchronously.
+
+Here is how we can implement `SelectMany(...)` for this case:
 
 ```csharp
 public static async Task<Option<TResult>> SelectMany<TFirst, TSecond, TResult>(
