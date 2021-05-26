@@ -183,11 +183,11 @@ Different programming paradigms utilize different ways of representing and handl
 
 When writing in a functional style, on the other hand, failures are typically encoded directly within function signatures using container types such as `Option<T>` and `Result<TValue, TError>`. This makes the representation of error states explicit and forces the caller to properly account for each of them before proceeding further with the execution.
 
-Even in primarily object-oriented environments, such as C#, optional types are still commonly used to communicate expected, predictable, or otherwise non-fatal errors, for which exceptions may often be impractical. For example, when building a web service, we can choose to express domain-level failures this way to ensure that they are always correctly handled and mapped to corresponding HTTP status codes upon reaching the system boundary.
+Even in primarily object-oriented environments, such as C#, optional types are still commonly used to communicate expected, predictable, or otherwise non-fatal errors, for which exceptions may often be impractical. For example, when building a web service, we can choose to express domain-level failures this way to ensure that they are correctly handled and mapped to corresponding HTTP status codes upon reaching the system boundary.
 
-One downside of the functional approach, however, is that it doesn't allow us to easily defer the responsibility of dealing with an error to upstream callers, which is something exceptions provide in a form of their bubbling behavior. Being explicit means we have to handle both the optimistic and pessimistic outcomes simultaneously, which can often be a bit cumbersome. After all, [no one would want to write code where you have to constantly manually verify if the last executed operation has completed successfully](https://golang.org).
+One downside of the functional approach, however, is that it doesn't allow us to easily defer the responsibility of dealing with an error to upstream callers, which is something exceptions provide in the form of their bubbling behavior. Being explicit means we have to always handle both the optimistic and pessimistic outcomes simultaneously, which can often be a bit cumbersome. After all, [no one wants to write code where you have to constantly verify if the last executed operation has completed successfully](https://golang.org).
 
-Luckily, this is just the kind of problem that can be solved by introducing a specialized LINQ query syntax. First, let's imagine we have an `Option<T>` type already implemented as shown below:
+Luckily, this is the exact kind of problem that we can solve by introducing custom LINQ query syntax. To illustrate, let's first imagine that we have an `Option<T>` type already implemented as shown below:
 
 ```csharp
 // Encapsulates a single value or lack thereof
@@ -223,7 +223,43 @@ public readonly struct Option<T>
 
 Since C# doesn't [yet](https://github.com/dotnet/csharplang/issues/113) offer a way to define discriminated unions directly, this type is implemented as a `struct` that encapsulates a value and a boolean flag used as a discriminator for its two potential states. Importantly, both the value and the flag are intentionally kept private, leaving the `Match(...)` method as the only way to observe the contents of an `Option<T>` instance from outside. This makes the design safer as it prevents possible runtime errors which would otherwise occur if the consumer tried to unwrap a container that didn't actually have a value.
 
-However, that safety does come at a cost, as the usage of `Match(...)` method becomes noticeably convoluted when there are multiple dependent operations involved. For example, let's say we have a couple of functions that return optional results:
+Assuming we have a method called `ParseInt(...)` that returns an `Option<int>`, we are able to use it like this:
+
+```csharp
+// Converts a string to integer, or returns 'none' in case of failure
+public static Option<int> ParseInt(string str) =>
+    int.TryParse(str, out var result)
+        ? Option<int>.Some(result)
+        : Option<int>.None();
+
+// ...
+
+var someResult = ParseInt("123");
+
+// Prints "123"
+maybeResult.Match(
+    // Parsed successfully -> handle the int value
+    value => Console.WriteLine(value),
+
+    // Parsing failed -> handle the error
+    () => Console.WriteLine("Parsing error")
+);
+
+// ...
+
+var noneResult = ParseInt("foo");
+
+// Prints "Parsing error"
+noneResult.Match(
+    // Parsed successfully -> handle the int value
+    value => Console.WriteLine(value),
+
+    // Parsing failed -> handle the error
+    () => Console.WriteLine("Parsing error")
+);
+```
+
+This works fairly well when we're dealing with a single result, but becomes noticeably more convoluted when there are multiple dependent operations involved. For example, let's imagine we also have a method called `GetEnvironmentVariable(...)` that returns an `Option<string>` and we want to combine it with our existing `ParseInt(...)` method to extract a numeric value out of an environment variable:
 
 ```csharp
 // Resolves an environment variable, or returns 'none' if it's not set
@@ -236,26 +272,15 @@ public static Option<string> GetEnvironmentVariable(string name)
     return Option<string>.Some(value);
 }
 
-// Converts a string to integer, or returns 'none' in case of failure
-public static Option<int> ParseInt(string str) =>
-    int.TryParse(str, out var result)
-        ? Option<int>.Some(result)
-        : Option<int>.None();
-```
+// ...
 
-In order to chain them together, we need to write code that looks like this:
-
-TODO: make the result dependent on the first operand
-```csharp
 var maxInstances = GetEnvironmentVariable("MYAPP_MAXALLOWEDINSTANCES").Match(
     // Environment variable is set -> continue
     envVar => ParseInt(envVar).Match(
         // Parsing succeeded -> continue
         maxInstances =>
-            // Perform some additional validation and finalize the result
-            maxInstances >= 1
-                ? Option<int>.Some(maxInstances)
-                : Option<int>.None(),
+            // Finalize -> clamp the result to a reasonable value
+            maxInstances >= 1 ? maxInstances : 1,
 
         // Parsing failed -> short-circuit
         () => Option<int>.None()
@@ -266,12 +291,14 @@ var maxInstances = GetEnvironmentVariable("MYAPP_MAXALLOWEDINSTANCES").Match(
 );
 
 maxInstances.Match(
-    value => Console.WriteLine(value), // do something with the value
-    () => Console.WriteLine("Value not set or invalid") // handle failure
+    value => Console.WriteLine(value),
+    () => Console.WriteLine("Value not set or invalid")
 );
 ```
 
-There are a few different ways to simplify this, but as already mentioned before, this is an ideal use case for LINQ query syntax. Just like `Task<T>` in the earlier example, `Option<T>` represents a type with chainable semantics in the form of nested `Match(...)` calls, meaning that it's a perfect candidate for a custom `SelectMany(...)` implementation:
+It is clear that the chain of nested `Match(...)` calls above is not particularly readable. Ideally, instead of dealing with an optional value on every step of the way, it would be much better if we could focus on only the transformations to the actual value, while propagating all errors implicitly.
+
+There are a few different ways to achieve this, but as already mentioned before, this is an ideal use case for LINQ. Just like `Task<T>` in the earlier example, `Option<T>` represents a type with chainable semantics, meaning that it's a perfect candidate for a custom `SelectMany(...)` implementation:
 
 ```csharp
 public static Option<TResult> SelectMany<TFirst, TSecond, TResult>(
@@ -280,22 +307,24 @@ public static Option<TResult> SelectMany<TFirst, TSecond, TResult>(
     Func<TFirst, TSecond, TResult> getResult)
 {
     return first.Match(
-        // First operand has value - continue to the second operand
+        // First operand has value -> continue to the second operand
         firstValue => getSecond(firstValue).Match(
-            // Second operand has value - get the result from the first and second operands
+            // Second operand has value -> compose the result from the first and second operands
             secondValue => Option<TResult>.Some(getResult(firstValue, secondValue)),
 
-            // Second operand is empty - exit
+            // Second operand is empty -> return
             () => Option<TResult>.None()
         ),
 
-        // First operand is empty - exit
+        // First operand is empty -> return
         () => Option<TResult>.None()
     );
 }
 ```
 
-Above logic may be better explained with a flowchart:
+Here we've essentially replicated the nested `Match(...)` structure from earlier, but in a more general form. This method works by taking the first `from` operand, using its underlying value to resolve the second operand, and then finally assembling the result based on the values retrieved from both. Depending on the actual case, the final result may not necessarily depend on both values, but the method definition facilitates the most complex usage.
+
+Graphically, the above implementation can also be illustrated with the following flowchart:
 
 ```ini
 [ Match first operand ]
@@ -303,7 +332,7 @@ Above logic may be better explained with a flowchart:
           +--- < Has value? > --- ( no )
                      |              |
                      |              |
-                  ( yes )        [ Exit ]
+                  ( yes )   [ Return 'none' ]
                      |
                      |
             [ Get second operand ]
@@ -314,27 +343,41 @@ Above logic may be better explained with a flowchart:
                      +--- < Has value? > --- ( no )
                                 |              |
                                 |              |
-                             ( yes )        [ Exit ]
+                             ( yes )   [ Return 'none' ]
                                 |
                                 |
                [ Compute result from both values ]
                                 |
                                 |
-                      [ Return the result ]
+                        [ Return result ]
 ```
 
-Now, without any change in the original two methods, we can rewrite our original piece of code to the following:
+Now that we have that we have a corresponding `SelectMany(...)` defined, we can rewrite our original example to the following:
 
 ```csharp
 var maxInstances =
-    from envVar in GetEnvironmentVariable("MYAPP_MAXALLOWEDINSTANCES")
-    from value in ParseInt(envVar)
-    select first + second;
+    from envVar in GetEnvironmentVariable("MYAPP_MAXALLOWEDINSTANCES") // Option<string>
+    from value in ParseInt(envVar) // Option<int>
+    select value >= 1 ? value : 1; // Option<int>
+
+maxInstances.Match(
+    value => Console.WriteLine(value),
+    () => Console.WriteLine("Value not set or invalid")
+);
 ```
 
-Think of `from x in y` as "using value x of y" and `select` as "combine".
+Or, if we wanted to wrap the expression in a method:
 
-Comprehension syntax let us express happy path scenarios, with implicit failure.
+```csharp
+public Option<int> GetMaxInstances() =>
+    from envVar in GetEnvironmentVariable("MYAPP_MAXALLOWEDINSTANCES")
+    from value in ParseInt(envVar)
+    select value >= 1 ? value : 1;
+```
+
+The range variables in this syntax refer to the actual values within the optional containers. If any stage of the pipeline returns an empty value, the execution will short circuit without proceeding further.
+
+Of course, on the surface this resulted in more succinct and readable code, but more importantly this syntax provides us with a convenient mental model that allows us to focus on the happy path of optional operations.
 
 ## Extrapolating further
 
