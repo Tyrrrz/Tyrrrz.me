@@ -27,27 +27,60 @@ export default function DonatePage() {
         </li>
       </ul>
 
-      <p>Top supporters:</p>
+      <p>💜 Top supporters:</p>
 
       <ul>
         <li>Peter Wesselius</li>
         <li>Mark Ledwich</li>
-        <li>Thomas C</li>
-        <li>BouncingWalrus</li>
         <li>Dominic Maas</li>
-        <li>Victor Smith</li>
-        <li>CCRed95</li>
+        <li>Thomas C</li>
         <li>A dude</li>
+        <li>BouncingWalrus</li>
         <li>Greg Engle</li>
-        <li>Samuel Morris</li>
-        <li>lupus</li>
-        <li>Richard</li>
+        <li>Victor Smith</li>
+        <li>KillerGoldFisch</li>
+        <li>CCRed95</li>
+        <li>Lucid Brot</li>
         <li>Foritus</li>
+        <li>lupus</li>
+        <li>Meteor Burn</li>
         <li>Vince</li>
-        <li>Michael Dayah</li>
+        <li>Richard</li>
+        <li>Przemyslaw Ryciuk</li>
+        <li>Rich Burgess</li>
+        <li>eggeggss</li>
+        <li>ACPWinitiate</li>
+        <li>sathh</li>
         <li>Sprocketman1981</li>
+        <li>Dook</li>
+        <li>Piotr</li>
+        <li>Perry Straw</li>
         <li>Jim Wilson</li>
+        <li>VinzNL</li>
+        <li>Michael Dayah</li>
+        <li>Samuel Morris</li>
         <li>Montegro</li>
+        <li>John Kurtz</li>
+        <li>Jim</li>
+        <li>davelasike</li>
+        <li>Louis</li>
+        <li>Ali</li>
+        <li>dziban303</li>
+        <li>Team Jesus</li>
+        <li>wesbyte</li>
+        <li>steskalj</li>
+        <li>Jeremie</li>
+        <li>mateusz</li>
+        <li>tktcorporation</li>
+        <li>Abdull</li>
+        <li>Vinayak Lakhani</li>
+        <li>Vaz</li>
+        <li>lucs100d</li>
+        <li>Skaamit</li>
+        <li>Volentér Krisztián</li>
+        <li>STEPHEN VERNYI</li>
+        <li>Reza Andalibi</li>
+        <li>Aidan Paradis</li>
       </ul>
     </Page>
   );
