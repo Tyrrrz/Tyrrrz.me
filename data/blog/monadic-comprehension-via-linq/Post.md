@@ -221,9 +221,9 @@ public readonly struct Option<T>
 }
 ```
 
-Since C# doesn't [yet](https://github.com/dotnet/csharplang/issues/113) offer a way to define discriminated unions directly, this type is implemented as a `struct` that encapsulates a value and a boolean flag used as a discriminator for its two potential states. Importantly, both the value and the flag are intentionally kept private, leaving the `Match(...)` method as the only way to observe the contents of an `Option<T>` instance from outside. This makes the design safer as it prevents possible runtime errors which would otherwise occur if the consumer tried to unwrap a container that didn't actually have a value.
+Since C# doesn't [yet](https://github.com/dotnet/csharplang/issues/113) offer a way to define unions directly, this type is implemented as a `struct` that encapsulates a value and a boolean flag used as a discriminator for its two potential states. Importantly, both the value and the flag are intentionally kept private, leaving the `Match(...)` method as the only way to observe the contents of an `Option<T>` instance from outside. This makes the design safer as it prevents possible runtime errors which would otherwise occur if the consumer tried to unwrap a container that didn't actually have a value.
 
-Assuming we have a method called `ParseInt(...)` that returns an `Option<int>`, we are able to use it like this:
+In order to create new instances, we can either use the `Some(...)` or `None()` factory methods, depending on which state we want to represent. For example, a simple function that parses an integer number from a string can then look like this:
 
 ```csharp
 // Converts a string to integer, or returns 'none' in case of failure
@@ -231,9 +231,11 @@ public static Option<int> ParseInt(string str) =>
     int.TryParse(str, out var result)
         ? Option<int>.Some(result)
         : Option<int>.None();
+```
 
-// ...
+And, subsequently, this is how we would interact with it:
 
+```csharp
 var someResult = ParseInt("123");
 
 // Prints "123"
@@ -244,9 +246,9 @@ maybeResult.Match(
     // Parsing failed -> handle the error
     () => Console.WriteLine("Parsing error")
 );
+```
 
-// ...
-
+```csharp
 var noneResult = ParseInt("foo");
 
 // Prints "Parsing error"
@@ -259,7 +261,7 @@ noneResult.Match(
 );
 ```
 
-This works fairly well when we're dealing with a single result, but becomes noticeably more convoluted when there are multiple dependent operations involved. For example, let's imagine we also have a method called `GetEnvironmentVariable(...)` that returns an `Option<string>` and we want to combine it with our existing `ParseInt(...)` method to extract a numeric value out of an environment variable:
+Overall, the `Match(...)` API works fairly well when we're dealing with isolated results, but becomes noticeably more convoluted when there are multiple dependent operations involved. For example, let's imagine we also have a method called `GetEnvironmentVariable(...)` that returns an `Option<string>`:
 
 ```csharp
 // Resolves an environment variable, or returns 'none' if it's not set
@@ -271,9 +273,11 @@ public static Option<string> GetEnvironmentVariable(string name)
 
     return Option<string>.Some(value);
 }
+```
 
-// ...
+Now if we wanted to combine it with our existing `ParseInt(...)` method to convert the value of an environment variable to a number, we'd have to write code like this:
 
+```csharp
 var maxInstances = GetEnvironmentVariable("MYAPP_MAXALLOWEDINSTANCES").Match(
     // Environment variable is set -> continue
     envVar => ParseInt(envVar).Match(
@@ -296,7 +300,7 @@ maxInstances.Match(
 );
 ```
 
-It is clear that the chain of nested `Match(...)` calls above is not particularly readable. Ideally, instead of dealing with an optional value on every step of the way, it would be much better if we could focus on only the transformations to the actual value, while propagating all errors implicitly.
+It is clear that the chain of nested `Match(...)` calls above is not particularly readable. Instead of dealing with an optional value on every step of the way, it would be more preferable if we could focus on only the transformations to the actual value, while propagating all the _none_ states implicitly.
 
 There are a few different ways to achieve this, but as already mentioned before, this is an ideal use case for LINQ. Just like `Task<T>` in the earlier example, `Option<T>` represents a type with chainable semantics, meaning that it's a perfect candidate for a custom `SelectMany(...)` implementation:
 
@@ -322,7 +326,7 @@ public static Option<TResult> SelectMany<TFirst, TSecond, TResult>(
 }
 ```
 
-Here we've essentially replicated the nested `Match(...)` structure from earlier, but in a more general form. This method works by taking the first `from` operand, using its underlying value to resolve the second operand, and then finally assembling the result based on the values retrieved from both. Depending on the actual case, the final result may not necessarily depend on both values, but the method definition facilitates the most complex usage.
+Here we've essentially replicated the nested `Match(...)` structure from earlier, except in a more broad form. This method works by taking the first `from` operand, unwrapping its underlying value to resolve the second operand, and then finally assembling the result based on the values retrieved from both.
 
 Graphically, the above implementation can also be illustrated with the following flowchart:
 
@@ -349,10 +353,10 @@ Graphically, the above implementation can also be illustrated with the following
                [ Compute result from both values ]
                                 |
                                 |
-                        [ Return result ]
+                    [ Return result as 'some' ]
 ```
 
-Now that we have that we have a corresponding `SelectMany(...)` defined, we can rewrite our original example to the following:
+Now that we have the corresponding `SelectMany(...)` defined, we can rewrite our original example to use LINQ query syntax like so:
 
 ```csharp
 var maxInstances =
@@ -366,7 +370,7 @@ maxInstances.Match(
 );
 ```
 
-Or, if we wanted to wrap the expression in a method:
+Or, if we wanted to, we could also wrap the expression in its own method like so:
 
 ```csharp
 public Option<int> GetMaxInstances() =>
@@ -375,17 +379,15 @@ public Option<int> GetMaxInstances() =>
     select value >= 1 ? value : 1;
 ```
 
-The range variables in this syntax refer to the actual values within the optional containers. If any stage of the pipeline returns an empty value, the execution will short circuit without proceeding further. An easy way to understand this form is by treating an instance of `Option<T>` as just a special case of `IEnumerable<T>` where there can only be either zero or a single element.
+In this syntax, the range variable in the `from` clause refers to the underlying value within the optional container. The expression is only evaluated in case the value actually exists -- if a _none_ result is returned on any stage of the pipeline, the execution short-circuits without proceeding further. Conceptually, this works very similarly to collections, seeing as `Option<T>` is really just a special case of `IEnumerable<T>` that can only have one or zero elements.
 
-Of course, on the surface this resulted in more succinct and readable code, but more importantly this syntax provides us with a convenient mental model that allows us to focus on the happy path of optional operations.
+On the surface using LINQ resulted in more succinct and readable code, but most importantly it provided us with a convenient comprehension model that allows us to express operations on optional values by treating them as if they are already materialized. This lets us more easily create execution chains while implicitly pushing the concern of unwrapping the container towards upstream callers.
 
 ## Extrapolating further
 
-Of course there are also other ways we can combine different types using `SelectMany(...)`. Given that we've already implemented LINQ expressions for both `Task<T>` and `Option<T>`, the next logical step is to do the same for `Task<Option<T>>`.
+Of course, we can take things even further. Given that we've already implemented LINQ expressions for both `Task<T>` and `Option<T>`, the next logical step would be to do the same for the compound `Task<Option<T>>`.
 
-Such comprehension syntax will be useful when dealing with operations that return optional values and do that asynchronously.
-
-Here is how we can implement `SelectMany(...)` for this case:
+It's not unusual that we need to deal with operations which are both asynchronous and return optional results, so a specialized syntax for such scenarios makes perfect sense. Following the same pattern from earlier, let's implement the corresponding `SelectMany(...)` method:
 
 ```csharp
 public static async Task<Option<TResult>> SelectMany<TFirst, TSecond, TResult>(
@@ -410,43 +412,52 @@ public static async Task<Option<TResult>> SelectMany<TFirst, TSecond, TResult>(
 }
 ```
 
+Because `Option<T>.Match(...)` has an overload that takes `Func<...>` delegates, we can simply mark the handler as `async` to have it return a task. Essentially, this implementation of `SelectMany(...)` looks the same as the one we wrote for regular `Option<T>`, with an addition of a few `await` operators.
+
+To illustrate a practical use case for this syntax, let's imagine we have a class named `PaymentProcessor` which can be used to resolve user's payment information and send money between accounts:
+
 ```csharp
 public class PaymentProcessor
 {
+    // List of registered users and their IBANs
+    private readonly Dictionary<string, string> _userIbans = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["levi@gmail.com"] = "NL18INGB9971485915",
+        ["olena@hotmail.com"] = "UA131174395738584578471957518"
+    };
+
+    // Try to get IBAN by registered user's email
     public async Task<Option<string>> GetIbanAsync(string userEmail)
     {
         // Pretend that we are talking to some external server or database here
         await Task.Delay(1000);
 
-        var userIbans = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["levi@gmail.com"] = "NL18INGB9971485915",
-            ["olena@hotmail.com"] = "UA131174395738584578471957518"
-        };
-
-        if (userIbans.TryGetValue(userEmail, out var iban))
-        {
+        if (_userIbans.TryGetValue(userEmail, out var iban))
             return Option<string>.Some(iban);
-        }
 
         return Option<string>.None();
     }
 
+    // Try to send a payment from IBAN to IBAN
     public async Task<Option<Guid>> SendPaymentAsync(
         string ibanFrom,
         string ibanTo,
         decimal amount)
     {
-        // Again, sending payments through a very real payment gateway
+        // Make sure IBANs exist
+        if (!_userIbans.ContainsValue(ibanFrom) || !_userIbans.ContainsValue(ibanTo))
+            return Option<Guid>.None();
+
+        // Send the payment through a very real gateway
         await Task.Delay(1000);
 
-        // This method doesn't have any checks, just to show that the
-        // execution won't even reach here in case one of the earlier
-        // steps have failed.
+        // Return the payment ID
         return Option<Guid>.Some(Guid.NewGuid());
     }
 }
 ```
+
+Both of the above methods are asynchronous and have potential error outputs: `GetIbanAsync(...)` fails if provided with an unknown email, while `SendPaymentAsync(...)` returns an error for invalid IBANs. With the query syntax we've just introduced, we can easily compose calls to these methods like so:
 
 ```csharp
 var paymentProcessor = new PaymentProcessor();
@@ -465,12 +476,16 @@ paymentId.Match(
 );
 ```
 
+Here, just like in the previous examples, LINQ allows us to work directly on the underlying values by skipping layers of containers around it. In the end the query expression evaluates to a task that represents a chain of composed asynchronous operations with an optional result.
+
+Similarly, if any stage of the pipeline ends up failing (i.e. returning a _none_ option), the execution will terminate early with an error:
+
 ```csharp
 var paymentProcessor = new PaymentProcessor();
 
 var paymentId = await
     from joshIban in paymentProcessor.GetIbanAsync("josh@yahoo.com") // this will fail
-    from olenaIban in paymentProcessor.GetIbanAsync("olena@hotmail.com")
+    from olenaIban in paymentProcessor.GetIbanAsync("olena@hotmail.com") // this won't be executed
     from paymentId in paymentProcessor.SendPaymentAsync(joshIban, olenaIban, 100)
     select paymentId;
 
@@ -483,8 +498,8 @@ paymentId.Match(
 
 ## Summary
 
-C#'s language integrated query syntax provides an alternative way to reason about and manipulate sequences of data, but it may actually be used for more than just that. By implementing the corresponding extension methods, we can overload query operators with custom semantics and apply them to other types as well.
+C#'s language integrated query syntax provides an alternative way to reason about and manipulate collections of data, but it may actually be used for more than just that. By implementing the corresponding extension methods, we can overload query operators with custom semantics and apply them to other types as well.
 
-This is particularly beneficial for types whose instances can be naturally composed together in a lazy manner. In such scenarios, query notation can be leveraged to establish a dedicated comprehension syntax that makes working with these structures a lot easier.
+This is particularly beneficial for types whose instances can be naturally composed together in a sequential manner. In such scenarios, query notation can be leveraged to establish a dedicated comprehension syntax that makes working with these structures a lot easier.
 
 In case you are curious about other situations where custom query syntax may be useful, see also [my older blog post](/blog/monadic-parser-combinators) that shows how [Sprache](https://github.com/sprache/Sprache) relies on this feature to create complex grammar rules from smaller parsers. Alternatively, if you want to learn more about LINQ's application within the context of functional programming in general, check out Dixin Yan's excellent series of articles titled [Category Theory via C#](https://weblogs.asp.net/dixin/Tags/Category%20Theory).
