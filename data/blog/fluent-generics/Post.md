@@ -15,7 +15,7 @@ Recently, I was also working on some code involving generics and had an unusual 
 
 After a bit of experimentation, I found a way to solve this problem elegantly by using an approach similar to the [_fluent interface_](https://en.wikipedia.org/wiki/Fluent_interface) design pattern, except applied in relation to types instead of objects. The design I arrived at features a domain-specific language that allows consumers to resolve the type they need, by "configuring" it in a sequence of logical steps.
 
-In this article, I will explain what this approach is about and how you can use it to organize complex generic types in a more accessible way.
+In this article I will explain what this approach is about and how you can use it to organize complex generic types in a more accessible way.
 
 ## Fluent interfaces
 
