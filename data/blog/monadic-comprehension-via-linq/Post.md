@@ -1,6 +1,6 @@
 ---
 title: 'Monadic Comprehension Syntax via LINQ in C#'
-date: '2021-05-11'
+date: '2021-06-01'
 tags:
   - 'dotnet'
   - 'csharp'
@@ -159,7 +159,7 @@ var result = await task;
 Console.WriteLine(result);
 ```
 
-Although the syntax for the query operators remains the same, the semantics are a little different from what we're used to when dealing with collections. Here, the range variable (the part between `from` and `in`) only has a single possible value -- the eventual result of the task on the right. The terminal `select` clause is then used to transform and aggregate results from individual operations to produce a single top-level task.
+Although the syntax for the query operators remains the same, the semantics are a little different compared to what we're used to when dealing with collections. Here, the range variable (the part between `from` and `in`) only has a single possible value -- the eventual result of the task on the right. The terminal `select` clause is then used to transform and aggregate results from individual operations to produce a single top-level task.
 
 Just like the `SelectMany(...)` method that this notation internally relies on, every action is encoded in a lazy manner. To get the final result, the composed task needs to be awaited.
 
@@ -185,7 +185,7 @@ When writing in a functional style, on the other hand, failures are typically en
 
 Even in primarily object-oriented environments, such as C#, optional types are still commonly used to communicate expected, predictable, or otherwise non-fatal errors, for which exceptions may often be impractical. For example, when building a web service, we can choose to express domain-level failures this way to ensure that they are correctly handled and mapped to corresponding HTTP status codes upon reaching the system boundary.
 
-One downside of the functional approach, however, is that it doesn't allow us to easily defer the responsibility of dealing with an error to upstream callers, which is something exceptions provide in the form of their bubbling behavior. Being explicit means we have to always handle both the optimistic and pessimistic outcomes simultaneously, which can often be a bit cumbersome. After all, [no one wants to write code where you have to constantly verify if the last executed operation has completed successfully](https://golang.org).
+One downside of the functional approach, however, is that it doesn't allow us to easily defer the responsibility of dealing with an error to upstream callers, which is something that exceptions provide in the form of their bubbling behavior. Being explicit means we have to always handle both the optimistic and pessimistic outcomes simultaneously, but that can be a bit cumbersome. After all, no one would want to write code where you need to [deal with errors every single step of the way](https://golang.org).
 
 Luckily, this is the exact kind of problem that we can solve by introducing custom LINQ query syntax. To illustrate, let's first imagine that we have an `Option<T>` type already implemented as shown below:
 
@@ -223,7 +223,7 @@ public readonly struct Option<T>
 
 Since C# doesn't [yet](https://github.com/dotnet/csharplang/issues/113) offer a way to define unions directly, this type is implemented as a `struct` that encapsulates a value and a boolean flag used as a discriminator for its two potential states. Importantly, both the value and the flag are intentionally kept private, leaving the `Match(...)` method as the only way to observe the contents of an `Option<T>` instance from outside. This makes the design safer as it prevents possible runtime errors which would otherwise occur if the consumer tried to unwrap a container that didn't actually have a value.
 
-In order to create new instances, we can either use the `Some(...)` or `None()` factory methods, depending on which state we want to represent. For example, a simple function that parses an integer number from a string can then look like this:
+In order to create new instances, we can use the `Some(...)` and `None()` factory methods, depending on which state we want to represent. For example, a simple function that parses an integer number from a string can then look like this:
 
 ```csharp
 // Converts a string to integer, or returns 'none' in case of failure
@@ -300,7 +300,7 @@ maxInstances.Match(
 );
 ```
 
-It is clear that the chain of nested `Match(...)` calls above is not particularly readable. Instead of dealing with an optional value on every step of the way, it would be more preferable if we could focus on only the transformations to the actual value, while propagating all the _none_ states implicitly.
+It is clear that the chain of nested `Match(...)` calls above is not particularly readable. Instead of dealing with an optional container on each step, it would be more preferable if we could focus on only the transformations to the actual value, while propagating all the _none_ states implicitly.
 
 There are a few different ways to achieve this, but as already mentioned before, this is an ideal use case for LINQ. Just like `Task<T>` in the earlier example, `Option<T>` represents a type with chainable semantics, meaning that it's a perfect candidate for a custom `SelectMany(...)` implementation:
 
@@ -356,7 +356,7 @@ Graphically, the above implementation can also be illustrated with the following
                     [ Return result as 'some' ]
 ```
 
-Now that we have the corresponding `SelectMany(...)` defined, we can rewrite our original example to use LINQ query syntax like so:
+Now that we have the corresponding `SelectMany(...)` defined, we can rewrite our original example to use LINQ query syntax like this:
 
 ```csharp
 var maxInstances =
@@ -379,11 +379,11 @@ public Option<int> GetMaxInstances() =>
     select value >= 1 ? value : 1;
 ```
 
-In this syntax, the range variable in the `from` clause refers to the underlying value within the optional container. The expression is only evaluated in case the value actually exists -- if a _none_ result is returned on any stage of the pipeline, the execution short-circuits without proceeding further. Conceptually, this works very similarly to collections, seeing as `Option<T>` is really just a special case of `IEnumerable<T>` that can only have one or zero elements.
+In this syntax, the range variable in the `from` clause refers to the underlying value within the optional container. The corresponding expression is only evaluated in case the value actually exists -- if a _none_ result is returned at any stage of the pipeline, the execution short-circuits without proceeding further. Conceptually, this works very similarly to collections, seeing as `Option<T>` is really just a special case of `IEnumerable<T>` that can only have one or zero elements.
 
 On the surface using LINQ resulted in more succinct and readable code, but most importantly it provided us with a convenient comprehension model that allows us to express operations on optional values by treating them as if they are already materialized. This lets us more easily create execution chains while implicitly pushing the concern of unwrapping the container towards upstream callers.
 
-## Extrapolating further
+## Extrapolating and combining
 
 Of course, we can take things even further. Given that we've already implemented LINQ expressions for both `Task<T>` and `Option<T>`, the next logical step would be to do the same for the compound `Task<Option<T>>`.
 
@@ -502,4 +502,4 @@ C#'s language integrated query syntax provides an alternative way to reason abou
 
 This is particularly beneficial for types whose instances can be naturally composed together in a sequential manner. In such scenarios, query notation can be leveraged to establish a dedicated comprehension syntax that makes working with these structures a lot easier.
 
-In case you are curious about other situations where custom query syntax may be useful, see also [my older blog post](/blog/monadic-parser-combinators) that shows how [Sprache](https://github.com/sprache/Sprache) relies on this feature to create complex grammar rules from smaller parsers. Alternatively, if you want to learn more about LINQ's application within the context of functional programming in general, check out Dixin Yan's excellent series of articles titled [Category Theory via C#](https://weblogs.asp.net/dixin/Tags/Category%20Theory).
+In case you are curious about other situations where custom query syntax may be useful, see also [my older blog post](/blog/monadic-parser-combinators) that shows how [Sprache](https://github.com/sprache/Sprache) relies on this feature to create complex parsers from simple grammar rules. Alternatively, if you want to learn more about LINQ's application within the context of functional programming in general, check out Dixin Yan's excellent series of articles titled [Category Theory via C#](https://weblogs.asp.net/dixin/Tags/Category%20Theory).
