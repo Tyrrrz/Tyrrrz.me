@@ -101,7 +101,7 @@ public static Container<TResult> SelectMany<TFirst, TSecond, TResult>(
         In query syntax:
 
         from {firstValue} in {first}
-        from {secondValue} in {getSecond(first)}
+        from {secondValue} in {getSecond(firstValue)}
         select {getResult(firstValue, secondValue)}
     */
 }
