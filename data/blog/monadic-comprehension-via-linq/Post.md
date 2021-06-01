@@ -239,7 +239,7 @@ And, subsequently, this is how we would interact with it:
 var someResult = ParseInt("123");
 
 // Prints "123"
-maybeResult.Match(
+someResult.Match(
     // Parsed successfully -> handle the int value
     value => Console.WriteLine(value),
 
