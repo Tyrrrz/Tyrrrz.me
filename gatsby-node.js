@@ -101,7 +101,8 @@ module.exports = {
       toPath: '/speaking',
       isPermanent: true,
       ignoreCase: true,
-      force: true
+      force: true,
+      redirectInBrowser: true
     });
   }
 };
