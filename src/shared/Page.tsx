@@ -81,8 +81,8 @@ function Navigation() {
           Projects
         </Link>
 
-        <Link className="navbar-link" activeClassName="navbar-link--active" href="/talks">
-          Talks
+        <Link className="navbar-link" activeClassName="navbar-link--active" href="/speaking">
+          Speaking
         </Link>
       </div>
     </nav>

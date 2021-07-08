@@ -48,8 +48,8 @@ module.exports = {
     });
 
     actions.createPage({
-      path: '/talks',
-      component: path.resolve('./src/Talks.tsx'),
+      path: '/speaking',
+      component: path.resolve('./src/Speaking.tsx'),
       context: null
     });
 
@@ -93,6 +93,15 @@ module.exports = {
         component: path.resolve('./src/BlogPost.tsx'),
         context: { slug, coverImagePath }
       });
+    });
+
+    // Generate redirects
+    actions.createRedirect({
+      fromPath: '/talks',
+      toPath: '/speaking',
+      isPermanent: true,
+      ignoreCase: true,
+      force: true
     });
   }
 };

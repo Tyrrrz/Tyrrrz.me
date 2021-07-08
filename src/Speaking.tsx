@@ -1,15 +1,16 @@
 import { compareDesc as compareDatesDesc, format as formatDate } from 'date-fns';
 import { graphql } from 'gatsby';
 import React from 'react';
-import { FiCalendar, FiGlobe, FiMessageCircle } from 'react-icons/fi';
+import { FiCalendar, FiGlobe, FiMessageCircle, FiMic, FiRadio, FiTool } from 'react-icons/fi';
 import Link from './shared/Link';
 import Page from './shared/Page';
 
 export const query = graphql`
   query {
-    allTalksJson {
+    allSpeakingJson {
       nodes {
         title
+        kind
         event
         date
         language
@@ -21,14 +22,15 @@ export const query = graphql`
   }
 `;
 
-interface TalksPageProps {
-  data: { allTalksJson: GatsbyTypes.TalksJsonConnection };
+interface SpeakingPageProps {
+  data: { allSpeakingJson: GatsbyTypes.SpeakingJsonConnection };
 }
 
-export default function TalksPage({ data }: TalksPageProps) {
-  const talks = [...data.allTalksJson.nodes]
+export default function SpeakingPage({ data }: SpeakingPageProps) {
+  const speakingEngagements = [...data.allSpeakingJson.nodes]
     .map((node) => ({
       title: node.title!,
+      kind: node.kind!,
       event: node.event!,
       date: new Date(node.date!),
       language: node.language!,
@@ -38,50 +40,59 @@ export default function TalksPage({ data }: TalksPageProps) {
     }))
     .sort((a, b) => compareDatesDesc(a.date, b.date));
 
-  const years = [...new Set(talks.map((talk) => talk.date.getFullYear()))];
+  const years = [...new Set(speakingEngagements.map((e) => e.date.getFullYear()))];
 
-  const talksByYear = years
+  const speakingEngagementsByYear = years
     .sort((a, b) => b - a)
     .map((year) => ({
       year,
-      talks: talks.filter((talk) => talk.date.getFullYear() === year)
+      engagements: speakingEngagements.filter((e) => e.date.getFullYear() === year)
     }));
 
   return (
-    <Page title="Talks">
-      <div className="section-header">Talks</div>
+    <Page title="Speaking">
+      <div className="section-header">Speaking</div>
 
-      {talksByYear.map(({ year, talks }) => (
+      {speakingEngagementsByYear.map(({ year, engagements }) => (
         <div key={year} className="group">
           <div className="group-header">
             <div>{year}</div>
             <hr className="group-header-line" />
           </div>
 
-          {talks.map((talk) => (
-            <div key={talk.event + talk.date} className="entry">
+          {engagements.map((e) => (
+            <div key={e.event + e.date} className="entry">
               <div className="entry-name">
-                <Link href={talk.recordingUrl || talk.presentationUrl || talk.eventUrl || '#'}>
-                  {talk.title}
+                <Link href={e.recordingUrl || e.presentationUrl || e.eventUrl || '#'}>
+                  {e.title}
                 </Link>
               </div>
 
               <div className="entry-info">
                 <div className="label">
+                  {{
+                    Talk: <FiMic strokeWidth={1} />,
+                    Workshop: <FiTool strokeWidth={1} />,
+                    Podcast: <FiRadio strokeWidth={1} />
+                  }[e.kind] || <FiMic strokeWidth={1} />}
+                  <div>{e.kind}</div>
+                </div>
+
+                <div className="label">
                   <FiGlobe strokeWidth={1} />
                   <div>
-                    <Link href={talk.eventUrl}>{talk.event}</Link>
+                    <Link href={e.eventUrl}>{e.event}</Link>
                   </div>
                 </div>
 
                 <div className="label">
                   <FiCalendar strokeWidth={1} />
-                  <div>{formatDate(talk.date, 'dd MMM yyyy')}</div>
+                  <div>{formatDate(e.date, 'dd MMM yyyy')}</div>
                 </div>
 
                 <div className="label">
                   <FiMessageCircle strokeWidth={1} />
-                  <div>{talk.language}</div>
+                  <div>{e.language}</div>
                 </div>
               </div>
             </div>

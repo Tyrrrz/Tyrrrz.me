@@ -42,23 +42,23 @@ export default function ProjectsPage({ data }: ProjectsPageProps) {
         <Link href="/donate">making a donation</Link> 💛
       </div>
 
-      {projects.map((project) => (
-        <div key={project.name} className="entry">
+      {projects.map((p) => (
+        <div key={p.name} className="entry">
           <div className="entry-name">
-            <Link href={project.url}>{project.name}</Link>
+            <Link href={p.url}>{p.name}</Link>
           </div>
 
-          <div className="entry-description">{project.description}</div>
+          <div className="entry-description">{p.description}</div>
 
           <div className="entry-info">
             <div className="label">
               <FiStar strokeWidth={1} fill="#ecc94b" />
-              <div>{project.stars}</div>
+              <div>{p.stars}</div>
             </div>
 
             <div className="label">
               <FiPackage strokeWidth={1} />
-              <div>{project.language}</div>
+              <div>{p.language}</div>
             </div>
           </div>
         </div>

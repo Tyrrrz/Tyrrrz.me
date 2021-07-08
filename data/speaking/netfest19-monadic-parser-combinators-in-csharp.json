@@ -1,5 +1,6 @@
 {
   "title": "Monadic Parser Combinators in C#",
+  "kind": "Talk",
   "event": ".NET Fest",
   "date": "2019-10-25",
   "language": "Russian",
