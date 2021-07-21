@@ -37,8 +37,8 @@ export default function HomePage() {
         </p>
         <p>
           My professional hobbies involve open source, conference speaking, and blogging. Outside of
-          that I&apos;m also into outdoor photography, digital art, playing guitar, and foreign
-          languages.
+          that I&apos;m also into outdoor photography, digital art, playing guitar, and learning
+          foreign languages.
         </p>
       </div>
 
