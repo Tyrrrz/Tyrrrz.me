@@ -2,6 +2,7 @@ import { compareDesc as compareDatesDesc, format as formatDate, formatDuration }
 import { graphql } from 'gatsby';
 import React from 'react';
 import { FiCalendar, FiClock, FiTag } from 'react-icons/fi';
+import Emoji from './shared/Emoji';
 import Link from './shared/Link';
 import Page from './shared/Page';
 
@@ -54,7 +55,7 @@ export default function BlogPage({ data }: BlogPageProps) {
       <div className="section-prelude">
         If you want to know when I post a new article, follow me on{' '}
         <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or subscribe to the{' '}
-        <Link href="/blog/rss.xml">RSS feed</Link> ✨
+        <Link href="/blog/rss.xml">RSS feed</Link> <Emoji code="✨" />
       </div>
 
       {blogPostsByYear.map(({ year, blogPosts }) => (

@@ -1,8 +1,8 @@
 import React from 'react';
 import Helmet from 'react-helmet';
 import { getAbsoluteUrl } from '../infra/utils';
-import '../styles/main.css';
 import Link from './Link';
+import './Page.css';
 import useSiteMetadata from './useSiteMetadata';
 
 interface MetaProps {

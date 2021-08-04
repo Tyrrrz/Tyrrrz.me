@@ -1,4 +1,5 @@
 import React from 'react';
+import Emoji from './shared/Emoji';
 import Link from './shared/Link';
 import Page from './shared/Page';
 
@@ -9,7 +10,7 @@ export default function DonatePage() {
 
       <div className="section-prelude">
         If you found any of my projects useful and want to support their development, please
-        consider making a donation 🙂
+        consider making a donation <Emoji code="🙂" />
       </div>
 
       <ul>
@@ -27,7 +28,9 @@ export default function DonatePage() {
         </li>
       </ul>
 
-      <p>💜 Top supporters:</p>
+      <p>
+        <Emoji code="💜" /> Top supporters:
+      </p>
 
       <ul>
         <li>Peter Wesselius</li>

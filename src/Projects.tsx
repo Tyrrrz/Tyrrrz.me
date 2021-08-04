@@ -1,6 +1,7 @@
 import { graphql } from 'gatsby';
 import React from 'react';
 import { FiPackage, FiStar } from 'react-icons/fi';
+import Emoji from './shared/Emoji';
 import Link from './shared/Link';
 import Page from './shared/Page';
 
@@ -39,7 +40,7 @@ export default function ProjectsPage({ data }: ProjectsPageProps) {
 
       <div className="section-prelude">
         If you want to support development of my projects, please consider{' '}
-        <Link href="/donate">making a donation</Link> 💛
+        <Link href="/donate">making a donation</Link> <Emoji code="💛" />
       </div>
 
       {projects.map((p) => (
