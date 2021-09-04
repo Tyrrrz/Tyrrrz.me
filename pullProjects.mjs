@@ -34,6 +34,7 @@ async function getNuGetDownloads(pkg) {
     `https://azuresearch-usnc.nuget.org/query?q=packageid:${pkg.toLowerCase()}`
   );
 
+  // Not all projects are on NuGet
   if (response.status !== 200) {
     return 0;
   }
@@ -47,29 +48,27 @@ async function main() {
   const repos = await getGitHubRepos();
 
   await Promise.allSettled(
-    repos.map(async (repo) => {
-      if (repo.stargazers_count < 35) {
-        return;
-      }
+    repos
+      .filter((repo) => repo.stargazers_count >= 35)
+      .map(async (repo) => {
+        const gitHubDownloads = await getGitHubDownloads(repo.name);
+        const nuGetDownloads = await getNuGetDownloads(repo.name);
 
-      const gitHubDownloads = await getGitHubDownloads(repo.name);
-      const nuGetDownloads = await getNuGetDownloads(repo.name);
+        const project = {
+          name: repo.name,
+          url: repo.html_url,
+          description: repo.description,
+          stars: repo.stargazers_count,
+          downloads: gitHubDownloads + nuGetDownloads,
+          language: repo.language
+        };
 
-      const project = {
-        name: repo.name,
-        url: repo.html_url,
-        description: repo.description,
-        stars: repo.stargazers_count,
-        downloads: gitHubDownloads + nuGetDownloads,
-        language: repo.language
-      };
+        const json = JSON.stringify(project, null, 2) + '\n';
+        const filePath = resolve(outputDirPath, `${project.name}.json`);
 
-      const json = JSON.stringify(project, null, 2) + '\n';
-      const filePath = resolve(outputDirPath, `${project.name}.json`);
-
-      writeFileSync(filePath, json);
-      console.log(`Pulled ${project.name}.`);
-    })
+        writeFileSync(filePath, json);
+        console.log(`Pulled ${project.name}.`);
+      })
   );
 }
 
