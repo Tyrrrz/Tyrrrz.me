@@ -1,6 +1,6 @@
 import { graphql } from 'gatsby';
 import React from 'react';
-import { FiPackage, FiStar } from 'react-icons/fi';
+import { FiDownload, FiPackage, FiStar } from 'react-icons/fi';
 import Emoji from './shared/Emoji';
 import Link from './shared/Link';
 import Page from './shared/Page';
@@ -13,6 +13,7 @@ export const query = graphql`
         url
         description
         stars
+        downloads
         language
       }
     }
@@ -30,6 +31,7 @@ export default function ProjectsPage({ data }: ProjectsPageProps) {
       url: node.url!,
       description: node.description!,
       stars: node.stars!,
+      downloads: node.downloads!,
       language: node.language!
     }))
     .sort((a, b) => b.stars - a.stars);
@@ -54,7 +56,12 @@ export default function ProjectsPage({ data }: ProjectsPageProps) {
           <div className="entry-info">
             <div className="label">
               <FiStar strokeWidth={1} fill="#ecc94b" />
-              <div>{p.stars}</div>
+              <div>{p.stars.toLocaleString()}</div>
+            </div>
+
+            <div className="label">
+              <FiDownload strokeWidth={1} />
+              <div>{p.downloads.toLocaleString()}</div>
             </div>
 
             <div className="label">

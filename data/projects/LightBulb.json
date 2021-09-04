@@ -2,6 +2,7 @@
   "name": "LightBulb",
   "url": "https://github.com/Tyrrrz/LightBulb",
   "description": "Reduces eye strain by adjusting gamma based on the current time",
-  "stars": 1261,
+  "stars": 1279,
+  "downloads": 220854,
   "language": "C#"
 }

@@ -2,6 +2,7 @@
   "name": "MiniRazor",
   "url": "https://github.com/Tyrrrz/MiniRazor",
   "description": "Portable Razor compiler & code generator",
-  "stars": 139,
+  "stars": 143,
+  "downloads": 6427,
   "language": "C#"
 }

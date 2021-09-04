@@ -8,7 +8,7 @@
     "@types/react-helmet": "^6.1.1",
     "@types/twemoji": "^12.1.2",
     "date-fns": "^2.22.1",
-    "gatsby": "^3.6.1",
+    "gatsby": "^3.13.0",
     "gatsby-plugin-canonical-urls": "^3.6.0",
     "gatsby-plugin-catch-links": "^3.6.0",
     "gatsby-plugin-disqus": "^1.2.2",
@@ -20,7 +20,7 @@
     "gatsby-plugin-offline": "^4.6.0",
     "gatsby-plugin-react-helmet": "^4.6.0",
     "gatsby-plugin-robots-txt": "^1.6.2",
-    "gatsby-plugin-sharp": "^3.6.0",
+    "gatsby-plugin-sharp": "^3.13.0",
     "gatsby-plugin-sitemap": "^3.3.0",
     "gatsby-plugin-typegen": "^2.2.4",
     "gatsby-remark-images": "^4.2.0",
@@ -45,14 +45,15 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "node-fetch": "^3.0.0",
     "prettier": "^2.3.0",
     "prettier-plugin-organize-imports": "^1.1.1"
   },
   "scripts": {
-    "lint": "eslint **/*.{js,jsx,ts,tsx} --fix",
-    "pull-external-data": "node ./pullExternalData.js",
     "start": "gatsby develop",
     "build": "gatsby build",
-    "clean": "gatsby clean"
+    "clean": "gatsby clean",
+    "lint": "eslint **/*.{js,jsx,ts,tsx} --fix",
+    "pull-projects": "node ./pullProjects.mjs"
   }
 }

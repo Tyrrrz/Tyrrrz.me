@@ -2,6 +2,7 @@
   "name": "Onova",
   "url": "https://github.com/Tyrrrz/Onova",
   "description": "Unopinionated auto-update framework for desktop applications",
-  "stars": 297,
+  "stars": 303,
+  "downloads": 30371,
   "language": "C#"
 }

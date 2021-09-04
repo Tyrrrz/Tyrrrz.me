@@ -2,6 +2,7 @@
   "name": "CliFx",
   "url": "https://github.com/Tyrrrz/CliFx",
   "description": "Declarative framework for building command line interfaces",
-  "stars": 988,
+  "stars": 1005,
+  "downloads": 154370,
   "language": "C#"
 }
