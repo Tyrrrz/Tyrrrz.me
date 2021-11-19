@@ -2,7 +2,7 @@
   "name": "DotnetRuntimeBootstrapper",
   "url": "https://github.com/Tyrrrz/DotnetRuntimeBootstrapper",
   "description": "Bootstraps .NET runtime for Windows desktop applications",
-  "stars": 95,
-  "downloads": 1261,
+  "stars": 98,
+  "downloads": 1517,
   "language": "C#"
 }
