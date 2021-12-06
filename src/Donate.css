@@ -1,0 +1,15 @@
+.donation {
+  margin: 0.65rem 0;
+}
+
+.donation-name {
+  font-size: 1.1rem;
+}
+
+.donation-info {
+  margin-top: 0.1rem;
+  display: flex;
+  flex-wrap: wrap;
+  font-weight: 300;
+  letter-spacing: 0.025rem;
+}

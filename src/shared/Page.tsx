@@ -1,5 +1,6 @@
 import React from 'react';
 import Helmet from 'react-helmet';
+import { IconContext } from 'react-icons/lib';
 import { getAbsoluteUrl } from '../infra/utils';
 import Link from './Link';
 import './Page.css';
@@ -95,11 +96,13 @@ interface PageProps extends MetaProps {
 
 export default function Page({ children, ...props }: PageProps) {
   return (
-    <div className="page-container">
-      <Meta {...props} />
-      <Navigation />
+    <IconContext.Provider value={{ style: { marginTop: '0.2rem' } }}>
+      <div className="page-container">
+        <Meta {...props} />
+        <Navigation />
 
-      <main>{children}</main>
-    </div>
+        <main>{children}</main>
+      </div>
+    </IconContext.Provider>
   );
 }

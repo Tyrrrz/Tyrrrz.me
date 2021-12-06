@@ -1,9 +1,36 @@
+import { graphql } from 'gatsby';
 import React from 'react';
+import { FiDollarSign, FiExternalLink } from 'react-icons/fi';
+import './Donate.css';
 import Emoji from './shared/Emoji';
 import Link from './shared/Link';
 import Page from './shared/Page';
 
-export default function DonatePage() {
+export const query = graphql`
+  query {
+    allDonationsJson {
+      nodes {
+        name
+        amount
+        platform
+      }
+    }
+  }
+`;
+
+interface DonatePageProps {
+  data: { allDonationsJson: GatsbyTypes.DonationsJsonConnection };
+}
+
+export default function DonatePage({ data }: DonatePageProps) {
+  const donations = [...data.allDonationsJson.nodes]
+    .map((node) => ({
+      name: node.name!,
+      amount: node.amount!,
+      platform: node.platform!
+    }))
+    .sort((a, b) => b.amount - a.amount);
+
   return (
     <Page title="Donate">
       <div className="section-header">Donate</div>
@@ -28,62 +55,27 @@ export default function DonatePage() {
         </li>
       </ul>
 
-      <p>
-        <Emoji code="💜" /> Top supporters:
-      </p>
+      <hr />
+
+      <div className="section-header">Top supporters</div>
 
       <ul>
-        <li>Peter Wesselius</li>
-        <li>Mark Ledwich</li>
-        <li>Dominic Maas</li>
-        <li>Thomas C</li>
-        <li>A dude</li>
-        <li>BouncingWalrus</li>
-        <li>Greg Engle</li>
-        <li>Victor Smith</li>
-        <li>KillerGoldFisch</li>
-        <li>CCRed95</li>
-        <li>Lucid Brot</li>
-        <li>Foritus</li>
-        <li>lupus</li>
-        <li>Meteor Burn</li>
-        <li>Vince</li>
-        <li>Richard</li>
-        <li>Przemyslaw Ryciuk</li>
-        <li>Rich Burgess</li>
-        <li>eggeggss</li>
-        <li>ACPWinitiate</li>
-        <li>sathh</li>
-        <li>Sprocketman1981</li>
-        <li>Dook</li>
-        <li>Piotr</li>
-        <li>Perry Straw</li>
-        <li>Jim Wilson</li>
-        <li>VinzNL</li>
-        <li>Michael Dayah</li>
-        <li>Samuel Morris</li>
-        <li>Montegro</li>
-        <li>John Kurtz</li>
-        <li>Jim</li>
-        <li>davelasike</li>
-        <li>Louis</li>
-        <li>Ali</li>
-        <li>dziban303</li>
-        <li>Team Jesus</li>
-        <li>wesbyte</li>
-        <li>steskalj</li>
-        <li>Jeremie</li>
-        <li>mateusz</li>
-        <li>tktcorporation</li>
-        <li>Abdull</li>
-        <li>Vinayak Lakhani</li>
-        <li>Vaz</li>
-        <li>lucs100d</li>
-        <li>Skaamit</li>
-        <li>Volentér Krisztián</li>
-        <li>STEPHEN VERNYI</li>
-        <li>Reza Andalibi</li>
-        <li>Aidan Paradis</li>
+        {donations.map((d) => (
+          <li key={d.name} className="donation">
+            <div className="donation-name">{d.name}</div>
+            <div className="donation-info">
+              <div className="label">
+                <FiDollarSign strokeWidth={1} />
+                <div>{d.amount}</div>
+              </div>
+
+              <div className="label">
+                <FiExternalLink strokeWidth={1} />
+                <div>{d.platform}</div>
+              </div>
+            </div>
+          </li>
+        ))}
       </ul>
     </Page>
   );
