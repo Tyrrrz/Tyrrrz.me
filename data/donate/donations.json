@@ -358,5 +358,10 @@
     "name": "Angelos Tsiflas",
     "amount": 6,
     "platform": "BuyMeACoffee"
+  },
+  {
+    "name": "Filip Navara",
+    "amount": 10,
+    "platform": "BuyMeACoffee"
   }
 ]
