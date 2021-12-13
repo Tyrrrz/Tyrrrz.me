@@ -53,6 +53,9 @@ export default function DonatePage({ data }: DonatePageProps) {
         <li>
           Bitcoin: <code>3HtgWiio8fzMpYTXiZVNrKiQSdXAEf7xet</code>
         </li>
+        <li>
+          <Link href="https://store.steampowered.com/wishlist/id/Tyrrrz">Steam Wishlist</Link>
+        </li>
       </ul>
 
       <hr />
