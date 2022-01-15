@@ -2,7 +2,7 @@
   "name": "DotnetRuntimeBootstrapper",
   "url": "https://github.com/Tyrrrz/DotnetRuntimeBootstrapper",
   "description": "Bootstrapped framework-dependent deployment for .NET applications",
-  "stars": 186,
-  "downloads": 2488,
+  "stars": 189,
+  "downloads": 3222,
   "language": "C#"
 }
