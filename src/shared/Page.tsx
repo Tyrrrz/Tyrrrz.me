@@ -18,9 +18,9 @@ function Meta({ title, description, keywords, imageUrl, rssUrl }: MetaProps) {
   const siteMetadata = useSiteMetadata();
 
   const defaults = {
-    title: 'Alexey Golub',
+    title: 'Oleksii Holub',
     description:
-      'Alexey Golub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker'
+      'Oleksii Holub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker'
   };
 
   const actual = {
@@ -65,7 +65,7 @@ function Navigation() {
     <nav className="navbar">
       <div className="navbar-logo">
         <Link className="navbar-logo-link" href="/">
-          Alexey Golub
+          Oleksii Holub
         </Link>
       </div>
 

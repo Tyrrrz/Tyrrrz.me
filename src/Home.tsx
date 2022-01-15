@@ -19,7 +19,7 @@ export default function HomePage() {
           width={128}
           height={128}
           placeholder="blurred"
-          alt="Alexey Golub"
+          alt="Oleksii Holub"
         />
       </figure>
 
@@ -27,7 +27,7 @@ export default function HomePage() {
 
       <div>
         <p>
-          <Emoji code="👋" /> Hello! My name is Alexey, also known online as Tyrrrz. I&apos;m a{' '}
+          <Emoji code="👋" /> Hello! My name is Oleksii, also known online as Tyrrrz. I&apos;m a{' '}
           {myAge} y/o software developer from Kyiv, Ukraine. I&apos;m also a{' '}
           <Link href="https://mvp.microsoft.com/en-us/PublicProfile/5004136">Microsoft MVP</Link>{' '}
           and a <Link href="https://stars.github.com/profiles/tyrrrz">GitHub Star</Link>.

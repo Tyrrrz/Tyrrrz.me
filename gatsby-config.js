@@ -31,9 +31,9 @@ function resolvePlugin(plugin, options) {
 module.exports = {
   siteMetadata: {
     siteUrl,
-    title: 'Alexey Golub',
+    title: 'Oleksii Holub',
     description:
-      'Alexey Golub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker'
+      'Oleksii Holub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker'
   },
 
   plugins: [
@@ -110,7 +110,7 @@ module.exports = {
             }
           }`,
           output: '/blog/rss.xml',
-          title: 'Blog | Alexey Golub (RSS Feed)'
+          title: 'Blog | Oleksii Holub (RSS Feed)'
         }
       ]
     }),
