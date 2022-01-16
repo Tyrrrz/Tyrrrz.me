@@ -141,7 +141,7 @@ public static Task<TResult> SelectMany<TFirst, TSecond, TResult>(
 }
 ```
 
-The usage of nested `ContinueWith(...)` callbacks allows us to sequence derived tasks and lazily compose their results without actually waiting for the entire process to complete. Calling `SelectMany(...)` will effectively produce a new higher-order task that has all the specified transformations encoded within it, and whose result can be observed once all of the dependent operations have finished.
+The usage of nested `ContinueWith(...)` callbacks allows us to sequence derived tasks and lazily compose their results without actually waiting for the entire process to complete. Calling `SelectMany(...)` will effectively produce a new higher-order task that has all the specified transformations encoded within it, and whose result can be observed once all of the underlying operations have finished.
 
 Having that extension method defined, we can use query syntax on tasks to write code similar to this:
 
