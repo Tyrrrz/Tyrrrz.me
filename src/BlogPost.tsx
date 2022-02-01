@@ -94,6 +94,7 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
       keywords={blogPost.tags}
       imageUrl={getSrc(coverImage?.gatsbyImageData || coverImageFallback.gatsbyImageData)}
       rssUrl="/blog/rss.xml"
+      previewLayout="imagePriority"
     >
       <div className="section-header">{blogPost.title}</div>
 

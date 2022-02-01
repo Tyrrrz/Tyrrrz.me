@@ -13,9 +13,10 @@ interface MetaProps {
   keywords?: string[];
   imageUrl?: string;
   rssUrl?: string;
+  previewLayout?: 'descriptionPriority' | 'imagePriority';
 }
 
-function Meta({ title, description, keywords, imageUrl, rssUrl }: MetaProps) {
+function Meta({ title, description, keywords, imageUrl, rssUrl, previewLayout }: MetaProps) {
   const siteMetadata = useSiteMetadata();
 
   const fallback = {
@@ -32,7 +33,8 @@ function Meta({ title, description, keywords, imageUrl, rssUrl }: MetaProps) {
           }
         }
       }
-    `).image.childImageSharp.original.src as string
+    `).image.childImageSharp.original.src as string,
+    previewLayout: 'descriptionPriority'
   };
 
   const actual = {
@@ -40,7 +42,8 @@ function Meta({ title, description, keywords, imageUrl, rssUrl }: MetaProps) {
     description: description || fallback.description,
     keywords: keywords?.join(', ') || '',
     imageUrl: getAbsoluteUrl(siteMetadata.siteUrl, imageUrl || fallback.imageUrl),
-    rssUrl: rssUrl && getAbsoluteUrl(siteMetadata.siteUrl, rssUrl)
+    rssUrl: rssUrl && getAbsoluteUrl(siteMetadata.siteUrl, rssUrl),
+    previewLayout: previewLayout || fallback.previewLayout
   };
 
   return (
@@ -61,7 +64,10 @@ function Meta({ title, description, keywords, imageUrl, rssUrl }: MetaProps) {
       <meta name="twitter:title" content={actual.title} />
       <meta name="twitter:site" content="@Tyrrrz" />
       <meta name="twitter:creator" content="@Tyrrrz" />
-      <meta name="twitter:card" content="summary_large_image" />
+      <meta
+        name="twitter:card"
+        content={actual.previewLayout === 'imagePriority' ? 'summary_large_image' : 'summary'}
+      />
       <meta name="twitter:description" content={actual.description} />
       <meta name="twitter:image" content={actual.imageUrl} />
 
