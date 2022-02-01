@@ -7,7 +7,7 @@ interface SiteMetadata {
 }
 
 export default function useSiteMetadata() {
-  const data = useStaticQuery(graphql`
+  const { site } = useStaticQuery(graphql`
     query {
       site {
         siteMetadata {
@@ -19,5 +19,5 @@ export default function useSiteMetadata() {
     }
   `);
 
-  return data.site.siteMetadata as SiteMetadata;
+  return site.siteMetadata as SiteMetadata;
 }

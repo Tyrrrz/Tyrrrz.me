@@ -11,8 +11,8 @@ import Page from './shared/Page';
 import useSiteMetadata from './shared/useSiteMetadata';
 
 export const query = graphql`
-  query($slug: String!, $coverImagePath: String!) {
-    markdownRemark(fields: { slug: { eq: $slug } }) {
+  query ($slug: String!, $coverImagePath: String!) {
+    post: markdownRemark(fields: { slug: { eq: $slug } }) {
       frontmatter {
         title
         date
@@ -63,7 +63,7 @@ function CommentsSection({ id, title }: CommentsSectionProps) {
 
 interface BlogPostPageProps {
   data: {
-    markdownRemark: GatsbyTypes.MarkdownRemark;
+    post: GatsbyTypes.MarkdownRemark;
     cover?: GatsbyTypes.File;
     coverFallback: GatsbyTypes.File;
   };
@@ -71,17 +71,17 @@ interface BlogPostPageProps {
 
 export default function BlogPostPage({ data }: BlogPostPageProps) {
   const blogPost = {
-    id: data.markdownRemark.fields?.slug!,
-    title: data.markdownRemark.frontmatter?.title!,
-    date: new Date(data.markdownRemark.frontmatter?.date!),
-    tags: data.markdownRemark.frontmatter?.tags?.map((tag) => tag!)!,
-    translations: data.markdownRemark.frontmatter?.translations?.map((translation) => ({
+    id: data.post.fields?.slug!,
+    title: data.post.frontmatter?.title!,
+    date: new Date(data.post.frontmatter?.date!),
+    tags: data.post.frontmatter?.tags?.map((tag) => tag!)!,
+    translations: data.post.frontmatter?.translations?.map((translation) => ({
       language: translation?.language!,
       url: translation?.url!
     }))!,
-    timeToRead: data.markdownRemark.timeToRead!,
-    excerpt: data.markdownRemark.excerpt!,
-    html: data.markdownRemark.html!
+    timeToRead: data.post.timeToRead!,
+    excerpt: data.post.excerpt!,
+    html: data.post.html!
   };
 
   const coverImage = data.cover?.childImageSharp;

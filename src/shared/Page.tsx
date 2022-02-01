@@ -1,3 +1,4 @@
+import { graphql, useStaticQuery } from 'gatsby';
 import React from 'react';
 import Helmet from 'react-helmet';
 import { IconContext } from 'react-icons/lib';
@@ -17,17 +18,28 @@ interface MetaProps {
 function Meta({ title, description, keywords, imageUrl, rssUrl }: MetaProps) {
   const siteMetadata = useSiteMetadata();
 
-  const defaults = {
+  const fallback = {
     title: 'Oleksii Holub',
     description:
-      'Oleksii Holub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker'
+      'Oleksii Holub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker',
+    imageUrl: useStaticQuery(graphql`
+      query {
+        image: file(relativePath: { eq: "photo.png" }) {
+          childImageSharp {
+            original {
+              src
+            }
+          }
+        }
+      }
+    `).image.childImageSharp.original.src as string
   };
 
   const actual = {
-    title: title ? `${title} | ${defaults.title}` : defaults.title,
-    description: description || defaults.description,
-    keywords: keywords?.join(', '),
-    imageUrl: imageUrl && getAbsoluteUrl(siteMetadata.siteUrl, imageUrl),
+    title: title ? `${title} | ${fallback.title}` : fallback.title,
+    description: description || fallback.description,
+    keywords: keywords?.join(', ') || '',
+    imageUrl: getAbsoluteUrl(siteMetadata.siteUrl, imageUrl || fallback.imageUrl),
     rssUrl: rssUrl && getAbsoluteUrl(siteMetadata.siteUrl, rssUrl)
   };
 
@@ -39,23 +51,21 @@ function Meta({ title, description, keywords, imageUrl, rssUrl }: MetaProps) {
       <title>{actual.title}</title>
 
       <meta name="description" content={actual.description} />
-      {actual.keywords && <meta name="keywords" content={actual.keywords} />}
+      <meta name="keywords" content={actual.keywords} />
 
       <meta property="og:type" content="website" />
       <meta property="og:title" content={actual.title} />
       <meta property="og:description" content={actual.description} />
-      {actual.imageUrl && <meta property="og:image" content={actual.imageUrl} />}
+      <meta property="og:image" content={actual.imageUrl} />
 
       <meta name="twitter:title" content={actual.title} />
       <meta name="twitter:site" content="@Tyrrrz" />
       <meta name="twitter:creator" content="@Tyrrrz" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:description" content={actual.description} />
-      {actual.imageUrl && <meta name="twitter:image" content={actual.imageUrl} />}
+      <meta name="twitter:image" content={actual.imageUrl} />
 
-      {actual.rssUrl && (
-        <link rel="alternate" type="application/rss+xml" title="RSS Feed" href={actual.rssUrl} />
-      )}
+      <link rel="alternate" type="application/rss+xml" title="RSS Feed" href={actual.rssUrl} />
     </Helmet>
   );
 }
