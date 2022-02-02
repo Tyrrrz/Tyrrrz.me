@@ -11,7 +11,9 @@ Almost a year ago, I started developing [YoutubeExplode](https://github.com/Tyrr
 
 Since this is a relatively popular discussion topic among many beginner developers, I thought that I could help out by sharing the knowledge I found by spending dozens of hours staring at Chrome Developer Tools.
 
-_Note: even though the base principles explained here are unlikely to change, some information in this post may become outdated. This post is relevant to YoutubeExplode v4.1 (16-Feb-2018)._
+_Note: even though the base principles explained here are unlikely to change, some information in this post may become outdated. This post is still relevant, as of YoutubeExplode v4.1 (16-Feb-2018)._
+
+_Note 2: as of YoutubeExplode v6.0.7 (10-Dec-2021), practically all the information in this post has become outdated and the approaches highlighted here are no longer in use by the library. If you want me to write an updated article on the current inner workings of YouTube, tag me on [Twitter](https://twitter.com/Tyrrrz) and let me know!_
 
 ## Getting video metadata
 
