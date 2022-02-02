@@ -1,7 +1,7 @@
 [
   {
     "name": "Simon Cropp",
-    "amount": 48.47,
+    "amount": 97.85,
     "platform": "Patreon"
   },
   {
@@ -21,12 +21,12 @@
   },
   {
     "name": "Greg Engle",
-    "amount": 80,
+    "amount": 90,
     "platform": "Patreon"
   },
   {
     "name": "A dude",
-    "amount": 87.55,
+    "amount": 97.85,
     "platform": "Patreon"
   },
   {
@@ -36,7 +36,7 @@
   },
   {
     "name": "Dominic Maas",
-    "amount": 115,
+    "amount": 120,
     "platform": "Patreon"
   },
   {
@@ -56,7 +56,12 @@
   },
   {
     "name": "Peter Wesselius",
-    "amount": 372,
+    "amount": 396,
+    "platform": "Patreon"
+  },
+  {
+    "name": "Ivan",
+    "amount": 10,
     "platform": "Patreon"
   },
   {
