@@ -1,8 +1,8 @@
 {
   "name": "Gress",
   "url": "https://github.com/Tyrrrz/Gress",
-  "description": "Aggregates progress across multiple concurrent operations",
-  "stars": 42,
-  "downloads": 13792,
+  "description": "Progress reporting toolbox",
+  "stars": 64,
+  "downloads": 13881,
   "language": "C#"
 }
