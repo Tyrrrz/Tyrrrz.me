@@ -316,13 +316,13 @@ public class RecommendationsProvider
                 .GetTopListenersAsync(scrobble.Song.Id);
 
             // Pure
-            var otherListenersSnapsot = otherListeners
+            var otherListenersSnapshot = otherListeners
                 .Where(u => u.TotalScrobbleCount >= 10_000)
                 .OrderByDescending(u => u.TotalScrobbleCount)
                 .Take(20)
                 .ToArray();
 
-            foreach (var otherListener in otherListenersSnapsot)
+            foreach (var otherListener in otherListenersSnapshot)
             {
                 // Impure
                 var otherScrobbles = await _songService
@@ -515,7 +515,7 @@ As you can see, the concept of purity gets a bit hazy once you start digging int
 
 If you decide to follow the rules pedantically, you'll find the idea of modelling any problem domain with pure functions quickly becomes impractical. However, it's important to remember that **the goal is not purity in itself, but rather the benefits it provides**.
 
-At the end of the day, the entire notion of purity is just a mathematical model, which may not necessarily translate very well to applied programming. As a developer of the project, it is up to you to draw the line and decide what makes sense and what doesn't.
+At the end of the day, the entire notion of purity is just a mathematical model, which may not necessarily translate very well to applied programming. As the developer of the project, it is up to you to draw the line and decide what makes sense and what doesn't.
 
 ## Summary
 
