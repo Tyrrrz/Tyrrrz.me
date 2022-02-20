@@ -8,11 +8,11 @@ tags:
 
 Two months ago I posted an article detailing why I think [unit testing is overrated](/blog/unit-testing-is-overrated), which seemed to resonate quite a lot with the readers, prompting very involved and interesting discussions. And although most commenters mainly shared their personal experiences, a few have also voiced criticism of the way some arguments were presented.
 
-In particular, one person mentioned that the drawbacks I've described, especially those pertaining to abstractions and mocking, are really just a byproduct of object-oriented programming and its inherent flaws. Had my examples been designed with functional principles in mind, many of the outlined problems would never have surfaced.
+In particular, one person mentioned that the drawbacks I've described, especially those pertaining to abstractions and mocking, are really just a byproduct of object-oriented programming and its inherent flaws. Had my example been designed with functional principles in mind, many of the outlined problems would never have surfaced.
 
 More specifically, the suggested solution was to refactor the presented class hierarchy by extracting the pure business logic away from the rest of the code. Getting rid of the impure dependency eliminates the need for mocking, which in turn simplifies unit testing.
 
-This exact approach was actually mentioned in later parts of the post as well, albeit in a slightly different context. Although it does make isolated testing easier for that particular snippet of code, it doesn't actually invalidate the main issues raised by the article.
+This exact approach was actually mentioned in later parts of the post as well, albeit in a slightly different context. Although it does make isolated testing easier for that particular code sample, it doesn't actually invalidate the main issues raised by the article.
 
 That said, I also think that the underlying principle of code separation based on purity is very important and often overlooked. When used correctly, it can guide software design, providing benefits in terms of readability, portability and, as mentioned, unit testing.
 
@@ -111,7 +111,7 @@ In order to reap the most benefit out of pure functions, we need to design softw
 
 ## Flattening the dependency tree
 
-Although the concept of purity forms the foundation of functional programming, it isn't given as much thought in the object-oriented world. In fact, the main purpose of object-oriented design is to aggregate related behavior in a single contextual entity, which usually involves state and mutations.
+While the concept of purity forms the foundation of functional programming, it isn't given as much thought in the object-oriented world. In fact, the main purpose of object-oriented design is to aggregate related behavior in a single contextual entity, which usually involves state and mutations.
 
 Software written with OOP in mind follows a hierarchical design, where objects are composed together to represent different layers of abstraction in a connected fashion. Any impurities that may exist in those objects are free to spread from child to parent, potentially contaminating the entire dependency tree.
 
@@ -263,7 +263,7 @@ public class SolarTimesController
 
 Previously, the method in `SolarCalculator` took an IP address as a parameter and relied on `LocationProvider` to get the coordinates it maps to. After refactoring, the method is now static and instead takes the location directly, skipping the previously required impure operation.
 
-Of course, that impurity didn't just disappear into thin air, our software still needs to get the location anyhow. The difference is that now this concern is pushed out towards the boundary of the system, which, in this case, is represented by the controller.
+Of course, that impurity didn't just disappear into thin air, our software still needs to get the location somehow. The difference is that now this concern is pushed out towards the boundary of the system, which, in this case, is represented by the controller.
 
 In doing that, we also flattened the hierarchy so that all of the dependencies are aggregated at the boundary. The data flow now looks a bit more like a pipeline instead:
 
