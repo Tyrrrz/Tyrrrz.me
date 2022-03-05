@@ -19,7 +19,7 @@ export default function HomePage() {
           My name is Oleksii, I'm a software developer from Kyiv, Ukraine.          
         </p>
         <p>
-          On 24th of February 2022, I woke up to war: <strong><Link href="https://en.wikipedia.org/wiki/2022_Russian_invasion_of_Ukraine">Russian armed forces have invaded my country</Link></strong>.
+          On 24th of February 2022 I woke up to war: <strong><Link href="https://en.wikipedia.org/wiki/2022_Russian_invasion_of_Ukraine">Russian armed forces have invaded my country</Link></strong>.
           Driven by their leader's determination to eradicate the Ukrainian people, this act of aggression can only be described as <strong>genocide</strong>.
         </p>
         <p>
