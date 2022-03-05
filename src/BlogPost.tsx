@@ -18,10 +18,6 @@ export const query = graphql`
         title
         date
         tags
-        translations {
-          language
-          url
-        }
       }
       fields {
         slug
@@ -76,10 +72,6 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
     title: data.post.frontmatter?.title!,
     date: new Date(data.post.frontmatter?.date!),
     tags: data.post.frontmatter?.tags?.map((tag) => tag!)!,
-    translations: data.post.frontmatter?.translations?.map((translation) => ({
-      language: translation?.language!,
-      url: translation?.url!
-    }))!,
     timeToRead: data.post.timeToRead!,
     excerpt: data.post.excerpt!,
     html: data.post.html!
@@ -120,17 +112,6 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
         <figure className="section-cover">
           <GatsbyImage image={coverImage.gatsbyImageData} alt={blogPost.title} />
         </figure>
-      )}
-
-      {blogPost.translations && blogPost.translations.length > 0 && (
-        <div className="section-misc">
-          Translated by readers into:{' '}
-          {blogPost.translations.map((translation) => (
-            <Link key={translation.language} href={translation.url}>
-              {translation.language}
-            </Link>
-          ))}
-        </div>
       )}
 
       <div style={{
