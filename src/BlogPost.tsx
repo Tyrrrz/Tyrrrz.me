@@ -117,15 +117,12 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
       <div style={{
         padding: '1em',
         border: '2px solid orange',
-        backgroundColor: '#ffdc91',
+        backgroundColor: '#ffebbf',
         fontSize: '1.25em'
       }}>
-        <p>
-          <strong><Emoji code="⚠" /><Emoji code="🇺🇦" /> UKRAINE IS UNDER ATTACK!</strong>
-        </p>
-        <p>
-          <Link href="/">Click here</Link> to learn what it means and find ways to help!
-        </p>
+        <strong><Emoji code="🇺🇦" /> Ukraine is under attack! <Emoji code="⚠" /></strong>
+        <br/>
+        <Link href="/">Click here</Link> to read what it means and find ways to help.
       </div>
 
       <article dangerouslySetInnerHTML={{ __html: blogPost.html }} />
