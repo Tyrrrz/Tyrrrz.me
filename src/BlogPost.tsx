@@ -6,6 +6,7 @@ import 'prismjs/themes/prism-tomorrow.css';
 import React from 'react';
 import { FiCalendar, FiClock, FiTag } from 'react-icons/fi';
 import { getAbsoluteUrl } from './infra/utils';
+import Emoji from './shared/Emoji';
 import Link from './shared/Link';
 import Page from './shared/Page';
 import useSiteMetadata from './shared/useSiteMetadata';
@@ -132,6 +133,20 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
         </div>
       )}
 
+      <div style={{
+        padding: '1em',
+        border: '2px solid orange',
+        backgroundColor: '#ffdc91',
+        fontSize: '1.25em'
+      }}>
+        <p>
+          <strong><Emoji code="⚠" /><Emoji code="🇺🇦" /> UKRAINE IS UNDER ATTACK!</strong>
+        </p>
+        <p>
+          <Link href="/">Click here</Link> to learn what it means and find ways to help!
+        </p>
+      </div>
+
       <article dangerouslySetInnerHTML={{ __html: blogPost.html }} />
 
       <hr />
@@ -139,7 +154,7 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
       <div className="section-postlude">
         Want to know when I post a new article? Follow me on{' '}
         <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or subscribe to the{' '}
-        <Link href="/blog/rss.xml">RSS Feed</Link> ✨
+        <Link href="/blog/rss.xml">RSS Feed</Link> <Emoji code="✨" />
       </div>
 
       <hr />

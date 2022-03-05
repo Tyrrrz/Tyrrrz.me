@@ -1,5 +1,3 @@
-import { differenceInYears } from 'date-fns';
-import { StaticImage } from 'gatsby-plugin-image';
 import React from 'react';
 import { FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
 import './Home.css';
@@ -8,41 +6,49 @@ import Link from './shared/Link';
 import Page from './shared/Page';
 
 export default function HomePage() {
-  const myAge = differenceInYears(new Date(), new Date(1995, 3, 28));
-
   return (
     <Page>
       <figure className="avatar">
-        <StaticImage
-          className="avatar-image"
-          src="./images/photo.png"
-          width={128}
-          height={128}
-          placeholder="blurred"
-          alt="Oleksii Holub"
-        />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Ukraine.svg/2560px-Flag_of_Ukraine.svg.png" width="200" height="120" />
       </figure>
 
       <hr />
 
       <div>
         <p>
-          <Emoji code="👋" /> Hello! My name is Oleksii, also known online as Tyrrrz. I&apos;m a{' '}
-          {myAge} y/o software developer from Kyiv, Ukraine. I&apos;m also a{' '}
-          <Link href="https://mvp.microsoft.com/en-us/PublicProfile/5004136">Microsoft MVP</Link>{' '}
-          and a <Link href="https://stars.github.com/profiles/tyrrrz">GitHub Star</Link>.
+          <Emoji code="⚠" /> My name is Oleksii, I'm a software developer from Kyiv, Ukraine.
+          Right this moment, <strong><Link href="https://en.wikipedia.org/wiki/2022_Russian_invasion_of_Ukraine">my country is under continuous attack by armed forces of Russia</Link></strong> in an act of war that can only be described as <strong>genocide of Ukranian people</strong>!
         </p>
         <p>
-          <Emoji code="👨‍💻" /> Most of my endeavors are in C#, but every now and then I code in F#
-          and TypeScript as well. I&apos;m primarily interested in the cloud, distributed systems,
-          and web applications.
+          Russian soldiers spare no thought when bombing residental areas, hospitals, schools, museums, cultural heritages, and civilian infrastructure.
+          The list of <Link href="https://en.wikipedia.org/wiki/War_crimes_during_the_2022_Russian_invasion_of_Ukraine">committed warcrimes</Link> only gets longer while the rest of the world largely remains passive.
         </p>
         <p>
-          <Emoji code="✏" /> My professional hobbies involve open source, conference speaking, and
-          blogging. Outside of that I&apos;m also into outdoor photography, digital art, playing
-          guitar, and learning foreign languages.
+          Please consider helping Ukraine fight back by suporting our military and by donating to humanitarian causes:
+          
+          <ul>
+            <li><Link href="https://bank.gov.ua/en/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zboru-koshtiv-na-potrebi-armiyi">Official Donation Fund for UA Military</Link></li>
+            <li><Link href="https://savelife.in.ua/en/donate">NPO "Come Back Alive" (non-lethal military equipment)</Link></li>
+            <li><Link href="https://savelife.in.ua/en/donate">NPO "Nova Ukraine" (humanitarian relief)</Link></li>
+            <li><Link href="https://donate.unhcr.org/int/en/ukraine-emergency">UNHCR UN Refugee Agency</Link></li>
+            <li>Any <Link href="/donate">personal donations</Link> during this time will also be used to support the country</li>
+          </ul>
+        </p>
+        <p>
+          If you don't have the means to help financially, consider also to:
+
+          <ul>
+            <li>Spread the information about the war throughout your local networks</li>
+            <li>Help Ukrainian refugees in your area with food, water, medication, supplies, housing, etc.</li>
+            <li><Link href="https://reddit.com/r/poland/comments/t0mr58/stop_buying_russian_products_at_least_thats_what">Stop buying products made in Russia</Link> (barcodes starting with 460-469)</li>
+            <li>Call your politicans to action and protest on the streets</li>
+          </ul>
         </p>
       </div>
+
+      <hr />
+
+      <div><strong><Emoji code="🇺🇦" /> GLORY TO UKRAINE! GLORY TO HEROES!</strong></div>
 
       <hr />
 
