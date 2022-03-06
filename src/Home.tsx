@@ -48,11 +48,10 @@ export default function HomePage() {
             <li>Help local Ukrainian refugees with food, water, medication, supplies, housing, etc.</li>
             <li>Stop buying products made in Russia (barcodes starting with 460-469)</li>
             <li>Urge your employer to take a stance against Russia</li>
-            <li>Call your politicans to action</li>
+            <li>Call your politicans to action (US citizens may use <Link href="https://docs.google.com/document/d/1V2iMwRNEcS7zL5eNwbOeFZXFQiDBykfx93QaxRSrJlw/edit?usp=sharing">this template</Link>)</li>
             <li>Protest on the streets</li>
+            <li><Link href="https://fightforua.org">Join Ukrainian military as a foreigner</Link></li>
           </ul>
-
-          U.S. citizens can use <Link href="https://docs.google.com/document/d/1V2iMwRNEcS7zL5eNwbOeFZXFQiDBykfx93QaxRSrJlw/edit?usp=sharing">this template</Link> to contact their representatives.
         </p>
       </div>
 
