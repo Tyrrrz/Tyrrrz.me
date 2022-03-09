@@ -2,7 +2,7 @@
   "name": "DiscordChatExporter",
   "url": "https://github.com/Tyrrrz/DiscordChatExporter",
   "description": "Exports Discord chat logs to a file",
-  "stars": 3497,
-  "downloads": 487840,
+  "stars": 3517,
+  "downloads": 491437,
   "language": "C#"
 }
