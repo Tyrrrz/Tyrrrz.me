@@ -22,7 +22,7 @@ interface DonatePageProps {
   data: { allDonationsJson: GatsbyTypes.DonationsJsonConnection };
 }
 
-export default function DonatePage({ data }: DonatePageProps) {
+const DonatePage: React.FC<DonatePageProps> = ({ data }) => {
   const donations = [...data.allDonationsJson.nodes]
     .map((node) => ({
       name: node.name!,
@@ -82,4 +82,6 @@ export default function DonatePage({ data }: DonatePageProps) {
       </ul>
     </Page>
   );
-}
+};
+
+export default DonatePage;

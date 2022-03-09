@@ -1,21 +1,21 @@
 import { Octokit } from '@octokit/rest';
 import { writeFileSync } from 'fs';
-import { resolve } from 'path';
 import fetch from 'node-fetch';
+import { resolve } from 'path';
 
 const outputDirPath = resolve('./data/projects/');
 const github = new Octokit();
 
-async function getGitHubRepos() {
+const getGitHubRepos = async () => {
   return await github.paginate(github.repos.listForUser, {
     username: 'Tyrrrz',
     type: 'owner',
     per_page: 100,
     sort: 'pushed'
   });
-}
+};
 
-async function getGitHubDownloads(repo) {
+const getGitHubDownloads = async (repo) => {
   const releases = await github.paginate(github.repos.listReleases, {
     owner: 'Tyrrrz',
     repo,
@@ -27,9 +27,9 @@ async function getGitHubDownloads(repo) {
     .reduce((acc, val) => acc.concat(val), [])
     .map((asset) => asset.download_count)
     .reduce((acc, val) => acc + val, 0);
-}
+};
 
-async function getNuGetDownloads(pkg) {
+const getNuGetDownloads = async (pkg) => {
   const response = await fetch(
     `https://azuresearch-usnc.nuget.org/query?q=packageid:${pkg.toLowerCase()}`
   );
@@ -42,9 +42,9 @@ async function getNuGetDownloads(pkg) {
   const meta = await response.json();
 
   return meta.data.reduce((acc, val) => acc + val.totalDownloads, 0);
-}
+};
 
-async function main() {
+const main = () => {
   const repos = await getGitHubRepos();
 
   await Promise.allSettled(
@@ -70,6 +70,6 @@ async function main() {
         console.log(`Pulled ${project.name}.`);
       })
   );
-}
+};
 
 main();

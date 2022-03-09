@@ -10,20 +10,20 @@ const googleAnalyticsId = process.env['TYRRRZME_GOOGLEANALYTICS'];
 /**
  * @param {string} url
  */
-function resolveRelativeUrl(url) {
+const resolveRelativeUrl = (url) => {
   return new URL(url, siteUrl).toString();
-}
+};
 
 /**
  * @param {string} plugin
  * @param {object} [options]
  */
-function resolvePlugin(plugin, options) {
+const resolvePlugin = (plugin, options) => {
   return {
     resolve: plugin,
     options: options
   };
-}
+};
 
 /**
  * @type {import('gatsby').GatsbyConfig}

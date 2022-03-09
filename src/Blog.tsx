@@ -28,7 +28,7 @@ interface BlogPageProps {
   data: { allMarkdownRemark: GatsbyTypes.MarkdownRemarkConnection };
 }
 
-export default function BlogPage({ data }: BlogPageProps) {
+const BlogPage: React.FC<BlogPageProps> = ({ data }) => {
   const blogPosts = [...data.allMarkdownRemark.nodes]
     .map((node) => ({
       id: node.fields?.slug!,
@@ -93,4 +93,6 @@ export default function BlogPage({ data }: BlogPageProps) {
       ))}
     </Page>
   );
-}
+};
+
+export default BlogPage;

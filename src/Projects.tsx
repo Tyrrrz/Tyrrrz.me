@@ -24,7 +24,7 @@ interface ProjectsPageProps {
   data: { allProjectsJson: GatsbyTypes.ProjectsJsonConnection };
 }
 
-export default function ProjectsPage({ data }: ProjectsPageProps) {
+const ProjectsPage: React.FC<ProjectsPageProps> = ({ data }) => {
   const projects = [...data.allProjectsJson.nodes]
     .map((node) => ({
       name: node.name!,
@@ -73,4 +73,6 @@ export default function ProjectsPage({ data }: ProjectsPageProps) {
       ))}
     </Page>
   );
-}
+};
+
+export default ProjectsPage;

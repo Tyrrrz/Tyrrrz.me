@@ -7,5 +7,5 @@ declare module 'gatsby-plugin-disqus' {
     };
   }
 
-  function Disqus(props: DisqusProps): JSX.Element;
+  const Disqus: (props: DisqusProps) => JSX.Element;
 }

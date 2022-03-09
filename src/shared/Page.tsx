@@ -2,7 +2,7 @@ import { graphql, useStaticQuery } from 'gatsby';
 import React from 'react';
 import Helmet from 'react-helmet';
 import { IconContext } from 'react-icons/lib';
-import { getAbsoluteUrl } from '../infra/utils';
+import { getAbsoluteUrl } from '../utils';
 import Link from './Link';
 import './Page.css';
 import useSiteMetadata from './useSiteMetadata';
@@ -16,7 +16,14 @@ interface MetaProps {
   previewLayout?: 'descriptionPriority' | 'imagePriority';
 }
 
-function Meta({ title, description, keywords, imageUrl, rssUrl, previewLayout }: MetaProps) {
+const Meta: React.FC<MetaProps> = ({
+  title,
+  description,
+  keywords,
+  imageUrl,
+  rssUrl,
+  previewLayout
+}) => {
   const siteMetadata = useSiteMetadata();
 
   const fallback = {
@@ -74,9 +81,9 @@ function Meta({ title, description, keywords, imageUrl, rssUrl, previewLayout }:
       <link rel="alternate" type="application/rss+xml" title="RSS Feed" href={actual.rssUrl} />
     </Helmet>
   );
-}
+};
 
-function Navigation() {
+const Navigation: React.FC = () => {
   return (
     <nav className="navbar">
       <div className="navbar-logo">
@@ -104,13 +111,13 @@ function Navigation() {
       </div>
     </nav>
   );
-}
+};
 
 interface PageProps extends MetaProps {
   children: React.ReactNode;
 }
 
-export default function Page({ children, ...props }: PageProps) {
+const Page: React.FC<PageProps> = ({ children, ...props }) => {
   return (
     <IconContext.Provider value={{ style: { marginTop: '0.2rem' } }}>
       <div className="page-container">
@@ -121,4 +128,6 @@ export default function Page({ children, ...props }: PageProps) {
       </div>
     </IconContext.Provider>
   );
-}
+};
+
+export default Page;

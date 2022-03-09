@@ -6,7 +6,7 @@ interface EmojiProps {
   code: string;
 }
 
-export default function Emoji({ code }: EmojiProps) {
+const Emoji: React.FC<EmojiProps> = ({ code }) => {
   return (
     <span
       className="emoji"
@@ -18,4 +18,6 @@ export default function Emoji({ code }: EmojiProps) {
       }}
     />
   );
-}
+};
+
+export default Emoji;

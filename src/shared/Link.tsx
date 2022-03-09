@@ -1,7 +1,7 @@
 import { Link as InternalLink } from 'gatsby';
 import { OutboundLink as ExternalLink } from 'gatsby-plugin-gtag';
 import React from 'react';
-import { isAbsoluteUrl } from '../infra/utils';
+import { isAbsoluteUrl } from '../utils';
 
 interface LinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
   href: string;
@@ -10,14 +10,14 @@ interface LinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
   activeExact?: boolean;
 }
 
-export default function Link({
+const Link: React.FC<LinkProps> = ({
   href,
   target,
   className,
   activeClassName,
   activeExact,
   ...props
-}: LinkProps) {
+}) => {
   if (isAbsoluteUrl(href)) {
     return <ExternalLink {...props} className={className} href={href} target={target} />;
   }
@@ -32,4 +32,6 @@ export default function Link({
       target={target}
     />
   );
-}
+};
+
+export default Link;

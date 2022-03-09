@@ -5,7 +5,7 @@ import Emoji from './shared/Emoji';
 import Link from './shared/Link';
 import Page from './shared/Page';
 
-export default function HomePage() {
+const HomePage: React.FC = () => {
   return (
     <Page>
       <figure className="avatar">
@@ -117,4 +117,6 @@ export default function HomePage() {
       </div>
     </Page>
   );
-}
+};
+
+export default HomePage;

@@ -2,7 +2,7 @@ import React from 'react';
 import Link from './shared/Link';
 import Page from './shared/Page';
 
-export default function Error404Page() {
+const Error404Page: React.FC = () => {
   return (
     <Page title="Not Found">
       <div className="section-header">Page not found</div>
@@ -12,4 +12,6 @@ export default function Error404Page() {
       </div>
     </Page>
   );
-}
+};
+
+export default Error404Page;

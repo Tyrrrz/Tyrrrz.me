@@ -5,11 +5,11 @@ import { GatsbyImage, getSrc } from 'gatsby-plugin-image';
 import 'prismjs/themes/prism-tomorrow.css';
 import React from 'react';
 import { FiCalendar, FiClock, FiTag } from 'react-icons/fi';
-import { getAbsoluteUrl } from './infra/utils';
 import Emoji from './shared/Emoji';
 import Link from './shared/Link';
 import Page from './shared/Page';
 import useSiteMetadata from './shared/useSiteMetadata';
+import { getAbsoluteUrl } from './utils';
 
 export const query = graphql`
   query ($slug: String!, $coverImagePath: String!) {
@@ -44,7 +44,7 @@ interface CommentsSectionProps {
   title: string;
 }
 
-function CommentsSection({ id, title }: CommentsSectionProps) {
+const CommentsSection: React.FC<CommentsSectionProps> = ({ id, title }) => {
   const siteMetadata = useSiteMetadata();
 
   return (
@@ -56,7 +56,7 @@ function CommentsSection({ id, title }: CommentsSectionProps) {
       }}
     />
   );
-}
+};
 
 interface BlogPostPageProps {
   data: {
@@ -66,7 +66,7 @@ interface BlogPostPageProps {
   };
 }
 
-export default function BlogPostPage({ data }: BlogPostPageProps) {
+const BlogPostPage: React.FC<BlogPostPageProps> = ({ data }) => {
   const blogPost = {
     id: data.post.fields?.slug!,
     title: data.post.frontmatter?.title!,
@@ -114,14 +114,18 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
         </figure>
       )}
 
-      <div style={{
-        padding: '1em',
-        border: '2px solid orange',
-        backgroundColor: '#ffebbf',
-        fontSize: '1.25em'
-      }}>
-        <strong><Emoji code="🇺🇦" /> Ukraine is under attack! <Emoji code="⚠" /></strong>
-        <br/>
+      <div
+        style={{
+          padding: '1em',
+          border: '2px solid orange',
+          backgroundColor: '#ffebbf',
+          fontSize: '1.25em'
+        }}
+      >
+        <strong>
+          <Emoji code="🇺🇦" /> Ukraine is under attack! <Emoji code="⚠" />
+        </strong>
+        <br />
         <Link href="/">Click here</Link> to read what it means and find ways to help.
       </div>
 
@@ -140,4 +144,6 @@ export default function BlogPostPage({ data }: BlogPostPageProps) {
       <CommentsSection id={blogPost.id} title={blogPost.title} />
     </Page>
   );
-}
+};
+
+export default BlogPostPage;

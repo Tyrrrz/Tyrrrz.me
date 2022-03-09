@@ -26,7 +26,7 @@ interface SpeakingPageProps {
   data: { allSpeakingJson: GatsbyTypes.SpeakingJsonConnection };
 }
 
-export default function SpeakingPage({ data }: SpeakingPageProps) {
+const SpeakingPage: React.FC<SpeakingPageProps> = ({ data }) => {
   const speakingEngagements = [...data.allSpeakingJson.nodes]
     .map((node) => ({
       title: node.title!,
@@ -101,4 +101,6 @@ export default function SpeakingPage({ data }: SpeakingPageProps) {
       ))}
     </Page>
   );
-}
+};
+
+export default SpeakingPage;
