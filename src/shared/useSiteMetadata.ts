@@ -6,7 +6,7 @@ interface SiteMetadata {
   description: string;
 }
 
-const useSiteMetadata = (): SiteMetadata => {
+const useSiteMetadata = () => {
   const { site } = useStaticQuery(graphql`
     query {
       site {

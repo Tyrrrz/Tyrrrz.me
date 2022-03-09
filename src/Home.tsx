@@ -20,14 +20,14 @@ const HomePage: React.FC = () => {
       <hr />
 
       <div>
-        <p>My name is Oleksii, I'm a software developer from Kyiv, Ukraine.</p>
+        <p>My name is Oleksii, I&apos;m a software developer from Kyiv, Ukraine.</p>
         <p>
           On 24th of February 2022 I woke up to war:{' '}
           <strong>
             <Link href="https://war.ukraine.ua">Russian armed forces have invaded my country</Link>
           </strong>
-          . Driven by their leader's determination to eradicate the Ukrainian people, this act of
-          aggression can only be described as <strong>genocide</strong>.
+          . Driven by chauvenistic ideals and determination to eradicate the Ukrainian people, this
+          act of aggression can only be described as <strong>genocide</strong>.
         </p>
         <p>
           Russian soldiers spare no thought when bombing residental areas, hospitals, schools,
@@ -38,7 +38,8 @@ const HomePage: React.FC = () => {
           grows longer by the minute, while the rest of the world largely remains passive.
         </p>
         <p>
-          Be on the right side of history! <strong>Today it's us, tomorrow it could be you</strong>.
+          Be on the right side of history!{' '}
+          <strong>Today it&apos;s us, tomorrow it could be you</strong>.
         </p>
         <p>
           Please consider helping Ukraine fight back by donating to our military and various
@@ -51,17 +52,17 @@ const HomePage: React.FC = () => {
             </li>
             <li>
               <Link href="https://savelife.in.ua/en/donate">
-                NPO "Come Back Alive" (non-lethal military equipment)
+                NPO &quot;Come Back Alive&quot; (non-lethal military equipment)
               </Link>
             </li>
             <li>
               <Link href="https://novaukraine.org/donate">
-                NPO "Nova Ukraine" (humanitarian relief)
+                NPO &quot;Nova Ukraine&quot; (humanitarian relief)
               </Link>
             </li>
             <li>
               <Link href="https://razomforukraine.org/donate">
-                NPO "Razom for Ukraine" (humanitarian relief)
+                NPO &quot;Razom for Ukraine&quot; (humanitarian relief)
               </Link>
             </li>
             <li>
@@ -71,7 +72,7 @@ const HomePage: React.FC = () => {
           </ul>
         </p>
         <p>
-          If you don't have the means to help financially, you can:
+          If you don&apos;t have the means to help financially, you can:
           <ul>
             <li>Spread the information about the war throughout your local networks</li>
             <li>
