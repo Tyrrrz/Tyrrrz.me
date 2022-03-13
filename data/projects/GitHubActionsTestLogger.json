@@ -3,6 +3,6 @@
   "url": "https://github.com/Tyrrrz/GitHubActionsTestLogger",
   "description": "Test logger for .NET that reports results in a format that GitHub Actions understands",
   "stars": 128,
-  "downloads": 577250,
+  "downloads": 583714,
   "language": "C#"
 }

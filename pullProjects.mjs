@@ -44,7 +44,7 @@ const getNuGetDownloads = async (pkg) => {
   return meta.data.reduce((acc, val) => acc + val.totalDownloads, 0);
 };
 
-const main = () => {
+const main = async () => {
   const repos = await getGitHubRepos();
 
   await Promise.allSettled(
