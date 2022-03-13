@@ -113,11 +113,7 @@ const Navigation: React.FC = () => {
   );
 };
 
-interface PageProps extends MetaProps {
-  children: React.ReactNode;
-}
-
-const Page: React.FC<PageProps> = ({ children, ...props }) => {
+const Page: React.FC<MetaProps> = ({ children, ...props }) => {
   return (
     <IconContext.Provider value={{ style: { marginTop: '0.2rem' } }}>
       <div className="page-container">
