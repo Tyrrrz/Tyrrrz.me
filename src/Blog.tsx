@@ -39,13 +39,13 @@ const BlogPage: React.FC<BlogPageProps> = ({ data }) => {
     }))
     .sort((a, b) => compareDatesDesc(a.date, b.date));
 
-  const years = [...new Set(blogPosts.map((p) => p.date.getFullYear()))];
+  const years = [...new Set(blogPosts.map((post) => post.date.getFullYear()))];
 
   const blogPostsByYear = years
     .sort((a, b) => b - a)
     .map((year) => ({
       year,
-      blogPosts: blogPosts.filter((p) => p.date.getFullYear() === year)
+      blogPosts: blogPosts.filter((post) => post.date.getFullYear() === year)
     }));
 
   return (
@@ -65,26 +65,26 @@ const BlogPage: React.FC<BlogPageProps> = ({ data }) => {
             <hr className="group-header-line" />
           </div>
 
-          {blogPosts.map((p) => (
-            <div key={p.id} className="entry">
+          {blogPosts.map((post) => (
+            <div key={post.id} className="entry">
               <div className="entry-name">
-                <Link href={`/blog/${p.id}`}>{p.title}</Link>
+                <Link href={`/blog/${post.id}`}>{post.title}</Link>
               </div>
 
               <div className="entry-info">
                 <div className="label">
                   <FiCalendar strokeWidth={1} />
-                  <div>{formatDate(p.date, 'dd MMM yyyy')}</div>
+                  <div>{formatDate(post.date, 'dd MMM yyyy')}</div>
                 </div>
 
                 <div className="label">
                   <FiClock strokeWidth={1} />
-                  <div>{formatDuration({ minutes: p.timeToRead })} to read</div>
+                  <div>{formatDuration({ minutes: post.timeToRead })} to read</div>
                 </div>
 
                 <div className="label">
                   <FiTag strokeWidth={1} />
-                  <div>{p.tags.join(', ')}</div>
+                  <div>{post.tags.join(', ')}</div>
                 </div>
               </div>
             </div>

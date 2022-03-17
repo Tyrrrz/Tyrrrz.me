@@ -45,28 +45,28 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ data }) => {
         <Link href="/donate">making a donation</Link> <Emoji code="💛" />
       </div>
 
-      {projects.map((p) => (
-        <div key={p.name} className="entry">
+      {projects.map((project) => (
+        <div key={project.name} className="entry">
           <div className="entry-name">
-            <Link href={p.url}>{p.name}</Link>
+            <Link href={project.url}>{project.name}</Link>
           </div>
 
-          <div className="entry-description">{p.description}</div>
+          <div className="entry-description">{project.description}</div>
 
           <div className="entry-info">
             <div className="label">
               <FiStar strokeWidth={1} fill="#ecc94b" />
-              <div>{p.stars.toLocaleString()}</div>
+              <div>{project.stars.toLocaleString()}</div>
             </div>
 
             <div className="label">
               <FiDownload strokeWidth={1} />
-              <div>{p.downloads.toLocaleString()}</div>
+              <div>{project.downloads > 0 ? project.downloads.toLocaleString() : 'N/A'}</div>
             </div>
 
             <div className="label">
               <FiPackage strokeWidth={1} />
-              <div>{p.language}</div>
+              <div>{project.language}</div>
             </div>
           </div>
         </div>

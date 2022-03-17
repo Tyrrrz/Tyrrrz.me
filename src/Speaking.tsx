@@ -40,13 +40,17 @@ const SpeakingPage: React.FC<SpeakingPageProps> = ({ data }) => {
     }))
     .sort((a, b) => compareDatesDesc(a.date, b.date));
 
-  const years = [...new Set(speakingEngagements.map((e) => e.date.getFullYear()))];
+  const years = [
+    ...new Set(speakingEngagements.map((engagement) => engagement.date.getFullYear()))
+  ];
 
   const speakingEngagementsByYear = years
     .sort((a, b) => b - a)
     .map((year) => ({
       year,
-      engagements: speakingEngagements.filter((e) => e.date.getFullYear() === year)
+      engagements: speakingEngagements.filter(
+        (engagement) => engagement.date.getFullYear() === year
+      )
     }));
 
   return (
@@ -60,11 +64,18 @@ const SpeakingPage: React.FC<SpeakingPageProps> = ({ data }) => {
             <hr className="group-header-line" />
           </div>
 
-          {engagements.map((e) => (
-            <div key={e.event + e.date} className="entry">
+          {engagements.map((engagement) => (
+            <div key={engagement.event + engagement.date} className="entry">
               <div className="entry-name">
-                <Link href={e.recordingUrl || e.presentationUrl || e.eventUrl || '#'}>
-                  {e.title}
+                <Link
+                  href={
+                    engagement.recordingUrl ||
+                    engagement.presentationUrl ||
+                    engagement.eventUrl ||
+                    '#'
+                  }
+                >
+                  {engagement.title}
                 </Link>
               </div>
 
@@ -74,25 +85,25 @@ const SpeakingPage: React.FC<SpeakingPageProps> = ({ data }) => {
                     Talk: <FiMic strokeWidth={1} />,
                     Workshop: <FiTool strokeWidth={1} />,
                     Podcast: <FiRadio strokeWidth={1} />
-                  }[e.kind] || <FiMic strokeWidth={1} />}
-                  <div>{e.kind}</div>
+                  }[engagement.kind] || <FiMic strokeWidth={1} />}
+                  <div>{engagement.kind}</div>
                 </div>
 
                 <div className="label">
                   <FiGlobe strokeWidth={1} />
                   <div>
-                    <Link href={e.eventUrl}>{e.event}</Link>
+                    <Link href={engagement.eventUrl}>{engagement.event}</Link>
                   </div>
                 </div>
 
                 <div className="label">
                   <FiCalendar strokeWidth={1} />
-                  <div>{formatDate(e.date, 'dd MMM yyyy')}</div>
+                  <div>{formatDate(engagement.date, 'dd MMM yyyy')}</div>
                 </div>
 
                 <div className="label">
                   <FiMessageCircle strokeWidth={1} />
-                  <div>{e.language}</div>
+                  <div>{engagement.language}</div>
                 </div>
               </div>
             </div>

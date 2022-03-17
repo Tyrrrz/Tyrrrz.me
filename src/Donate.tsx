@@ -63,18 +63,18 @@ const DonatePage: React.FC<DonatePageProps> = ({ data }) => {
       <div className="section-header">Top supporters</div>
 
       <ul>
-        {donations.map((d) => (
-          <li key={d.name} className="donation">
-            <div className="donation-name">{d.name}</div>
+        {donations.map((donation) => (
+          <li key={donation.name} className="donation">
+            <div className="donation-name">{donation.name}</div>
             <div className="donation-info">
               <div className="label">
                 <FiDollarSign strokeWidth={1} />
-                <div>{d.amount}</div>
+                <div>{donation.amount}</div>
               </div>
 
               <div className="label">
                 <FiExternalLink strokeWidth={1} />
-                <div>{d.platform}</div>
+                <div>{donation.platform}</div>
               </div>
             </div>
           </li>
