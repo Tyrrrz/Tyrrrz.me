@@ -413,5 +413,10 @@
     "name": "Deng Zfeng",
     "amount": 5,
     "platform": "BuyMeACoffee"
+  },
+  {
+    "name": "Ivan B.",
+    "amount": 25,
+    "platform": "BuyMeACoffee"
   }
 ]
