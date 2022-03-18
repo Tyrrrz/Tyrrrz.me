@@ -51,6 +51,6 @@
     "start": "gatsby develop",
     "build": "gatsby build",
     "clean": "gatsby clean",
-    "pull-projects": "node ./pullProjects.mjs"
+    "pull": "node ./data/pull.mjs"
   }
 }

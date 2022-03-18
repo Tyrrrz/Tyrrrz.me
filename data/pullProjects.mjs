@@ -1,9 +1,8 @@
 import { Octokit } from '@octokit/rest';
-import { writeFileSync } from 'fs';
+import fs from 'fs/promises';
 import fetch from 'node-fetch';
-import { resolve } from 'path';
+import path from 'path';
 
-const outputDirPath = resolve('./data/projects/');
 const github = new Octokit();
 
 const getGitHubRepos = async () => {
@@ -44,7 +43,8 @@ const getNuGetDownloads = async (pkg) => {
   return meta.data.reduce((acc, val) => acc + val.totalDownloads, 0);
 };
 
-const main = async () => {
+export const pullProjects = async () => {
+  const dirPath = path.resolve('./data/projects/');
   const repos = await getGitHubRepos();
 
   await Promise.allSettled(
@@ -64,12 +64,10 @@ const main = async () => {
         };
 
         const json = JSON.stringify(project, null, 2) + '\n';
-        const filePath = resolve(outputDirPath, `${project.name}.json`);
+        const filePath = path.resolve(dirPath, `${project.name}.json`);
 
-        writeFileSync(filePath, json);
+        await fs.writeFile(filePath, json);
         console.log(`Pulled ${project.name}.`);
       })
   );
 };
-
-main();
