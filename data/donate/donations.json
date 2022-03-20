@@ -418,5 +418,10 @@
     "name": "Ivan B.",
     "amount": 25,
     "platform": "BuyMeACoffee"
+  },
+  {
+    "name": "@hhrafn",
+    "amount": 25,
+    "platform": "BuyMeACoffee"
   }
 ]
