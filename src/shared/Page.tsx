@@ -32,7 +32,7 @@ const Meta: React.FC<MetaProps> = ({
       'Oleksii Holub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker',
     imageUrl: useStaticQuery(graphql`
       query {
-        image: file(relativePath: { eq: "photo.png" }) {
+        image: file(relativePath: { eq: "photo.jpg" }) {
           childImageSharp {
             original {
               src
