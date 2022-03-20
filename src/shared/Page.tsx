@@ -26,59 +26,62 @@ const Meta: React.FC<MetaProps> = ({
 }) => {
   const siteMetadata = useSiteMetadata();
 
-  const fallback = {
-    title: 'Oleksii Holub',
-    description:
-      'Oleksii Holub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker',
-    imageUrl: useStaticQuery(graphql`
-      query {
-        image: file(relativePath: { eq: "photo.jpg" }) {
-          childImageSharp {
-            original {
-              src
+  const actualTitle = title ? `${title} | Oleksii Holub` : 'Oleksii Holub';
+
+  const actualDescription =
+    description ||
+    'Oleksii Holub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker';
+
+  const actualKeywords = keywords?.join(', ') || '';
+
+  const actualImageUrl = getAbsoluteUrl(
+    siteMetadata.siteUrl,
+    imageUrl ||
+      (useStaticQuery(graphql`
+        query {
+          image: file(relativePath: { eq: "photo.jpg" }) {
+            childImageSharp {
+              original {
+                src
+              }
             }
           }
         }
-      }
-    `).image.childImageSharp.original.src as string,
-    previewLayout: 'descriptionPriority'
-  };
+      `).image.childImageSharp.original.src as string)
+  );
 
-  const actual = {
-    title: title ? `${title} | ${fallback.title}` : fallback.title,
-    description: description || fallback.description,
-    keywords: keywords?.join(', ') || '',
-    imageUrl: getAbsoluteUrl(siteMetadata.siteUrl, imageUrl || fallback.imageUrl),
-    rssUrl: rssUrl && getAbsoluteUrl(siteMetadata.siteUrl, rssUrl),
-    previewLayout: previewLayout || fallback.previewLayout
-  };
+  const actualRssUrl = rssUrl && getAbsoluteUrl(siteMetadata.siteUrl, rssUrl);
+
+  const actualPreviewLayout = previewLayout || 'descriptionPriority';
 
   return (
     <Helmet>
       <html lang="en" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-      <title>{actual.title}</title>
+      <title>{actualTitle}</title>
 
-      <meta name="description" content={actual.description} />
-      <meta name="keywords" content={actual.keywords} />
+      <meta name="description" content={actualDescription} />
+      <meta name="keywords" content={actualKeywords} />
 
       <meta property="og:type" content="website" />
-      <meta property="og:title" content={actual.title} />
-      <meta property="og:description" content={actual.description} />
-      <meta property="og:image" content={actual.imageUrl} />
+      <meta property="og:title" content={actualTitle} />
+      <meta property="og:description" content={actualDescription} />
+      <meta property="og:image" content={actualImageUrl} />
 
-      <meta name="twitter:title" content={actual.title} />
+      <meta name="twitter:title" content={actualTitle} />
       <meta name="twitter:site" content="@Tyrrrz" />
       <meta name="twitter:creator" content="@Tyrrrz" />
       <meta
         name="twitter:card"
-        content={actual.previewLayout === 'imagePriority' ? 'summary_large_image' : 'summary'}
+        content={actualPreviewLayout === 'imagePriority' ? 'summary_large_image' : 'summary'}
       />
-      <meta name="twitter:description" content={actual.description} />
-      <meta name="twitter:image" content={actual.imageUrl} />
+      <meta name="twitter:description" content={actualDescription} />
+      <meta name="twitter:image" content={actualImageUrl} />
 
-      <link rel="alternate" type="application/rss+xml" title="RSS Feed" href={actual.rssUrl} />
+      {actualRssUrl && (
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed" href={actualRssUrl} />
+      )}
     </Helmet>
   );
 };
