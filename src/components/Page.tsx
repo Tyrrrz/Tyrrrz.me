@@ -1,7 +1,6 @@
 import { graphql, useStaticQuery } from 'gatsby';
 import React from 'react';
 import Helmet from 'react-helmet';
-import { IconContext } from 'react-icons/lib';
 import { getAbsoluteUrl } from '../utils';
 import Link from './Link';
 import './Page.css';
@@ -118,14 +117,13 @@ const Navigation: React.FC = () => {
 
 const Page: React.FC<MetaProps> = ({ children, ...props }) => {
   return (
-    <IconContext.Provider value={{ style: { marginTop: '0.2rem' } }}>
-      <div className="page-container">
-        <Meta {...props} />
-        <Navigation />
+    <div className="page-container">
+      <Meta {...props} />
 
-        <main>{children}</main>
-      </div>
-    </IconContext.Provider>
+      <Navigation />
+
+      <main>{children}</main>
+    </div>
   );
 };
 

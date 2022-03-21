@@ -44,55 +44,53 @@ const HomePage: React.FC = () => {
         <p>
           Please consider helping Ukraine fight back by donating to our military and various
           humanitarian causes:
-          <ul>
-            <li>
-              <Link href="https://bank.gov.ua/en/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zboru-koshtiv-na-potrebi-armiyi">
-                Official military donation page
-              </Link>
-            </li>
-            <li>
-              <Link href="https://savelife.in.ua/en/donate">
-                NPO &quot;Come Back Alive&quot; (non-lethal military equipment)
-              </Link>
-            </li>
-            <li>
-              <Link href="https://novaukraine.org/donate">
-                NPO &quot;Nova Ukraine&quot; (humanitarian relief)
-              </Link>
-            </li>
-            <li>
-              <Link href="https://razomforukraine.org/donate">
-                NPO &quot;Razom for Ukraine&quot; (humanitarian relief)
-              </Link>
-            </li>
-            <li>
-              Any <Link href="/donate">personal donations</Link> during this time will also be
-              routed to support the country
-            </li>
-          </ul>
         </p>
-        <p>
-          If you don&apos;t have the means to help financially, you can:
-          <ul>
-            <li>Spread the information about the war throughout your local networks</li>
-            <li>
-              Help local Ukrainian refugees with food, water, medication, supplies, housing, etc.
-            </li>
-            <li>Stop buying products made in Russia (barcodes starting with 460-469)</li>
-            <li>Urge your employer to take a stance against Russia</li>
-            <li>
-              Call your politicans to action (US citizens may use{' '}
-              <Link href="https://docs.google.com/document/d/1V2iMwRNEcS7zL5eNwbOeFZXFQiDBykfx93QaxRSrJlw/edit?usp=sharing">
-                this template
-              </Link>
-              )
-            </li>
-            <li>Protest on the streets</li>
-            <li>
-              <Link href="https://fightforua.org">Join Ukrainian military as a foreigner</Link>
-            </li>
-          </ul>
-        </p>
+        <ul>
+          <li>
+            <Link href="https://bank.gov.ua/en/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zboru-koshtiv-na-potrebi-armiyi">
+              Official military donation page
+            </Link>
+          </li>
+          <li>
+            <Link href="https://savelife.in.ua/en/donate">
+              NPO &quot;Come Back Alive&quot; (non-lethal military equipment)
+            </Link>
+          </li>
+          <li>
+            <Link href="https://novaukraine.org/donate">
+              NPO &quot;Nova Ukraine&quot; (humanitarian relief)
+            </Link>
+          </li>
+          <li>
+            <Link href="https://razomforukraine.org/donate">
+              NPO &quot;Razom for Ukraine&quot; (humanitarian relief)
+            </Link>
+          </li>
+          <li>
+            Any <Link href="/donate">personal donations</Link> during this time will also be routed
+            to support the country
+          </li>
+        </ul>
+        <p>If you don&apos;t have the means to help financially, you can:</p>
+        <ul>
+          <li>Spread the information about the war throughout your local networks</li>
+          <li>
+            Help local Ukrainian refugees with food, water, medication, supplies, housing, etc.
+          </li>
+          <li>Stop buying products made in Russia (barcodes starting with 460-469)</li>
+          <li>Urge your employer to take a stance against Russia</li>
+          <li>
+            Call your politicans to action (US citizens may use{' '}
+            <Link href="https://docs.google.com/document/d/1V2iMwRNEcS7zL5eNwbOeFZXFQiDBykfx93QaxRSrJlw/edit?usp=sharing">
+              this template
+            </Link>
+            )
+          </li>
+          <li>Protest on the streets</li>
+          <li>
+            <Link href="https://fightforua.org">Join Ukrainian military as a foreigner</Link>
+          </li>
+        </ul>
       </div>
 
       <hr />
