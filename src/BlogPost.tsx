@@ -9,7 +9,7 @@ import Emoji from './components/Emoji';
 import Link from './components/Link';
 import Page from './components/Page';
 import useSiteMetadata from './components/useSiteMetadata';
-import { getAbsoluteUrl } from './utils';
+import { getAbsoluteUrl } from './utils/url';
 
 export const query = graphql`
   query ($slug: String!, $coverImagePath: String!) {

@@ -1,7 +1,7 @@
 import { graphql, useStaticQuery } from 'gatsby';
 import React from 'react';
 import Helmet from 'react-helmet';
-import { getAbsoluteUrl } from '../utils';
+import { getAbsoluteUrl } from '../utils/url';
 import Link from './Link';
 import './Page.css';
 import useSiteMetadata from './useSiteMetadata';
