@@ -1,9 +1,9 @@
 import { graphql } from 'gatsby';
 import React from 'react';
 import { FiDownload, FiPackage, FiStar } from 'react-icons/fi';
-import Emoji from './shared/Emoji';
-import Link from './shared/Link';
-import Page from './shared/Page';
+import Emoji from './components/Emoji';
+import Link from './components/Link';
+import Page from './components/Page';
 
 export const query = graphql`
   query {

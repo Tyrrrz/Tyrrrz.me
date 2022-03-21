@@ -2,8 +2,8 @@ import { compareDesc as compareDatesDesc, format as formatDate } from 'date-fns'
 import { graphql } from 'gatsby';
 import React from 'react';
 import { FiCalendar, FiGlobe, FiMessageCircle, FiMic, FiRadio, FiTool } from 'react-icons/fi';
-import Link from './shared/Link';
-import Page from './shared/Page';
+import Link from './components/Link';
+import Page from './components/Page';
 
 export const query = graphql`
   query {

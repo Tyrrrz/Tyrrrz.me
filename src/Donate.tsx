@@ -1,10 +1,10 @@
 import { graphql } from 'gatsby';
 import React from 'react';
 import { FiDollarSign, FiExternalLink } from 'react-icons/fi';
+import Emoji from './components/Emoji';
+import Link from './components/Link';
+import Page from './components/Page';
 import './Donate.css';
-import Emoji from './shared/Emoji';
-import Link from './shared/Link';
-import Page from './shared/Page';
 
 export const query = graphql`
   query {

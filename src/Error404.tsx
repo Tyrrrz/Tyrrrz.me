@@ -1,6 +1,6 @@
 import React from 'react';
-import Link from './shared/Link';
-import Page from './shared/Page';
+import Link from './components/Link';
+import Page from './components/Page';
 
 const Error404Page: React.FC = () => {
   return (

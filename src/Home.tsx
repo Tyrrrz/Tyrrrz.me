@@ -1,9 +1,9 @@
 import React from 'react';
 import { FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
+import Emoji from './components/Emoji';
+import Link from './components/Link';
+import Page from './components/Page';
 import './Home.css';
-import Emoji from './shared/Emoji';
-import Link from './shared/Link';
-import Page from './shared/Page';
 
 const HomePage: React.FC = () => {
   return (

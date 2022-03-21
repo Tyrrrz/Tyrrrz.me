@@ -5,10 +5,10 @@ import { GatsbyImage, getSrc } from 'gatsby-plugin-image';
 import 'prismjs/themes/prism-tomorrow.css';
 import React from 'react';
 import { FiCalendar, FiClock, FiTag } from 'react-icons/fi';
-import Emoji from './shared/Emoji';
-import Link from './shared/Link';
-import Page from './shared/Page';
-import useSiteMetadata from './shared/useSiteMetadata';
+import Emoji from './components/Emoji';
+import Link from './components/Link';
+import Page from './components/Page';
+import useSiteMetadata from './components/useSiteMetadata';
 import { getAbsoluteUrl } from './utils';
 
 export const query = graphql`

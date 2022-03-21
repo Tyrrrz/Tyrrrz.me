@@ -2,9 +2,9 @@ import { compareDesc as compareDatesDesc, format as formatDate, formatDuration }
 import { graphql } from 'gatsby';
 import React from 'react';
 import { FiCalendar, FiClock, FiTag } from 'react-icons/fi';
-import Emoji from './shared/Emoji';
-import Link from './shared/Link';
-import Page from './shared/Page';
+import Emoji from './components/Emoji';
+import Link from './components/Link';
+import Page from './components/Page';
 
 export const query = graphql`
   query {
