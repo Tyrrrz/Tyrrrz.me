@@ -60,10 +60,7 @@ const BlogPage: React.FC<BlogPageProps> = ({ data }) => {
 
       {blogPostsByYear.map(({ year, blogPosts }) => (
         <div key={year} className="group">
-          <div className="group-header">
-            <div>{year}</div>
-            <hr className="group-header-line" />
-          </div>
+          <div className="group-header">{year}</div>
 
           {blogPosts.map((post) => (
             <div key={post.id} className="entry">

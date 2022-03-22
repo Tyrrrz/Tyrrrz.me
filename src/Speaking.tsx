@@ -59,10 +59,7 @@ const SpeakingPage: React.FC<SpeakingPageProps> = ({ data }) => {
 
       {speakingEngagementsByYear.map(({ year, engagements }) => (
         <div key={year} className="group">
-          <div className="group-header">
-            <div>{year}</div>
-            <hr className="group-header-line" />
-          </div>
+          <div className="group-header">{year}</div>
 
           {engagements.map((engagement) => (
             <div key={engagement.event + engagement.date} className="entry">

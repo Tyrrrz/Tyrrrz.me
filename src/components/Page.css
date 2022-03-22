@@ -60,6 +60,8 @@ hr {
 .navbar {
   display: flex;
   padding: 1rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  gap: 0 1.5rem;
   align-items: center;
 }
 
@@ -71,13 +73,12 @@ hr {
 }
 
 .navbar-logo {
-  margin-right: 1.5rem;
   font-size: 2rem;
+  font-weight: 500;
 }
 
 @media only screen and (max-width: 640px) {
   .navbar-logo {
-    margin-right: 0;
     text-align: center;
   }
 }
@@ -138,7 +139,7 @@ hr {
 
 .section-header {
   margin: 1rem 0;
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 500;
 }
 
@@ -178,16 +179,12 @@ hr {
 }
 
 .group-header {
-  margin-bottom: 1rem;
   display: flex;
+  margin-bottom: 1rem;
   align-items: center;
   font-size: 1.25rem;
   font-weight: 500;
   letter-spacing: 0.025rem;
-}
-
-.group-header-line {
-  margin: 0 1rem;
 }
 
 .entry {
@@ -203,19 +200,16 @@ hr {
 }
 
 .entry-info {
-  margin-top: 0.25rem;
   display: flex;
+  margin-top: 0.25rem;
   flex-wrap: wrap;
   font-weight: 300;
   letter-spacing: 0.025rem;
 }
 
 .label {
-  margin-right: 0.75rem;
   display: flex;
+  margin-right: 0.75rem;
+  gap: 0 0.25rem;
   align-items: center;
-}
-
-.label > * + * {
-  margin-left: 0.25rem;
 }

@@ -17,8 +17,6 @@ const HomePage: React.FC = () => {
         />
       </figure>
 
-      <hr />
-
       <div>
         <p>My name is Oleksii, I&apos;m a software developer from Kyiv, Ukraine.</p>
         <p>
