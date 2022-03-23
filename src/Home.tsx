@@ -24,14 +24,14 @@ const HomePage: React.FC = () => {
           <strong>
             <Link href="https://war.ukraine.ua">Russian armed forces have invaded my country</Link>
           </strong>
-          . Driven by chauvenistic ideals and determination to eradicate the Ukrainian people, this
+          . Driven by chauvinistic ideals and determination to eradicate the Ukrainian people, this
           act of aggression can only be described as <strong>genocide</strong>.
         </p>
         <p>
-          Russian soldiers spare no thought when bombing residental areas, hospitals, schools,
+          Russian soldiers spare no thought when bombing residential areas, hospitals, schools,
           museums, cultural heritages, and civilian infrastructure. The list of{' '}
           <Link href="https://en.wikipedia.org/wiki/War_crimes_during_the_2022_Russian_invasion_of_Ukraine">
-            committed warcrimes
+            committed war crimes
           </Link>{' '}
           grows longer by the minute, while the rest of the world largely remains passive.
         </p>
@@ -75,7 +75,7 @@ const HomePage: React.FC = () => {
           <li>
             Help local Ukrainian refugees with food, water, medication, supplies, housing, etc.
           </li>
-          <li>Stop buying products made in Russia (barcodes starting with 460-469)</li>
+          <li>Stop buying products made in Russia (bar codes starting with 460-469)</li>
           <li>Urge your employer to take a stance against Russia</li>
           <li>
             Call your politicans to action (US citizens may use{' '}

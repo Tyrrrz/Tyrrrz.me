@@ -126,7 +126,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ data }) => {
           <Emoji code="🇺🇦" /> Ukraine is under attack! <Emoji code="⚠" />
         </strong>
         <br />
-        <Link href="/">Click here</Link> to read what it means and find ways to help.
+        <Link href="/">Click here</Link> to learn what it means and find ways to help.
       </div>
 
       <article dangerouslySetInnerHTML={{ __html: blogPost.html }} />
