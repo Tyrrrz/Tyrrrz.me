@@ -14,10 +14,10 @@ const getGitHubRepos = async () => {
   });
 };
 
-const getGitHubDownloads = async (repo) => {
+const getGitHubDownloads = async (repositoryName: string) => {
   const releases = await github.paginate(github.repos.listReleases, {
     owner: 'Tyrrrz',
-    repo,
+    repo: repositoryName,
     per_page: 100
   });
 
@@ -28,9 +28,9 @@ const getGitHubDownloads = async (repo) => {
     .reduce((acc, val) => acc + val, 0);
 };
 
-const getNuGetDownloads = async (pkg) => {
+const getNuGetDownloads = async (packageName: string) => {
   const response = await fetch(
-    `https://azuresearch-usnc.nuget.org/query?q=packageid:${pkg.toLowerCase()}`
+    `https://azuresearch-usnc.nuget.org/query?q=packageid:${packageName.toLowerCase()}`
   );
 
   // Not all projects are on NuGet
@@ -38,18 +38,18 @@ const getNuGetDownloads = async (pkg) => {
     return 0;
   }
 
-  const meta = await response.json();
+  const meta = (await response.json()) as { data: { totalDownloads: number }[] };
 
   return meta.data.reduce((acc, val) => acc + val.totalDownloads, 0);
 };
 
-export const pullProjects = async () => {
+const pullProjects = async () => {
   const dirPath = path.resolve('./data/projects/');
   const repos = await getGitHubRepos();
 
   await Promise.allSettled(
     repos
-      .filter((repo) => repo.stargazers_count >= 35)
+      .filter((repo) => repo.stargazers_count && repo.stargazers_count >= 35)
       .map(async (repo) => {
         const gitHubDownloads = await getGitHubDownloads(repo.name);
         const nuGetDownloads = await getNuGetDownloads(repo.name);
@@ -71,3 +71,5 @@ export const pullProjects = async () => {
       })
   );
 };
+
+export default pullProjects;

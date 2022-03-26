@@ -1,4 +1,4 @@
-import { pullProjects } from './pullProjects.mjs';
+import pullProjects from './pullProjects';
 
 const main = async () => {
   await pullProjects();

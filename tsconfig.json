@@ -16,11 +16,13 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "noEmit": true,
-    "pretty": true
+    "pretty": true,
+    "incremental": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true
   },
   "include": [
     "**/*.js",
-    "**/*.mjs",
     "**/*.jsx",
     "**/*.ts",
     "**/*.tsx"
