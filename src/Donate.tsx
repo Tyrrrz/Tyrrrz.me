@@ -6,24 +6,14 @@ import Link from './components/Link';
 import Page from './components/Page';
 import './Donate.css';
 
-export const query = graphql`
-  query {
-    allDonationsJson {
-      nodes {
-        name
-        amount
-        platform
-      }
-    }
-  }
-`;
-
 interface DonatePageProps {
-  data: { allDonationsJson: GatsbyTypes.DonationsJsonConnection };
+  data: {
+    donations: GatsbyTypes.DonationsJsonConnection;
+  };
 }
 
 const DonatePage: React.FC<DonatePageProps> = ({ data }) => {
-  const donations = [...data.allDonationsJson.nodes]
+  const donations = data.donations.nodes
     .map((node) => ({
       name: node.name!,
       amount: node.amount!,
@@ -83,5 +73,17 @@ const DonatePage: React.FC<DonatePageProps> = ({ data }) => {
     </Page>
   );
 };
+
+export const query = graphql`
+  query {
+    donations: allDonationsJson {
+      nodes {
+        name
+        amount
+        platform
+      }
+    }
+  }
+`;
 
 export default DonatePage;

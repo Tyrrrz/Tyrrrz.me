@@ -5,29 +5,14 @@ import { FiCalendar, FiGlobe, FiMessageCircle, FiMic, FiRadio, FiTool } from 're
 import Link from './components/Link';
 import Page from './components/Page';
 
-export const query = graphql`
-  query {
-    allSpeakingJson {
-      nodes {
-        title
-        kind
-        event
-        date
-        language
-        eventUrl
-        presentationUrl
-        recordingUrl
-      }
-    }
-  }
-`;
-
 interface SpeakingPageProps {
-  data: { allSpeakingJson: GatsbyTypes.SpeakingJsonConnection };
+  data: {
+    speakingEngagements: GatsbyTypes.SpeakingJsonConnection;
+  };
 }
 
 const SpeakingPage: React.FC<SpeakingPageProps> = ({ data }) => {
-  const speakingEngagements = [...data.allSpeakingJson.nodes]
+  const speakingEngagements = data.speakingEngagements.nodes
     .map((node) => ({
       title: node.title!,
       kind: node.kind!,
@@ -110,5 +95,22 @@ const SpeakingPage: React.FC<SpeakingPageProps> = ({ data }) => {
     </Page>
   );
 };
+
+export const query = graphql`
+  query {
+    speakingEngagements: allSpeakingJson {
+      nodes {
+        title
+        kind
+        event
+        date
+        language
+        eventUrl
+        presentationUrl
+        recordingUrl
+      }
+    }
+  }
+`;
 
 export default SpeakingPage;

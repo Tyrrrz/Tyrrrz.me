@@ -6,30 +6,14 @@ import Emoji from './components/Emoji';
 import Link from './components/Link';
 import Page from './components/Page';
 
-export const query = graphql`
-  query {
-    allMarkdownRemark {
-      nodes {
-        frontmatter {
-          title
-          date
-          tags
-        }
-        fields {
-          slug
-        }
-        timeToRead
-      }
-    }
-  }
-`;
-
 interface BlogPageProps {
-  data: { allMarkdownRemark: GatsbyTypes.MarkdownRemarkConnection };
+  data: {
+    blogPosts: GatsbyTypes.MarkdownRemarkConnection;
+  };
 }
 
 const BlogPage: React.FC<BlogPageProps> = ({ data }) => {
-  const blogPosts = [...data.allMarkdownRemark.nodes]
+  const blogPosts = data.blogPosts.nodes
     .map((node) => ({
       id: node.fields?.slug!,
       title: node.frontmatter?.title!,
@@ -91,5 +75,23 @@ const BlogPage: React.FC<BlogPageProps> = ({ data }) => {
     </Page>
   );
 };
+
+export const query = graphql`
+  query {
+    blogPosts: allMarkdownRemark {
+      nodes {
+        frontmatter {
+          title
+          date
+          tags
+        }
+        fields {
+          slug
+        }
+        timeToRead
+      }
+    }
+  }
+`;
 
 export default BlogPage;

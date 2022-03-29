@@ -11,34 +11,6 @@ import Page from './components/Page';
 import useSiteMetadata from './components/useSiteMetadata';
 import { getAbsoluteUrl } from './utils/url';
 
-export const query = graphql`
-  query ($slug: String!, $coverImagePath: String!) {
-    post: markdownRemark(fields: { slug: { eq: $slug } }) {
-      frontmatter {
-        title
-        date
-        tags
-      }
-      fields {
-        slug
-      }
-      timeToRead
-      excerpt(pruneLength: 280)
-      html
-    }
-    cover: file(relativePath: { eq: $coverImagePath }) {
-      childImageSharp {
-        gatsbyImageData(layout: CONSTRAINED, width: 1024, quality: 100, placeholder: BLURRED)
-      }
-    }
-    coverFallback: file(relativePath: { eq: "blog-cover-fallback.png" }) {
-      childImageSharp {
-        gatsbyImageData(layout: CONSTRAINED, width: 1024, quality: 100, placeholder: BLURRED)
-      }
-    }
-  }
-`;
-
 interface CommentsSectionProps {
   id: string;
   title: string;
@@ -50,7 +22,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ id, title }) => {
   return (
     <Disqus
       config={{
-        url: getAbsoluteUrl(siteMetadata.siteUrl, '/blog/' + id),
+        url: getAbsoluteUrl(siteMetadata.siteUrl!, '/blog/' + id),
         identifier: 'Blog/' + id,
         title
       }}
@@ -60,7 +32,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ id, title }) => {
 
 interface BlogPostPageProps {
   data: {
-    post: GatsbyTypes.MarkdownRemark;
+    blogPost: GatsbyTypes.MarkdownRemark;
     cover?: GatsbyTypes.File;
     coverFallback: GatsbyTypes.File;
   };
@@ -68,13 +40,13 @@ interface BlogPostPageProps {
 
 const BlogPostPage: React.FC<BlogPostPageProps> = ({ data }) => {
   const blogPost = {
-    id: data.post.fields?.slug!,
-    title: data.post.frontmatter?.title!,
-    date: new Date(data.post.frontmatter?.date!),
-    tags: data.post.frontmatter?.tags?.map((tag) => tag!)!,
-    timeToRead: data.post.timeToRead!,
-    excerpt: data.post.excerpt!,
-    html: data.post.html!
+    id: data.blogPost.fields?.slug!,
+    title: data.blogPost.frontmatter?.title!,
+    date: new Date(data.blogPost.frontmatter?.date!),
+    tags: data.blogPost.frontmatter?.tags?.map((tag) => tag!)!,
+    timeToRead: data.blogPost.timeToRead!,
+    excerpt: data.blogPost.excerpt!,
+    html: data.blogPost.html!
   };
 
   const coverImage = data.cover?.childImageSharp;
@@ -145,5 +117,33 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ data }) => {
     </Page>
   );
 };
+
+export const query = graphql`
+  query ($slug: String!, $coverImagePath: String!) {
+    blogPost: markdownRemark(fields: { slug: { eq: $slug } }) {
+      frontmatter {
+        title
+        date
+        tags
+      }
+      fields {
+        slug
+      }
+      timeToRead
+      excerpt(pruneLength: 280)
+      html
+    }
+    cover: file(relativePath: { eq: $coverImagePath }) {
+      childImageSharp {
+        gatsbyImageData(layout: CONSTRAINED, width: 1024, quality: 100, placeholder: BLURRED)
+      }
+    }
+    coverFallback: file(relativePath: { eq: "blog-cover-fallback.png" }) {
+      childImageSharp {
+        gatsbyImageData(layout: CONSTRAINED, width: 1024, quality: 100, placeholder: BLURRED)
+      }
+    }
+  }
+`;
 
 export default BlogPostPage;

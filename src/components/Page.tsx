@@ -34,9 +34,9 @@ const Meta: React.FC<MetaProps> = ({
   const actualKeywords = keywords?.join(', ') || '';
 
   const actualImageUrl = getAbsoluteUrl(
-    siteMetadata.siteUrl,
+    siteMetadata.siteUrl!,
     imageUrl ||
-      (useStaticQuery(graphql`
+      (useStaticQuery<{ image: GatsbyTypes.File }>(graphql`
         query {
           image: file(relativePath: { eq: "photo.jpg" }) {
             childImageSharp {
@@ -46,10 +46,10 @@ const Meta: React.FC<MetaProps> = ({
             }
           }
         }
-      `).image.childImageSharp.original.src as string)
+      `).image.childImageSharp!.original!.src as string)
   );
 
-  const actualRssUrl = rssUrl && getAbsoluteUrl(siteMetadata.siteUrl, rssUrl);
+  const actualRssUrl = rssUrl && getAbsoluteUrl(siteMetadata.siteUrl!, rssUrl);
 
   const actualPreviewLayout = previewLayout || 'descriptionPriority';
 
@@ -99,12 +99,12 @@ const Navigation: React.FC = () => {
           Home
         </Link>
 
-        <Link className="navbar-link" activeClassName="navbar-link--active" href="/blog">
-          Blog
-        </Link>
-
         <Link className="navbar-link" activeClassName="navbar-link--active" href="/projects">
           Projects
+        </Link>
+
+        <Link className="navbar-link" activeClassName="navbar-link--active" href="/blog">
+          Blog
         </Link>
 
         <Link className="navbar-link" activeClassName="navbar-link--active" href="/speaking">

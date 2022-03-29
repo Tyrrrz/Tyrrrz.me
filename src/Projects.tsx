@@ -5,27 +5,14 @@ import Emoji from './components/Emoji';
 import Link from './components/Link';
 import Page from './components/Page';
 
-export const query = graphql`
-  query {
-    allProjectsJson {
-      nodes {
-        name
-        url
-        description
-        stars
-        downloads
-        language
-      }
-    }
-  }
-`;
-
 interface ProjectsPageProps {
-  data: { allProjectsJson: GatsbyTypes.ProjectsJsonConnection };
+  data: {
+    projects: GatsbyTypes.ProjectsJsonConnection;
+  };
 }
 
 const ProjectsPage: React.FC<ProjectsPageProps> = ({ data }) => {
-  const projects = [...data.allProjectsJson.nodes]
+  const projects = data.projects.nodes
     .map((node) => ({
       name: node.name!,
       url: node.url!,
@@ -74,5 +61,20 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ data }) => {
     </Page>
   );
 };
+
+export const query = graphql`
+  query {
+    projects: allProjectsJson {
+      nodes {
+        name
+        url
+        description
+        stars
+        downloads
+        language
+      }
+    }
+  }
+`;
 
 export default ProjectsPage;

@@ -46,7 +46,6 @@
     "@types/react": "^17.0.40",
     "@types/react-dom": "^17.0.13",
     "@types/react-helmet": "^6.1.5",
-    "@types/twemoji": "^12.1.2",
     "node-fetch": "^2.6.7",
     "prettier": "^2.5.1",
     "prettier-plugin-organize-imports": "^2.3.4",

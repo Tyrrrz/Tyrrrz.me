@@ -1,11 +1,19 @@
 declare module 'gatsby-plugin-disqus' {
-  interface DisqusProps {
+  const Disqus: React.FC<{
     config: {
       url: string;
       identifier: string;
       title: string;
     };
-  }
+  }>;
+}
 
-  const Disqus: (props: DisqusProps) => JSX.Element;
+declare module 'twemoji' {
+  const parse: (
+    code: string,
+    options?: {
+      folder?: string;
+      ext?: string;
+    }
+  ) => string;
 }
