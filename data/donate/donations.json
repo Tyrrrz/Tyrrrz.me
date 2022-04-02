@@ -458,5 +458,15 @@
     "name": "Khalid Abuhakmeh",
     "amount": 15,
     "platform": "BuyMeACoffee"
+  },
+  {
+    "name": "<Anonymous>",
+    "amount": 365,
+    "platform": "Ethereum"
+  },
+  {
+    "name": "<Anonymous>",
+    "amount": 10,
+    "platform": "Bitcoin"
   }
 ]
