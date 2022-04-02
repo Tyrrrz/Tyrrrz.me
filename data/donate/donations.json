@@ -21,12 +21,12 @@
   },
   {
     "name": "Greg Engle",
-    "amount": 90,
+    "amount": 100,
     "platform": "Patreon"
   },
   {
     "name": "A dude",
-    "amount": 97.85,
+    "amount": 108.15,
     "platform": "Patreon"
   },
   {
@@ -56,11 +56,31 @@
   },
   {
     "name": "Peter Wesselius",
-    "amount": 396,
+    "amount": 420,
     "platform": "Patreon"
   },
   {
     "name": "Ivan",
+    "amount": 30,
+    "platform": "Patreon"
+  },
+  {
+    "name": "Matei Radu",
+    "amount": 5,
+    "platform": "Patreon"
+  },
+  {
+    "name": "Greg H",
+    "amount": 15,
+    "platform": "Patreon"
+  },
+  {
+    "name": "Stuart Lang",
+    "amount": 5.25,
+    "platform": "Patreon"
+  },
+  {
+    "name": "Thomas Sobieck",
     "amount": 10,
     "platform": "Patreon"
   },
