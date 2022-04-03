@@ -460,6 +460,11 @@
     "platform": "BuyMeACoffee"
   },
   {
+    "name": "@noseratio",
+    "amount": 25,
+    "platform": "BuyMeACoffee"
+  },
+  {
     "name": "<Anonymous>",
     "amount": 365,
     "platform": "Ethereum"
