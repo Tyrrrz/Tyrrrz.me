@@ -54,7 +54,8 @@ const Meta: React.FC<MetaProps> = ({
   const actualPreviewLayout = previewLayout || 'descriptionPriority';
 
   return (
-    <Helmet>
+    // Workaround for https://github.com/gatsbyjs/gatsby/issues/8089#issuecomment-461479234
+    <Helmet defer={false}>
       <meta name="viewport" content="width=device-width, initial-scale=1" />
 
       <title>{actualTitle}</title>
