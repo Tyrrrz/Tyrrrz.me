@@ -88,6 +88,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ data }) => {
 
       <div
         style={{
+          margin: '1em 0',
           padding: '1em',
           border: '2px solid orange',
           backgroundColor: '#ffebbf',
