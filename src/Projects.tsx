@@ -18,8 +18,8 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ data }) => {
       url: node.url!,
       description: node.description!,
       stars: node.stars!,
-      downloads: node.downloads!,
-      language: node.language!
+      downloads: node.downloads,
+      language: node.language
     }))
     .sort((a, b) => b.stars - a.stars);
 
@@ -48,12 +48,12 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ data }) => {
 
             <div className="label">
               <FiDownload strokeWidth={1} />
-              <div>{project.downloads > 0 ? project.downloads.toLocaleString() : 'N/A'}</div>
+              <div>{project.downloads ? project.downloads.toLocaleString() : 'N/A'}</div>
             </div>
 
             <div className="label">
               <FiPackage strokeWidth={1} />
-              <div>{project.language}</div>
+              <div>{project.language || 'N/A'}</div>
             </div>
           </div>
         </div>
