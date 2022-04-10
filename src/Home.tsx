@@ -50,7 +50,7 @@ const HomePage: React.FC = () => {
             </Link>
           </li>
           <li>
-            <Link href="https://savelife.in.ua/en/donate">
+            <Link href="https://comebackalive.in.ua/en/donate">
               NPO &quot;Come Back Alive&quot; (non-lethal military equipment)
             </Link>
           </li>
