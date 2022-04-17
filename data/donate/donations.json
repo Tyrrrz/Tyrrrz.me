@@ -480,6 +480,11 @@
     "platform": "BuyMeACoffee"
   },
   {
+    "name": "Giulius",
+    "amount": 5,
+    "platform": "BuyMeACoffee"
+  },
+  {
     "name": "[Anonymous]",
     "amount": 365,
     "platform": "Ethereum"
