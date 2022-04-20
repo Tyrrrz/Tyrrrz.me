@@ -1,6 +1,5 @@
 import { Octokit } from '@octokit/rest';
 import fs from 'fs/promises';
-import fetch from 'node-fetch';
 import path from 'path';
 
 const github = new Octokit();
