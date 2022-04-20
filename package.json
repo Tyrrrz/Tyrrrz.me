@@ -4,6 +4,9 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "config": {
+    "legacy-peer-deps": true
+  },
   "scripts": {
     "start": "gatsby develop",
     "build": "gatsby build",
