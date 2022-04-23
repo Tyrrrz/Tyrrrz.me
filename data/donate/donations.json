@@ -110,12 +110,12 @@
     "platform": "BuyMeACoffee"
   },
   {
-    "name": "[Anonymous]",
+    "name": null,
     "amount": 10,
     "platform": "BuyMeACoffee"
   },
   {
-    "name": "[Anonymous]",
+    "name": null,
     "amount": 15,
     "platform": "BuyMeACoffee"
   },
@@ -160,12 +160,12 @@
     "platform": "BuyMeACoffee"
   },
   {
-    "name": "[Anonymous]",
+    "name": null,
     "amount": 15,
     "platform": "BuyMeACoffee"
   },
   {
-    "name": "[Anonymous]",
+    "name": null,
     "amount": 10,
     "platform": "BuyMeACoffee"
   },
@@ -255,7 +255,7 @@
     "platform": "BuyMeACoffee"
   },
   {
-    "name": "[Anonymous]",
+    "name": null,
     "amount": 6,
     "platform": "BuyMeACoffee"
   },
@@ -275,7 +275,7 @@
     "platform": "BuyMeACoffee"
   },
   {
-    "name": "[Anonymous]",
+    "name": null,
     "amount": 3,
     "platform": "BuyMeACoffee"
   },
@@ -350,12 +350,12 @@
     "platform": "BuyMeACoffee"
   },
   {
-    "name": "[Anonymous]",
+    "name": null,
     "amount": 21,
     "platform": "BuyMeACoffee"
   },
   {
-    "name": "[Anonymous]",
+    "name": null,
     "amount": 9,
     "platform": "BuyMeACoffee"
   },
@@ -375,7 +375,7 @@
     "platform": "BuyMeACoffee"
   },
   {
-    "name": "[Anonymous]",
+    "name": null,
     "amount": 9,
     "platform": "BuyMeACoffee"
   },
@@ -450,7 +450,7 @@
     "platform": "BuyMeACoffee"
   },
   {
-    "name": "[Anonymous]",
+    "name": null,
     "amount": 5,
     "platform": "BuyMeACoffee"
   },
@@ -470,12 +470,12 @@
     "platform": "BuyMeACoffee"
   },
   {
-    "name": "[Anonymous]",
+    "name": null,
     "amount": 210,
     "platform": "BuyMeACoffee"
   },
   {
-    "name": "[Anonymous]",
+    "name": null,
     "amount": 5,
     "platform": "BuyMeACoffee"
   },
@@ -485,12 +485,12 @@
     "platform": "BuyMeACoffee"
   },
   {
-    "name": "[Anonymous]",
+    "name": null,
     "amount": 365,
     "platform": "Ethereum"
   },
   {
-    "name": "[Anonymous]",
+    "name": null,
     "amount": 10,
     "platform": "Bitcoin"
   }

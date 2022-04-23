@@ -15,7 +15,7 @@ interface DonatePageProps {
 const DonatePage: React.FC<DonatePageProps> = ({ data }) => {
   const donations = data.donations.nodes
     .map((node) => ({
-      name: node.name!,
+      name: node.name,
       amount: node.amount!,
       platform: node.platform!
     }))
@@ -54,8 +54,8 @@ const DonatePage: React.FC<DonatePageProps> = ({ data }) => {
 
       <ul>
         {donations.map((donation) => (
-          <li key={donation.name} className="donation">
-            <div className="donation-name">{donation.name}</div>
+          <li key={donation.amount + donation.platform} className="donation">
+            <div className="donation-name">{donation.name || '[ Anonymous ]'}</div>
             <div className="donation-info">
               <div className="label">
                 <FiDollarSign strokeWidth={1} />
