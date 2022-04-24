@@ -166,7 +166,7 @@ Error in Ln: 1 Col: 1
 Expecting: decimal digit, letter, '#', '%' or '*'
 ```
 
-An important thing to note about choice combinators in FParsec is that all of them are non-backtracking by default. This ensures the path of least resistance for writing high performance code but may lead to slightly unexpected results.
+An important thing to note about choice combinators in FParsec is that all of them are non-backtracking by default. This ensures the path of the least resistance for writing high performance code but may lead to slightly unexpected results.
 
 For example, in the following snippet one of the alternative parsers (`fooXyz`) will never be evaluated:
 
@@ -331,9 +331,9 @@ type JsonNode =
     | JsonObject of Map<string, JsonNode> // { "count": 4, "items": [5, 1, -8, 3.14] }
 ```
 
-These will represent the individual nodes in the tree and later we're going to add some logic to navigate through the hierarchy.
+These will represent the individual nodes in the tree, and later we're going to add some logic to navigate through the hierarchy.
 
-Let's create a new module called `JsonGrammar` in the same file. The functions in this module will represent individual grammar rules so their names will match those of the actual data types but with camel case instead.
+Let's create a new module called `JsonGrammar` in the same file. The functions in this module will represent individual grammar rules, so their names will match those of the actual data types but with camel case instead.
 
 The first parser that we'll write is going to be `jsonNull`, which is really easy:
 
@@ -437,9 +437,9 @@ module JsonGrammar =
     let jsonString = quotedString .>> spaces |>> JsonString
 ```
 
-Ok, to be fair this doesn't handle escape sequences like `\t`, `\n`, etc. which are allowed in JSON strings. Handling those is not very interesting so I will cheat here by claiming that this is left as an exercise for the reader. 🙂
+Ok, to be fair this doesn't handle escape sequences like `\t`, `\n`, etc. which are allowed in JSON strings. Handling those is not very interesting, so I will cheat here by claiming that this is left as an exercise for the reader. 🙂
 
-With all of the literals out of the way, we can group them into a single parser. This is not necessary but it makes it slightly easier to reason about the grammar.
+With all of the literals out of the way, we can group them into a single parser. This is not necessary, but it makes it slightly easier to reason about the grammar.
 
 ```fsharp
 namespace MyJsonProcessor
@@ -498,7 +498,7 @@ module JsonGrammar =
     let jsonArray =
         jsonNode                       // parse JSON nodes...
         |> manyContained               // contained within...
-            (skipChar '[' .>> spaces)  // openning square bracket...
+            (skipChar '[' .>> spaces)  // opening square bracket...
             (skipChar ']' .>> spaces)  // and closing square bracket...
             (skipChar ',' .>> spaces)  // separated by commas
         |>> JsonArray

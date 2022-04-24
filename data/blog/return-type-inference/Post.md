@@ -36,7 +36,7 @@ In a similar vein, C# also allows initializing an array without having to manual
 var array = new[] {"Hello", "world"}; // string[]
 ```
 
-In this case, the compiler can see that we're initializing the array with two string elements so it can safely conclude that the resulting array is of type `string[]`. In some (very rare) cases, it can even infer the type of the array based on the most specific common type among the individual elements:
+Here, the compiler can see that we're initializing the array with two string elements, so it can safely conclude that the resulting array is of type `string[]`. In some (very rare) cases, it can even infer the type of the array based on the most specific common type among the individual elements:
 
 ```csharp
 var array = new[] {1, 2, 3.0}; // double[]
@@ -59,7 +59,7 @@ Which in turn can be used like this:
 var list = List.Create(1, 3, 5); // List<int>
 ```
 
-In the above scenario we could've specified the type explicitly by writing `List.Create<int>(...)` but we didn't have to. The compiler is able to detect it automatically based on the parameters we passed into the method, which are constrained by the same type as the returned list itself.
+In the above scenario we could've specified the type explicitly by writing `List.Create<int>(...)`, but we didn't have to. The compiler is able to detect it automatically based on the parameters we passed into the method, which are constrained by the same type as the returned list itself.
 
 Interestingly enough, all of the examples shown above are in fact based on the same form of type inference, which works by analyzing the constraints imposed by other expressions, whose type is already known. In other words, it examines the flow of data that _goes in_ and draws conclusions about the data that _goes out_.
 
@@ -139,7 +139,7 @@ Even though the type argument for `Option.None<T>(...)` seems to be inherently o
 
 Of course, ideally, we would want the compiler to figure out the type of `T` in `Option.None<T>(...)` based on the _return type_ this expression is _expected_ to have, as dictated by the signature of the containing method. If not, we would want it to at least get the `T` from the first branch of the conditional expression, where it was already inferred from `value`.
 
-Unfortunately, neither of these is possible with C#'s type system because it would need to work out the type in reverse, which it cannot do. That said, we can help it a little bit.
+Unfortunately, neither of these is possible with C#'s type system because it would need to work out the type in reverse, which it cannot do. That said, we can help it a little.
 
 We can simulate _return type inference_ by having `Option.None` return a special non-generic type representing an option with deferred initialization, which can be coerced into `Option<T>`. Here's how that would look:
 

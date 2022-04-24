@@ -6,7 +6,7 @@ tags:
   - 'csharp'
 ---
 
-Expression trees is an obscure, although very interesting feature in .NET. Most people probably think of it as something synonymous with object-relational mapping frameworks, but despite being its most common use case, it's not the only one. There are a lot of creative things you can do with expression trees, including code generation, transpilation, metaprogramming, and more.
+Expression trees is an obscure, although very interesting feature in .NET. Most people probably think of it as something synonymous with object-relational mapping frameworks, but despite being its most common use case, it's not the only one. There are a lot of creative things you can do with expression trees, including code generation, transpilation, meta-programming, and more.
 
 In this article I will give an overview of what expression trees are and how to work with them, as well as show some interesting scenarios where I've seen them used to great effect.
 
@@ -108,7 +108,7 @@ public Expression ConstructGreetingExpression()
 
 Let's digest what just happened here.
 
-First of all, we're calling `Expression.Parameter` in order to construct a parameter expression. We will be able to use it to resolve the value of a particular parameter.
+First, we're calling `Expression.Parameter` in order to construct a parameter expression. We will be able to use it to resolve the value of a particular parameter.
 
 Following that, we are relying on reflection to resolve a reference to the `string.IsNullOrWhiteSpace` method. We use `Expression.Call` to create a method invocation expression that represents a call to `string.IsNullOrWhiteSpace` with the parameter resolved by the expression we created earlier. To perform a logical "not" operation on the result, we're calling `Expression.Not` to wrap the method call. Incidentally, this expression constitutes the condition part of the ternary expression we're building.
 
@@ -116,7 +116,7 @@ To compose the positive clause, we're constructing an "add" operation with the h
 
 Then, for the negative clause, we're using `Expression.Constant` to create a `null` constant expression. To ensure that the `null` value is typed correctly, we explicitly specify the type as the second parameter.
 
-Finally, we're combining all of the above parts together to create our ternary conditional operator. If you take a moment to trace what goes into `Expression.Condition`, you will realize that we have essentially replicated the tree diagram we've seen earlier.
+Finally, we're combining all the above parts together to create our ternary conditional operator. If you take a moment to trace what goes into `Expression.Condition`, you will realize that we have essentially replicated the tree diagram we've seen earlier.
 
 However, this expression isn't particularly useful on its own. Since we've created it ourselves, we're not really interested in its structure -- we want to be able to evaluate it instead.
 
@@ -170,7 +170,7 @@ The binary operator Add is not defined for the types 'System.String' and 'System
 
 Hmm, that's weird. I'm pretty sure the `+` operator is defined for strings, otherwise how else would I be able to write `"foo" + "bar"`?
 
-Well, actually the error message is correct, this operator is indeed not defined for `System.String`. Instead what happens is that the C# compiler automatically converts expressions like `"foo" + "bar"` into `string.Concat("foo", "bar")`. In cases with more than two strings this provides better performance because it avoids unnecessary allocations.
+Well, actually the error message is correct, this operator is indeed not defined for `System.String`. Instead, what happens is that the C# compiler automatically converts expressions like `"foo" + "bar"` into `string.Concat("foo", "bar")`. In cases with more than two strings this provides better performance because it avoids unnecessary allocations.
 
 When dealing with expression trees, we're essentially writing the "final" version of the code. So instead of `Expression.Add` we need to call `string.Concat` directly.
 
@@ -725,7 +725,7 @@ public class CompiledDictionary<TKey, TValue> : IDictionary<TKey, TValue>
 }
 ```
 
-The method `UpdateLookup` takes all of the key-value pairs contained within the inner dictionary and groups them by the hash codes of their keys, which are then transformed into switch cases. If there is no collision for a particular hash code, then the switch case is made up of a single constant expression that produces the corresponding value. Otherwise, it contains an inner switch expression that further evaluates the key to determine which value to return.
+The method `UpdateLookup` takes all the key-value pairs contained within the inner dictionary and groups them by the hash codes of their keys, which are then transformed into switch cases. If there is no collision for a particular hash code, then the switch case is made up of a single constant expression that produces the corresponding value. Otherwise, it contains an inner switch expression that further evaluates the key to determine which value to return.
 
 Let's see how well this dictionary performs when benchmarked against the standard implementation:
 
@@ -867,9 +867,9 @@ public class Benchmarks
 | Compile (fast) |  4.497 us | 0.0662 us | 0.0619 us |  0.12 |   1.21 KB |
 ```
 
-As you can see, the performance improvement is pretty noticeable. The reason it runs so fast is because the `CompileFast` version skips all the verifications that normal `Compile` does to ensure that the expression tree is valid.
+As you can see, the performance improvement is pretty noticeable. The reason it runs so fast is that the `CompileFast` version skips all the verifications that normal `Compile` does to ensure that the expression tree is valid.
 
-This library (as part of `FastExpressionCompiler.LightExpression`) also offers a drop-in replacement for `Expression` and all of its static factory methods. These alternative implementations construct expressions which may in some cases perform much faster than their default counterparts. However, I still recommend to benchmark it on your particular use cases to ensure that it actually provides an improvement.
+This library (as part of `FastExpressionCompiler.LightExpression`) also offers a drop-in replacement for `Expression` and all of its static factory methods. These alternative implementations construct expressions which may in some cases perform much faster than their default counterparts. However, I still recommend benchmarking it on your particular use cases to ensure that it actually provides an improvement.
 
 ## Inferring expression trees from code
 
@@ -1013,7 +1013,7 @@ public class Validator<T>
         // ...
     }
 
-    // Evalute all predicates
+    // Evaluate all predicates
     public bool Validate(T obj) { /* ... */ }
 
     /* ... */
@@ -1032,9 +1032,9 @@ var isValid = validator.Validate(new Dto { Id = Guid.NewGuid() }); // false
 
 However, the problem here is that all of our validators are effectively untyped. We have to specify the generic argument in `AddValidation` so that our predicates are aware of what they're working with, but this setup is very volatile.
 
-If we were to, for example, change the type of `Dto.Id` from `Guid` to `int`, everything will still compile but the code will no longer work correctly because our predicate expects the type to be `Guid`. Also, we'd be lucky if our users were to provide the property names using `nameof`, in reality there will probably be magic strings instead. All in all, this code is not refactor-safe.
+If we were to, for example, change the type of `Dto.Id` from `Guid` to `int`, everything will still compile, but the code will no longer work correctly because our predicate expects the type to be `Guid`. Also, we'd be lucky if our users were to provide the property names using `nameof`, in reality there will probably be magic strings instead. All in all, this code is not refactor-safe.
 
-With expressions we can completely remedy this:
+With expressions, we can completely remedy this:
 
 ```csharp
 public class Validator<T>
@@ -1071,7 +1071,7 @@ This works exactly the same, except that now we don't need to specify generic ar
 
 Many existing libraries are using expression trees for this purpose, including:
 
-- [FluentValidation](https://github.com/JeremySkinner/FluentValidation) uses it to setup validation rules
+- [FluentValidation](https://github.com/JeremySkinner/FluentValidation) uses it to set up validation rules
 - [EntityFramework](https://github.com/dotnet/efcore) uses it for entity configuration
 - [Moq](https://github.com/moq/moq4) uses it to build mocks
 
@@ -1194,7 +1194,7 @@ Note that with this approach we will only be able to obtain the expression as a 
 
 In order to analyze expression trees, we need to be able to traverse them in a recursive descent manner, starting from the body of the lambda expression and going down to every expression it's made out of. This could be done manually with a large switch expression that calls into itself.
 
-Fortunately, we don't have to reinvent the wheel because the framework already provides a special class for this purpose called [`ExpressionVisitor`](https://docs.microsoft.com/en-us/dotnet/api/system.linq.expressions.expressionvisitor). It's an abstract class that has a visitor method for every expression type so you can simply inherit from it and override the methods you're interested in.
+Fortunately, we don't have to reinvent the wheel because the framework already provides a special class for this purpose called [`ExpressionVisitor`](https://docs.microsoft.com/en-us/dotnet/api/system.linq.expressions.expressionvisitor). It's an abstract class that has a visitor method for every expression type, so you can simply inherit from it and override the methods you're interested in.
 
 For example, we can implement a visitor that prints out all the binary and method call expressions it encounters:
 
@@ -1312,7 +1312,7 @@ public static class FSharpTranspiler
 
 With this setup, we can inject a `StringBuilder` into our visitor and use that as the output buffer. While the visitor takes care of navigating the tree, we need to make sure we're emitting valid code on each expression type.
 
-Writing a full C# to F# transpiler would be too complicated and way outside of the scope of this article. For the sake of simplicity let's limit our job to support expressions similar to the one we've seen in the initial example. To handle these, we will need to translate `Console.WriteLine` into correct usage of `printfn`.
+Writing a full C# to F# transpiler would be too complicated and way outside the scope of this article. For the sake of simplicity let's limit our job to support expressions similar to the one we've seen in the initial example. To handle these, we will need to translate `Console.WriteLine` into correct usage of `printfn`.
 
 Here's how we can do it:
 

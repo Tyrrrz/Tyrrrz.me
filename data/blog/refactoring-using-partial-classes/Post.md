@@ -6,21 +6,21 @@ tags:
   - 'csharp'
 ---
 
-As our code grows, we regularly find ourselves seeking new ways to keep it well structured and organized. Systematic refactoring is a necessity but often doesn't come very easily.
+As our code grows, we regularly find ourselves seeking new ways to keep it well-structured and organized. Systematic refactoring is a necessity but often doesn't come very easily.
 
 One of the challenges we often face is deciding how to group different parts of a bigger class together. Even with a good degree of separation, sometimes we end up with classes that might be a bit too much to reason about.
 
-From the earliest versions of the language, C# provided a construct called [regions](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/preprocessor-directives/preprocessor-region). Although it can be helpful when trying to organize code, most seem to agree that using regions is [generally an anti-pattern](https://softwareengineering.stackexchange.com/questions/53086/are-regions-an-antipattern-or-code-smell). Even if their usage can be justified, their benefits often come at a rather steep cost in terms of readability.
+From the earliest versions of the language, C# provided a construct called [regions](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/preprocessor-directives/preprocessor-region). Although it can be helpful when trying to organize code, most seem to agree that using regions is [generally an antipattern](https://softwareengineering.stackexchange.com/questions/53086/are-regions-an-antipattern-or-code-smell). Even if their usage can be justified, their benefits often come at a rather steep cost in terms of readability.
 
 I do believe that being able to group code to form logical blocks is useful, however I agree that regions cause more problems than they solve. For that reason, I've been actively using _partial classes_ instead, which in many ways can be used for a similar purpose without suffering from the same drawbacks.
 
-[Partial classes](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/partial-classes-and-methods) is a C# feature that lets you split the definition of a type into multiple parts, each potentially in its own file. During the build, compiler collects all of the parts and combines them together to produce a single class, as if it was defined in one place. It's enabled by adding the `partial` keyword in the definition.
+[Partial classes](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/partial-classes-and-methods) is a C# feature that lets you split the definition of a type into multiple parts, each potentially in its own file. During the build, compiler collects all the parts and combines them together to produce a single class, as if it was defined in one place. It's enabled by adding the `partial` keyword in the definition.
 
 In this article I will show you how I typically utilize partial classes when refactoring my own code.
 
 ## Extracting static members
 
-One thing that I like to do nearly all the time is separate static properties and methods from the rest of the class. That might seem like an arbitrary criteria, but I find it makes sense because we do reason about static and non-static members in different ways.
+One thing that I like to do nearly all the time is separate static properties and methods from the rest of the class. That might seem like an arbitrary criterion, but I find it makes sense because we do reason about static and non-static members in different ways.
 
 Let's have a look at an example. Imagine we're working on an abstraction called `PartitionedTextWriter` that implements the _rolling file_ concept -- it acts as a streaming text writer that automatically switches to a new file after reaching a certain character threshold in the previous one.
 
@@ -118,7 +118,7 @@ Note that in this example both partial definitions of the class are placed in th
 
 This idea works especially well when combining with the ["Resource acquisition is initialization"](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization) pattern. Using partial classes we can group methods responsible for initialization and separate them from the rest of the class.
 
-In the following example we have a class called `NativeDeviceContext` which is a wrapper for a device context resource in the Windows operating system. The class can be constructed by providing a handle to the native resource, but the consumers will not be doing this manually. Instead they will be calling one of the available static methods such as `FromDeviceName(...)` that will take care of the initialization for them.
+In the following example we have a class called `NativeDeviceContext` which is a wrapper for a device context resource in the Windows operating system. The class can be constructed by providing a handle to the native resource, but the consumers will not be doing this manually. Instead, they will be calling one of the available static methods such as `FromDeviceName(...)` that will take care of the initialization for them.
 
 Again, let's see how it looks when we split out the static methods:
 

@@ -34,7 +34,7 @@ Generally speaking, a **mock is a substitute, that pretends to function like its
 
 In fact, **a mock is not intended to have valid functionality at all**. Its purpose is rather to mimic the outcomes of various operations, so that the system under test exercises the behavior required by a given scenario.
 
-Besides that, **mocks can also be used to verify side-effects** that take place within the system. This is achieved by recording method calls and checking if the number of times they appear and their parameters match the expectations.
+Besides that, **mocks can also be used to verify side effects** that take place within the system. This is achieved by recording method calls and checking if the number of times they appear and their parameters match the expectations.
 
 Let's take a look at how all of this works in practice. As an example, imagine that we're building a system that relies on some binary file storage represented by the following interface:
 
@@ -134,12 +134,12 @@ public async Task I_can_update_the_content_of_a_document()
 }
 ```
 
-In the above code snippet, the first test attempts to verify that the consumer can retrieve a document, given it already exists in the storage. To facilitate this precondition, we configure the mock in such way that it returns a hardcoded byte stream when `ReadFileAsync()` is called with the expected file name.
+In the above code snippet, the first test attempts to verify that the consumer can retrieve a document, given it already exists in the storage. To facilitate this precondition, we configure the mock in such way that it returns a hard-coded byte stream when `ReadFileAsync()` is called with the expected file name.
 
 However, in doing so, we are inadvertently making a few very strong assumptions about how `DocumentManager` works under the hood. Namely, we assume that:
 
 - Calling `GetDocumentAsync()` in turn calls `ReadFileAsync()`
-- File name is formed by prepending `docs/` to the name of the document
+- File name is formed by pre-pending `docs/` to the name of the document
 
 These specifics may be true now, but they can easily change in the future. For example, it's not a stretch to imagine that we may decide to store files under a different path or replace the call to `ReadFileAsync()` with `DownloadFileAsync()`, as a means to preemptively cache files locally.
 
@@ -149,7 +149,7 @@ The second scenario works a bit differently, but also suffers from the same issu
 
 Again, it's not hard to imagine a situation where the underlying implementation can change in way that breaks this test. For example, we may decide to optimize the behavior slightly by not uploading the documents straight away, but instead keeping them in memory and sending in batches using `UploadManyFilesAsync()`.
 
-An experienced mocking practitioner might argue that some of these shortcomings can be mitigated if we configure our mocks to be less strict. In this instance, we can modify the test so it expects a call to any of the upload methods rather than a specific one, while also not checking the parameters at all:
+An experienced mocking practitioner might argue that some of these shortcomings can be mitigated if we configure our mocks to be less strict. In this instance, we can modify the test so that it expects a call to any of the upload methods rather than a specific one, while also not checking the parameters at all:
 
 ```csharp
 [Fact]
@@ -192,9 +192,9 @@ Instead of providing us with a safety net in the face of potential regressions, 
 
 ## Behavioral testing with fakes
 
-Logically, in order to avoid strong coupling between tests and the underlying implementations, our test doubles need to be completely independent from the scenarios they're used in. As you can probably guess, that's exactly where fakes come in.
+Logically, in order to avoid strong coupling between tests and the underlying implementations, our test doubles need to be completely independent of the scenarios they're used in. As you can probably guess, that's exactly where fakes come in.
 
-In essence, a **fake is a substitute that represents a lightweight but otherwise completely functional alternative to its real counterpart**. Instead of merely trying to fulfil the contract with preconfigured responses, it provides an actually valid end-to-end implementation.
+In essence, a **fake is a substitute that represents a lightweight but otherwise completely functional alternative to its real counterpart**. Instead of merely trying to fulfil the contract with pre-configured responses, it provides an actually valid end-to-end implementation.
 
 Although its functionality resembles that of the real component, a **fake implementation is intentionally made simpler by taking certain shortcuts**. For example, rather than relying on a remote database server, the fake can be programmed to use an in-memory provider instead. This makes it more accessible in testing, while retaining most of its core behavior.
 
@@ -245,7 +245,7 @@ public class FakeBlobStorage : IBlobStorage
 
 As seen above, our fake blob storage uses a hash map to keep track of uploaded files and their content. For the more high-level operations such as `DownloadFileAsync()` and `UploadManyFilesAsync()`, the real implementation may be using some optimized routines, but here we are just composing existing functionality.
 
-Note that the above implementation doesn't make any assumptions about how it's going to be used in tests. Instead it provides what can effectively be a drop-in replacement for the actual blob storage component in our system.
+Note that the above implementation doesn't make any assumptions about how it's going to be used in tests. Instead, it provides what can effectively be a drop-in replacement for the actual blob storage component in our system.
 
 Because of that, it's also important that the fake replicates the behavior of the real dependency as closely as possible. This means that we might have to consider various nuances, some of which are:
 
@@ -284,9 +284,9 @@ public async Task I_can_get_the_content_of_an_existing_document()
 }
 ```
 
-Here we take an existing test and rather than configure a mock to return a preconfigured response, we create a fake blob storage and fill it with data directly. This way we don't need to assume that retrieving a document should call a certain method, but instead just rely on the completeness of the behavior provided by our fake.
+Here we take an existing test and rather than configure a mock to return a pre-configured response, we create a fake blob storage and fill it with data directly. This way we don't need to assume that retrieving a document should call a certain method, but instead just rely on the completeness of the behavior provided by our fake.
 
-However, despite being able to eliminate most of the assumptions, we didn't get rid of all of them. Namely, our test still expects that calling `GetDocumentAsync()` should look for the file inside the `docs/` namespace, as that's where we're uploading it to in the arrange phase.
+However, despite being able to eliminate most of the assumptions, we didn't get rid of all of them. Namely, our test still expects that calling `GetDocumentAsync()` should look for the file inside the `docs/` namespace, as that's where we're uploading it to in the arrangement phase.
 
 This problem stems from the fact that we are yet again relying on how `DocumentManager` interacts with `IBlobStorage`, but this time it's not caused by the test double but by the design of the test itself. To avoid it, we need to adapt the scenario so that it revolves around the external behavior of the system and not its relationship with the dependencies.
 
@@ -318,7 +318,7 @@ Because of this, we don't have to worry about where the file is persisted inside
 
 It is also worth noting how little code we had to write, comparing to our previous attempts when we relied on mocking. This additional benefit comes from the fact that well-designed fakes are inherently reusable, which helps a lot with maintainability.
 
-If you are used to purist unit testing, this approach may seem a little bit weird at first, since we're not verifying the outcomes of individual operations, but rather how they fit together to create cohesive functionality. In the grand scheme of things, the latter is [far more important](/blog/unit-testing-is-overrated), as the confidence we derive directly depends on how accurately our tests match the way the software is actually used.
+If you are used to purist unit testing, this approach may seem a little weird at first, since we're not verifying the outcomes of individual operations, but rather how they fit together to create cohesive functionality. In the grand scheme of things, the latter is [far more important](/blog/unit-testing-is-overrated), as the confidence we derive directly depends on how accurately our tests match the way the software is actually used.
 
 ## Testing the test doubles
 

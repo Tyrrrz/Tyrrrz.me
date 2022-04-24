@@ -17,7 +17,7 @@ You can still resort to using a manually defined nuspec file in the new csproj f
 
 At the time of writing, the new csproj format is barely covered in documentation. My challenge-driven friend and coworker **Ihor Nechyporuk** spent multiple hours scavenging internet for clues and finally found a way to get it properly working.
 
-Let's take look at some of the solutions.
+Let's take look at some solutions.
 
 ## Solution for new project formats only
 
@@ -69,7 +69,7 @@ We can include the targets file in our project by simply adding an `<Import>` el
 
 This will cause MSBuild to copy `SOME_NATIVE_LIBRARY.dll` to output directory on every build.
 
-However, to make sure the external file and targets are added into the NuGet package we also need to add an additional item group:
+However, to make sure the external file and targets are included in the NuGet package we also need to add the following item group:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">

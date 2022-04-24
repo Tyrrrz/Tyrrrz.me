@@ -39,7 +39,7 @@ Normally, when the code isn't written with unit tests in mind, it may be impossi
 
 Besides that, unit tests are expected to be pure. For example, if a function contains code that writes data to the file system, that part needs to be abstracted away as well, otherwise the test that verifies such behavior will be considered an integration test instead, since its coverage extends to the unit's integration with the file system.
 
-Considering the factors mentioned above, we can reason that **unit tests are only useful to verify pure business logic inside of a given function**. Their scope does not extend to testing side-effects or other integrations because that belongs to the domain of integration testing.
+Considering the factors mentioned above, we can reason that **unit tests are only useful to verify pure business logic inside of a given function**. Their scope does not extend to testing side effects or other integrations because that belongs to the domain of integration testing.
 
 To illustrate how these nuances affect design, let's take a look at an example of a simple system that we want to test. Imagine we're working on an application that calculates local sunrise and sunset times, which it does through the help of the following two classes:
 
@@ -288,7 +288,7 @@ What's acceptable or not is subjective and depends on the context. At the end of
 
 Doing this also means that you will likely end up with tests that are scattered across different levels of the integration scale, with seemingly no clear sense of structure. This isn't an issue we would have had with unit testing, because there each test is coupled to a specific method or a function, so the structure usually ends up mirroring that of the code itself.
 
-Fortunately, this doesn't matter because organizing tests by individual classes or modules is not important in itself but is rather a side-effect of unit testing. Instead, the tests should be partitioned by the actual user-facing functionality that they are meant to verify.
+Fortunately, this doesn't matter because organizing tests by individual classes or modules is not important in itself but is rather a side effect of unit testing. Instead, the tests should be partitioned by the actual user-facing functionality that they are meant to verify.
 
 Such tests are often called _functional_ because they are based on the software's functional requirements that describe what features it has and how they work. Functional testing is not another layer on the pyramid, but instead a completely orthogonal concept.
 

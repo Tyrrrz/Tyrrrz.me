@@ -7,7 +7,7 @@ tags:
   - 'wpf'
 ---
 
-GUI applications sometimes offer a way for users to configure hotkeys, typically using a textbox that records combination of key presses inside of it. Such control doesn't come out of the box with WPF but we can implement it ourselves.
+GUI applications sometimes offer a way for users to configure hotkeys, typically using a textbox that records combination of key presses inside it. Such control doesn't come out of the box with WPF but we can implement it ourselves.
 
 ## Hotkey class
 
@@ -54,8 +54,8 @@ An instance of this class is created by specifying a key along with a combinatio
 
 To make the actual WPF control, you can either derive from `TextBox` or make your own `UserControl`. I chose the latter, mainly for two reasons:
 
-- I can hide all of the inherent textbox properties that aren't applicable for my control.
-- I have fewer limitations in case I need to replace textbox with a different control or add something on top of it.
+- It's possible to hide all the inherent textbox properties that aren't applicable for my control.
+- There are fewer limitations in case I need to replace textbox with a different control or add something on top of it.
 
 ```xml
 <UserControl x:Class="Your.Namespace.HotkeyEditorControl"
@@ -84,9 +84,9 @@ To make the actual WPF control, you can either derive from `TextBox` or make you
 
 There are a few important things we need to configure in our internal `TextBox`.
 
-First of all, it shouldn't allow manual text input, so I set `IsReadOnly` to `true`.
+First, it shouldn't allow manual text input, so I set `IsReadOnly` to `true`.
 
-Second of all, it'd be best to remove the caret since it isn't useful in any way. Setting `IsReadOnlyCaretVisible` to `false` takes cares of that.
+Second, it'd be best to remove the caret since it isn't useful in any way. Setting `IsReadOnlyCaretVisible` to `false` takes cares of that.
 
 We also don't want it to keep the undo/redo history so let's disable `IsUndoEnabled` as well.
 

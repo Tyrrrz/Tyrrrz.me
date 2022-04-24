@@ -60,7 +60,7 @@ Whether an input is considered valid or not is decided by a set of grammar rules
 
 ## Formal grammar
 
-Parsing numbers isn't rocket science and you wouldn't be reading this article if that was what you were after. Everyone can write a quick regular expression to split text like that into syntactic components.
+Parsing numbers isn't rocket science, and you wouldn't be reading this article if that was what you were after. Everyone can write a quick regular expression to split text like that into syntactic components.
 
 Speaking of regular expressions, do you know why is it that they are called _regular_?
 
@@ -260,7 +260,7 @@ internal static class JsonGrammar
 
 Let's quickly look into what we've just wrote here.
 
-On the right hand side of the equals sign, we are calling `Parse.String` to create a basic parser that will look for a sequence of characters that make up the string "null". This method produces a delegate of type `Parser<IEnumerable<char>>`, but since we're not particularly interested in the sequence of characters itself, we chain it with `Return` extension method that lets us specify a concrete object to return instead. Doing this also changes the delegate type to `Parser<JsonNull>`.
+On the right-hand side of the equals sign, we are calling `Parse.String` to create a basic parser that will look for a sequence of characters that make up the string "null". This method produces a delegate of type `Parser<IEnumerable<char>>`, but since we're not particularly interested in the sequence of characters itself, we chain it with `Return` extension method that lets us specify a concrete object to return instead. Doing this also changes the delegate type to `Parser<JsonNull>`.
 
 It's worth noting that as we write this, no parsing actually happens just yet. We are only building a delegate that can be later invoked to parse a particular input.
 

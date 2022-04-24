@@ -7,7 +7,7 @@ tags:
   - 'wpf'
 ---
 
-Sometimes you may find yourself facing a problem of having to switch between multiple presentations based on some condition. For example, you may want to display the same list of items differently depending on whether multiselect is enabled or not.
+Sometimes you may find yourself facing a problem of having to switch between multiple presentations based on some condition. For example, you may want to display the same list of items differently depending on whether multi-select is enabled or not.
 
 The easiest and the most obvious way to achieve this is to bind the `Visibility` property of the elements so that one is shown while the other is collapsed or hidden. However, this approach comes at a cost.
 
@@ -17,7 +17,7 @@ Changing the value of `Visibility` property tends to get the job done but it has
 
 - You have to use a converter to turn the bound value into `Visibility`.
 - It gets complicated when there are more than two presentations to switch between or when there is more than one condition.
-- Even when collapsed or hidden, all of the UI elements still remain in the visual tree.
+- Even when collapsed or hidden, all the UI elements still remain in the visual tree.
 
 The last point is something that tends to get overlooked and may lead to problems. When you make an element invisible, be it by setting the `Visibility` to `Hidden` or `Collapsed`, it doesn't actually disappear from the visual tree. This means it still takes part in most interactions, including bindings. Additionally, if a hidden element has a binding that fails, an exception will be raised and silently suppressed by the framework, potentially causing performance issues.
 

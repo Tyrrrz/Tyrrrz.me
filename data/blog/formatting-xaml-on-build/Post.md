@@ -77,7 +77,7 @@ Luckily, I can just run XAMLStyler on the code above and get something that look
 
 This is way better. Individual elements are now arranged vertically, long attribute declarations broken into separate lines, redundant code gone, even the comments are formatted as well.
 
-Note how it didn't touch the two consecutive `Run` elements in my code. That's because splitting them into multiple lines would result in a different layout being rendered. XAMLStyler is aware of these nuances and doesn't make changes that could introduce unwanted side-effects.
+Note how it didn't touch the two consecutive `Run` elements in my code. That's because splitting them into multiple lines would result in a different layout being rendered. XAMLStyler is aware of these nuances and doesn't make changes that could introduce unwanted side effects.
 
 Another thing I really like about it, is how it sorts attributes. They are not merely sorted alphabetically, but also in accordance with the categories to which they belong. For example, properties like `Margin` and `VerticalAlignment` are placed above most other attributes, which makes them easier to find.
 

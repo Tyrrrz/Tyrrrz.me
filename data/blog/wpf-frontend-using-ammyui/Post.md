@@ -207,4 +207,4 @@ Grid {
 
 I think AmmyUI is a very interesting project and highlights how much better WPF could've been if it didn't involve XAML.
 
-Ultimately, I don't think Ammy is production ready yet but I recommend trying it out in one of your side projects.
+Ultimately, I don't think Ammy is production ready yet, but I recommend trying it out in one of your side projects.

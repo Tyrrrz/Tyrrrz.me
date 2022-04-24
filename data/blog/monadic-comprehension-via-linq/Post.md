@@ -107,7 +107,7 @@ public static Container<TResult> SelectMany<TFirst, TSecond, TResult>(
 }
 ```
 
-In academic terms, this method signature actually represents a slightly more elaborate version of the [_monadic bind function_](https://en.wikipedia.org/wiki/Monad_(functional_programming)#Overview), which is used to sequence monadic operations together. Knowing that is not very important, but it helps us understand that LINQ query syntax (specifically the part involving multiple `from` clauses) is effectively a general-purpose monadic comprehension notation.
+In academic terms, this method signature actually represents a slightly more elaborate version of the [_monadic bind function_](<https://en.wikipedia.org/wiki/Monad_(functional_programming)#Overview>), which is used to sequence monadic operations together. Knowing that is not very important, but it helps us understand that LINQ query syntax (specifically the part involving multiple `from` clauses) is effectively a general-purpose monadic comprehension notation.
 
 Consequentially, any container type for which an appropriate `SelectMany(...)` may be reasonably defined, can benefit from the alternative mental model provided by LINQ. Moving on, let's explore some potential candidates.
 

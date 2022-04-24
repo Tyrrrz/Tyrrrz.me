@@ -9,7 +9,7 @@ tags:
 
 As any WPF developer knows, XAML can get messy due to all the nested elements and indentation. One common problematic area is data templates -- they are naturally decoupled from the surrounding layout but are still nested quite deep in the hierarchy.
 
-To deal with it, you can refactor some of the commonly used objects as resources into a `ResourceDictionary`, which can also be self-contained in its own separate XAML file. Dictionaries can later be referenced using the `Source` property or by including them in a `MergedDictionary`.
+To deal with it, you can refactor some commonly used objects as resources into a `ResourceDictionary`, which can also be self-contained in its own separate XAML file. Dictionaries can later be referenced using the `Source` property or by including them in a `MergedDictionary`.
 
 Sometimes the XAML you want to refactor can also contain some logic in code-behind, such as event handlers. By default, when you create a new resource dictionary, it comes without a code-behind class, but it's possible to add it. Let's see how we can do it.
 

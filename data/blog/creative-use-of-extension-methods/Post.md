@@ -11,7 +11,7 @@ I'm sure everyone with at least some background in C# is aware of extension meth
 
 This is extremely convenient in cases where you want to add functionality to types you don't have control over. In fact, I think everyone at some point authored extensions for the base class library just to make some things more accessible.
 
-But besides the more obvious use cases, there are a few other interesting patterns that directly rely on extension methods, showing how they can used in a slightly less conventional way.
+But besides the more obvious use cases, there are a few other interesting patterns that directly rely on extension methods, showing how they can be used in a slightly less conventional way.
 
 ## Adding methods to enums
 

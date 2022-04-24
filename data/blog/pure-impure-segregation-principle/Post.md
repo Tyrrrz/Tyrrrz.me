@@ -26,7 +26,7 @@ In this article we will look at what actually makes something pure or impure, wh
 
 As I'm writing this in 2020, there is no doubt that most readers are already familiar with the concept of purity in programming. Nevertheless, let's go over it one more time to make sure we are on the same page.
 
-In essence, _pure code_ is code encapsulated within a function, whose **evaluation is influenced only by its parameters** and whose **evaluation influences only its returned value**. In other words, a pure function doesn't have any implicit arguments, doesn't depend on or interact with external state, and doesn't generate any observable _side-effects_.
+In essence, _pure code_ is code encapsulated within a function, whose **evaluation is influenced only by its parameters** and whose **evaluation influences only its returned value**. In other words, a pure function doesn't have any implicit arguments, doesn't depend on or interact with external state, and doesn't generate any observable _side effects_.
 
 Conversely, a function which breaks at least one of those two rules is called _impure_. To illustrate this, let's look at a very simple example:
 
@@ -54,7 +54,7 @@ public static void IsFoodEdible(DateTimeOffset expiration, DateTimeOffset instan
 }
 ```
 
-In this case, the impurity comes from the fact that this function generates side-effects by interacting with the standard output stream. Since its evaluation influences something other than its returned value, it breaks the second rule we outlined earlier.
+In this case, the impurity comes from the fact that this function generates side effects by interacting with the standard output stream. Since its evaluation influences something other than its returned value, it breaks the second rule we outlined earlier.
 
 As a general rule, **any function that doesn't return anything** (or whose return value may be ignored) **is guaranteed to be impure**, because a pure function without a return value is inherently useless. Furthermore, if a function executes asynchronously, it's also a reliable giveaway that a function is impure, since asynchrony naturally comes from I/O operations.
 
@@ -75,7 +75,7 @@ public static bool AllFoodEdible(IReadOnlyList<DateTimeOffset> expirations, Date
 
 Seeing as `AllFoodEdible` mutates the value of `i` during the course of its execution, one could think that such a function is not pure either. However, because the variable `i` is encapsulated within a local scope and cannot be accessed from outside, this mutation is not externally observable and, as such, does not make the function impure.
 
-Now, of course it wouldn't make much sense to classify code based on these seemingly arbitrary traits if purity didn't provide us with some useful benefits. Indeed, since pure functions are deterministic and have no side-effects, they possess the following intrinsic qualities:
+Now, of course it wouldn't make much sense to classify code based on these seemingly arbitrary traits if purity didn't provide us with some useful benefits. Indeed, since pure functions are deterministic and have no side effects, they possess the following intrinsic qualities:
 
 - Easy to reason about
 - Can be safely cached

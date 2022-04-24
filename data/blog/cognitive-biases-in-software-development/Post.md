@@ -24,7 +24,7 @@ Needless to say, the effects of this bias can negatively impact motivation. Simi
 
 I've found this bias reflected well in how developers defend their decisions far more vigorously when their changes were already pushed and merged to master. The regret associated with making revert commits is something we all prefer to avoid, due to the induced shame of having made bad choices and spending efforts on what ultimately didn't bring the desired value.
 
-I can often find myself standing by something I've done, not noticing that I'm simply trying to justify my decision making, instead of focusing on what's best for the project in the long run. At the time the action was taken, it may have made perfect sense, but some months later the circumstances could be different -- yet your brain is conditioned to remember it only for being the best option, instead of the thought process that brought you to that conclusion.
+I can often find myself standing by something I've done, not noticing that I'm simply trying to justify my decision-making, instead of focusing on what's best for the project in the long run. At the time the action was taken, it may have made perfect sense, but some months later the circumstances could be different -- yet your brain is conditioned to remember it only for being the best option, instead of the thought process that brought you to that conclusion.
 
 In situations like this, it helps to think of each incremental change as an improvement over the previous, without overindulging in how a particular issue was introduced in the first place.
 

@@ -123,7 +123,7 @@ You will be interested in the following properties:
 - `url` -- URL that serves the stream.
 - `s` -- cipher signature used to protect the stream (if present).
 
-Note: I've encountered cases when [some of the muxed streams were removed](https://github.com/Tyrrrz/YoutubeExplode/issues/36) despite still appearing in the metadata. Therefore it's recommended to send HEAD requests to check that each stream is still available. You can get content length as well while you're at it, since it's not present in the metadata.
+Note: I've encountered cases when [some of the muxed streams were removed](https://github.com/Tyrrrz/YoutubeExplode/issues/36) despite still appearing in the metadata. Therefore, it's recommended to send HEAD requests to check that each stream is still available. You can get content length as well while you're at it, since it's not present in the metadata.
 
 ### Adaptive streams
 
@@ -154,9 +154,9 @@ Adaptive streams have a slightly extended set of properties. I'll list the usefu
 - `url` -- URL that serves the stream.
 - `s` -- cipher signature used to protect the stream (if present).
 - `clen` -- content length of the stream in bytes.
-- `bitrate` -- stream bitrate in kbit/sec.
+- `bitrate` -- stream bit rate in kbit/sec.
 - `size` -- video resolution (video-only).
-- `fps` -- video framerate (video-only).
+- `fps` -- video frame rate (video-only).
 
 ### Adaptive streams in DASH manifest
 
@@ -182,10 +182,10 @@ The DASH manifest follows [this XML schema](http://standards.iso.org/ittf/Public
 They have the following attributes:
 
 - `id` -- integer code that identifies the type of stream.
-- `bandwidth` -- stream bitrate in kbit/sec.
+- `bandwidth` -- stream bit rate in kbit/sec.
 - `width` -- video width (video-only).
 - `height` -- video height (video-only).
-- `frameRate` -- video framerate (video-only).
+- `frameRate` -- video frame rate (video-only).
 
 The URL can be extracted from inner text of `<BaseURL>` node.
 
@@ -299,13 +299,13 @@ private async Task<IReadOnlyList<ICipherOperation>> GetCipherOperationsAsync(str
 }
 ```
 
-Output of this method is a collection of `ICipherOperation`s. At this point in time, there can be up to 3 kind of cipher operations:
+Output of this method is a collection of `ICipherOperation`s. At this point in time, there can be up to 3 kinds of cipher operations:
 
 - Swap -- swaps the first character in the signature with given, identified by position.
 - Slice -- truncates leading characters in signature which come before given position.
 - Reverse -- reverses the entire signature.
 
-Once you successfully extract the type and order of the used operations, you need to store them somewhere so you can execute them on a signature.
+Once you successfully extract the type and order of the used operations, you need to store them somewhere so that you can execute them on a signature.
 
 ### Deciphering signatures and updating URLs
 
@@ -424,7 +424,7 @@ private static readonly Dictionary<int, ItagDescriptor> ItagMap = new Dictionary
 };
 ```
 
-Things like bitrate, resolution and framerate are not strictly regulated by `itag` so you still need to extract them from metadata.
+Things like bit rate, resolution and frame rate are not strictly regulated by `itag`, so you still need to extract them from metadata.
 
 ## Bypassing rate limit
 
