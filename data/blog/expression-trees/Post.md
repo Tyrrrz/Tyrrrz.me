@@ -869,7 +869,7 @@ public class Benchmarks
 
 As you can see, the performance improvement is pretty noticeable. The reason it runs so fast is that the `CompileFast` version skips all the verifications that normal `Compile` does to ensure that the expression tree is valid.
 
-This library (as part of `FastExpressionCompiler.LightExpression`) also offers a drop-in replacement for `Expression` and all of its static factory methods. These alternative implementations construct expressions which may in some cases perform much faster than their default counterparts. However, I still recommend benchmarking it on your particular use cases to ensure that it actually provides an improvement.
+This library (as part of `FastExpressionCompiler.LightExpression`) also offers a drop-in replacement for `Expression` and all of its static factory methods. These alternative implementations construct expressions which may, in some cases, perform much faster than their regular counterparts. However, I still recommend benchmarking it on your particular use cases to ensure that it actually provides an improvement.
 
 ## Inferring expression trees from code
 
@@ -1032,7 +1032,7 @@ var isValid = validator.Validate(new Dto { Id = Guid.NewGuid() }); // false
 
 However, the problem here is that all of our validators are effectively untyped. We have to specify the generic argument in `AddValidation` so that our predicates are aware of what they're working with, but this setup is very volatile.
 
-If we were to, for example, change the type of `Dto.Id` from `Guid` to `int`, everything will still compile, but the code will no longer work correctly because our predicate expects the type to be `Guid`. Also, we'd be lucky if our users were to provide the property names using `nameof`, in reality there will probably be magic strings instead. All in all, this code is not refactor-safe.
+If we were to, for example, change the type of `Dto.Id` from `Guid` to `int`, everything would still compile, but the code will no longer work correctly because our predicate expects the type to be `Guid`. Also, we'd be lucky if our users were to provide the property names using `nameof`, in reality there will probably be magic strings instead. All in all, this code is not refactor-safe.
 
 With expressions, we can completely remedy this:
 

@@ -521,7 +521,7 @@ At the end of the day, the entire notion of purity is just a mathematical model,
 
 Overall, purity is a pretty useful concept, as it helps us understand how some operations may make our code non-deterministic, difficult to reason about, and cumbersome to test in isolation. Impure interactions are not bad on their own, but the constraints they impose are contagious in nature and may spread to other parts of the application.
 
-The pure-impure segregation principle aims to limit impurities to an essential minimum, by decoupling them from the rest of the code. Ultimately, the goal is to push all non-pure operations towards the outermost layers of the system, while keeping the domain layer consisted entirely of pure functions.
+The pure-impure segregation principle aims to limit impurities to an essential minimum, by decoupling them from the rest of the code. Ultimately, the goal is to push all non-pure operations towards the outermost layers of the system, while keeping the domain layer composed entirely of pure functions.
 
 Designing software in such way leads to an architecture that resembles a pipeline rather than a hierarchy, which favors functional style of programming. Depending on the project, this may aid in expressing the flow of data more clearly, among other useful benefits.
 

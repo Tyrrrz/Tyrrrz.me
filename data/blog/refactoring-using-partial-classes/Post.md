@@ -14,7 +14,7 @@ From the earliest versions of the language, C# provided a construct called [regi
 
 I do believe that being able to group code to form logical blocks is useful, however I agree that regions cause more problems than they solve. For that reason, I've been actively using _partial classes_ instead, which in many ways can be used for a similar purpose without suffering from the same drawbacks.
 
-[Partial classes](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/partial-classes-and-methods) is a C# feature that lets you split the definition of a type into multiple parts, each potentially in its own file. During the build, compiler collects all the parts and combines them together to produce a single class, as if it was defined in one place. It's enabled by adding the `partial` keyword in the definition.
+[Partial classes](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/partial-classes-and-methods) is a C# feature that lets you split the definition of a type into multiple parts, each potentially in its own file. During the build, compiler collects all the parts and combines them together to produce a single class, as if it were defined in one place. It's enabled by adding the `partial` keyword in the definition.
 
 In this article I will show you how I typically utilize partial classes when refactoring my own code.
 

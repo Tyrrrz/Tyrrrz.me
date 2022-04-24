@@ -286,7 +286,7 @@ public async Task I_can_get_the_content_of_an_existing_document()
 
 Here we take an existing test and rather than configure a mock to return a pre-configured response, we create a fake blob storage and fill it with data directly. This way we don't need to assume that retrieving a document should call a certain method, but instead just rely on the completeness of the behavior provided by our fake.
 
-However, despite being able to eliminate most of the assumptions, we didn't get rid of all of them. Namely, our test still expects that calling `GetDocumentAsync()` should look for the file inside the `docs/` namespace, as that's where we're uploading it to in the arrangement phase.
+However, despite being able to eliminate most of the assumptions, we didn't get rid of all of them. Namely, our test still expects that calling `GetDocumentAsync()` should look for the file inside the `docs/` namespace, as that's where we're uploading it to in the arrange phase.
 
 This problem stems from the fact that we are yet again relying on how `DocumentManager` interacts with `IBlobStorage`, but this time it's not caused by the test double but by the design of the test itself. To avoid it, we need to adapt the scenario so that it revolves around the external behavior of the system and not its relationship with the dependencies.
 

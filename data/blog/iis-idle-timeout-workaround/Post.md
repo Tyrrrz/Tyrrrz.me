@@ -10,7 +10,7 @@ Web applications hosted in IIS adhere to the _Idle Timeout_ setting. It defines 
 
 If you have access to the IIS Manager, it's possible to change the timeout or disable it altogether, but this is not an option for those using shared hosting.
 
-The workaround seems pretty obvious -- we just need to keep sending requests to prevent IIS from killing our application. Default idle timeout is 20 minutes so you would need to send requests at least this often, although some hosting providers might have different settings.
+The workaround seems pretty obvious -- we just need to keep sending requests to prevent IIS from killing our application. Default idle timeout is 20 minutes, so you would need to send requests at least this often, although some hosting providers might have different settings.
 
 Problem is, however, simply pinging the host is not enough to keep it alive, we need to send actual HTTP requests. I've tried many uptime monitors and the only one that satisfied these criteria was Application Insight and its _Availability_ feature.
 

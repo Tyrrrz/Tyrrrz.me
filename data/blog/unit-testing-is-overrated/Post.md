@@ -146,7 +146,7 @@ public class SolarCalculatorTests
 
 Here we have a basic test that verifies that `SolarCalculator` works correctly for a known location. Since unit tests and their units are tightly coupled, we're following the recommended naming convention, where the test class is named after the class under test, and the name of the test method follows the `Method_Precondition_Result` pattern.
 
-In order to simulate the desired precondition in the arrangement phase, we have to inject corresponding behavior into the unit's dependency, `ILocationProvider`. In this case we do that by substituting the return value of `GetLocationAsync()` with a location for which the correct solar times are already known ahead of time.
+In order to simulate the desired precondition in the arrange phase, we have to inject corresponding behavior into the unit's dependency, `ILocationProvider`. In this case we do that by substituting the return value of `GetLocationAsync()` with a location for which the correct solar times are already known ahead of time.
 
 Note that although `ILocationProvider` exposes two different methods, from the contract perspective **we have no way of knowing which one actually gets called**. This means that by choosing to mock a specific one of these methods, we are making an **assumption about the underlying implementation** of the method we're testing (which was deliberately hidden in the previous snippets).
 
@@ -186,7 +186,7 @@ Logically, it would make sense to assume that, since they are small and isolated
 
 Even though the previously mentioned modular architecture lures us into thinking that individual components can be considered separately from each other, unit tests don't actually benefit from that. In fact, the complexity of a unit test only grows proportionally to the number of external interactions the unit has, due to all the work that you must do to achieve isolation while still exercising required behavior.
 
-The example illustrated previously in this article is very simple, but in a real project it's not unusual to see the arrangement phase spanning many long lines, just to set preconditions for a single test. In some cases, the mocked behavior can be so complex, it's almost impossible to unravel it back to figure out what it was supposed to do.
+The example illustrated previously in this article is very simple, but in a real project it's not unusual to see the arrange phase spanning many long lines, just to set preconditions for a single test. In some cases, the mocked behavior can be so complex, it's almost impossible to unravel it back to figure out what it was supposed to do.
 
 Besides that, unit tests are by design very tightly coupled to the code they're testing, which means that any effort to make a change is effectively doubled as the test suite needs to be updated as well. What makes this worse is that very few developers seem to find doing that an enticing task, often just pawning it off to more junior members on the team.
 
@@ -609,7 +609,7 @@ public class SolarTimeSpecs : IClassFixture<RedisFixture>, IAsyncLifetime
 }
 ```
 
-As you can see, the setup is really simple. All we need to do is create an instance of `FakeApp` and use the provided `HttpClient` to send requests to one of the endpoints, just like you would if it was a real web app.
+As you can see, the setup is really simple. All we need to do is create an instance of `FakeApp` and use the provided `HttpClient` to send requests to one of the endpoints, just like you would if it were a real web app.
 
 This specific test works by querying the `/solartimes/by_ip` route, which determines user's sunrise and sunset times for the current date based on their IP. Since we're relying on an actual GeoIP provider and don't know what the result is going to be, we're performing property-based assertions to ensure that the solar times are valid.
 

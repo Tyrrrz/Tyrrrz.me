@@ -124,7 +124,7 @@ public class GlobalHotkeyService : IDisposable
 
     private void ProcessMessage(Message message)
     {
-        // Only interested in hotkey messages so skip others
+        // Only interested in hotkey messages, so skip others
         if (message.Msg != 0x0312)
             return;
 
