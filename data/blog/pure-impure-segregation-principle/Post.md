@@ -6,7 +6,7 @@ tags:
   - 'software design'
 ---
 
-Two months ago I posted an article detailing why I think [unit testing is overrated](/blog/unit-testing-is-overrated), which seemed to resonate quite a lot with the readers, prompting very involved and interesting discussions. And although most commenters mainly shared their personal experiences, a few have also voiced criticism of the way some arguments were presented.
+Two months ago I posted an article detailing why I think [unit testing is overrated](/blog/unit-testing-is-overrated), which seemed to resonate quite a lot with the readers, prompting very involved and interesting discussions. And although most commentators mainly shared their personal experiences, a few have also voiced criticism of the way some arguments were presented.
 
 In particular, one person mentioned that the drawbacks I've described, especially those pertaining to abstractions and mocking, are really just a byproduct of object-oriented programming and its inherent flaws. Had my example been designed with functional principles in mind, many of the outlined problems would never have surfaced.
 
@@ -16,7 +16,7 @@ This exact approach was actually mentioned in later parts of the post as well, a
 
 That said, I also think that the underlying principle of code separation based on purity is very important and often overlooked. When used correctly, it can guide software design, providing benefits in terms of readability, portability and, as mentioned, unit testing.
 
-Depending on who you ask, this principle may have different names, such as [functional core, imperative shell](https://destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell), [impure-pure-impure sandwich](https://blog.ploeh.dk/2017/02/02/dependency-rejection), and some others. And while most developers seem to agree on its value, there's still some misunderstanding remaining as to how it's applied beyond simple academic examples.
+Depending on whom you ask, this principle may have different names, such as [functional core, imperative shell](https://destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell), [impure-pure-impure sandwich](https://blog.ploeh.dk/2017/02/02/dependency-rejection), and some others. And while most developers seem to agree on its value, there's still some misunderstanding remaining as to how it's applied beyond simple academic examples.
 
 At the end of the day, just like with any other software development pattern, its usefulness is entirely situational. However, it offers a good mental model for reasoning about non-determinism in code, which is relevant regardless of context.
 
@@ -212,7 +212,7 @@ This is a very typical scenario for "classically" designed object-oriented softw
 
 If we consider this relationship from a standpoint of purity, we'll also notice that the entire call chain is impure. And while for `LocationProvider` it makes sense because it performs non-deterministic I/O, the `SolarCalculator` is impure only due to its dependency on the former.
 
-That design is not ideal, because we lose out on the benefits of pure functions without really getting anything in return. Now if we wanted to, for example, test `SolarCalculator.GetSolarTimesAsync` in isolation, we would only be able do that with the help of an autotelic abstraction and a mock object, which is not desirable.
+That design is not ideal, because we lose out on the benefits of pure functions without really getting anything in return. Now if we wanted to, for example, test `SolarCalculator.GetSolarTimesAsync` in isolation, we would only be able to do that with the help of an autotelic abstraction and a mock object, which is not desirable.
 
 This issue could've been avoided if we architected our code with the pure-impure segregation principle in mind. Let's see how we can refactor our classes to push the impurities out of `SolarCalculator`:
 
@@ -265,7 +265,7 @@ Previously, the method in `SolarCalculator` took an IP address as a parameter an
 
 Of course, that impurity didn't just disappear into thin air, our software still needs to get the location somehow. The difference is that now this concern is pushed out towards the boundary of the system, which, in this case, is represented by the controller.
 
-In doing that, we also flattened the hierarchy so that all of the dependencies are aggregated at the boundary. The data flow now looks a bit more like a pipeline instead:
+In doing that, we also flattened the hierarchy so that all the dependencies are aggregated at the boundary. The data flow now looks a bit more like a pipeline instead:
 
 ```ini
 [ LocationProvider ]  [ SolarCalculator ]
@@ -435,7 +435,7 @@ public class RecommendationsProvider
 }
 ```
 
-By extracting all of the pure code out of `GetRecommendationsAsync`, we can now write unit tests that verify that the intermediate stages of the algorithm work as intended. On the surface, it looks as though we managed to achieve exactly what we wanted.
+By extracting all the pure code out of `GetRecommendationsAsync`, we can now write unit tests that verify that the intermediate stages of the algorithm work as intended. On the surface, it looks as though we managed to achieve exactly what we wanted.
 
 However, instead of having one cohesive element to reason about, we ended up with multiple fragments, each having no meaning or value of their own. While unit testing of individual parts may have become easier, the benefit is very questionable, as it provides no confidence in the correctness of the algorithm as a whole.
 
@@ -521,7 +521,7 @@ At the end of the day, the entire notion of purity is just a mathematical model,
 
 Overall, purity is a pretty useful concept, as it helps us understand how some operations may make our code non-deterministic, difficult to reason about, and cumbersome to test in isolation. Impure interactions are not bad on their own, but the constraints they impose are contagious in nature and may spread to other parts of the application.
 
-The pure-impure segregation principle aims to limit impurities to an essential minimum, by decoupling them from the rest of the code. Ultimately, the goal is to push all non-pure operations towards the outermost layers of the system, while keeping the domain layer comprised entirely of pure functions.
+The pure-impure segregation principle aims to limit impurities to an essential minimum, by decoupling them from the rest of the code. Ultimately, the goal is to push all non-pure operations towards the outermost layers of the system, while keeping the domain layer consisted entirely of pure functions.
 
 Designing software in such way leads to an architecture that resembles a pipeline rather than a hierarchy, which favors functional style of programming. Depending on the project, this may aid in expressing the flow of data more clearly, among other useful benefits.
 
