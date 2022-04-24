@@ -112,7 +112,7 @@ Processing: f:\Projects\Softdev\LightBulb\LightBulb\Views\Dialogs\SettingsView.x
 Processed 9 of 9 files.
 ```
 
-This is nice, but not ideal. As evident by the name, global tools are installed system-wide, which is convenient for some one-off utilities but doesn't work so well with tools that your project relies on. That's because the project repository is no longer self-contained -- other developers (or future you) will now have to also manually install this tool on their machines, which adds an an extra unnecessary step.
+This is nice, but not ideal. As evident by the name, global tools are installed system-wide, which is convenient for some one-off utilities but doesn't work so well with tools that your project relies on. That's because the project repository is no longer self-contained -- other developers (or future you) will now have to also manually install this tool on their machines, which adds an extra unnecessary step.
 
 Having to take any additional steps after `git clone` makes the developer experience worse and introduces indeterminism, so we want to avoid that. After all, it's always nice to keep the repository as a single source of truth.
 
@@ -194,9 +194,9 @@ Let's update our project file accordingly:
 
 As you can see, this target will trigger automatically on each build, execute `dotnet tool restore` and then run XAMLStyler recursively on the project's directory.
 
-By executing the restore first, we ensure that the tool is always available. Once it's downloaded and installed, running the restore again will just complete instantly so we don't have to worry about any performance issues. I've found this to be the most reliable approach after experimenting with a few different ones.
+By executing the restore first, we ensure that the tool is always available. Once it's downloaded and installed, running the restore again will just complete instantly, so we don't have to worry about any performance issues. I've found this to be the most reliable approach after experimenting with a few different ones.
 
-Now, when we run `dotnet build` on the project, it will also execute XAMLStyler to format all XAML files inside of it. The same will happen if we build the project in Visual Studio, Rider, VS Code, or anywhere else. Also, since the tool is installed locally and restored as part of the build, any developer who clones the repository won't have to take any additional steps to get up and running.
+Now, when we run `dotnet build` on the project, it will also execute XAMLStyler to format all XAML files inside it. The same will happen if we build the project in Visual Studio, Rider, VS Code, or anywhere else. Also, since the tool is installed locally and restored as part of the build, any developer who clones the repository won't have to take any additional steps to get up and running.
 
 ## Summary
 
