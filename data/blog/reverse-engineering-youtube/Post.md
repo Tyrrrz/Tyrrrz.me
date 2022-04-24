@@ -86,7 +86,7 @@ When the request fails, the response will contain only a few fields:
 - `errorcode` -- an integer code that identifies the error.
 - `reason` -- text message that explains why the video is not available.
 
-Error codes seem to be very generic and most of the time it's either `100` or `150` so they aren't very useful at determining what went wrong.
+Error codes seem to be very generic and most of the time it's either `100` or `150`, so they aren't very useful at determining what went wrong.
 
 ### Paid videos
 

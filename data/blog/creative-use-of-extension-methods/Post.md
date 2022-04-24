@@ -129,7 +129,7 @@ public static class ClosedCaptionTrackExtensions
 An extension method here achieves the same thing as a normal method, but it provides a few subtle benefits:
 
 1. It's clear that this method only works with public members of the class and doesn't mutate its private state in some obscure way.
-2. It's obvious that this method simply provides a shortcut and it's there only for convenience.
+2. It's obvious that this method simply provides a shortcut and exists only for convenience.
 3. The method is part of an entirely separate class (or even assembly) which helps us separate data from logic.
 
 Overall, using an extension method approach here helps draw a line between what's _necessary_ and what's _helpful_.

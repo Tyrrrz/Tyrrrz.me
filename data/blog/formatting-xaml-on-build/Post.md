@@ -114,7 +114,7 @@ Processed 9 of 9 files.
 
 This is nice, but not ideal. As evident by the name, global tools are installed system-wide, which is convenient for some one-off utilities but doesn't work so well with tools that your project relies on. That's because the project repository is no longer self-contained -- other developers (or future you) will now have to also manually install this tool on their machines, which adds an extra unnecessary step.
 
-Having to take any additional steps after `git clone` makes the developer experience worse and introduces indeterminism, so we want to avoid that. After all, it's always nice to keep the repository as a single source of truth.
+Having to take any additional steps after `git clone` makes the developer experience worse and introduces non-determinism, so we want to avoid that. After all, it's always nice to keep the repository as a single source of truth.
 
 ## Installing as a local tool
 

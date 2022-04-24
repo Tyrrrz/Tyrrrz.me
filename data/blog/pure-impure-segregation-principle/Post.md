@@ -352,7 +352,7 @@ public class RecommendationsProvider
 }
 ```
 
-The above algorithm works by retrieving the user's most listened songs, finding other people who have also listened to the same titles, and then extracting their top songs as well. Those songs are then aggregated into a list of recommendations and returned back to the caller.
+The above algorithm works by retrieving the user's most listened songs, finding other people who have also listened to the same titles, and then extracting their top songs as well. Those songs are then aggregated into a list of recommendations and returned to the caller.
 
 It's quite clear that this function would benefit greatly from being pure, seeing how much business logic is encapsulated within it. Unfortunately, the technique we relied upon earlier won't work here.
 

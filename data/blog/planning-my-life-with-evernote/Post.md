@@ -68,7 +68,7 @@ Which tasks I choose to draft for the week comes down to their importance and my
 
 ![The week plan](Week-plan.png)
 
-Once the week plan is made, it becomes the only note I look at throughout the week. I don't have to care about anything else because all the information I need is consolidated within this plan. Should I want to know more about a specific task or event I planned -- I can click on the internal link I inserted and it will take me to the corresponding note.
+Once the week plan is made, it becomes the only note I look at throughout the week. I don't have to care about anything else because all the information I need is consolidated within this plan. Should I want to know more about a specific task or event I planned -- I can click on the internal link I inserted and navigate to the corresponding note.
 
 As I routinely come back to the week plan, I cross out the items I have completed and move the corresponding notes to trash so that they don't appear in the next planning phase.
 

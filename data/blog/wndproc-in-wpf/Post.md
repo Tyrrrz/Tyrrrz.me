@@ -30,7 +30,7 @@ private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref b
 }
 ```
 
-In the example above we use the application's main window as the host, as it typically stays open for as long as the application is running. You can specify a different window as a parameter to `FromVisual(…)` method, but then make sure to call `source.RemoveHook(…)` and `source.Dispose()` after you're done.
+In the example above we use the application's main window as the host, as it typically stays open for as long as the application is running. You can specify a different window as a parameter to `FromVisual(...)` method, but then make sure to call `source.RemoveHook(...)` and `source.Dispose()` after you're done.
 
 The above approach suffers from not being MVVM-friendly -- the `WndProc` method, which will most likely be defined in the model layer, is actually coupled to a window. As a result, it can introduce a circular dependency between the view and the model, where one will wait on the other to initialize.
 

@@ -26,13 +26,13 @@ As we enter the realm of software terminology, words slowly start to lose their 
 
 Unsurprisingly, the concept of "mock" or how it's fundamentally different from other types of substitutes is also one of those cases. Despite its highly ubiquitous usage, this term [doesn't have a single universally accepted interpretation](https://stackoverflow.com/questions/346372/whats-the-difference-between-faking-mocking-and-stubbing).
 
-According to the [original definitions introduced by Gerard Meszaros](https://martinfowler.com/bliki/TestDouble.html), a mock is a very specific type of substitutes which is used to verify interactions between the system under test and its dependencies. Nowadays, however, the distinction has become a bit blurry, as this term is commonly used to refer to a broader class of objects created with frameworks such as [Moq](https://github.com/moq/moq4), [Mockito](https://github.com/mockito/mockito), [Jest](https://github.com/facebook/jest), and others.
+According to the [original definitions introduced by Gerard Meszaros](https://martinfowler.com/bliki/TestDouble.html), a mock object is a very specific type of substitute which is used to verify interactions between the system under test and its dependencies. Nowadays, however, the distinction has become a bit blurry, as this term is commonly used to refer to a broader class of objects created with frameworks such as [Moq](https://github.com/moq/moq4), [Mockito](https://github.com/mockito/mockito), [Jest](https://github.com/facebook/jest), and others.
 
 Such substitutes may not necessarily be mocks under the original definition, but there's very little benefit in acknowledging these technicalities. So to make matters simpler, we will stick to this more colloquial understanding of the term throughout the article.
 
-Generally speaking, a **mock is a substitute, that pretends to function like its real counterpart, but returns predefined responses instead**. From a structural standpoint, it does implement the same external interface as the actual component, however that **implementation is entirely superficial**.
+Generally speaking, a **mock object is a substitute, that pretends to function like its real counterpart, but returns predefined responses instead**. From a structural standpoint, it does implement the same external interface as the actual component, however that **implementation is entirely superficial**.
 
-In fact, **a mock is not intended to have valid functionality at all**. Its purpose is rather to mimic the outcomes of various operations, so that the system under test exercises the behavior required by a given scenario.
+In fact, **a mock object is not intended to have valid functionality at all**. Its purpose is rather to mimic the outcomes of various operations, so that the system under test exercises the behavior required by a given scenario.
 
 Besides that, **mocks can also be used to verify side effects** that take place within the system. This is achieved by recording method calls and checking if the number of times they appear and their parameters match the expectations.
 

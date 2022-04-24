@@ -357,9 +357,9 @@ We are using `stringReturn` to consume a string `"null"` and return the correspo
 
 Since whitespace is ignored in JSON, we have to also account for it in our parsers or else they will fail when they encounter any whitespace character. We can do that by chaining our parser with `spaces` which will consume and discard any trailing spaces. As long as we do that at the end of every parser, we will be fine.
 
-The traditional way of dealing with insignificant whitespace involves writing a separate _lexer_ component, which parses raw characters into so-called _tokens_. It can be done with FParsec as well and it provides many benefits, but for the sake of simplicity we'll be writing a scanner-less parser this time.
+The traditional way of dealing with insignificant whitespace involves writing a separate _lexer_ component, which parses raw characters into so-called _tokens_. It can be done with FParsec as well, and it provides many benefits, but for the sake of simplicity we'll be writing a scanner-less parser this time.
 
-If you're following along and your IDE is complaining that the type of a parser can't be inferred -- help it by explicitly specifying it as `let jsonNull : Parser<_, unit> = ...`. We're not going to be using state so we can set it to `unit`. By the end of this exercise we will have an entry point function that will help the F#'s compiler correctly determine the generic types, but for now we can write them out manually.
+If you're following along and your IDE is complaining that the type of a parser can't be inferred -- help it by explicitly specifying it as `let jsonNull : Parser<_, unit> = ...`. We're not going to be using state, so we can set it to `unit`. By the end of this exercise we will have an entry point function that will help the F#'s compiler correctly determine the generic types, but for now we can write them out manually.
 
 With `JsonNull` out of the way, let's proceed on to our next data type, `JsonBool`:
 
@@ -439,7 +439,7 @@ module JsonGrammar =
 
 Ok, to be fair this doesn't handle escape sequences like `\t`, `\n`, etc. which are allowed in JSON strings. Handling those is not very interesting, so I will cheat here by claiming that this is left as an exercise for the reader. 🙂
 
-With all of the literals out of the way, we can group them into a single parser. This is not necessary, but it makes it slightly easier to reason about the grammar.
+With all the literals out of the way, we can group them into a single parser. This is not necessary, but it makes it slightly easier to reason about the grammar.
 
 ```fsharp
 namespace MyJsonProcessor

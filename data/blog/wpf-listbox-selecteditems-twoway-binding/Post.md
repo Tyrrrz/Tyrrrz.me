@@ -102,9 +102,9 @@ public class ListBoxSelectionBehavior<T> : Behavior<ListBox>
 
 The behavior above defines its own `SelectedItems` property, identical to the one in `ListBox`, except it can be bound to and is not read-only.
 
-When the property is changed from the view model, the `OnSelectedItemsChanged(…)` method is called, which is where the changes are propagated to the view. We do that in the `SelectItems()` method where we just clear and add new items to the `ListBox.SelectedItems` collection.
+When the property is changed from the view model, the `OnSelectedItemsChanged(...)` method is called, which is where the changes are propagated to the view. We do that in the `SelectItems()` method where we just clear and add new items to the `ListBox.SelectedItems` collection.
 
-When the change is triggered by the view, we call the `OnListBoxSelectionChanged(…)` method. To update the selected items on the view model, we copy the items from `ListBox.SelectedItems` to our own `SelectedItems` collection.
+When the change is triggered by the view, we call the `OnListBoxSelectionChanged(...)` method. To update the selected items on the view model, we copy the items from `ListBox.SelectedItems` to our own `SelectedItems` collection.
 
 Note, however, that this behavior is generic because we expect to work with a collection like `IReadOnlyList<T>` on the view model side. WPF doesn't support generic behaviors, so we have to subtype this class for each specific data type:
 
@@ -304,7 +304,7 @@ public class ListBoxSelectionBehavior<T> : Behavior<ListBox>
 
 I added another dependency property for `SelectedValues` and a few new methods.
 
-`SelectedValuesToItems()` and `SelectedItemsToValues()` convert between `SelectedItems` and `SelectedValues`, depending on which property was updated. `GetDeepPropertyValue(…)` is used to extract value of a property using an object and member path -- it's used to establish conformity between items and values.
+`SelectedValuesToItems()` and `SelectedItemsToValues()` convert between `SelectedItems` and `SelectedValues`, depending on which property was updated. `GetDeepPropertyValue(...)` is used to extract value of a property using an object and member path -- it's used to establish conformity between items and values.
 
 ## Usage with SelectedValuePath
 

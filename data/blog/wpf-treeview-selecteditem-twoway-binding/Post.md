@@ -18,7 +18,7 @@ I solved this problem by writing a small behavior that takes care of this for me
 
 I realized that to solve this I would have to traverse the entire hierarchy of tree nodes, but that wasn't the only problem. To access `IsSelected` and `IsExpanded` properties I needed to resolve a reference to an instance of `TreeViewItem`, which is a container that wraps around the data template.
 
-This in itself can be accomplished by using the `TreeViewItem.ItemContainerGenerator.ContainerFromItem(…)` method. However, if the node is not visible yet, then the container is also not initialized, making the method return `null`.
+This in itself can be accomplished by using the `TreeViewItem.ItemContainerGenerator.ContainerFromItem(...)` method. However, if the node is not visible yet, then the container is also not initialized, making the method return `null`.
 
 In order to make our target node visible, we need to expand all of its ancestor nodes one by one, starting from the very top. I naively assumed that by expanding the node from code, its children's item containers will immediately become available, but this is not the case because that's handled asynchronously. We can, however, subscribe to the `Loaded` event of each data item, which will trigger once the control has been loaded.
 
@@ -28,7 +28,7 @@ Generally, the approach looks like this:
 - When `SelectedItem` changes, go through all loaded tree nodes and try to locate the target node.
 - If we manage to find it, select it and exit early.
 - If we instead find its parent, expand it so that we can continue the search once it's loaded.
-- When one of the nodes we expanded is loaded, it triggers an event and we start again from the top.
+- When one of the nodes we expanded is loaded, it triggers an event, and we start again from the top.
 
 Here's the behavior I've implemented:
 
@@ -209,7 +209,7 @@ To make it easier to check if a node is a child of another node, I defined a pro
 
 Once this behavior is attached, it calls `UpdateTreeViewItemStyle()` to inject an event handler for `Loaded` event of `ItemContainerStyle`. We need to listen to this event to handle nodes that were expanded. To ensure maximum compatibility, it extends an existing style if it can find one or creates a new one otherwise.
 
-It also calls `UpdateAllTreeViewItems()` after attaching. This goes through all of the tree view's children and in turn calls `UpdateTreeViewItem(…)` on them.
+It also calls `UpdateAllTreeViewItems()` after attaching. This goes through all of the tree view's children and in turn calls `UpdateTreeViewItem(...)` on them.
 
 ## Usage
 

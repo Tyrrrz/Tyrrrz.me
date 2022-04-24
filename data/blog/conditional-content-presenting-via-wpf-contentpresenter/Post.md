@@ -13,7 +13,7 @@ The easiest and the most obvious way to achieve this is to bind the `Visibility`
 
 ## Downsides of switching visibility
 
-Changing the value of `Visibility` property tends to get the job done but it has some noticeable drawbacks:
+Changing the value of `Visibility` property tends to get the job done, but it has some noticeable drawbacks:
 
 - You have to use a converter to turn the bound value into `Visibility`.
 - It gets complicated when there are more than two presentations to switch between or when there is more than one condition.

@@ -53,7 +53,7 @@ If we send a GET request with this URL we will get a response such as this one:
 }
 ```
 
-As you can see, it doesn't provide very much but it contains aggregated pricing information, which is exactly what we need.
+As you can see, it doesn't provide a lot of data, but it contains aggregated pricing information, which is exactly what we need.
 
 It's also worth noting that sometimes the response may not contain `median_price` and `volume`. I'm not sure why it happens but make sure to handle such cases too.
 
@@ -80,7 +80,7 @@ $url =
     '&format=json';
 ```
 
-It's a bit different from the previous one but it takes the same parameters. In fact, the base of this request is the item's listing URL we've inspected earlier.
+It's a bit different from the previous one but takes the same parameters. In fact, the base of this request is the item's listing URL we've inspected earlier.
 
 By setting `start` to `0` and `count` to `1` we are limiting the response to one listing since we are only interested in the image which is the same for all listings anyway.
 
@@ -114,6 +114,6 @@ If you take a look at the end of the URL, you can see the portion where it speci
 
 ## Source code
 
-The WordPress plugin I wrote is open source and you can [check it out here](https://github.com/Tyrrrz/WPSteamMarketExcerpt). Here's how it looks in action:
+The WordPress plugin I wrote is open source, you can [check it out here](https://github.com/Tyrrrz/WPSteamMarketExcerpt). Here's how it looks in action:
 
 ![WPSteamMarketExcerpt](WPSME.png)

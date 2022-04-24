@@ -22,14 +22,14 @@ The best part is that you can create an Application Insights resource on a free 
 
 To set up availability tests, go to [Azure Portal](https://portal.azure.com/) and add a new Application Insights resource.
 
-![create new resource](Step1.png)
+![Create a new resource](Step1.png)
 
 Navigate to **Availability** under **Investigate** section. Find the **Add test** button to create a new test.
 
-![add test](Step2.png)
+![Add a test](Step2.png)
 
 Configure the test with your URL and click **Create**.
 
-![configure test](Step3.png)
+![Configure the test](Step3.png)
 
 Once it's set up, Azure will poll your website every few minutes, keeping it alive and sending you alerts if it goes down.

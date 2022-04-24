@@ -429,9 +429,9 @@ public static class ExpressionTrees
 }
 ```
 
-In all of these approaches we're relying on static constructors to initialize the properties in a lazy and thread-safe manner. This ensures that all of the heavy-lifting happens only once, the first time the members of these classes are accessed.
+In all these approaches we're relying on static constructors to initialize the properties in a lazy and thread-safe manner. This ensures that all of the heavy-lifting happens only once, the first time the members of these classes are accessed.
 
-Now let's pit all of these techniques against each other and compare their performance using [Benchmark.NET](https://github.com/dotnet/BenchmarkDotNet):
+Now let's pit these techniques against each other and compare their performance using [Benchmark.NET](https://github.com/dotnet/BenchmarkDotNet):
 
 ```csharp
 public class Benchmarks
@@ -1165,7 +1165,7 @@ As you can see, the error message now specifies the exact assertion that failed.
 
 ---
 
-With the advent of .NET Core 3.0, the .NET team has also added a new attribute, `CallerArgumentExpression`. This attribute was meant to be supported by a [language feature](https://github.com/dotnet/csharplang/issues/287) that was planned for C# 8 but unfortunately it didn't make it. Currently, the attribute doesn't do anything, but we should see this change in one of the future versions of the language.
+With the advent of .NET Core 3.0, the .NET team has also added a new attribute, `CallerArgumentExpression`. This attribute was meant to be supported by a [language feature](https://github.com/dotnet/csharplang/issues/287) that was planned for C# 8 but unfortunately didn't make the cut. Currently, the attribute doesn't do anything, but we should see this change in one of the future versions of the language.
 
 The goal of this attribute is to provide the ability to "sniff" the expression passed to the specified parameter. For example, we should be able to define a method like this:
 

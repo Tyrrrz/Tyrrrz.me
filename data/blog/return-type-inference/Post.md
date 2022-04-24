@@ -61,7 +61,7 @@ var list = List.Create(1, 3, 5); // List<int>
 
 In the above scenario we could've specified the type explicitly by writing `List.Create<int>(...)`, but we didn't have to. The compiler is able to detect it automatically based on the parameters we passed into the method, which are constrained by the same type as the returned list itself.
 
-Interestingly enough, all of the examples shown above are in fact based on the same form of type inference, which works by analyzing the constraints imposed by other expressions, whose type is already known. In other words, it examines the flow of data that _goes in_ and draws conclusions about the data that _goes out_.
+Interestingly enough, all the examples shown above are in fact based on the same form of type inference, which works by analyzing the constraints imposed by other expressions, whose type is already known. In other words, it examines the flow of data that _goes in_ and draws conclusions about the data that _goes out_.
 
 There are scenarios, however, where we may want the type inference to work in the opposite direction. Let's see where that could be useful.
 

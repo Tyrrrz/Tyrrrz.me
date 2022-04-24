@@ -7,7 +7,7 @@ tags:
   - 'wpf'
 ---
 
-GUI applications sometimes offer a way for users to configure hotkeys, typically using a textbox that records combination of key presses inside it. Such control doesn't come out of the box with WPF but we can implement it ourselves.
+GUI applications sometimes offer a way for users to configure hotkeys, typically using a textbox that records combination of key presses inside it. Such control doesn't come out of the box with WPF, but we can implement it ourselves.
 
 ## Hotkey class
 
