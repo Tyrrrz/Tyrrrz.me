@@ -50,6 +50,11 @@ const HomePage: React.FC = () => {
             </Link>
           </li>
           <li>
+            <Link href="https://www.hospitallers.life/needs-hospitallers">
+              Hospitallers Battalion (front-line medical assistance)
+            </Link>
+          </li>
+          <li>
             <Link href="https://comebackalive.in.ua/en/donate">
               NPO &quot;Come Back Alive&quot; (non-lethal military equipment)
             </Link>
