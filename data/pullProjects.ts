@@ -50,15 +50,17 @@ const pullProjects = async () => {
     repos
       .filter((repo) => repo.stargazers_count && repo.stargazers_count >= 35)
       .map(async (repo) => {
-        const gitHubDownloads = await getGitHubDownloads(repo.name);
-        const nuGetDownloads = await getNuGetDownloads(repo.name);
+        const downloads = [
+          await getGitHubDownloads(repo.name),
+          await getNuGetDownloads(repo.name)
+        ].reduce((acc, val) => acc + val, 0);
 
         const project = {
           name: repo.name,
           url: repo.html_url,
           description: repo.description,
           stars: repo.stargazers_count,
-          downloads: gitHubDownloads + nuGetDownloads,
+          downloads,
           language: repo.language
         };
 

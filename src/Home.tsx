@@ -50,7 +50,7 @@ const HomePage: React.FC = () => {
             </Link>
           </li>
           <li>
-            <Link href="https://www.hospitallers.life/needs-hospitallers">
+            <Link href="https://hospitallers.life/needs-hospitallers">
               Hospitallers Battalion (front-line medical assistance)
             </Link>
           </li>
