@@ -490,6 +490,11 @@
     "platform": "BuyMeACoffee"
   },
   {
+    "name": "Kay",
+    "amount": 10,
+    "platform": "BuyMeACoffee"
+  },
+  {
     "name": null,
     "amount": 365,
     "platform": "Ethereum"
