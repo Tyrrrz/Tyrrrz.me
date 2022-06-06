@@ -2,6 +2,7 @@ import { graphql, useStaticQuery } from 'gatsby';
 import React from 'react';
 import Helmet from 'react-helmet';
 import { getAbsoluteUrl } from '../utils/url';
+import Emoji from './Emoji';
 import Link from './Link';
 import './Page.css';
 import useSiteMetadata from './useSiteMetadata';
@@ -115,12 +116,35 @@ const Navigation: React.FC = () => {
   );
 };
 
+const MerchAdvertisement: React.FC = () => {
+  // Hacky CSS because it's (hopefully) temporary
+  return (
+    <div
+      style={{
+        marginTop: '-1.25em',
+        marginBottom: '2.25em',
+        padding: '0.5em',
+        textAlign: 'center',
+        border: '1px solid orange',
+        backgroundColor: '#ffebbf',
+        borderRadius: '9px'
+      }}
+    >
+      <Link href="https://merch4ukraine.org">
+        <Emoji code="🇺🇦" /> Support Ukraine — buy merch, donate to charity <Emoji code="👕" />
+      </Link>
+    </div>
+  );
+};
+
 const Page: React.FC<MetaProps> = ({ children, ...props }) => {
   return (
     <div className="page-container">
       <Meta {...props} />
 
       <Navigation />
+
+      <MerchAdvertisement />
 
       <main>{children}</main>
     </div>

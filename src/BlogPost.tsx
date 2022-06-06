@@ -86,22 +86,6 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ data }) => {
         </figure>
       )}
 
-      <div
-        style={{
-          margin: '1em 0',
-          padding: '1em',
-          border: '2px solid orange',
-          backgroundColor: '#ffebbf',
-          fontSize: '1.25em'
-        }}
-      >
-        <strong>
-          <Emoji code="🇺🇦" /> Ukraine is under attack! <Emoji code="⚠" />
-        </strong>
-        <br />
-        <Link href="/">Click here</Link> to learn what it means and find ways to help.
-      </div>
-
       <article dangerouslySetInnerHTML={{ __html: blogPost.html }} />
 
       <hr />
