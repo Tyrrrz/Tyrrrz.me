@@ -70,8 +70,13 @@ const HomePage: React.FC = () => {
             </Link>
           </li>
           <li>
-            Any <Link href="/donate">personal donations</Link> during this time will also be routed
-            to support the country
+            <Link href="https://merch4ukraine.org">
+              Merch4Ukraine (my own merch store; proceeds donated to local charities)
+            </Link>
+          </li>
+          <li>
+            Any <Link href="/donate">personal donations</Link> during this time will also be
+            directed to support the country
           </li>
         </ul>
         <p>If you don&apos;t have the means to help financially, you can:</p>
