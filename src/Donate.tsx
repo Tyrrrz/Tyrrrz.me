@@ -46,6 +46,9 @@ const DonatePage: React.FC<DonatePageProps> = ({ data }) => {
         <li>
           <Link href="https://store.steampowered.com/wishlist/id/Tyrrrz">Steam Wishlist</Link>
         </li>
+        <li>
+          <Link href="https://merch4ukraine.org">Merch4Ukraine</Link>
+        </li>
       </ul>
 
       <hr />

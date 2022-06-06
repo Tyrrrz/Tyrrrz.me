@@ -71,7 +71,7 @@ const HomePage: React.FC = () => {
           </li>
           <li>
             <Link href="https://merch4ukraine.org">
-              Merch4Ukraine (my own merch store; proceeds donated to local charities)
+              Merch4Ukraine (my own merch store; proceeds go to local charities)
             </Link>
           </li>
           <li>
