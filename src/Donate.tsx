@@ -21,6 +21,8 @@ const DonatePage: React.FC<DonatePageProps> = ({ data }) => {
     }))
     .sort((a, b) => b.amount - a.amount);
 
+  const totalDonatedAmount = donations.reduce((acc, cur) => acc + cur.amount, 0);
+
   return (
     <Page title="Donate">
       <div className="section-header">Donate</div>
@@ -73,6 +75,8 @@ const DonatePage: React.FC<DonatePageProps> = ({ data }) => {
           </li>
         ))}
       </ul>
+
+      <div>Total amount donated: ${totalDonatedAmount.toLocaleString()}</div>
     </Page>
   );
 };

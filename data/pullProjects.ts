@@ -53,7 +53,7 @@ const pullProjects = async () => {
         const downloads = [
           await getGitHubDownloads(repo.name),
           await getNuGetDownloads(repo.name)
-        ].reduce((acc, val) => acc + val, 0);
+        ].reduce((acc, cur) => acc + cur, 0);
 
         const project = {
           name: repo.name,
