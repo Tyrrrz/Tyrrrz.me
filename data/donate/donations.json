@@ -510,6 +510,11 @@
     "platform": "BuyMeACoffee"
   },
   {
+    "name": "@84jcon",
+    "amount": 1,
+    "platform": "BuyMeACoffee"
+  },
+  {
     "name": null,
     "amount": 365,
     "platform": "Ethereum"
