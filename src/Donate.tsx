@@ -59,7 +59,7 @@ const DonatePage: React.FC<DonatePageProps> = ({ data }) => {
 
       <ul>
         {donations.map((donation) => (
-          <li key={donation.amount + donation.platform} className="donation">
+          <li key={donation.name || '?' + donation.amount + donation.platform} className="donation">
             <div className="donation-name">{donation.name || '[ Anonymous ]'}</div>
             <div className="donation-info">
               <div className="label">
