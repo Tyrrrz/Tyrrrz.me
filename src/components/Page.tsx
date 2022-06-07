@@ -1,5 +1,6 @@
 import { graphql, useStaticQuery } from 'gatsby';
 import React from 'react';
+import FadeIn from 'react-fade-in';
 import Helmet from 'react-helmet';
 import { getAbsoluteUrl } from '../utils/url';
 import Emoji from './Emoji';
@@ -146,7 +147,9 @@ const Page: React.FC<MetaProps> = ({ children, ...props }) => {
 
       <MerchAdvertisement />
 
-      <main>{children}</main>
+      <main>
+        <FadeIn>{children}</FadeIn>
+      </main>
     </div>
   );
 };
