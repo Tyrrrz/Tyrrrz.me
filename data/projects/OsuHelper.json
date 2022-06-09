@@ -2,7 +2,8 @@
   "name": "OsuHelper",
   "url": "https://github.com/Tyrrrz/OsuHelper",
   "description": "Beatmap suggester for osu!",
+  "homepageUrl": null,
   "stars": 76,
-  "downloads": 11520,
+  "downloads": 11521,
   "language": "C#"
 }

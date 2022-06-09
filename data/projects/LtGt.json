@@ -2,6 +2,7 @@
   "name": "LtGt",
   "url": "https://github.com/Tyrrrz/LtGt",
   "description": "Lightweight HTML processor",
+  "homepageUrl": null,
   "stars": 115,
   "downloads": 49094,
   "language": "C#"

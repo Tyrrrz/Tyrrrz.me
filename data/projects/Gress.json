@@ -2,6 +2,7 @@
   "name": "Gress",
   "url": "https://github.com/Tyrrrz/Gress",
   "description": "Progress reporting toolbox",
+  "homepageUrl": null,
   "stars": 120,
   "downloads": 17210,
   "language": "C#"

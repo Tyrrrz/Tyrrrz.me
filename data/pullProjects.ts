@@ -56,16 +56,18 @@ const pullProjects = async () => {
         const project = {
           name: repo.name,
           url: repo.html_url,
-          description: repo.description,
-          stars: repo.stargazers_count,
+          description: repo.description || null,
+          homepageUrl: repo.homepage || null,
+          stars: repo.stargazers_count || 0,
           downloads,
-          language: repo.language
+          language: repo.language || null
         };
 
-        const json = JSON.stringify(project, null, 2) + '\n';
-        const filePath = path.resolve(dirPath, `${project.name}.json`);
+        await fs.writeFile(
+          path.resolve(dirPath, `${project.name}.json`),
+          JSON.stringify(project, null, 2) + '\n'
+        );
 
-        await fs.writeFile(filePath, json);
         console.log(`Pulled ${project.name}.`);
       })
   );

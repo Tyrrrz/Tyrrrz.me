@@ -2,6 +2,7 @@
   "name": "YoutubeExplode.Converter",
   "url": "https://github.com/Tyrrrz/YoutubeExplode.Converter",
   "description": "Muxes and converts videos from YoutubeExplode",
+  "homepageUrl": null,
   "stars": 85,
   "downloads": 717426,
   "language": "C#"

@@ -1,6 +1,6 @@
 import { graphql } from 'gatsby';
 import React from 'react';
-import { FiDownload, FiPackage, FiStar } from 'react-icons/fi';
+import { FiCode, FiDownload, FiExternalLink, FiStar } from 'react-icons/fi';
 import Emoji from './components/Emoji';
 import Link from './components/Link';
 import Page from './components/Page';
@@ -16,9 +16,10 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ data }) => {
     .map((node) => ({
       name: node.name!,
       url: node.url!,
-      description: node.description!,
-      stars: node.stars!,
-      downloads: node.downloads,
+      description: node.description,
+      homepageUrl: node.homepageUrl,
+      stars: node.stars || 0,
+      downloads: node.downloads || 0,
       language: node.language
     }))
     .sort((a, b) => b.stars - a.stars);
@@ -46,15 +47,28 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ data }) => {
               <div>{project.stars.toLocaleString()}</div>
             </div>
 
-            <div className="label">
-              <FiDownload strokeWidth={1} />
-              <div>{project.downloads ? project.downloads.toLocaleString() : 'N/A'}</div>
-            </div>
+            {project.language && (
+              <div className="label">
+                <FiCode strokeWidth={1} />
+                <div>{project.language}</div>
+              </div>
+            )}
 
-            <div className="label">
-              <FiPackage strokeWidth={1} />
-              <div>{project.language || 'N/A'}</div>
-            </div>
+            {project.downloads > 0 && (
+              <div className="label">
+                <FiDownload strokeWidth={1} />
+                <div>{project.downloads.toLocaleString()}</div>
+              </div>
+            )}
+
+            {project.homepageUrl && (
+              <div className="label">
+                <FiExternalLink strokeWidth={1} />
+                <div>
+                  <Link href={project.homepageUrl}>Open</Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       ))}
@@ -69,6 +83,7 @@ export const query = graphql`
         name
         url
         description
+        homepageUrl
         stars
         downloads
         language

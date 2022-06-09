@@ -2,7 +2,8 @@
   "name": "CliWrap",
   "url": "https://github.com/Tyrrrz/CliWrap",
   "description": "Library for running command line processes",
-  "stars": 1863,
+  "homepageUrl": null,
+  "stars": 1864,
   "downloads": 2010181,
   "language": "C#"
 }
