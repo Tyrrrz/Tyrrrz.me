@@ -13,23 +13,21 @@ const getGitHubRepos = async () => {
   });
 };
 
-const getGitHubDownloads = async (repositoryName: string) => {
+const getGitHubDownloads = async (repo: string) => {
   const releases = await github.paginate(github.repos.listReleases, {
     owner: 'Tyrrrz',
-    repo: repositoryName,
+    repo,
     per_page: 100
   });
 
   return releases
-    .map((release) => release.assets)
-    .reduce((acc, val) => acc.concat(val), [])
-    .map((asset) => asset.download_count)
-    .reduce((acc, val) => acc + val, 0);
+    .flatMap((release) => release.assets)
+    .reduce((acc, cur) => acc + cur.download_count, 0);
 };
 
-const getNuGetDownloads = async (packageName: string) => {
+const getNuGetDownloads = async (pkg: string) => {
   const response = await fetch(
-    `https://azuresearch-usnc.nuget.org/query?q=packageid:${packageName.toLowerCase()}`
+    `https://azuresearch-usnc.nuget.org/query?q=packageid:${pkg.toLowerCase()}`
   );
 
   // Not all projects are on NuGet

@@ -4,4 +4,4 @@ const main = async () => {
   await pullProjects();
 };
 
-main();
+main().catch(console.error);

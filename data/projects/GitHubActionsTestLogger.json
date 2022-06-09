@@ -1,8 +1,8 @@
 {
   "name": "GitHubActionsTestLogger",
   "url": "https://github.com/Tyrrrz/GitHubActionsTestLogger",
-  "description": "Test logger for .NET that reports results in a format that GitHub Actions understands",
-  "stars": 151,
-  "downloads": 691580,
+  "description": "Test logger for .NET that integrates with GitHub Actions",
+  "stars": 174,
+  "downloads": 774755,
   "language": "C#"
 }
