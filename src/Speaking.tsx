@@ -1,7 +1,7 @@
 import { compareDesc as compareDatesDesc, format as formatDate } from 'date-fns';
 import { graphql } from 'gatsby';
 import React from 'react';
-import { FiCalendar, FiGlobe, FiMessageCircle, FiMic, FiRadio, FiTool } from 'react-icons/fi';
+import { FiCalendar, FiMessageCircle, FiMic, FiRadio, FiTool, FiUsers } from 'react-icons/fi';
 import Link from './components/Link';
 import Page from './components/Page';
 
@@ -72,7 +72,7 @@ const SpeakingPage: React.FC<SpeakingPageProps> = ({ data }) => {
                 </div>
 
                 <div className="label">
-                  <FiGlobe strokeWidth={1} />
+                  <FiUsers strokeWidth={1} />
                   <div>
                     <Link href={engagement.eventUrl}>{engagement.event}</Link>
                   </div>

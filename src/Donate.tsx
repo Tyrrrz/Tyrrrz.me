@@ -1,6 +1,6 @@
 import { graphql } from 'gatsby';
 import React from 'react';
-import { FiDollarSign, FiExternalLink } from 'react-icons/fi';
+import { FiDollarSign, FiShoppingBag } from 'react-icons/fi';
 import Emoji from './components/Emoji';
 import Link from './components/Link';
 import Page from './components/Page';
@@ -68,7 +68,7 @@ const DonatePage: React.FC<DonatePageProps> = ({ data }) => {
               </div>
 
               <div className="label">
-                <FiExternalLink strokeWidth={1} />
+                <FiShoppingBag strokeWidth={1} />
                 <div>{donation.platform}</div>
               </div>
             </div>
