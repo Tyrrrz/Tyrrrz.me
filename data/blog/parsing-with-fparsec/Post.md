@@ -692,8 +692,6 @@ let main _ =
 
 Once we run this piece of code, we should see `Value: Golden State Warriors`. Awesome, we've verified that our parser works and made a pretty simple but useful API around it.
 
-_The finished project is also available as a gist [here](https://gist.github.com/Tyrrrz/eb68660903c9c6e4dd231eeee20113a4)._
-
 ## Wait, but where are the monads?
 
 If you've come here after my previous article or were otherwise expecting to see monads here, you might be a bit surprised that there were none so far. This is because the combinators FParsec provides out of the box are so powerful you very rarely need to resort to it.
