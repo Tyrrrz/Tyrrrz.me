@@ -40,13 +40,23 @@ const HomePage: React.FC = () => {
           <strong>Today it&apos;s us, tomorrow it could be you</strong>.
         </p>
         <p>
-          Please consider helping Ukraine fight back by donating to our military and various
-          humanitarian causes:
+          Please consider helping Ukraine fight back by donating to local charitable funds. Avoid
+          donating to global funds such as Red Cross, UNCR, or other non-UA based Ukrainian NGOs —
+          their support is ineffective.
         </p>
         <ul>
           <li>
-            <Link href="https://bank.gov.ua/en/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zboru-koshtiv-na-potrebi-armiyi">
-              Official military donation page
+            <Link href="https://u24.gov.ua">Official government donation page</Link>
+          </li>
+
+          <li>
+            <Link href="https://comebackalive.in.ua/en/donate">
+              NPO &quot;Come Back Alive&quot; (military aid)
+            </Link>
+          </li>
+          <li>
+            <Link href="https://prytulafoundation.org/en">
+              NPO &quot;Serhiy Prytula Foundation&quot; (military &amp; humanitarian aid)
             </Link>
           </li>
           <li>
@@ -55,45 +65,22 @@ const HomePage: React.FC = () => {
             </Link>
           </li>
           <li>
-            <Link href="https://comebackalive.in.ua/en/donate">
-              NPO &quot;Come Back Alive&quot; (non-lethal military equipment)
-            </Link>
-          </li>
-          <li>
-            <Link href="https://novaukraine.org/donate">
-              NPO &quot;Nova Ukraine&quot; (humanitarian relief)
-            </Link>
-          </li>
-          <li>
-            <Link href="https://razomforukraine.org/donate">
-              NPO &quot;Razom for Ukraine&quot; (humanitarian relief)
-            </Link>
-          </li>
-          <li>
             <Link href="https://merch4ukraine.org">
-              Merch4Ukraine (my own merch store; proceeds go to local charities)
+              Merch4Ukraine (my own merch store; proceeds go to smaller local charities)
             </Link>
           </li>
           <li>
             Any <Link href="/donate">personal donations</Link> during this time will also be
-            directed to support the country
+            directed to local charities at my own discretion
           </li>
         </ul>
         <p>If you don&apos;t have the means to help financially, you can:</p>
         <ul>
           <li>Spread the information about the war throughout your local networks</li>
-          <li>
-            Help local Ukrainian refugees with food, water, medication, supplies, housing, etc.
-          </li>
+          <li>Help out Ukrainian refugees in your area</li>
           <li>Stop buying products made in Russia (bar codes starting with 460-469)</li>
           <li>Urge your employer to take a stance against Russia</li>
-          <li>
-            Call your politicans to action (US citizens may use{' '}
-            <Link href="https://docs.google.com/document/d/1V2iMwRNEcS7zL5eNwbOeFZXFQiDBykfx93QaxRSrJlw/edit?usp=sharing">
-              this template
-            </Link>
-            )
-          </li>
+          <li>Call your politicans to action</li>
           <li>Protest on the streets</li>
           <li>
             <Link href="https://fightforua.org">Join Ukrainian military as a foreigner</Link>
