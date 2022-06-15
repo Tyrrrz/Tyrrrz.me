@@ -55,7 +55,7 @@ const HomePage: React.FC = () => {
             </Link>
           </li>
           <li>
-            <Link href="https://prytulafoundation.org/en">
+            <Link href="https://prytulafoundation.org/en/home/support_page">
               NPO &quot;Serhiy Prytula Foundation&quot; (military &amp; humanitarian aid)
             </Link>
           </li>
