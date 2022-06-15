@@ -41,8 +41,8 @@ const HomePage: React.FC = () => {
         </p>
         <p>
           Please consider helping Ukraine fight back by donating to local charitable funds. Avoid
-          donating to global funds such as Red Cross, UNCR, or other non-UA based Ukrainian NGOs —
-          their support is ineffective.
+          donating to global funds such as Red Cross, UNCR, or other non-UA based NGOs — their
+          support is ineffective.
         </p>
         <ul>
           <li>
