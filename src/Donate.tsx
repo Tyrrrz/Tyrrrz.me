@@ -40,10 +40,16 @@ const DonatePage: React.FC<DonatePageProps> = ({ data }) => {
           <Link href="https://buymeacoffee.com/Tyrrrz">BuyMeACoffee</Link> (one-time)
         </li>
         <li>
-          Ethereum: <code>0xE52F3BD5375DB842e20c86f13dE99717929DE730</code>
+          Ethereum: <code>0x8c7D4568d4F3FC4BDBaE615C971a514f8B2236B6</code>
         </li>
         <li>
-          Bitcoin: <code>3HtgWiio8fzMpYTXiZVNrKiQSdXAEf7xet</code>
+          Bitcoin: <code>3C9UMPHcxwSBkBuXuizcGdAnLSM54Cyoej</code>
+        </li>
+        <li>
+          Solana: <code>7r7oDiMUJ4CcwTUxqYvqBJHgJ7EzmyHF64SxAGZPzz6M</code>
+        </li>
+        <li>
+          Ripple: <code>rw2ciyaNshpHe7bCHo4bRWq6pqqynnWKQg</code> (tag: <code>581679733</code>)
         </li>
         <li>
           <Link href="https://store.steampowered.com/wishlist/id/Tyrrrz">Steam Wishlist</Link>
