@@ -34,8 +34,10 @@ const DonatePage: React.FC<DonatePageProps> = ({ data }) => {
 
       <ul>
         <li>
-          <Link href="https://github.com/sponsors/Tyrrrz">GitHub Sponsors</Link> (recurring,
-          one-time)
+          <Link href="https://github.com/sponsors/Tyrrrz">
+            <strong>GitHub Sponsors</strong>
+          </Link>{' '}
+          (recurring, one-time)
         </li>
         <li>
           <Link href="https://patreon.com/Tyrrrz">Patreon</Link> (recurring)
