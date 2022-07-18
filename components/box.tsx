@@ -5,17 +5,15 @@ type BoxProps = PropsWithChildren<{
   type?: string;
   classes?: ClassName[];
   style?: CSSProperties;
-  innerHtml?: string;
 }>;
 
-const Box: FC<BoxProps> = ({ type = 'div', classes = [], style, innerHtml, children }) => {
+const Box: FC<BoxProps> = ({ type = 'div', classes = [], style, children }) => {
   const className = classNames(classes) || undefined;
   return createElement(
     type,
     {
       className,
-      style,
-      dangerouslySetInnerHTML: { __html: innerHtml }
+      style
     },
     children
   );

@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import Script from 'next/script';
 import { FC, PropsWithChildren, ReactNode, useEffect, useState } from 'react';
 import Box from '../components/box';
-import Link from '../components/link';
 import Meta from '../components/meta';
 import useDebouncedValue from '../hooks/useDebouncedValue';
 import { getGoogleAnalyticsId, isProduction } from '../utils/env';
@@ -77,51 +76,11 @@ const Loader: FC = () => {
 };
 
 const Header: FC = () => {
-  return (
-    <Link href="/">
-      <Box classes={['border-b', 'bg-white', 'hover:bg-neutral-50']}>
-        <Box
-          type="header"
-          classes={[
-            'flex',
-            'w-fit',
-            'mx-auto',
-            'px-4',
-            'py-6',
-            'items-center',
-            'gap-x-4',
-            'sm:gap-x-6',
-            'text-neutral-900'
-          ]}
-        >
-          <Box classes={['w-px', 'h-12', 'sm:h-16', 'bg-neutral-600']} />
-
-          <Box>
-            <Box classes={['flex', 'text-3xl', 'sm:text-4xl']}>
-              <Box classes={['p-1', 'pl-2', 'sm:pb-2', 'bg-ukraine-blue', 'text-white']}>
-                Spelling
-              </Box>
-              <Box classes={['p-1', 'pr-2', 'sm:pb-2', 'bg-ukraine-yellow']}>Ukraine</Box>
-            </Box>
-
-            <Box classes={['mt-1', 'text-sm', 'sm:text-xl', 'font-light', 'sm:tracking-wide']}>
-              Language is political. Transliterate correctly.
-            </Box>
-          </Box>
-        </Box>
-      </Box>
-    </Link>
-  );
+  return <></>;
 };
 
 const Main: FC<PropsWithChildren> = ({ children }) => {
-  return (
-    <Box classes={['flex-grow', 'bg-white']}>
-      <Box type="main" classes={['container', 'mx-auto', 'mt-6', 'mb-8', 'px-4']}>
-        {children}
-      </Box>
-    </Box>
-  );
+  return <Box>{children}</Box>;
 };
 
 const Scripts: FC = () => {
@@ -155,15 +114,13 @@ const App = ({ Component, pageProps }: AppProps) => {
     <>
       <Meta />
 
-      <Box classes={['flex', 'flex-col', 'min-h-screen', 'bg-neutral-50']}>
-        <Loader />
+      <Loader />
 
-        <Header />
+      <Header />
 
-        <Main>
-          <Component {...pageProps} />
-        </Main>
-      </Box>
+      <Main>
+        <Component {...pageProps} />
+      </Main>
 
       <Scripts />
     </>
