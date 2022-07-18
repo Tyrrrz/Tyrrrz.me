@@ -35,13 +35,17 @@ const getNuGetDownloads = async (pkg: string) => {
     return 0;
   }
 
-  const meta = (await response.json()) as { data: { totalDownloads: number }[] };
+  const meta: {
+    data: {
+      totalDownloads: number;
+    }[];
+  } = await response.json();
 
   return meta.data.reduce((acc, val) => acc + val.totalDownloads, 0);
 };
 
 const pullProjects = async () => {
-  const dirPath = path.resolve('./data/projects/');
+  const dirPath = path.resolve(process.cwd(), 'data', 'projects');
   const repos = await getGitHubRepos();
 
   await Promise.allSettled(

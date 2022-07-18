@@ -1,0 +1,17 @@
+{
+  "name": "Tyrrrzme",
+  "short_name": "Tyrrrzme",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#343838",
+  "background_color": "#343838",
+  "start_url": "/",
+  "display": "browser",
+  "orientation": "portrait"
+}
