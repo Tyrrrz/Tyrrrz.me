@@ -27,6 +27,7 @@
     "autoprefixer": "^10.4.7",
     "eslint": "8.20.0",
     "eslint-config-next": "12.2.2",
+    "front-matter": "^4.0.2",
     "postcss": "^8.4.14",
     "prettier": "^2.7.1",
     "prettier-plugin-organize-imports": "^3.0.0",
