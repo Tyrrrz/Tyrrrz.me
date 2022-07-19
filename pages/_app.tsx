@@ -83,17 +83,26 @@ const Header: FC = () => {
   return (
     <Box
       type="header"
-      classes={['container', 'flex', 'mx-auto', 'py-4', 'items-center', 'justify-between']}
+      classes={[
+        'container',
+        'flex',
+        'flex-col',
+        'sm:flex-row',
+        'mx-auto',
+        'p-4',
+        'items-center',
+        'justify-between'
+      ]}
     >
-      <Box>
+      <Box classes={['my-1']}>
         <Link href="/">
-          <Box classes={['text-2xl', 'font-mono', 'font-semibold', 'tracking-wide']}>
+          <Box classes={['text-2xl', 'text-center', 'font-mono', 'font-semibold', 'tracking-wide']}>
             ://tyrrrz.me
           </Box>
         </Link>
       </Box>
 
-      <Box type="nav">
+      <Box type="nav" classes={['px-2']}>
         <Stack orientation="horizontal" gap="large">
           <Box>
             <NavLink href="/">home</NavLink>
@@ -116,12 +125,16 @@ const Header: FC = () => {
   );
 };
 
+const Divider: FC = () => {
+  return <Box classes={['h-1', 'mt-1', 'mx-auto', 'bg-neutral-100']} />;
+};
+
 const Main: FC<PropsWithChildren> = ({ children }) => {
   // Ensure that fade-in triggers each time the content changes
   const key = useMemo(() => Math.random() * (children?.toString()?.length || 17), [children]);
 
   return (
-    <Box classes={['container', 'mx-auto', 'my-10']}>
+    <Box classes={['container', 'mx-auto', 'my-10', 'p-4']}>
       <FadeIn key={key}>{children}</FadeIn>
     </Box>
   );
@@ -162,7 +175,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 
       <Header />
 
-      <Box classes={['h-px', 'mx-auto', 'bg-gray-300']} />
+      <Divider />
 
       <Main>
         <Component {...pageProps} />
