@@ -32,7 +32,7 @@ It has 3 required parameters:
 
 You can get the values for the first two parameters straight from the item's URL. For example, if we were interested in [AK-47 | Redline](https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Redline%20%28Field-Tested%29), we'd be able to inspect the URL and see that the value of `appid` is `730` while `market_hash_name` is equal to `AK-47%20%7C%20Redline%20%28Field-Tested%29`.
 
-![Example listing](Example.png)
+![Example listing](example.png)
 
 We still need to set the value for the third required parameter, `currency`. I'm not sure what is the full list of supported currencies and their IDs, but the value of `1` seems to correspond to USD, so we'll use that.
 
@@ -67,7 +67,7 @@ To make matters worse, a big portion of the page, including the image, is render
 
 Luckily, the listings at the bottom of the page also contain the image, and they are rendered asynchronously using another AJAX request.
 
-![Listings](Listings.png)
+![Listings](listings.png)
 
 The aforementioned request looks like this:
 
@@ -116,4 +116,4 @@ If you take a look at the end of the URL, you can see the portion where it speci
 
 The WordPress plugin I wrote is open source, you can [check it out here](https://github.com/Tyrrrz/WPSteamMarketExcerpt). Here's how it looks in action:
 
-![WPSteamMarketExcerpt](WPSME.png)
+![WPSteamMarketExcerpt](plugin.png)

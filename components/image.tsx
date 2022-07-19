@@ -1,5 +1,5 @@
 import NextImage from 'next/image';
-import React, { FC, useState } from 'react';
+import { FC, useState } from 'react';
 
 type ImageProps = {
   src: string;

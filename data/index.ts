@@ -5,7 +5,7 @@ import path from 'path';
 export type BlogPost = {
   id: string;
   title: string;
-  date: Date;
+  date: string;
   content: string;
 };
 
@@ -37,7 +37,7 @@ export const getBlogPosts = async function* () {
     const post: BlogPost = {
       id,
       title,
-      date: new Date(date),
+      date,
       content: body
     };
 

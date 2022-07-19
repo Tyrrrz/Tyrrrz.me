@@ -7,6 +7,10 @@ const runtimeCaching = require('next-pwa/cache');
 const nextConfig = {
   reactStrictMode: true,
 
+  images: {
+    domains: ['twemoji.maxcdn.com']
+  },
+
   env: {
     BUILD_ID: [
       spawnSync('git', ['rev-parse', '--short', 'HEAD']).stdout.toString().trim(),

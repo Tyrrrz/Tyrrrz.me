@@ -5,7 +5,7 @@ type BlogPostPageProps = {
   post: BlogPost;
 };
 
-type BlogPostPageParameters = {
+type BlogPostPageParams = {
   id: string;
 };
 
@@ -13,7 +13,7 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
   return <></>;
 };
 
-export const getStaticPaths: GetStaticPaths<BlogPostPageParameters> = async () => {
+export const getStaticPaths: GetStaticPaths<BlogPostPageParams> = async () => {
   const ids: string[] = [];
   for await (const post of getBlogPosts()) {
     ids.push(post.id);
@@ -25,7 +25,7 @@ export const getStaticPaths: GetStaticPaths<BlogPostPageParameters> = async () =
   };
 };
 
-export const getStaticProps: GetStaticProps<BlogPostPageProps, BlogPostPageParameters> = async ({
+export const getStaticProps: GetStaticProps<BlogPostPageProps, BlogPostPageParams> = async ({
   params
 }) => {
   const { id } = params || {};

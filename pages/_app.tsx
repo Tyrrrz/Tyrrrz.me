@@ -1,9 +1,13 @@
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import Script from 'next/script';
-import { FC, PropsWithChildren, ReactNode, useEffect, useState } from 'react';
+import { FC, PropsWithChildren, ReactNode, useEffect, useMemo, useState } from 'react';
+import FadeIn from 'react-fade-in';
 import Box from '../components/box';
+import Link from '../components/link';
 import Meta from '../components/meta';
+import NavLink from '../components/navlink';
+import Stack from '../components/stack';
 import useDebouncedValue from '../hooks/useDebouncedValue';
 import { getGoogleAnalyticsId, isProduction } from '../utils/env';
 import './globals.css';
@@ -61,7 +65,7 @@ const Loader: FC = () => {
       classes={[
         'h-1',
         {
-          'bg-blue-500': isVisible,
+          'bg-purple-500': isVisible,
           'bg-transparent': !isVisible
         }
       ]}
@@ -76,11 +80,51 @@ const Loader: FC = () => {
 };
 
 const Header: FC = () => {
-  return <></>;
+  return (
+    <Box
+      type="header"
+      classes={['container', 'flex', 'mx-auto', 'py-4', 'items-center', 'justify-between']}
+    >
+      <Box>
+        <Link href="/">
+          <Box classes={['text-2xl', 'font-mono', 'font-semibold', 'tracking-wide']}>
+            ://tyrrrz.me
+          </Box>
+        </Link>
+      </Box>
+
+      <Box type="nav">
+        <Stack orientation="horizontal" gap="large">
+          <Box>
+            <NavLink href="/">home</NavLink>
+          </Box>
+          <Box>
+            <NavLink href="/projects">projects</NavLink>
+          </Box>
+          <Box>
+            <NavLink href="/blog">blog</NavLink>
+          </Box>
+          <Box>
+            <NavLink href="/speaking">speaking</NavLink>
+          </Box>
+          <Box>
+            <NavLink href="/donate">donate</NavLink>
+          </Box>
+        </Stack>
+      </Box>
+    </Box>
+  );
 };
 
 const Main: FC<PropsWithChildren> = ({ children }) => {
-  return <Box>{children}</Box>;
+  // Ensure that fade-in triggers each time the content changes
+  const key = useMemo(() => Math.random() * (children?.toString()?.length || 17), [children]);
+
+  return (
+    <Box classes={['container', 'mx-auto', 'my-10']}>
+      <FadeIn key={key}>{children}</FadeIn>
+    </Box>
+  );
 };
 
 const Scripts: FC = () => {
@@ -117,6 +161,8 @@ const App = ({ Component, pageProps }: AppProps) => {
       <Loader />
 
       <Header />
+
+      <Box classes={['h-px', 'mx-auto', 'bg-gray-300']} />
 
       <Main>
         <Component {...pageProps} />

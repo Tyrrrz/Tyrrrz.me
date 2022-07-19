@@ -170,4 +170,4 @@ To capture keystrokes we're processing the `PreviewKeyDown` event because it als
 
 Finally, here's how the control looks in my app [LightBulb](https://github.com/Tyrrrz/LightBulb):
 
-![example](Example.png)
+![example](example.png)

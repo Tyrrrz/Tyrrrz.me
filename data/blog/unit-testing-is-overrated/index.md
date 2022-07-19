@@ -216,7 +216,7 @@ The problem with unit tests is that they're the exact opposite of that. Since we
 
 Doing mock-based testing puts the value of such tests under an even bigger question, because the parts of our system that would've been used otherwise are replaced with mocks, further distancing the simulated environment from reality. It's impossible to gain confidence that the user will have a smooth experience by testing something that doesn't resemble that experience.
 
-[!["Unit testing is a great way to ensure your mocks work" (Tweet by @rkoutnik)](Tweet-testing-mocks.png)](https://twitter.com/rkoutnik/status/1242073856128495620)
+[!["Unit testing is a great way to ensure your mocks work" (Tweet by @rkoutnik)](tweet-testing-mocks.png)](https://twitter.com/rkoutnik/status/1242073856128495620)
 
 ## Pyramid-driven testing
 
@@ -224,7 +224,7 @@ So why would we, as an industry, decide that unit testing should be the primary 
 
 If you refer to the traditional test pyramid, you will find that it suggests that the most significant part of testing should be performed at the unit level. The idea is that, since coarse-grained tests are assumed to be slower and more complicated, you will want to concentrate efforts towards the bottom of the integration spectrum to end up with an efficient and maintainable test suite:
 
-![Test pyramid. Shows unit tests at the bottom, integration tests on top, and end-to-end tests at the peak.](Test-pyramid.png)
+![Test pyramid. Shows unit tests at the bottom, integration tests on top, and end-to-end tests at the peak.](test-pyramid.png)
 
 The metaphorical model offered by the pyramid is meant to convey that a good testing approach should involve many different layers, because focusing on the extremes can lead to issues where the tests are either too slow and unwieldy, or are useless at providing any confidence. That said, the lower levels are emphasized as that's where the return on investment for development testing is believed to be the highest.
 
@@ -236,7 +236,7 @@ For these reasons, all testing done during development typically resides at the 
 
 In the eyes of most developers, the test pyramid looks somewhat like this instead:
 
-![Test pyramid as developers see it. Shows unit tests at the bottom and the rest marked as someone else's problem.](Test-pyramid-real.png)
+![Test pyramid as developers see it. Shows unit tests at the bottom and the rest marked as someone else's problem.](test-pyramid-real.png)
 
 While the pyramid is a noble attempt to turn software testing into a solved problem, there are obviously many issues with this model. In particular, the assumptions it relies on might not be true for every context, especially the premise of highly integrated test suites being slow or hard.
 
@@ -264,7 +264,7 @@ It also doesn't account for the fact that isolation has a cost in itself and isn
 
 If you consider these aspects, it seems likely that the scale is not linear after all and that the point of the highest return on investment resides somewhere closer to the middle rather than at the unit level:
 
-![Graph that shows that the scale of cost & speed might not be linear to integration.](Test-conversion-efficiency.png)
+![Graph that shows that the scale of cost & speed might not be linear to integration.](test-conversion-efficiency.png)
 
 All in all, when you're trying to establish an efficient test suite for your project, the test pyramid isn't the best guideline you can follow. It makes a lot more sense to focus on what's relevant specifically to your context, instead of relying on "best practices".
 
@@ -314,7 +314,7 @@ Naming tests in accordance to specifications rather than classes has an addition
 
 By adhering to this structure, our test suite will effectively take form of a living documentation. For example, this is how the test suite is organized in [CliWrap](https://github.com/Tyrrrz/CliWrap) (the underscores are replaced with spaces by [xUnit](https://xunit.net/docs/configuration-files#methodDisplayOptions)):
 
-![Functional tests used for CliWrap](CliWrap-functional-tests.png)
+![Functional tests used for CliWrap](cliwrap-functional-tests.png)
 
 As long as a piece of software does something at least remotely useful, it will always have functional requirements. Those can be either _formal_ (specification documents, user stories, etc.) or _informal_ (verbally agreed upon, assumed, JIRA tickets, written on toilet paper, etc.)
 
@@ -906,7 +906,7 @@ The test will query the same endpoint multiple times and assert that the result 
 
 At the end of the day we have a simple test suite that looks like this:
 
-![Test suite](Example-test-results.png)
+![Test suite](example-test-results.png)
 
 Note that the duration of the tests is pretty good, with the fastest integration test completing at 55ms and the slowest being under a second (due to suffering from cold start). Considering that these tests involve the entire lifecycle, include all dependencies and infrastructure, while relying on a grand total of zero mocks, I would say that this is more than acceptable.
 
