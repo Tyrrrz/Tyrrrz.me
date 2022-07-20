@@ -134,7 +134,7 @@ const Main: FC<PropsWithChildren> = ({ children }) => {
   const key = useMemo(() => Math.random() * (children?.toString()?.length || 17), [children]);
 
   return (
-    <Box classes={['container', 'mx-auto', 'my-10', 'p-4']}>
+    <Box classes={['container', 'mx-auto', 'my-6', 'px-4']}>
       <FadeIn key={key}>{children}</FadeIn>
     </Box>
   );
