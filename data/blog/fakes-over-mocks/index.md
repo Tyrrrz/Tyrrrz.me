@@ -1,9 +1,6 @@
 ---
 title: 'Prefer Fakes Over Mocks'
 date: '2020-10-13'
-tags:
-  - 'programming'
-  - 'testing'
 ---
 
 The primary purpose of software testing is to detect any potential defects in a program before it reaches its intended consumers. This is typically achieved by establishing functional requirements which define supported user interactions as well as expected outcomes, and then validating them using (automated) tests.

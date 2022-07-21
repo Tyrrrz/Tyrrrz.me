@@ -1,10 +1,6 @@
 ---
 title: 'Monadic Comprehension Syntax via LINQ in C#'
 date: '2021-06-01'
-tags:
-  - 'dotnet'
-  - 'csharp'
-  - 'tricks'
 ---
 
 If you ask a C# developer to list the reasons why they enjoy working with the language, they will most likely put LINQ somewhere at the top. LINQ is an extremely convenient set of language tools that provide ways to query and transform data sequences of arbitrary shapes and origins, in a fluent, lazy, and efficient manner.

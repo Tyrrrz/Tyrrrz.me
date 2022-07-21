@@ -1,10 +1,6 @@
 ---
 title: 'Additional NuGet Files in New Project Format'
 date: '2017-11-05'
-tags:
-  - 'dotnet'
-  - 'nuget'
-  - 'msbuild'
 ---
 
 [New csproj format](https://docs.microsoft.com/en-us/dotnet/core/tools/csproj), among other things, has an option to generate a NuGet package on every successful build. It resolves dependencies, target frameworks and documentation automatically and doesn't require a predefined nuspec file as all metadata is now also part of the csproj file.

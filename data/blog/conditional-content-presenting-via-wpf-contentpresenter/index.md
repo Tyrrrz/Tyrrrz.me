@@ -1,10 +1,6 @@
 ---
 title: 'Conditional Content Presenting via WPF ContentPresenter'
 date: '2016-10-28'
-tags:
-  - 'dotnet'
-  - 'xaml'
-  - 'wpf'
 ---
 
 Sometimes you may find yourself facing a problem of having to switch between multiple presentations based on some condition. For example, you may want to display the same list of items differently depending on whether multi-select is enabled or not.

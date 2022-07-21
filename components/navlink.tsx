@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { FC, PropsWithChildren } from 'react';
 import Box from './box';
-import Link from './link';
+import RawLink from './rawlink';
 
 type NavLinkProps = PropsWithChildren<{
   href: string;
@@ -9,7 +9,7 @@ type NavLinkProps = PropsWithChildren<{
 
 const NavLink: FC<NavLinkProps> = ({ href, children }) => {
   const router = useRouter();
-  const isActive = router.route === href;
+  const isActive = router.route === href || router.route.startsWith(href + '/');
 
   return (
     <Box
@@ -30,7 +30,15 @@ const NavLink: FC<NavLinkProps> = ({ href, children }) => {
         'duration-300'
       ]}
     >
-      <Link href={href}>{children}</Link>
+      <Box
+        classes={[
+          {
+            'hover:text-blue-500': !isActive
+          }
+        ]}
+      >
+        <RawLink href={href}>{children}</RawLink>
+      </Box>
     </Box>
   );
 };

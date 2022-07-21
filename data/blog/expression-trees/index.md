@@ -1,9 +1,6 @@
 ---
 title: 'Working with Expression Trees in C#'
 date: '2020-02-17'
-tags:
-  - 'dotnet'
-  - 'csharp'
 ---
 
 Expression trees is an obscure, although very interesting feature in .NET. Most people probably think of it as something synonymous with object-relational mapping frameworks, but despite being its most common use case, it's not the only one. There are a lot of creative things you can do with expression trees, including code generation, transpilation, meta-programming, and more.

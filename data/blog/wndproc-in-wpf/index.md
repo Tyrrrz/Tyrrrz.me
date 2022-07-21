@@ -1,10 +1,6 @@
 ---
 title: 'WndProc in WPF'
 date: '2017-02-02'
-tags:
-  - 'dotnet'
-  - 'csharp'
-  - 'wpf'
 ---
 
 WndProc is a callback function that takes care of system messages sent from the operating system.

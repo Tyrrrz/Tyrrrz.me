@@ -1,10 +1,6 @@
 ---
 title: 'Formatting XAML Files on Build with XAMLStyler'
 date: '2020-01-09'
-tags:
-  - 'dotnet'
-  - 'xaml'
-  - 'msbuild'
 ---
 
 Recently, I've decided to switch from Visual Studio to Rider as my default .NET development environment. The main problem with Visual Studio was that it was too slow when paired with ReSharper and, unfortunately, too useless when not. Rider offered me the best of both worlds.

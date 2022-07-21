@@ -1,6 +1,8 @@
 import { GetStaticProps, NextPage } from 'next';
 import { FiDollarSign } from 'react-icons/fi';
 import Box from '../components/box';
+import Header from '../components/header';
+import Meta from '../components/meta';
 import Stack from '../components/stack';
 import { Donation, getDonations } from '../data';
 
@@ -19,6 +21,9 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
 
   return (
     <>
+      <Meta title="Donate" />
+      <Header>Donate</Header>
+
       <Box classes={['flex', 'flex-wrap', 'gap-3']}>
         {donations.map((donation, i) => (
           <Box

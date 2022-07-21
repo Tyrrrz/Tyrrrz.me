@@ -4,9 +4,9 @@ import Script from 'next/script';
 import { FC, PropsWithChildren, ReactNode, useEffect, useMemo, useState } from 'react';
 import FadeIn from 'react-fade-in';
 import Box from '../components/box';
-import Link from '../components/link';
 import Meta from '../components/meta';
 import NavLink from '../components/navlink';
+import RawLink from '../components/rawlink';
 import Stack from '../components/stack';
 import useDebouncedValue from '../hooks/useDebouncedValue';
 import { getGoogleAnalyticsId, isProduction } from '../utils/env';
@@ -79,54 +79,57 @@ const Loader: FC = () => {
   );
 };
 
-const Header: FC = () => {
+const Nav: FC = () => {
   return (
-    <Box
-      type="header"
-      classes={[
-        'container',
-        'flex',
-        'flex-col',
-        'sm:flex-row',
-        'mx-auto',
-        'p-4',
-        'items-center',
-        'justify-between'
-      ]}
-    >
-      <Box classes={['my-1']}>
-        <Link href="/">
-          <Box classes={['text-2xl', 'text-center', 'font-mono', 'font-semibold', 'tracking-wide']}>
-            ://tyrrrz.me
-          </Box>
-        </Link>
-      </Box>
+    <Box classes={['border-b-4', 'border-neutral-100']}>
+      <Box
+        type="header"
+        classes={[
+          'max-w-screen-lg',
+          'flex',
+          'flex-col',
+          'sm:flex-row',
+          'mx-auto',
+          'p-4',
+          'items-center',
+          'justify-between'
+        ]}
+      >
+        <Box classes={['my-1']}>
+          <RawLink href="/">
+            <Box
+              classes={['text-2xl', 'text-center', 'font-mono', 'font-semibold', 'tracking-wide']}
+            >
+              <Box type="span" classes={['text-neutral-400']}>
+                ://
+              </Box>
+              <Box type="span">tyrrrz.me</Box>
+            </Box>
+          </RawLink>
+        </Box>
 
-      <Box type="nav" classes={['px-2']}>
-        <Stack orientation="horizontal" gap="large">
-          <Box>
-            <NavLink href="/">home</NavLink>
-          </Box>
-          <Box>
-            <NavLink href="/projects">projects</NavLink>
-          </Box>
-          <Box>
-            <NavLink href="/blog">blog</NavLink>
-          </Box>
-          <Box>
-            <NavLink href="/speaking">speaking</NavLink>
-          </Box>
-          <Box>
-            <NavLink href="/donate">donate</NavLink>
-          </Box>
-        </Stack>
+        <Box type="nav" classes={['px-2', 'text-lg']}>
+          <Stack orientation="horizontal" gap="large">
+            <Box>
+              <NavLink href="/">home</NavLink>
+            </Box>
+            <Box>
+              <NavLink href="/projects">projects</NavLink>
+            </Box>
+            <Box>
+              <NavLink href="/blog">blog</NavLink>
+            </Box>
+            <Box>
+              <NavLink href="/speaking">speaking</NavLink>
+            </Box>
+            <Box>
+              <NavLink href="/donate">donate</NavLink>
+            </Box>
+          </Stack>
+        </Box>
       </Box>
     </Box>
   );
-};
-
-const Divider: FC = () => {
-  return <Box classes={['h-1', 'mt-1', 'mx-auto', 'bg-neutral-100']} />;
 };
 
 const Main: FC<PropsWithChildren> = ({ children }) => {
@@ -134,7 +137,7 @@ const Main: FC<PropsWithChildren> = ({ children }) => {
   const key = useMemo(() => Math.random() * (children?.toString()?.length || 17), [children]);
 
   return (
-    <Box classes={['container', 'mx-auto', 'my-6', 'px-4']}>
+    <Box type="main" classes={['max-w-screen-lg', , 'mx-auto', 'my-6', 'px-4']}>
       <FadeIn key={key}>{children}</FadeIn>
     </Box>
   );
@@ -173,9 +176,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 
       <Loader />
 
-      <Header />
-
-      <Divider />
+      <Nav />
 
       <Main>
         <Component {...pageProps} />

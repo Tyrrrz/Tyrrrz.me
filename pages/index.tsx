@@ -3,11 +3,11 @@ import { FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
 import Box from '../components/box';
 import Emoji from '../components/emoji';
 import Image from '../components/image';
-import Link from '../components/link';
+import RawLink from '../components/rawlink';
 import Stack from '../components/stack';
 
 const HomePage: NextPage = () => {
-  const myAge = new Date(Date.now() - Date.UTC(1995, 4, 28)).getUTCFullYear() - 1970;
+  const age = new Date(Date.now() - Date.UTC(1995, 4, 28)).getUTCFullYear() - 1970;
 
   return (
     <>
@@ -18,29 +18,29 @@ const HomePage: NextPage = () => {
 
           <Box classes={['my-3', 'h-1', 'bg-purple-500']} />
 
-          <Box classes={['text-xl']}>
-            <Stack orientation="horizontal">
-              <Link href="https://github.com/tyrrrz">
-                <Box classes={['px-2', 'py-1']}>
+          <Box classes={['text-2xl']}>
+            <Stack orientation="horizontal" gap="large">
+              <RawLink href="https://github.com/tyrrrz">
+                <Box classes={['hover:text-blue-500']}>
                   <FiGithub strokeWidth={1} />
                 </Box>
-              </Link>
-              <Link href="https://twitter.com/tyrrrz">
-                <Box classes={['px-2', 'py-1']}>
+              </RawLink>
+              <RawLink href="https://twitter.com/tyrrrz">
+                <Box classes={['hover:text-blue-500']}>
                   <FiTwitter strokeWidth={1} />
                 </Box>
-              </Link>
-              <Link href="https://linkedin.com/in/tyrrrz">
-                <Box classes={['px-2', 'py-1']}>
+              </RawLink>
+              <RawLink href="https://linkedin.com/in/tyrrrz">
+                <Box classes={['hover:text-blue-500']}>
                   <FiLinkedin strokeWidth={1} />
                 </Box>
-              </Link>
+              </RawLink>
             </Stack>
           </Box>
         </Box>
 
-        <Box classes={['shrink']}>
-          <Image src="/logo.png" alt="picture" width={360} height={360} priority />
+        <Box classes={['w-64']}>
+          <Image src="/logo-trans.png" alt="picture" priority />
         </Box>
       </Box>
 
@@ -50,8 +50,8 @@ const HomePage: NextPage = () => {
         </Box>
         <Box classes={['mt-2', 'sm:text-xl', 'space-y-2']}>
           <Box>
-            My name is Oleksii, also known online as Tyrrrz. I&apos;m a {myAge} y/o software
-            developer from Kyiv, Ukraine. I&apos;m also a Microsoft MVP and a GitHub Star.
+            My name is Oleksii, also known online as Tyrrrz. I&apos;m a {age} y/o software developer
+            from Kyiv, Ukraine. I&apos;m also a Microsoft MVP and a GitHub Star.
           </Box>
           <Box>
             Most of my endeavors are in C#, but every now and then I code in F# and TypeScript as

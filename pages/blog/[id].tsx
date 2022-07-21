@@ -1,5 +1,11 @@
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
+import { FiCalendar, FiClock } from 'react-icons/fi';
+import Box from '../../components/box';
+import Header from '../../components/header';
+import Meta from '../../components/meta';
+import Stack from '../../components/stack';
 import { BlogPost, getBlogPost, getBlogPosts } from '../../data';
+import { getTimeToReadMs } from '../../utils/str';
 
 type BlogPostPageProps = {
   post: BlogPost;
@@ -10,7 +16,34 @@ type BlogPostPageParams = {
 };
 
 const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
-  return <></>;
+  return (
+    <>
+      <Meta title={post.title} />
+      <Header>{post.title}</Header>
+
+      <Box classes={['-mt-2']}>
+        <Stack orientation="horizontal" wrap gap="large">
+          <Stack orientation="horizontal">
+            <FiCalendar strokeWidth={1} />
+            <Box classes={['font-light']}>
+              {new Date(post.date).toLocaleDateString('en-US', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+              })}
+            </Box>
+          </Stack>
+
+          <Stack orientation="horizontal">
+            <FiClock strokeWidth={1} />
+            <Box classes={['font-light']}>
+              {Math.ceil(getTimeToReadMs(post.content) / 60000)} minutes to read
+            </Box>
+          </Stack>
+        </Stack>
+      </Box>
+    </>
+  );
 };
 
 export const getStaticPaths: GetStaticPaths<BlogPostPageParams> = async () => {

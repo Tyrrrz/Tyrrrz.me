@@ -83,7 +83,7 @@ export const getProjects = async function* () {
 
 export type SpeakingEngagement = {
   title: string;
-  kind: 'talk' | 'workshop' | 'podcast';
+  kind: 'Talk' | 'Workshop' | 'Podcast';
   event: string;
   date: Date;
   language: string;

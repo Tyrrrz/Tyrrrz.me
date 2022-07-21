@@ -1,9 +1,6 @@
 ---
 title: 'Parsing Steam Market'
 date: '2015-09-26'
-tags:
-  - 'php'
-  - 'reverse-engineering'
 ---
 
 At some point, I was contracted to make a WordPress plugin that displays some basic information on an item from Steam Market. It had to show its name, image and the current lowest price.

@@ -1,4 +1,6 @@
 import { GetStaticProps, NextPage } from 'next';
+import Header from '../../components/header';
+import Meta from '../../components/meta';
 import { getProjects, Project } from '../../data';
 
 type ProjectsPageProps = {
@@ -6,7 +8,12 @@ type ProjectsPageProps = {
 };
 
 const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
-  return <></>;
+  return (
+    <>
+      <Meta title="Projects" />
+      <Header>Projects</Header>
+    </>
+  );
 };
 
 export const getStaticProps: GetStaticProps<ProjectsPageProps> = async () => {
