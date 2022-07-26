@@ -29,9 +29,9 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
       <Meta title="Blog" />
       <Header>Blog</Header>
 
-      <Box classes={['text-lg']}>
+      <Box>
         I write about software design, architecture, programming languages, and other technical
-        topics. Follow me on <Link href="https://twitter.com/tyrrrz">Twitter</Link> or subscribe to
+        topics. Follow me on <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or subscribe to
         the <Link href="/blog/rss.xml">RSS Feed</Link> to get notified when I post a new article.
       </Box>
 
@@ -63,7 +63,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
                       <Stack orientation="horizontal">
                         <FiClock strokeWidth={1} />
                         <Box classes={['font-light']}>
-                          {Math.ceil(getTimeToReadMs(post.content) / 60000)} minutes to read
+                          {Math.ceil(getTimeToReadMs(post.content) / 60000)} minutes
                         </Box>
                       </Stack>
                     </Stack>

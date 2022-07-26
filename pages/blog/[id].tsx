@@ -37,7 +37,7 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
           <Stack orientation="horizontal">
             <FiClock strokeWidth={1} />
             <Box classes={['font-light']}>
-              {Math.ceil(getTimeToReadMs(post.content) / 60000)} minutes to read
+              {Math.ceil(getTimeToReadMs(post.content) / 60000)} minutes
             </Box>
           </Stack>
         </Stack>

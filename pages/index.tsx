@@ -3,7 +3,7 @@ import { FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
 import Box from '../components/box';
 import Emoji from '../components/emoji';
 import Image from '../components/image';
-import RawLink from '../components/rawlink';
+import RawLink from '../components/rawLink';
 import Stack from '../components/stack';
 
 const HomePage: NextPage = () => {
@@ -20,17 +20,17 @@ const HomePage: NextPage = () => {
 
           <Box classes={['text-2xl']}>
             <Stack orientation="horizontal" gap="large">
-              <RawLink href="https://github.com/tyrrrz">
+              <RawLink href="https://github.com/Tyrrrz">
                 <Box classes={['hover:text-blue-500']}>
                   <FiGithub strokeWidth={1} />
                 </Box>
               </RawLink>
-              <RawLink href="https://twitter.com/tyrrrz">
+              <RawLink href="https://twitter.com/Tyrrrz">
                 <Box classes={['hover:text-blue-500']}>
                   <FiTwitter strokeWidth={1} />
                 </Box>
               </RawLink>
-              <RawLink href="https://linkedin.com/in/tyrrrz">
+              <RawLink href="https://linkedin.com/in/Tyrrrz">
                 <Box classes={['hover:text-blue-500']}>
                   <FiLinkedin strokeWidth={1} />
                 </Box>

@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { FC, PropsWithChildren } from 'react';
 import Box from './box';
-import RawLink from './rawlink';
+import RawLink from './rawLink';
 
 type NavLinkProps = PropsWithChildren<{
   href: string;

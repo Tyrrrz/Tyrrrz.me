@@ -32,11 +32,11 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
       <Meta title="Speaking" />
       <Header>Speaking</Header>
 
-      <Box classes={['text-lg']}>
+      <Box>
         These are all the speaking engagements I&apos;ve had in the past, or plan to have in the
         future. Where available, follow the links to see the video recordings. If you want me to
         speak at your event, please contact me on{' '}
-        <Link href="https://twitter.com/tyrrrz">Twitter</Link>.
+        <Link href="https://twitter.com/Tyrrrz">Twitter</Link>.
       </Box>
 
       <Box classes={['mt-6', 'space-y-6']}>
@@ -79,7 +79,7 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
                           Workshop: <FiTool strokeWidth={1} />,
                           Podcast: <FiRadio strokeWidth={1} />
                         }[engagement.kind] || <FiMic strokeWidth={1} />}
-                        <Box classes={['font-light', 'capitalize']}>{engagement.kind}</Box>
+                        <Box classes={['font-light']}>{engagement.kind}</Box>
                       </Stack>
 
                       <Stack orientation="horizontal">
@@ -110,6 +110,8 @@ export const getStaticProps: GetStaticProps<SpeakingPageProps> = async () => {
   for await (const engagement of getSpeakingEngagements()) {
     engagements.push(engagement);
   }
+
+  engagements.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
 
   return {
     props: {

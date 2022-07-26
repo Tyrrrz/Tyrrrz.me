@@ -5,8 +5,8 @@ import { FC, PropsWithChildren, ReactNode, useEffect, useMemo, useState } from '
 import FadeIn from 'react-fade-in';
 import Box from '../components/box';
 import Meta from '../components/meta';
-import NavLink from '../components/navlink';
-import RawLink from '../components/rawlink';
+import NavLink from '../components/navLink';
+import RawLink from '../components/rawLink';
 import Stack from '../components/stack';
 import useDebouncedValue from '../hooks/useDebouncedValue';
 import { getGoogleAnalyticsId, isProduction } from '../utils/env';

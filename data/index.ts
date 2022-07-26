@@ -85,7 +85,7 @@ export type SpeakingEngagement = {
   title: string;
   kind: 'Talk' | 'Workshop' | 'Podcast';
   event: string;
-  date: Date;
+  date: string;
   language: string;
   eventUrl?: string;
   presentationUrl?: string;
