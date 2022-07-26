@@ -1,6 +1,7 @@
 import { GetStaticProps, NextPage } from 'next';
 import { FiDollarSign } from 'react-icons/fi';
 import Box from '../components/box';
+import Codeblock from '../components/codeblock';
 import Header from '../components/header';
 import Link from '../components/link';
 import List from '../components/list';
@@ -29,8 +30,8 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
 
       <Box classes={['space-y-2']}>
         <Box>
-          If you found any of my projects useful and want to support their development, please
-          consider making a donation! I accept donations through the following platforms:
+          If you found the work I do useful and want to support me financially, please consider
+          making a donation through one of the following platforms:
         </Box>
         <List>
           <ListItem>
@@ -56,23 +57,17 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
 
           <ListItem>
             <Box type="span">Ethereum: </Box>
-            <Box type="span" classes={['font-mono', 'bg-neutral-100']}>
-              0x8c7D4568d4F3FC4BDBaE615C971a514f8B2236B6
-            </Box>
+            <Codeblock>0x8c7D4568d4F3FC4BDBaE615C971a514f8B2236B6</Codeblock>
           </ListItem>
 
           <ListItem>
             <Box type="span">Bitcoin: </Box>
-            <Box type="span" classes={['font-mono', 'bg-neutral-100']}>
-              3C9UMPHcxwSBkBuXuizcGdAnLSM54Cyoej
-            </Box>
+            <Codeblock>3C9UMPHcxwSBkBuXuizcGdAnLSM54Cyoej</Codeblock>
           </ListItem>
 
           <ListItem>
             <Box type="span">Solana: </Box>
-            <Box type="span" classes={['font-mono', 'bg-neutral-100']}>
-              7r7oDiMUJ4CcwTUxqYvqBJHgJ7EzmyHF64SxAGZPzz6M
-            </Box>
+            <Codeblock>7r7oDiMUJ4CcwTUxqYvqBJHgJ7EzmyHF64SxAGZPzz6M</Codeblock>
           </ListItem>
         </List>
       </Box>

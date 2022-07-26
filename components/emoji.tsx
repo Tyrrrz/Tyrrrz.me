@@ -39,6 +39,7 @@ const Emoji: FC<EmojiProps> = ({ code }) => {
 
   return (
     <Box
+      type="span"
       style={{
         display: 'inline-block',
         width: '1em',
