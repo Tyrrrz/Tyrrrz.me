@@ -526,7 +526,7 @@
   },
   {
     "name": "Jeffrey James Hancorn @athelstanhall",
-    "amount": 5,
+    "amount": 10,
     "platform": "BuyMeACoffee"
   },
   {
@@ -551,7 +551,17 @@
   },
   {
     "name": "@84jcon",
-    "amount": 1,
+    "amount": 5,
+    "platform": "BuyMeACoffee"
+  },
+  {
+    "name": null,
+    "amount": 15,
+    "platform": "BuyMeACoffee"
+  },
+  {
+    "name": null,
+    "amount": 25,
     "platform": "BuyMeACoffee"
   },
   {
