@@ -136,7 +136,7 @@ const Header: FC = () => {
         >
           {links.map((link, i) => (
             <NavLink key={i} href={link.href}>
-              {link.label}
+              <div>{link.label}</div>
             </NavLink>
           ))}
         </nav>

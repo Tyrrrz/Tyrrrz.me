@@ -1,6 +1,5 @@
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
-import { useMemo } from 'react';
 import { FiDollarSign } from 'react-icons/fi';
 import Codeblock from '../components/codeblock';
 import Heading from '../components/heading';
@@ -17,14 +16,6 @@ type DonationPageProps = {
 };
 
 const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
-  const largeDonationAmountThreshold = useMemo(() => {
-    return donations[Math.floor(donations.length * 0.1)].amount;
-  }, [donations]);
-
-  const mediumDonationAmountThreshold = useMemo(() => {
-    return donations[Math.floor(donations.length * 0.5)].amount;
-  }, [donations]);
-
   return (
     <Page>
       <Meta title="Donate" />
@@ -85,10 +76,8 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
               'p-4',
               'border',
               {
-                'border-purple-500': donation.amount >= largeDonationAmountThreshold,
-                'border-purple-300':
-                  donation.amount < largeDonationAmountThreshold &&
-                  donation.amount >= mediumDonationAmountThreshold
+                'border-purple-500': i <= 8,
+                'border-purple-300': i > 8 && i <= 17
               },
               'rounded'
             )}

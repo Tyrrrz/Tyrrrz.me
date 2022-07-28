@@ -1,6 +1,5 @@
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
-import { useMemo } from 'react';
 import { FiCode, FiDownload, FiExternalLink, FiStar } from 'react-icons/fi';
 import Heading from '../../components/heading';
 import Inline from '../../components/inline';
@@ -14,14 +13,6 @@ type ProjectsPageProps = {
 };
 
 const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
-  const largeProjectStarsThreshold = useMemo(() => {
-    return projects[Math.floor(projects.length * 0.3)].stars;
-  }, [projects]);
-
-  const mediumProjectStarsThreshold = useMemo(() => {
-    return projects[Math.floor(projects.length * 0.7)].stars;
-  }, [projects]);
-
   return (
     <Page>
       <Meta title="Projects" />
@@ -47,10 +38,8 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
               'p-4',
               'border',
               {
-                'border-purple-500': project.stars >= largeProjectStarsThreshold,
-                'border-purple-300':
-                  project.stars < largeProjectStarsThreshold &&
-                  project.stars >= mediumProjectStarsThreshold
+                'border-purple-500': i <= 5,
+                'border-purple-300': i > 5 && i <= 11
               },
               'rounded'
             )}
