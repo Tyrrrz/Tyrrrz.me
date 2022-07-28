@@ -17,11 +17,11 @@ type DonationPageProps = {
 };
 
 const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
-  const largeDonationThreshold = useMemo(() => {
+  const largeDonationAmountThreshold = useMemo(() => {
     return donations[Math.floor(donations.length * 0.1)].amount;
   }, [donations]);
 
-  const mediumDonationThreshold = useMemo(() => {
+  const mediumDonationAmountThreshold = useMemo(() => {
     return donations[Math.floor(donations.length * 0.5)].amount;
   }, [donations]);
 
@@ -67,7 +67,7 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
 
       <Heading variant="h2">Top donors</Heading>
 
-      <section
+      <div
         className={c(
           'grid',
           'sm:grid-cols-2',
@@ -85,10 +85,10 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
               'p-4',
               'border',
               {
-                'border-purple-500': donation.amount >= largeDonationThreshold,
+                'border-purple-500': donation.amount >= largeDonationAmountThreshold,
                 'border-purple-300':
-                  donation.amount < largeDonationThreshold &&
-                  donation.amount >= mediumDonationThreshold
+                  donation.amount < largeDonationAmountThreshold &&
+                  donation.amount >= mediumDonationAmountThreshold
               },
               'rounded'
             )}
@@ -103,7 +103,7 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
             <div className={c('font-light')}>{donation.platform}</div>
           </section>
         ))}
-      </section>
+      </div>
     </Page>
   );
 };
