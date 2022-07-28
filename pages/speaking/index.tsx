@@ -1,13 +1,14 @@
+import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
 import { FiCalendar, FiMapPin, FiMessageCircle, FiMic, FiRadio, FiTool } from 'react-icons/fi';
-import Box from '../../components/box';
-import Header from '../../components/header';
+import Heading from '../../components/heading';
+import Inline from '../../components/inline';
 import Link from '../../components/link';
 import Meta from '../../components/meta';
-import Stack from '../../components/stack';
+import Page from '../../components/page';
 import Timeline from '../../components/timeline';
 import TimelineItem from '../../components/timelineItem';
-import { getSpeakingEngagements, SpeakingEngagement } from '../../data';
+import { loadSpeakingEngagements, SpeakingEngagement } from '../../data';
 
 type SpeakingPageProps = {
   engagements: SpeakingEngagement[];
@@ -28,27 +29,27 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
     }));
 
   return (
-    <>
+    <Page>
       <Meta title="Speaking" />
-      <Header>Speaking</Header>
+      <Heading>Speaking</Heading>
 
-      <Box>
+      <section>
         These are all the speaking engagements I&apos;ve had in the past, or plan to have in the
         future. Where available, follow the links to see the video recordings. If you want me to
         speak at your event, please contact me on{' '}
         <Link href="https://twitter.com/Tyrrrz">Twitter</Link>.
-      </Box>
+      </section>
 
-      <Box classes={['mt-6', 'space-y-6']}>
+      <div className={c('mt-6', 'space-y-6')}>
         {groups.map(({ year, engagements }, i) => (
-          <Box key={i}>
-            <Box classes={['my-2', 'text-xl', 'font-semibold']}>{year}</Box>
+          <section key={i}>
+            <Heading variant="h2">{year}</Heading>
 
-            <Box classes={['ml-4']}>
+            <div className={c('ml-4')}>
               <Timeline>
                 {engagements.map((engagement, i) => (
                   <TimelineItem key={i}>
-                    <Box classes={['text-lg']}>
+                    <div className={c('text-lg')}>
                       <Link
                         href={
                           engagement.recordingUrl ||
@@ -59,55 +60,55 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
                       >
                         {engagement.title}
                       </Link>
-                    </Box>
+                    </div>
 
-                    <Stack orientation="horizontal" wrap gap="large">
-                      <Stack orientation="horizontal">
+                    <div className={c('flex', 'flex-wrap', 'gap-x-3', 'font-light')}>
+                      <Inline>
                         <FiCalendar strokeWidth={1} />
-                        <Box classes={['font-light']}>
+                        <span>
                           {new Date(engagement.date).toLocaleDateString('en-US', {
                             day: 'numeric',
                             month: 'long',
                             year: 'numeric'
                           })}
-                        </Box>
-                      </Stack>
+                        </span>
+                      </Inline>
 
-                      <Stack orientation="horizontal">
+                      <Inline>
                         {{
                           Talk: <FiMic strokeWidth={1} />,
                           Workshop: <FiTool strokeWidth={1} />,
                           Podcast: <FiRadio strokeWidth={1} />
                         }[engagement.kind] || <FiMic strokeWidth={1} />}
-                        <Box classes={['font-light']}>{engagement.kind}</Box>
-                      </Stack>
+                        <span>{engagement.kind}</span>
+                      </Inline>
 
-                      <Stack orientation="horizontal">
+                      <Inline>
                         <FiMapPin strokeWidth={1} />
-                        <Box classes={['font-light']}>
+                        <span>
                           <Link href={engagement.eventUrl || '#'}>{engagement.event}</Link>
-                        </Box>
-                      </Stack>
+                        </span>
+                      </Inline>
 
-                      <Stack orientation="horizontal">
+                      <Inline>
                         <FiMessageCircle strokeWidth={1} />
-                        <Box classes={['font-light']}>{engagement.language}</Box>
-                      </Stack>
-                    </Stack>
+                        <span>{engagement.language}</span>
+                      </Inline>
+                    </div>
                   </TimelineItem>
                 ))}
               </Timeline>
-            </Box>
-          </Box>
+            </div>
+          </section>
         ))}
-      </Box>
-    </>
+      </div>
+    </Page>
   );
 };
 
 export const getStaticProps: GetStaticProps<SpeakingPageProps> = async () => {
   const engagements: SpeakingEngagement[] = [];
-  for await (const engagement of getSpeakingEngagements()) {
+  for await (const engagement of loadSpeakingEngagements()) {
     engagements.push(engagement);
   }
 

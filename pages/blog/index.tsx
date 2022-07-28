@@ -1,13 +1,14 @@
+import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
 import { FiCalendar, FiClock } from 'react-icons/fi';
-import Box from '../../components/box';
-import Header from '../../components/header';
+import Heading from '../../components/heading';
+import Inline from '../../components/inline';
 import Link from '../../components/link';
 import Meta from '../../components/meta';
-import Stack from '../../components/stack';
+import Page from '../../components/page';
 import Timeline from '../../components/timeline';
 import TimelineItem from '../../components/timelineItem';
-import { BlogPost, getBlogPosts } from '../../data';
+import { BlogPost, loadBlogPosts } from '../../data';
 import { getTimeToReadMs } from '../../utils/str';
 
 type BlogPageProps = {
@@ -25,62 +26,60 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
     }));
 
   return (
-    <>
+    <Page>
       <Meta title="Blog" />
-      <Header>Blog</Header>
+      <Heading>Blog</Heading>
 
-      <Box>
+      <section>
         I write about software design, architecture, programming languages, and other technical
         topics. Follow me on <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or subscribe to
         the <Link href="/blog/rss.xml">RSS Feed</Link> to get notified when I post a new article.
-      </Box>
+      </section>
 
-      <Box classes={['mt-6', 'space-y-6']}>
+      <div className={c('mt-6', 'space-y-6')}>
         {groups.map(({ year, posts }, i) => (
-          <Box key={i}>
-            <Box classes={['my-2', 'text-xl', 'font-semibold']}>{year}</Box>
+          <section key={i}>
+            <Heading variant="h2">{year}</Heading>
 
-            <Box classes={['ml-4']}>
+            <div className={c('ml-4')}>
               <Timeline>
                 {posts.map((post, i) => (
                   <TimelineItem key={i}>
-                    <Box classes={['text-lg']}>
+                    <div className={c('text-lg')}>
                       <Link href={`/blog/${post.id}`}>{post.title}</Link>
-                    </Box>
+                    </div>
 
-                    <Stack orientation="horizontal" wrap gap="large">
-                      <Stack orientation="horizontal">
+                    <div className={c('flex', 'flex-wrap', 'gap-x-3', 'font-light')}>
+                      <Inline>
                         <FiCalendar strokeWidth={1} />
-                        <Box classes={['font-light']}>
+                        <span>
                           {new Date(post.date).toLocaleDateString('en-US', {
                             day: 'numeric',
                             month: 'long',
                             year: 'numeric'
                           })}
-                        </Box>
-                      </Stack>
+                        </span>
+                      </Inline>
 
-                      <Stack orientation="horizontal">
+                      <Inline>
                         <FiClock strokeWidth={1} />
-                        <Box classes={['font-light']}>
-                          {Math.ceil(getTimeToReadMs(post.content) / 60000)} minutes
-                        </Box>
-                      </Stack>
-                    </Stack>
+                        <span>{Math.ceil(getTimeToReadMs(post.content) / 60000)} min to read</span>
+                      </Inline>
+                    </div>
                   </TimelineItem>
                 ))}
               </Timeline>
-            </Box>
-          </Box>
+            </div>
+          </section>
         ))}
-      </Box>
-    </>
+      </div>
+    </Page>
   );
 };
 
 export const getStaticProps: GetStaticProps<BlogPageProps> = async () => {
   const posts: BlogPost[] = [];
-  for await (const post of getBlogPosts()) {
+  for await (const post of loadBlogPosts()) {
     posts.push(post);
   }
 

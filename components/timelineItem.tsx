@@ -1,13 +1,13 @@
+import c from 'classnames';
 import { FC, PropsWithChildren } from 'react';
-import Box from './box';
 
 type TimelineItemProps = PropsWithChildren;
 
 const TimelineItem: FC<TimelineItemProps> = ({ children }) => {
   return (
-    <Box classes={['relative']}>
-      <Box
-        classes={[
+    <section className={c('relative')}>
+      <div
+        className={c(
           'absolute',
           'w-[8px]',
           'h-[8px]',
@@ -15,10 +15,10 @@ const TimelineItem: FC<TimelineItemProps> = ({ children }) => {
           'top-3',
           'rounded-full',
           'bg-purple-500'
-        ]}
+        )}
       />
-      <Box classes={['ml-4']}>{children}</Box>
-    </Box>
+      <div className={c('ml-4')}>{children}</div>
+    </section>
   );
 };
 

@@ -1,5 +1,5 @@
+import c from 'classnames';
 import { FC, useMemo } from 'react';
-import Box from './box';
 import Image from './image';
 
 type EmojiProps = {
@@ -38,18 +38,9 @@ const Emoji: FC<EmojiProps> = ({ code }) => {
   const url = useMemo(() => getTwemojiUrl(code), [code]);
 
   return (
-    <Box
-      type="span"
-      style={{
-        display: 'inline-block',
-        width: '1em',
-        height: '1em',
-        margin: '0 0.05em 0 0.1em',
-        verticalAlign: '-0.1em'
-      }}
-    >
+    <span className={c('inline-block', 'w-[1em]', 'h-[1em]')}>
       <Image src={url} alt={code} />
-    </Box>
+    </span>
   );
 };
 

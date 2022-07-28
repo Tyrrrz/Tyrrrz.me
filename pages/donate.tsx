@@ -1,112 +1,116 @@
+import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
+import { useMemo } from 'react';
 import { FiDollarSign } from 'react-icons/fi';
-import Box from '../components/box';
 import Codeblock from '../components/codeblock';
-import Header from '../components/header';
+import Heading from '../components/heading';
+import Inline from '../components/inline';
 import Link from '../components/link';
 import List from '../components/list';
 import ListItem from '../components/listItem';
 import Meta from '../components/meta';
-import Stack from '../components/stack';
-import { Donation, getDonations } from '../data';
+import Page from '../components/page';
+import { Donation, loadDonations } from '../data';
 
 type DonationPageProps = {
   donations: Donation[];
 };
 
 const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
-  const isLargeDonation = (donation: Donation) => {
-    return donation.amount >= 0.85 * Math.max(...donations.map((d) => d.amount));
-  };
+  const largeDonationThreshold = useMemo(() => {
+    return donations[Math.floor(donations.length * 0.1)].amount;
+  }, [donations]);
 
-  const isMediumDonation = (donation: Donation) => {
-    return donation.amount >= 0.25 * Math.max(...donations.map((d) => d.amount));
-  };
+  const mediumDonationThreshold = useMemo(() => {
+    return donations[Math.floor(donations.length * 0.5)].amount;
+  }, [donations]);
 
   return (
-    <>
+    <Page>
       <Meta title="Donate" />
-      <Header>Donate</Header>
+      <Heading>Donate</Heading>
 
-      <Box classes={['space-y-2']}>
-        <Box>
+      <section className={c('space-y-2')}>
+        <div>
           If you found the work I do useful and want to support me financially, please consider
           making a donation through one of the following platforms:
-        </Box>
+        </div>
         <List>
           <ListItem>
-            <Box type="span" classes={['font-semibold']}>
+            <span className={c('font-semibold')}>
               <Link href="https://github.com/sponsors/Tyrrrz">GitHub Sponsors</Link>
-            </Box>
-            <Box type="span"> (recurring, one-time)</Box>
+            </span>{' '}
+            (recurring, one-time)
           </ListItem>
 
           <ListItem>
-            <Box type="span">
-              <Link href="https://patreon.com/Tyrrrz">Patreon</Link>
-            </Box>
-            <Box type="span"> (recurring)</Box>
+            <Link href="https://patreon.com/Tyrrrz">Patreon</Link> (recurring)
           </ListItem>
 
           <ListItem>
-            <Box type="span">
-              <Link href="https://buymeacoffee.com/Tyrrrz">BuyMeACoffee</Link>
-            </Box>
-            <Box type="span"> (one-time)</Box>
+            <Link href="https://buymeacoffee.com/Tyrrrz">BuyMeACoffee</Link> (one-time)
           </ListItem>
 
           <ListItem>
-            <Box type="span">Ethereum: </Box>
-            <Codeblock>0x8c7D4568d4F3FC4BDBaE615C971a514f8B2236B6</Codeblock>
+            Ethereum: <Codeblock>0x8c7D4568d4F3FC4BDBaE615C971a514f8B2236B6</Codeblock>
           </ListItem>
 
           <ListItem>
-            <Box type="span">Bitcoin: </Box>
-            <Codeblock>3C9UMPHcxwSBkBuXuizcGdAnLSM54Cyoej</Codeblock>
+            Bitcoin: <Codeblock>3C9UMPHcxwSBkBuXuizcGdAnLSM54Cyoej</Codeblock>
           </ListItem>
 
           <ListItem>
-            <Box type="span">Solana: </Box>
-            <Codeblock>7r7oDiMUJ4CcwTUxqYvqBJHgJ7EzmyHF64SxAGZPzz6M</Codeblock>
+            Solana: <Codeblock>7r7oDiMUJ4CcwTUxqYvqBJHgJ7EzmyHF64SxAGZPzz6M</Codeblock>
           </ListItem>
         </List>
-      </Box>
+      </section>
 
-      <Box classes={['flex', 'flex-wrap', 'gap-3']}>
+      <Heading variant="h2">Top donors</Heading>
+
+      <section
+        className={c(
+          'grid',
+          'sm:grid-cols-2',
+          'md:grid-cols-3',
+          'lg:grid-cols-4',
+          'xl:grid-cols-5',
+          '2xl:grid-cols-6',
+          'gap-3'
+        )}
+      >
         {donations.map((donation, i) => (
-          <Box
+          <section
             key={i}
-            classes={[
+            className={c(
               'p-4',
-              'grow',
-              'rounded',
-              'border-2',
-              'border-purple-500',
+              'border',
               {
-                'border-red-500': isLargeDonation(donation),
-                'border-yellow-500': isMediumDonation(donation)
+                'border-purple-500': donation.amount >= largeDonationThreshold,
+                'border-purple-300':
+                  donation.amount < largeDonationThreshold &&
+                  donation.amount >= mediumDonationThreshold
               },
-              'bg-purple-100',
-              'text-center'
-            ]}
+              'rounded'
+            )}
           >
-            <Box classes={['flex', 'justify-center', 'text-xl']}>
-              <Stack orientation="horizontal">
-                <FiDollarSign /> <Box>{donation.amount.toFixed(0)}</Box>
-              </Stack>
-            </Box>
-            <Box classes={['font-semibold']}>{donation.name || '< Anonymous >'}</Box>
-            <Box>{donation.platform}</Box>
-          </Box>
+            <div className={c('text-lg')}>
+              <Inline>
+                <FiDollarSign strokeWidth={1} /> <span>{donation.amount.toFixed(0)}</span>
+              </Inline>
+            </div>
+
+            <div className={c('font-semibold')}>{donation.name || '[ anonymous ]'}</div>
+            <div className={c('font-light')}>{donation.platform}</div>
+          </section>
         ))}
-      </Box>
-    </>
+      </section>
+    </Page>
   );
 };
 
 export const getStaticProps: GetStaticProps<DonationPageProps> = async () => {
   const donations: Donation[] = [];
-  for await (const donation of getDonations()) {
+  for await (const donation of loadDonations()) {
     donations.push(donation);
   }
 

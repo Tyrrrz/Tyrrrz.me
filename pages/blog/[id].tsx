@@ -1,10 +1,11 @@
+import c from 'classnames';
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import { FiCalendar, FiClock } from 'react-icons/fi';
-import Box from '../../components/box';
-import Header from '../../components/header';
+import Heading from '../../components/heading';
+import Inline from '../../components/inline';
 import Meta from '../../components/meta';
-import Stack from '../../components/stack';
-import { BlogPost, getBlogPost, getBlogPosts } from '../../data';
+import Page from '../../components/page';
+import { BlogPost, loadBlogPost, loadBlogPosts } from '../../data';
 import { getTimeToReadMs } from '../../utils/str';
 
 type BlogPostPageProps = {
@@ -17,38 +18,36 @@ type BlogPostPageParams = {
 
 const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
   return (
-    <>
+    <Page>
       <Meta title={post.title} />
-      <Header>{post.title}</Header>
+      <Heading>{post.title}</Heading>
 
-      <Box classes={['-mt-2']}>
-        <Stack orientation="horizontal" wrap gap="large">
-          <Stack orientation="horizontal">
+      <section className={c('-mt-2')}>
+        <div className={c('flex', 'flex-wrap', 'gap-x-3', 'font-light')}>
+          <Inline>
             <FiCalendar strokeWidth={1} />
-            <Box classes={['font-light']}>
+            <span>
               {new Date(post.date).toLocaleDateString('en-US', {
                 day: 'numeric',
                 month: 'long',
                 year: 'numeric'
               })}
-            </Box>
-          </Stack>
+            </span>
+          </Inline>
 
-          <Stack orientation="horizontal">
+          <Inline>
             <FiClock strokeWidth={1} />
-            <Box classes={['font-light']}>
-              {Math.ceil(getTimeToReadMs(post.content) / 60000)} minutes
-            </Box>
-          </Stack>
-        </Stack>
-      </Box>
-    </>
+            <span>{Math.ceil(getTimeToReadMs(post.content) / 60000)} min to read</span>
+          </Inline>
+        </div>
+      </section>
+    </Page>
   );
 };
 
 export const getStaticPaths: GetStaticPaths<BlogPostPageParams> = async () => {
   const ids: string[] = [];
-  for await (const post of getBlogPosts()) {
+  for await (const post of loadBlogPosts()) {
     ids.push(post.id);
   }
 
@@ -68,7 +67,7 @@ export const getStaticProps: GetStaticProps<BlogPostPageProps, BlogPostPageParam
 
   return {
     props: {
-      post: await getBlogPost(id)
+      post: await loadBlogPost(id)
     }
   };
 };

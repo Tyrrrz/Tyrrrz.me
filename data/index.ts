@@ -9,7 +9,7 @@ export type BlogPost = {
   content: string;
 };
 
-export const getBlogPosts = async function* () {
+export const loadBlogPosts = async function* () {
   const dirPath = path.resolve(process.cwd(), 'data', 'blog');
 
   const ents = await fs.readdir(dirPath, { withFileTypes: true });
@@ -45,8 +45,8 @@ export const getBlogPosts = async function* () {
   }
 };
 
-export const getBlogPost = async (id: string) => {
-  for await (const post of getBlogPosts()) {
+export const loadBlogPost = async (id: string) => {
+  for await (const post of loadBlogPosts()) {
     if (post.id === id) {
       return post;
     }
@@ -65,7 +65,7 @@ export type Project = {
   language?: string;
 };
 
-export const getProjects = async function* () {
+export const loadProjects = async function* () {
   const dirPath = path.resolve(process.cwd(), 'data', 'projects');
 
   const ents = await fs.readdir(dirPath, { withFileTypes: true });
@@ -92,7 +92,7 @@ export type SpeakingEngagement = {
   recordingUrl?: string;
 };
 
-export const getSpeakingEngagements = async function* () {
+export const loadSpeakingEngagements = async function* () {
   const dirPath = path.resolve(process.cwd(), 'data', 'speaking');
 
   const ents = await fs.readdir(dirPath, { withFileTypes: true });
@@ -114,7 +114,7 @@ export type Donation = {
   platform: string;
 };
 
-export const getDonations = async function* () {
+export const loadDonations = async function* () {
   const filePath = path.resolve(process.cwd(), 'data', 'donate', 'donations.json');
   const donations: Donation[] = JSON.parse(await fs.readFile(filePath, 'utf8'));
 

@@ -1,157 +1,18 @@
 import type { AppProps } from 'next/app';
-import { useRouter } from 'next/router';
 import Script from 'next/script';
-import { FC, PropsWithChildren, ReactNode, useEffect, useMemo, useState } from 'react';
-import FadeIn from 'react-fade-in';
-import Box from '../components/box';
+import { FC, ReactNode } from 'react';
 import Meta from '../components/meta';
-import NavLink from '../components/navLink';
-import RawLink from '../components/rawLink';
-import Stack from '../components/stack';
-import useDebouncedValue from '../hooks/useDebouncedValue';
 import { getGoogleAnalyticsId, isProduction } from '../utils/env';
 import './globals.css';
-
-const Loader: FC = () => {
-  const router = useRouter();
-
-  const [isNavigating, setIsNavigating] = useState(false);
-  const [progress, setProgress] = useState(0);
-
-  // Only show loading indicator if the navigation takes a while.
-  // This prevents indicator from flashing during faster navigation.
-  const isVisible = useDebouncedValue(isNavigating, 300);
-
-  useEffect(() => {
-    const onRouteChangeStart = () => {
-      setIsNavigating(true);
-      setProgress(0);
-    };
-
-    const onRouteChangeComplete = () => {
-      setIsNavigating(false);
-      setProgress(1);
-    };
-
-    router.events.on('routeChangeStart', onRouteChangeStart);
-    router.events.on('routeChangeComplete', onRouteChangeComplete);
-    router.events.on('routeChangeError', onRouteChangeComplete);
-
-    return () => {
-      router.events.off('routeChangeStart', onRouteChangeStart);
-      router.events.off('routeChangeComplete', onRouteChangeComplete);
-      router.events.off('routeChangeError', onRouteChangeComplete);
-    };
-  }, [router]);
-
-  useEffect(() => {
-    if (!isNavigating) {
-      return;
-    }
-
-    const interval = setInterval(() => {
-      // Progress is not representative of anything, it's just used
-      // to give a sense that something is happening.
-      // The value is increased inverse-hyperbolically, so that it
-      // slows down and never actually reaches 100%.
-      setProgress((progress) => progress + 0.1 * (0.95 - progress) ** 2);
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [isNavigating]);
-
-  return (
-    <Box
-      classes={[
-        'h-1',
-        {
-          'bg-purple-500': isVisible,
-          'bg-transparent': !isVisible
-        }
-      ]}
-      style={{
-        width: `${progress * 100}%`,
-        transitionProperty: 'width',
-        transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-        transitionDuration: '150ms'
-      }}
-    />
-  );
-};
-
-const Nav: FC = () => {
-  return (
-    <Box classes={['border-b-4', 'border-neutral-100']}>
-      <Box
-        type="header"
-        classes={[
-          'max-w-screen-lg',
-          'flex',
-          'flex-col',
-          'sm:flex-row',
-          'mx-auto',
-          'p-4',
-          'items-center',
-          'justify-between'
-        ]}
-      >
-        <Box classes={['my-1']}>
-          <RawLink href="/">
-            <Box
-              classes={['text-2xl', 'text-center', 'font-mono', 'font-semibold', 'tracking-wide']}
-            >
-              <Box type="span" classes={['text-neutral-400']}>
-                ://
-              </Box>
-              <Box type="span">tyrrrz.me</Box>
-            </Box>
-          </RawLink>
-        </Box>
-
-        <Box type="nav" classes={['px-2', 'text-lg']}>
-          <Stack orientation="horizontal" gap="large">
-            <Box>
-              <NavLink href="/">home</NavLink>
-            </Box>
-            <Box>
-              <NavLink href="/projects">projects</NavLink>
-            </Box>
-            <Box>
-              <NavLink href="/blog">blog</NavLink>
-            </Box>
-            <Box>
-              <NavLink href="/speaking">speaking</NavLink>
-            </Box>
-            <Box>
-              <NavLink href="/donate">donate</NavLink>
-            </Box>
-          </Stack>
-        </Box>
-      </Box>
-    </Box>
-  );
-};
-
-const Main: FC<PropsWithChildren> = ({ children }) => {
-  // Ensure that fade-in triggers each time the content changes
-  const key = useMemo(() => Math.random() * (children?.toString()?.length || 17), [children]);
-
-  return (
-    <Box type="main" classes={['max-w-screen-lg', , 'mx-auto', 'my-6', 'px-4']}>
-      <FadeIn key={key}>{children}</FadeIn>
-    </Box>
-  );
-};
 
 const Scripts: FC = () => {
   const scripts: ReactNode[] = [];
 
   // Google Analytics (production build only)
-  const googleAnalyticsId = getGoogleAnalyticsId();
-  if (googleAnalyticsId && isProduction()) {
+  if (getGoogleAnalyticsId() && isProduction()) {
     scripts.push(
       <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}
+        src={`https://www.googletagmanager.com/gtag/js?id=${getGoogleAnalyticsId()}`}
         strategy="afterInteractive"
       />,
 
@@ -160,7 +21,7 @@ const Scripts: FC = () => {
 window.dataLayer = window.dataLayer || [];
 function gtag(){window.dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', '${googleAnalyticsId}');
+gtag('config', '${getGoogleAnalyticsId()}');
 `}
       </Script>
     );
@@ -173,15 +34,7 @@ const App = ({ Component, pageProps }: AppProps) => {
   return (
     <>
       <Meta />
-
-      <Loader />
-
-      <Nav />
-
-      <Main>
-        <Component {...pageProps} />
-      </Main>
-
+      <Component {...pageProps} />
       <Scripts />
     </>
   );

@@ -1,14 +1,10 @@
+import c from 'classnames';
 import { FC, PropsWithChildren } from 'react';
-import Box from './box';
 
 type CodeblockProps = PropsWithChildren;
 
 const Codeblock: FC<CodeblockProps> = ({ children }) => {
-  return (
-    <Box type="span" classes={['font-mono', 'bg-neutral-100']}>
-      {children}
-    </Box>
-  );
+  return <span className={c('px-1', 'font-mono', 'bg-neutral-100')}>{children}</span>;
 };
 
 export default Codeblock;

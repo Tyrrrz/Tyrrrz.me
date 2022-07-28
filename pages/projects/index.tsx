@@ -1,7 +1,8 @@
 import { GetStaticProps, NextPage } from 'next';
-import Header from '../../components/header';
+import Heading from '../../components/heading';
 import Meta from '../../components/meta';
-import { getProjects, Project } from '../../data';
+import Page from '../../components/page';
+import { loadProjects, Project } from '../../data';
 
 type ProjectsPageProps = {
   projects: Project[];
@@ -9,16 +10,16 @@ type ProjectsPageProps = {
 
 const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
   return (
-    <>
+    <Page>
       <Meta title="Projects" />
-      <Header>Projects</Header>
-    </>
+      <Heading>Projects</Heading>
+    </Page>
   );
 };
 
 export const getStaticProps: GetStaticProps<ProjectsPageProps> = async () => {
   const projects: Project[] = [];
-  for await (const project of getProjects()) {
+  for await (const project of loadProjects()) {
     projects.push(project);
   }
 
