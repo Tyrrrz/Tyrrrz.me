@@ -165,13 +165,16 @@ type PageProps = PropsWithChildren;
 
 const Page: FC<PageProps> = ({ children }) => {
   return (
-    <div className={c('max-w-4xl', 'mx-auto')}>
-      <div className={c('container', 'mx-auto')}>
-        <Loader />
-        <Header />
-        <Main>{children}</Main>
+    <>
+      <Loader />
+
+      <div className={c('max-w-4xl', 'mx-auto')}>
+        <div className={c('container', 'mx-auto')}>
+          <Header />
+          <Main>{children}</Main>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
