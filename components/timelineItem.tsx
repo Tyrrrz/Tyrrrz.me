@@ -12,7 +12,8 @@ const TimelineItem: FC<TimelineItemProps> = ({ children }) => {
           'w-[8px]',
           'h-[8px]',
           '-left-[5px]',
-          'top-3',
+          'top-2.5',
+          'md:top-3',
           'rounded-full',
           'bg-purple-500'
         )}

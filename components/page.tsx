@@ -68,9 +68,7 @@ const NavLink: FC<NavLinkProps> = ({ href, children }) => {
         },
         {
           'bg-purple-100': isActive
-        },
-        'transition',
-        'duration-300'
+        }
       )}
     >
       <Link variant="discreet" href={href}>

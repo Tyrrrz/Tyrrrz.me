@@ -18,6 +18,13 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
       <Meta title="Projects" />
       <Heading>Projects</Heading>
 
+      <section>
+        These are the open source projects that I currently maintain. Most of these started out of
+        personal necessity and over time evolved into popular tools used by thousands of people
+        across the world. If you want to support the development of my projects, please consider{' '}
+        <Link href="/donate">donating.</Link>
+      </section>
+
       <div
         className={c(
           'grid',
@@ -26,6 +33,7 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
           'lg:grid-cols-3',
           'xl:grid-cols-4',
           '2xl:grid-cols-5',
+          'mt-6',
           'gap-3'
         )}
       >
@@ -48,7 +56,19 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
               <Link href={project.url}>{project.name}</Link>
             </div>
 
-            <div className={c('grow', 'my-1')}>{project.description}</div>
+            <div className={c('grow', 'my-1', 'space-y-2')}>
+              <div>{project.description}</div>
+              {project.homepageUrl && (
+                <div>
+                  <Inline>
+                    <FiExternalLink strokeWidth={1} />
+                    <span>
+                      <Link href={project.homepageUrl}>{project.homepageUrl}</Link>
+                    </span>
+                  </Inline>
+                </div>
+              )}
+            </div>
 
             <div className={c('flex', 'flex-wrap', 'mt-1', 'gap-x-3', 'font-light')}>
               <Inline>
@@ -67,15 +87,6 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
                 <Inline>
                   <FiDownload strokeWidth={1} />
                   <span>{project.downloads.toLocaleString('en-US')}</span>
-                </Inline>
-              )}
-
-              {project.homepageUrl && (
-                <Inline>
-                  <FiExternalLink strokeWidth={1} />
-                  <span>
-                    <Link href={project.homepageUrl}>Open</Link>
-                  </span>
                 </Inline>
               )}
             </div>

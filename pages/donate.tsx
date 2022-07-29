@@ -77,7 +77,7 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
               'border',
               {
                 'border-purple-500': i <= 8,
-                'border-purple-300': i > 8 && i <= 17
+                'border-purple-300': i > 8 && i <= 32
               },
               'rounded'
             )}
