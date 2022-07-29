@@ -90,8 +90,18 @@ const Header: FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className={c('border-b-2', 'border-neutral-100')}>
-      <div className={c('container', 'flex', 'mx-auto', 'p-4', 'items-center', 'justify-between')}>
+    <header>
+      <div
+        className={c(
+          'flex',
+          'mx-auto',
+          'p-4',
+          'border-b-2',
+          'border-neutral-100',
+          'items-center',
+          'justify-between'
+        )}
+      >
         {/* Logo */}
         <div className={c('my-1', 'text-2xl', 'font-mono', 'font-semibold', 'tracking-wide')}>
           <Link variant="hidden" href="/">
@@ -124,7 +134,7 @@ const Header: FC = () => {
           className={c(
             { '-mt-[100%]': !isMenuOpen },
             'p-2',
-            'border-t-2',
+            'border-b-2',
             'border-neutral-100',
             'space-y-1',
             'text-lg',
@@ -145,7 +155,7 @@ const Header: FC = () => {
 
 const Main: FC<PropsWithChildren> = ({ children }) => {
   return (
-    <main className={c('container', 'mx-auto', 'my-6', 'px-4')}>
+    <main className={c('mx-4', 'my-6')}>
       <FadeIn>{children}</FadeIn>
     </main>
   );
@@ -155,13 +165,13 @@ type PageProps = PropsWithChildren;
 
 const Page: FC<PageProps> = ({ children }) => {
   return (
-    <>
-      <Loader />
-
-      <Header />
-
-      <Main>{children}</Main>
-    </>
+    <div className={c('max-w-4xl', 'mx-auto')}>
+      <div className={c('container', 'mx-auto')}>
+        <Loader />
+        <Header />
+        <Main>{children}</Main>
+      </div>
+    </div>
   );
 };
 

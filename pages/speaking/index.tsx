@@ -40,7 +40,7 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
         <Link href="https://twitter.com/Tyrrrz">Twitter</Link>.
       </section>
 
-      <div className={c('mt-6', 'space-y-6')}>
+      <div className={c('mt-8', 'space-y-6')}>
         {groups.map(({ year, engagements }, i) => (
           <section key={i}>
             <Heading variant="h2">{year}</Heading>

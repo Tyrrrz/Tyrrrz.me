@@ -38,7 +38,16 @@ const Emoji: FC<EmojiProps> = ({ code }) => {
   const url = useMemo(() => getTwemojiUrl(code), [code]);
 
   return (
-    <span className={c('inline-block', 'w-[1em]', 'h-[1em]')}>
+    <span
+      className={c(
+        'inline-block',
+        'w-[1em]',
+        'h-[1em]',
+        'mr-[0.05em]',
+        'ml-[0.1em]',
+        '-align-[0.1em]'
+      )}
+    >
       <Image src={url} alt={code} />
     </span>
   );

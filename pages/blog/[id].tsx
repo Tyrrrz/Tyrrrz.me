@@ -37,7 +37,7 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
 
           <Inline>
             <FiClock strokeWidth={1} />
-            <span>{Math.ceil(getTimeToReadMs(post.content) / 60000)} min to read</span>
+            <span>{Math.ceil(getTimeToReadMs(post.content) / 60000)} min read</span>
           </Inline>
         </div>
       </section>

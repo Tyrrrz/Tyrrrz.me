@@ -1,6 +1,6 @@
 import c from 'classnames';
 import type { NextPage } from 'next';
-import { FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
+import { FiGithub, FiLinkedin, FiTwitter, FiYoutube } from 'react-icons/fi';
 import Emoji from '../components/emoji';
 import Image from '../components/image';
 import Link from '../components/link';
@@ -11,23 +11,36 @@ const HomePage: NextPage = () => {
 
   return (
     <Page>
-      <section className={c('flex', 'items-center', 'justify-between', 'gap-3')}>
-        <div className={c('flex-none')}>
-          <div className={c('text-3xl', 'sm:text-4xl')}>Oleksii Holub</div>
+      <section className={c('flex', 'mx-auto', 'items-center', 'justify-between', 'gap-6')}>
+        <div className={c('flex-none', 'grow')}>
+          <div className={c('text-3xl')}>Oleksii Holub</div>
           <div className={c('text-xl', 'font-thin', 'tracking-wide')}>software developer</div>
 
-          <div className={c('my-3', 'h-1', 'bg-purple-500')} />
+          <div
+            className={c('my-4', 'h-1', 'bg-gradient-to-r', 'from-purple-500', 'to-transparent')}
+          />
 
           <div className={c('text-2xl')}>
-            <div className={c('flex', 'flex-wrap', 'gap-x-5', 'font-light')}>
+            <div className={c('flex', 'flex-wrap', 'gap-x-3', 'font-light')}>
               <Link variant="discreet" href="https://github.com/Tyrrrz">
-                <FiGithub strokeWidth={1} />
+                <div className={c('p-1')}>
+                  <FiGithub strokeWidth={1} />
+                </div>
               </Link>
               <Link variant="discreet" href="https://twitter.com/Tyrrrz">
-                <FiTwitter strokeWidth={1} />
+                <div className={c('p-1')}>
+                  <FiTwitter strokeWidth={1} />
+                </div>
+              </Link>
+              <Link variant="discreet" href="https://youtube.com/c/Tyrrrz">
+                <div className={c('p-1')}>
+                  <FiYoutube strokeWidth={1} />
+                </div>
               </Link>
               <Link variant="discreet" href="https://linkedin.com/in/Tyrrrz">
-                <FiLinkedin strokeWidth={1} />
+                <div className={c('p-1')}>
+                  <FiLinkedin strokeWidth={1} />
+                </div>
               </Link>
             </div>
           </div>
@@ -38,26 +51,24 @@ const HomePage: NextPage = () => {
         </div>
       </section>
 
-      <section className={c('mt-2')}>
-        <div className={c('text-2xl', 'sm:text-3xl', 'tracking-wide')}>
+      <section className={c('mt-8', 'space-y-2')}>
+        <p className={c('text-xl', 'tracking-wide')}>
           <Emoji code="👋" /> Hello!
-        </div>
-        <article className={c('mt-2', 'sm:text-xl', 'space-y-2')}>
-          <p>
-            My name is Oleksii, also known online as Tyrrrz. I&apos;m a {age} y/o software developer
-            from Kyiv, Ukraine. I&apos;m also a Microsoft MVP and a GitHub Star.
-          </p>
-          <p>
-            Most of my endeavors are in C#, but every now and then I code in F# and TypeScript as
-            well. I&apos;m primarily interested in the cloud, distributed systems, and web
-            applications.
-          </p>
-          <p>
-            My professional hobbies involve open source, conference speaking, and blogging. Outside
-            of that I&apos;m also into outdoor photography, digital art, playing guitar, and
-            learning foreign languages.
-          </p>
-        </article>
+        </p>
+        <p>
+          My name is Oleksii, also known online as Tyrrrz. I&apos;m a {age} y/o software developer
+          from Kyiv, Ukraine. I&apos;m also a Microsoft MVP and a GitHub Star.
+        </p>
+        <p>
+          Most of my endeavors are in C#, but every now and then I code in F# and TypeScript as
+          well. I&apos;m primarily interested in the cloud, distributed systems, and web
+          applications.
+        </p>
+        <p>
+          My professional hobbies involve open source, conference speaking, and blogging. Outside of
+          that I&apos;m also into outdoor photography, digital art, playing guitar, and learning
+          foreign languages.
+        </p>
       </section>
     </Page>
   );

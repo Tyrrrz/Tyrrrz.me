@@ -36,7 +36,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
         the <Link href="/blog/rss.xml">RSS Feed</Link> to get notified when I post a new article.
       </section>
 
-      <div className={c('mt-6', 'space-y-6')}>
+      <div className={c('mt-8', 'space-y-6')}>
         {groups.map(({ year, posts }, i) => (
           <section key={i}>
             <Heading variant="h2">{year}</Heading>
@@ -63,7 +63,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
 
                       <Inline>
                         <FiClock strokeWidth={1} />
-                        <span>{Math.ceil(getTimeToReadMs(post.content) / 60000)} min to read</span>
+                        <span>{Math.ceil(getTimeToReadMs(post.content) / 60000)} min read</span>
                       </Inline>
                     </div>
                   </TimelineItem>
