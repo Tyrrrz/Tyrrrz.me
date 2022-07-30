@@ -9,8 +9,8 @@
       "purpose": "any maskable"
     }
   ],
-  "theme_color": "#343838",
-  "background_color": "#343838",
+  "theme_color": "#a855f7",
+  "background_color": "#a855f7",
   "start_url": "/",
   "display": "browser",
   "orientation": "portrait"

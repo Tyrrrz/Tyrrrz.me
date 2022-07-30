@@ -155,7 +155,7 @@ const Header: FC = () => {
 
 const Main: FC<PropsWithChildren> = ({ children }) => {
   return (
-    <main className={c('mx-4', 'my-6')}>
+    <main className={c('mx-4', 'mt-6', 'mb-8')}>
       <FadeIn>{children}</FadeIn>
     </main>
   );
