@@ -1,15 +1,15 @@
+import Codeblock from '@/components/codeblock';
+import Emoji from '@/components/emoji';
+import Heading from '@/components/heading';
+import Image from '@/components/image';
+import Inline from '@/components/inline';
+import Link from '@/components/link';
+import List from '@/components/list';
+import ListItem from '@/components/listItem';
+import Meta from '@/components/meta';
+import Page from '@/components/page';
 import c from 'classnames';
 import { NextPage } from 'next';
-import Codeblock from '../components/codeblock';
-import Emoji from '../components/emoji';
-import Heading from '../components/heading';
-import Image from '../components/image';
-import Inline from '../components/inline';
-import Link from '../components/link';
-import List from '../components/list';
-import ListItem from '../components/listItem';
-import Meta from '../components/meta';
-import Page from '../components/page';
 
 const UkrainePage: NextPage = () => {
   return (

@@ -1,8 +1,8 @@
+import Inline from '@/components/inline';
+import Link from '@/components/link';
 import c from 'classnames';
 import { FC } from 'react';
 import { FiAlertTriangle } from 'react-icons/fi';
-import Inline from './inline';
-import Link from './link';
 
 const UkraineAlert: FC = () => {
   return (

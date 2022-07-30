@@ -1,6 +1,6 @@
+import Image from '@/components/image';
 import c from 'classnames';
 import { FC, useMemo } from 'react';
-import Image from './image';
 
 type EmojiProps = {
   code: string;

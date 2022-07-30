@@ -1,4 +1,4 @@
-import pullProjects from './pullProjects';
+import pullProjects from '@/data/pullProjects';
 
 const main = async () => {
   await pullProjects();

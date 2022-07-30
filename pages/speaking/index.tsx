@@ -1,14 +1,14 @@
+import Heading from '@/components/heading';
+import Inline from '@/components/inline';
+import Link from '@/components/link';
+import Meta from '@/components/meta';
+import Page from '@/components/page';
+import Timeline from '@/components/timeline';
+import TimelineItem from '@/components/timelineItem';
+import { loadSpeakingEngagements, SpeakingEngagement } from '@/data';
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
 import { FiCalendar, FiMapPin, FiMessageCircle, FiMic, FiRadio, FiTool } from 'react-icons/fi';
-import Heading from '../../components/heading';
-import Inline from '../../components/inline';
-import Link from '../../components/link';
-import Meta from '../../components/meta';
-import Page from '../../components/page';
-import Timeline from '../../components/timeline';
-import TimelineItem from '../../components/timelineItem';
-import { loadSpeakingEngagements, SpeakingEngagement } from '../../data';
 
 type SpeakingPageProps = {
   engagements: SpeakingEngagement[];

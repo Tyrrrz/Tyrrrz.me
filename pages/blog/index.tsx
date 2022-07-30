@@ -1,15 +1,15 @@
+import Heading from '@/components/heading';
+import Inline from '@/components/inline';
+import Link from '@/components/link';
+import Meta from '@/components/meta';
+import Page from '@/components/page';
+import Timeline from '@/components/timeline';
+import TimelineItem from '@/components/timelineItem';
+import { BlogPost, loadBlogPosts } from '@/data';
+import { getTimeToReadMs } from '@/utils/str';
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
 import { FiCalendar, FiClock } from 'react-icons/fi';
-import Heading from '../../components/heading';
-import Inline from '../../components/inline';
-import Link from '../../components/link';
-import Meta from '../../components/meta';
-import Page from '../../components/page';
-import Timeline from '../../components/timeline';
-import TimelineItem from '../../components/timelineItem';
-import { BlogPost, loadBlogPosts } from '../../data';
-import { getTimeToReadMs } from '../../utils/str';
 
 type BlogPageProps = {
   posts: BlogPost[];

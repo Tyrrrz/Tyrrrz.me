@@ -1,15 +1,15 @@
+import Codeblock from '@/components/codeblock';
+import Heading from '@/components/heading';
+import Inline from '@/components/inline';
+import Link from '@/components/link';
+import List from '@/components/list';
+import ListItem from '@/components/listItem';
+import Meta from '@/components/meta';
+import Page from '@/components/page';
+import { Donation, loadDonations } from '@/data';
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
 import { FiDollarSign } from 'react-icons/fi';
-import Codeblock from '../components/codeblock';
-import Heading from '../components/heading';
-import Inline from '../components/inline';
-import Link from '../components/link';
-import List from '../components/list';
-import ListItem from '../components/listItem';
-import Meta from '../components/meta';
-import Page from '../components/page';
-import { Donation, loadDonations } from '../data';
 
 type DonationPageProps = {
   donations: Donation[];

@@ -1,12 +1,12 @@
+import Heading from '@/components/heading';
+import Inline from '@/components/inline';
+import Meta from '@/components/meta';
+import Page from '@/components/page';
+import { BlogPost, loadBlogPost, loadBlogPosts } from '@/data';
+import { getTimeToReadMs } from '@/utils/str';
 import c from 'classnames';
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import { FiCalendar, FiClock } from 'react-icons/fi';
-import Heading from '../../components/heading';
-import Inline from '../../components/inline';
-import Meta from '../../components/meta';
-import Page from '../../components/page';
-import { BlogPost, loadBlogPost, loadBlogPosts } from '../../data';
-import { getTimeToReadMs } from '../../utils/str';
 
 type BlogPostPageProps = {
   post: BlogPost;
