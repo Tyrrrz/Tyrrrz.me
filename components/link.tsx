@@ -1,3 +1,4 @@
+import { isAbsoluteUrl } from '@/utils/url';
 import c from 'classnames';
 import NextLink from 'next/link';
 import { FC, PropsWithChildren } from 'react';
@@ -8,9 +9,7 @@ type RawLinkProps = PropsWithChildren<{
 }>;
 
 const RawLink: FC<RawLinkProps> = ({ className, href, children }) => {
-  const isAbsolute = /^[a-z][a-z\d+\-.]*:/iu.test(href);
-
-  if (isAbsolute) {
+  if (isAbsoluteUrl(href)) {
     return (
       <a className={className} href={href} target="_blank" rel="noreferrer">
         {children}

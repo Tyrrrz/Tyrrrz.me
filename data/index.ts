@@ -6,19 +6,19 @@ export type BlogPost = {
   id: string;
   title: string;
   date: string;
-  content: string;
+  source: string;
 };
 
 export const loadBlogPosts = async function* () {
   const dirPath = path.resolve(process.cwd(), 'data', 'blog');
 
-  const ents = await fs.readdir(dirPath, { withFileTypes: true });
-  for (const ent of ents) {
-    if (!ent.isDirectory()) {
+  const entries = await fs.readdir(dirPath, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
       continue;
     }
 
-    const id = ent.name;
+    const id = entry.name;
     const filePath = path.join(dirPath, id, 'index.md');
 
     const {
@@ -38,7 +38,7 @@ export const loadBlogPosts = async function* () {
       id,
       title,
       date,
-      content: body
+      source: body
     };
 
     yield post;
@@ -68,13 +68,13 @@ export type Project = {
 export const loadProjects = async function* () {
   const dirPath = path.resolve(process.cwd(), 'data', 'projects');
 
-  const ents = await fs.readdir(dirPath, { withFileTypes: true });
-  for (const ent of ents) {
-    if (!ent.isFile() || !ent.name.endsWith('.json')) {
+  const entries = await fs.readdir(dirPath, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith('.json')) {
       continue;
     }
 
-    const filePath = path.join(dirPath, ent.name);
+    const filePath = path.join(dirPath, entry.name);
     const project: Project = JSON.parse(await fs.readFile(filePath, 'utf8'));
 
     yield project;
@@ -95,13 +95,13 @@ export type SpeakingEngagement = {
 export const loadSpeakingEngagements = async function* () {
   const dirPath = path.resolve(process.cwd(), 'data', 'speaking');
 
-  const ents = await fs.readdir(dirPath, { withFileTypes: true });
-  for (const ent of ents) {
-    if (!ent.isFile() || !ent.name.endsWith('.json')) {
+  const entries = await fs.readdir(dirPath, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith('.json')) {
       continue;
     }
 
-    const filePath = path.join(dirPath, ent.name);
+    const filePath = path.join(dirPath, entry.name);
     const engagement: SpeakingEngagement = JSON.parse(await fs.readFile(filePath, 'utf8'));
 
     yield engagement;

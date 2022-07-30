@@ -1,5 +1,6 @@
 import Heading from '@/components/heading';
 import Inline from '@/components/inline';
+import Markdown from '@/components/markdown';
 import Meta from '@/components/meta';
 import Page from '@/components/page';
 import { BlogPost, loadBlogPost, loadBlogPosts } from '@/data';
@@ -37,9 +38,13 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
 
           <Inline>
             <FiClock strokeWidth={1} />
-            <span>{Math.ceil(getTimeToReadMs(post.content) / 60000)} min read</span>
+            <span>{Math.ceil(getTimeToReadMs(post.source) / 60000)} min read</span>
           </Inline>
         </div>
+      </section>
+
+      <section>
+        <Markdown source={post.source} />
       </section>
     </Page>
   );
