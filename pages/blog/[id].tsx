@@ -4,9 +4,12 @@ import Markdown from '@/components/markdown';
 import Meta from '@/components/meta';
 import Page from '@/components/page';
 import { BlogPost, loadBlogPost, loadBlogPosts } from '@/data';
+import { getDisqusId, getSiteUrl } from '@/utils/env';
 import { getTimeToReadMs } from '@/utils/str';
 import c from 'classnames';
+import { DiscussionEmbed } from 'disqus-react';
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
+import { FC } from 'react';
 import { FiCalendar, FiClock } from 'react-icons/fi';
 
 type BlogPostPageProps = {
@@ -15,6 +18,25 @@ type BlogPostPageProps = {
 
 type BlogPostPageParams = {
   id: string;
+};
+
+const Discussion: FC<BlogPostPageProps> = ({ post }) => {
+  const disqusId = getDisqusId();
+  if (!disqusId) {
+    return null;
+  }
+
+  return (
+    <DiscussionEmbed
+      shortname={disqusId}
+      config={{
+        identifier: `Blog/${post.id}`,
+        url: getSiteUrl(`/blog/${post.id}`),
+        title: post.title,
+        language: 'en'
+      }}
+    />
+  );
 };
 
 const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
@@ -45,6 +67,10 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
 
       <section>
         <Markdown source={post.source} />
+      </section>
+
+      <section>
+        <Discussion post={post} />
       </section>
     </Page>
   );
