@@ -1,5 +1,6 @@
 import Code from '@/components/code';
 import Heading from '@/components/heading';
+import Image from '@/components/image';
 import Link from '@/components/link';
 import List from '@/components/list';
 import Paragraph from '@/components/paragraph';
@@ -12,11 +13,15 @@ import Syntax from './syntax';
 
 type MarkdownProps = {
   source: string;
+  transformLinkHref?: (href: string) => string;
+  transformImageSrc?: (src: string) => string;
 };
 
-const Markdown: FC<MarkdownProps> = ({ source }) => {
+const Markdown: FC<MarkdownProps> = ({ source, transformLinkHref, transformImageSrc }) => {
   return (
     <ReactMarkdown
+      transformImageUri={transformImageSrc}
+      transformLinkUri={transformLinkHref}
       components={{
         h1: ({ children }) => {
           return <Heading variant="h1">{children}</Heading>;
@@ -28,7 +33,7 @@ const Markdown: FC<MarkdownProps> = ({ source }) => {
           return <Heading variant="h3">{children}</Heading>;
         },
         a: ({ href, children }) => {
-          return <Link href={href || '#'}>{children}</Link>;
+          return <Link href={href!}>{children}</Link>;
         },
         p: ({ children }) => {
           return <Paragraph>{children}</Paragraph>;
@@ -45,6 +50,9 @@ const Markdown: FC<MarkdownProps> = ({ source }) => {
               {children}
             </List>
           );
+        },
+        img: ({ src, alt }) => {
+          return <Image src={src!} alt={alt!} />;
         },
         blockquote: ({ children }) => {
           return <Quote>{children}</Quote>;

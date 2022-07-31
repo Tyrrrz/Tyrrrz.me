@@ -6,14 +6,13 @@ import Page from '@/components/page';
 import Paragraph from '@/components/paragraph';
 import Timeline from '@/components/timeline';
 import TimelineItem from '@/components/timelineItem';
-import { BlogPost, loadBlogPosts } from '@/data';
-import { getTimeToReadMs } from '@/utils/str';
+import { BlogPostRef, loadBlogPostRefs } from '@/data';
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
 import { FiCalendar, FiClock } from 'react-icons/fi';
 
 type BlogPageProps = {
-  posts: BlogPost[];
+  posts: BlogPostRef[];
 };
 
 const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
@@ -68,7 +67,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
 
                       <Inline>
                         <FiClock strokeWidth={1} />
-                        <span>{Math.ceil(getTimeToReadMs(post.source) / 60000)} min read</span>
+                        <span>{Math.ceil(post.timeToReadMs / 60000)} min read</span>
                       </Inline>
                     </div>
                   </TimelineItem>
@@ -83,8 +82,8 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
 };
 
 export const getStaticProps: GetStaticProps<BlogPageProps> = async () => {
-  const posts: BlogPost[] = [];
-  for await (const post of loadBlogPosts()) {
+  const posts: BlogPostRef[] = [];
+  for await (const post of loadBlogPostRefs()) {
     posts.push(post);
   }
 

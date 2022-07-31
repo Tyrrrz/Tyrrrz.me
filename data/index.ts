@@ -6,6 +6,7 @@ export type BlogPost = {
   id: string;
   title: string;
   date: string;
+  timeToReadMs: number;
   source: string;
 };
 
@@ -34,10 +35,13 @@ export const loadBlogPosts = async function* () {
       throw new Error(`Blog post '${id}' has no date`);
     }
 
+    const timeToReadMs = (body.split(/\s/g).length * 60000) / 350;
+
     const post: BlogPost = {
       id,
       title,
       date,
+      timeToReadMs,
       source: body
     };
 
@@ -53,6 +57,21 @@ export const loadBlogPost = async (id: string) => {
   }
 
   throw new Error(`Blog post '${id}' not found`);
+};
+
+export type BlogPostRef = Omit<BlogPost, 'source'>;
+
+export const loadBlogPostRefs = async function* () {
+  for await (const post of loadBlogPosts()) {
+    const ref: BlogPostRef = {
+      id: post.id,
+      title: post.title,
+      date: post.date,
+      timeToReadMs: post.timeToReadMs
+    };
+
+    yield ref;
+  }
 };
 
 export type Project = {

@@ -3,9 +3,9 @@ import Inline from '@/components/inline';
 import Markdown from '@/components/markdown';
 import Meta from '@/components/meta';
 import Page from '@/components/page';
-import { BlogPost, loadBlogPost, loadBlogPosts } from '@/data';
+import { BlogPost, loadBlogPost, loadBlogPostRefs } from '@/data';
 import { getDisqusId, getSiteUrl } from '@/utils/env';
-import { getTimeToReadMs } from '@/utils/str';
+import { isAbsoluteUrl } from '@/utils/url';
 import c from 'classnames';
 import { DiscussionEmbed } from 'disqus-react';
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
@@ -18,6 +18,27 @@ type BlogPostPageProps = {
 
 type BlogPostPageParams = {
   id: string;
+};
+
+const Article: FC<BlogPostPageProps> = ({ post }) => {
+  // Transform local-relative URLs to site-relative URLs
+  const transformUrl = (url: string) => {
+    if (isAbsoluteUrl(url) || url.startsWith('/')) {
+      return url;
+    }
+
+    return `/blog/${post.id}/${url}`;
+  };
+
+  return (
+    <article>
+      <Markdown
+        source={post.source}
+        transformLinkHref={transformUrl}
+        transformImageSrc={transformUrl}
+      />
+    </article>
+  );
 };
 
 const Discussion: FC<BlogPostPageProps> = ({ post }) => {
@@ -61,15 +82,13 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
 
           <Inline>
             <FiClock strokeWidth={1} />
-            <span>{Math.ceil(getTimeToReadMs(post.source) / 60000)} min read</span>
+            <span>{Math.ceil(post.timeToReadMs / 60000)} min read</span>
           </Inline>
         </div>
       </section>
 
       <section>
-        <article>
-          <Markdown source={post.source} />
-        </article>
+        <Article post={post} />
       </section>
 
       <section>
@@ -81,7 +100,7 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
 
 export const getStaticPaths: GetStaticPaths<BlogPostPageParams> = async () => {
   const ids: string[] = [];
-  for await (const post of loadBlogPosts()) {
+  for await (const post of loadBlogPostRefs()) {
     ids.push(post.id);
   }
 
