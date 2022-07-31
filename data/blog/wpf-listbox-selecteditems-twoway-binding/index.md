@@ -128,7 +128,7 @@ We can now use this behavior by initializing it in XAML, like this:
 
 Another useful feature of `ListBox` is that you can make a binding proxy using `SelectedValuePath` and `SelectedValue`. Setting `SelectedValuePath` lets you specify a member path to be evaluated by `SelectedValue`.
 
-The great part about it is that it also works the other way around -- changing `SelectedValue` will use the member path in `SelectedValuePath` to update `SelectedItem` with a new reference.
+The great part about it is that it also works the other way around — changing `SelectedValue` will use the member path in `SelectedValuePath` to update `SelectedItem` with a new reference.
 
 This could also be very useful for multi-select, but unfortunately the plural version, `SelectedValues`, does not exist. Let's extend our behavior to add support for it.
 
@@ -299,7 +299,7 @@ public class ListBoxSelectionBehavior<T> : Behavior<ListBox>
 
 I added another dependency property for `SelectedValues` and a few new methods.
 
-`SelectedValuesToItems()` and `SelectedItemsToValues()` convert between `SelectedItems` and `SelectedValues`, depending on which property was updated. `GetDeepPropertyValue(...)` is used to extract value of a property using an object and member path -- it's used to establish conformity between items and values.
+`SelectedValuesToItems()` and `SelectedItemsToValues()` convert between `SelectedItems` and `SelectedValues`, depending on which property was updated. `GetDeepPropertyValue(...)` is used to extract value of a property using an object and member path — it's used to establish conformity between items and values.
 
 ## Usage with SelectedValuePath
 

@@ -3,6 +3,7 @@ import Inline from '@/components/inline';
 import Link from '@/components/link';
 import Meta from '@/components/meta';
 import Page from '@/components/page';
+import Paragraph from '@/components/paragraph';
 import Timeline from '@/components/timeline';
 import TimelineItem from '@/components/timelineItem';
 import { loadSpeakingEngagements, SpeakingEngagement } from '@/data';
@@ -31,16 +32,19 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
   return (
     <Page>
       <Meta title="Speaking" />
-      <Heading>Speaking</Heading>
 
       <section>
-        These are all the speaking engagements I&apos;ve had in the past, or plan to have in the
-        future. Where available, follow the links to see the video recordings. If you want me to
-        speak at your event, please contact me on{' '}
-        <Link href="https://twitter.com/Tyrrrz">Twitter</Link>.
+        <Heading>Speaking</Heading>
+
+        <Paragraph>
+          These are all the speaking engagements I&apos;ve had in the past, or plan to have in the
+          future. Where available, follow the links to see the video recordings. If you want me to
+          speak at your event, please contact me on{' '}
+          <Link href="https://twitter.com/Tyrrrz">Twitter</Link>.
+        </Paragraph>
       </section>
 
-      <div className={c('mt-8', 'space-y-6')}>
+      <section className={c('mt-8', 'space-y-6')}>
         {groups.map(({ year, engagements }, i) => (
           <section key={i}>
             <Heading variant="h2">{year}</Heading>
@@ -101,7 +105,7 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
             </div>
           </section>
         ))}
-      </div>
+      </section>
     </Page>
   );
 };

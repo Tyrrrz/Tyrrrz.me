@@ -55,8 +55,8 @@ Here's an example of how a typical setup may look like using `ContentPresenter`:
 
 Here we bind the `Content` property to the current `DataContext` so that it can be accessed by the data templates.
 
-The `ContentPresenter.Resources` lists data templates used for each separate presentation -- in this case it's a combobox and a listbox bound to the same collection. To configure which data template is used when, we declare a set of triggers that check the value of the `IsMultiselect` property and switch the `ContentTemplate` accordingly.
+The `ContentPresenter.Resources` lists data templates used for each separate presentation — in this case it's a combobox and a listbox bound to the same collection. To configure which data template is used when, we declare a set of triggers that check the value of the `IsMultiselect` property and switch the `ContentTemplate` accordingly.
 
-Note how using triggers gives us more flexibility -- we don't need to use converters in order to turn `IsMultiselect` into an instance of `Visibility`, we just bind to it directly.
+Note how using triggers gives us more flexibility — we don't need to use converters in order to turn `IsMultiselect` into an instance of `Visibility`, we just bind to it directly.
 
 Using this approach we're also not leaving any unnecessary mess in the visual tree because we're changing the actual content instead of just hiding it.

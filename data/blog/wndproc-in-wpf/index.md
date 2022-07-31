@@ -28,13 +28,13 @@ private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref b
 
 In the example above we use the application's main window as the host, as it typically stays open for as long as the application is running. You can specify a different window as a parameter to `FromVisual(...)` method, but then make sure to call `source.RemoveHook(...)` and `source.Dispose()` after you're done.
 
-The above approach suffers from not being MVVM-friendly -- the `WndProc` method, which will most likely be defined in the model layer, is actually coupled to a window. As a result, it can introduce a circular dependency between the view and the model, where one will wait on the other to initialize.
+The above approach suffers from not being MVVM-friendly — the `WndProc` method, which will most likely be defined in the model layer, is actually coupled to a window. As a result, it can introduce a circular dependency between the view and the model, where one will wait on the other to initialize.
 
 ## MVVM way
 
 As an alternative, we can decouple message processing from the view layer by creating a specialized invisible "sponge" window.
 
-Conveniently, `System.Windows.Forms.NativeWindow` fits exactly this purpose -- it's a low level window class that does nothing else but listen to system messages. We can use it be adding a reference to `System.Windows.Forms`.
+Conveniently, `System.Windows.Forms.NativeWindow` fits exactly this purpose — it's a low level window class that does nothing else but listen to system messages. We can use it be adding a reference to `System.Windows.Forms`.
 
 Here is how I defined my sponge window:
 

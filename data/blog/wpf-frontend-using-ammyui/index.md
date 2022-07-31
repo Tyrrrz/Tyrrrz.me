@@ -11,7 +11,7 @@ I've never been a big fan of XAML, so it got me interested and I decided to use 
 
 ## Installation
 
-To use AmmyUI, you will need to add its NuGet package to your project -- either `Ammy.WPF`, `Ammy.UWP`, or `Ammy.XamarinForms`, depending on your platform.
+To use AmmyUI, you will need to add its NuGet package to your project — either `Ammy.WPF`, `Ammy.UWP`, or `Ammy.XamarinForms`, depending on your platform.
 
 Although technically not required, you will definitely want to also install the [Visual Studio extension](https://marketplace.visualstudio.com/items?itemName=ionoy.Ammy) as it provides syntax highlighting and Intellisense support.
 
@@ -57,7 +57,7 @@ Grid Key="MyGrid" {
 
 ### Using statements
 
-Instead of defining aliases for XML namespaces, Ammy is using an approach identical to C# -- `using` directives.
+Instead of defining aliases for XML namespaces, Ammy is using an approach identical to C# — `using` directives.
 
 This means you can import an entire CLR namespace and stop worrying about prefixing nodes with namespace aliases.
 
@@ -105,7 +105,7 @@ TextBlock {
 }
 ```
 
-There are many other things you can use with `from`, namely `$this`, `$template`, `$ancestor<TextBlock>(3)`, `$previous`, `SomeType.StaticProperty`, `$resource SomeResource` -- each of them replaces a normally rather lengthy binding declaration in XAML.
+There are many other things you can use with `from`, namely `$this`, `$template`, `$ancestor<TextBlock>(3)`, `$previous`, `SomeType.StaticProperty`, `$resource SomeResource` — each of them replaces a normally rather lengthy binding declaration in XAML.
 
 ### Resource shortcuts
 

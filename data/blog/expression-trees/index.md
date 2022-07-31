@@ -23,7 +23,7 @@ Of course, expressions vary in complexity and can contain different combinations
 
 Looking at the above expression, we can also consider two of its aspects: **what it does** and **how it does it**.
 
-When it comes to the former, the answer is pretty simple -- it generates a greeting based on the person's name, or produces a `null`. If this expression was returned by a function, that would be the extent of information we could derive from its signature:
+When it comes to the former, the answer is pretty simple — it generates a greeting based on the person's name, or produces a `null`. If this expression was returned by a function, that would be the extent of information we could derive from its signature:
 
 ```csharp
 string? GetGreeting(string personName) { /* ... */ }
@@ -67,14 +67,14 @@ The framework offers us with an API to construct expression trees through the [`
 
 Some of these methods are:
 
-- `Expression.Constant(...)` -- creates an expression that represents a value.
-- `Expression.Variable(...)` -- creates an expression that represents a variable.
-- `Expression.New(...)` -- creates an expression that represents an initialization of a new instance.
-- `Expression.Assign(...)` -- creates an expression that represents an assignment operation.
-- `Expression.Equal(...)` -- creates an expression that represents an equality comparison.
-- `Expression.Call(...)` -- creates an expression that represents a specific method call.
-- `Expression.Condition(...)` -- creates an expression that represents branching logic.
-- `Expression.Loop(...)` -- creates an expression that represents repeating logic.
+- `Expression.Constant(...)` — creates an expression that represents a value.
+- `Expression.Variable(...)` — creates an expression that represents a variable.
+- `Expression.New(...)` — creates an expression that represents an initialization of a new instance.
+- `Expression.Assign(...)` — creates an expression that represents an assignment operation.
+- `Expression.Equal(...)` — creates an expression that represents an equality comparison.
+- `Expression.Call(...)` — creates an expression that represents a specific method call.
+- `Expression.Condition(...)` — creates an expression that represents branching logic.
+- `Expression.Loop(...)` — creates an expression that represents repeating logic.
 
 As a simple exercise, let's recreate the expression we've looked into in the previous part of the article:
 
@@ -115,7 +115,7 @@ Then, for the negative clause, we're using `Expression.Constant` to create a `nu
 
 Finally, we're combining all the above parts together to create our ternary conditional operator. If you take a moment to trace what goes into `Expression.Condition`, you will realize that we have essentially replicated the tree diagram we've seen earlier.
 
-However, this expression isn't particularly useful on its own. Since we've created it ourselves, we're not really interested in its structure -- we want to be able to evaluate it instead.
+However, this expression isn't particularly useful on its own. Since we've created it ourselves, we're not really interested in its structure — we want to be able to evaluate it instead.
 
 In order to do that, we have to create an entry point by wrapping everything in a lambda expression. To turn it into an actual lambda, we can call `Compile` which will produce a delegate that we can invoke.
 
@@ -460,7 +460,7 @@ public class Benchmarks
 |           Expressions |   5.383 ns | 0.0433 ns | 0.0383 ns |  0.03 |
 ```
 
-As you can see, compiled expressions outperform reflection across the board, even though the approach with `CreateDelegate` comes really close. Note however that while the execution times are similar, `CreateDelegate` is more limited than compiled expressions -- for example, it cannot be used to call constructor methods.
+As you can see, compiled expressions outperform reflection across the board, even though the approach with `CreateDelegate` comes really close. Note however that while the execution times are similar, `CreateDelegate` is more limited than compiled expressions — for example, it cannot be used to call constructor methods.
 
 This approach of using expression trees for dynamic method invocation is commonplace in various frameworks and libraries. For example:
 

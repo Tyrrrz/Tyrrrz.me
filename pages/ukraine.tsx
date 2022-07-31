@@ -1,4 +1,4 @@
-import Codeblock from '@/components/codeblock';
+import Code from '@/components/code';
 import Emoji from '@/components/emoji';
 import Heading from '@/components/heading';
 import Image from '@/components/image';
@@ -8,6 +8,7 @@ import List from '@/components/list';
 import ListItem from '@/components/listItem';
 import Meta from '@/components/meta';
 import Page from '@/components/page';
+import Paragraph from '@/components/paragraph';
 import c from 'classnames';
 import { NextPage } from 'next';
 
@@ -15,16 +16,16 @@ const UkrainePage: NextPage = () => {
   return (
     <Page>
       <Meta title="Support Ukraine" />
-      <Heading>Support Ukraine</Heading>
 
-      <article className={c('space-y-2')}>
+      <section>
+        <Heading>Support Ukraine</Heading>
+
         <div className={c('text-center')}>
           <Image src="/ukraine-flag.png" alt="Flag of Ukraine" width={200} height={120} priority />
         </div>
 
-        <p>My name is Oleksii, I&apos;m a software developer from Kyiv, Ukraine.</p>
-
-        <p>
+        <Paragraph>My name is Oleksii, I&apos;m a software developer from Kyiv, Ukraine.</Paragraph>
+        <Paragraph>
           On{' '}
           <Link href="https://twitter.com/Tyrrrz/status/1496665421277184000">
             24th of February 2022
@@ -36,90 +37,89 @@ const UkrainePage: NextPage = () => {
           . Driven by chauvinistic ideals and determination to eradicate the Ukrainian people, this
           act of aggression can only be described as{' '}
           <span className={c('font-semibold')}>genocide</span>.
-        </p>
-
-        <p>
+        </Paragraph>
+        <Paragraph>
           Russian soldiers spare no thought when bombing residential areas, hospitals, schools,
           museums, cultural heritages, and civilian infrastructure. The{' '}
           <Link href="https://newdirection.online/ukraine-monitoring/article/crimes_in_ukraine_committed_by_the_russian_federation">
             list of committed war crimes
           </Link>{' '}
           grows longer by the minute, while the rest of the world largely remains passive.
-        </p>
-
-        <p>
+        </Paragraph>
+        <Paragraph>
           Be on the right side of history!{' '}
           <span className={c('font-semibold')}>Today it&apos;s us, tomorrow it could be you</span>.
-        </p>
+        </Paragraph>
+      </section>
 
+      <section>
         <Heading variant="h2">Help financially</Heading>
 
-        <p>
+        <Paragraph>
           Please consider helping Ukraine fight back by donating to local charitable funds. Avoid
           donating to global funds such as Red Cross, UNCR, or other non-UA based NGOs — their
           support is ineffective.
-        </p>
+        </Paragraph>
 
         <List>
           <ListItem>
             <Link href="https://u24.gov.ua">Official government donation page</Link>
           </ListItem>
           <ListItem>
-            <Link href="https://savelife.in.ua/en/donate-en">
-              NGO &quot;Come Back Alive&quot; (military aid)
-            </Link>
+            <Link href="https://savelife.in.ua/en/donate-en">NGO &quot;Come Back Alive&quot;</Link>{' '}
+            (military aid)
           </ListItem>
           <ListItem>
             <Link href="https://prytulafoundation.org/en/home/support_page">
-              NGO &quot;Serhiy Prytula Foundation&quot; (military & humanitarian aid)
-            </Link>
+              NGO &quot;Serhiy Prytula Foundation&quot;
+            </Link>{' '}
+            (military & humanitarian aid)
           </ListItem>
           <ListItem>
-            <Link href="https://hospitallers.life/needs-hospitallers">
-              Hospitallers Battalion (front-line medical assistance)
-            </Link>
+            <Link href="https://hospitallers.life/needs-hospitallers">Hospitallers Battalion</Link>{' '}
+            (front-line medical assistance)
           </ListItem>
           <ListItem>
             Any <Link href="/donate">personal donations</Link> during this time will also be
             directed to local charities at my own discretion
           </ListItem>
         </List>
+      </section>
 
+      <section>
         <Heading variant="h2">Help in other ways</Heading>
 
-        <p>If you don&apos;t have the means to help financially, you can also:</p>
+        <Paragraph>If you don&apos;t have the means to help financially, you can also:</Paragraph>
 
         <List>
           <ListItem>Spread the information about the war throughout your local networks</ListItem>
           <ListItem>
-            Avoid products made in Russia (bar codes starting with <Codeblock>460</Codeblock>-
-            <Codeblock>469</Codeblock>)
+            Avoid products made in Russia (bar codes starting with <Code>460</Code>-<Code>469</Code>
+            )
           </ListItem>
           <ListItem>
-            Urge your employer to implement sanctions against Russia, help Ukrainian customers, or
-            donate to charitable funds
+            Urge your employer to implement sanctions against Russia, or help in other ways
           </ListItem>
           <ListItem>
-            Ask your politicians to provide stronger support to Ukraine, including by selling or
-            donating more heavy weapons
+            Ask your politicians to provide stronger support to Ukraine, including heavy weapons
           </ListItem>
           <ListItem>
             Join your local demonstrations and protests to empower Ukrainian voices
           </ListItem>
           <ListItem>
-            <Link href="https://fightforua.org/">
+            <Link href="https://fightforua.org">
               Enlist in the Ukrainian military as a foreign fighter
             </Link>
           </ListItem>
         </List>
+      </section>
 
-        <div className={c('py-2', 'text-lg', 'font-semibold')}>
-          <Inline>
-            <span>Glory to Ukraine! Glory to Heroes!</span>
-            <Emoji code="🇺🇦" />
-          </Inline>
-        </div>
-      </article>
+      <div className={c('my-6', 'text-xl', 'text-center', 'font-light')}>
+        <Inline>
+          <span>Glory to Ukraine! Glory to Heroes!</span>
+          <Emoji code="🇺🇦" />
+        </Inline>
+      </div>
     </Page>
   );
 };

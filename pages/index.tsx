@@ -3,6 +3,7 @@ import Heading from '@/components/heading';
 import Image from '@/components/image';
 import Link from '@/components/link';
 import Page from '@/components/page';
+import Paragraph from '@/components/paragraph';
 import UkraineAlert from '@/components/ukraineAlert';
 import c from 'classnames';
 import type { NextPage } from 'next';
@@ -22,24 +23,24 @@ const HomePage: NextPage = () => {
           <Image src="/logo-trans.png" alt="picture" priority />
         </div>
 
-        <div className={c('space-y-2')}>
+        <div>
           <Heading>
             <Emoji code="👋" /> Hello!
           </Heading>
-          <p>
+          <Paragraph>
             My name is Oleksii, also known online as Tyrrrz. I&apos;m a {age} y/o software developer
             from Kyiv, Ukraine. I&apos;m also a Microsoft MVP and a GitHub Star.
-          </p>
-          <p>
+          </Paragraph>
+          <Paragraph>
             Most of my endeavors are in C#, but every now and then I code in F# and TypeScript as
             well. I&apos;m primarily interested in the cloud, distributed systems, and web
             applications.
-          </p>
-          <p>
+          </Paragraph>
+          <Paragraph>
             My professional hobbies involve open source, conference speaking, and blogging. Outside
             of that I&apos;m also into outdoor photography, digital art, playing guitar, and
             learning foreign languages.
-          </p>
+          </Paragraph>
         </div>
       </section>
 

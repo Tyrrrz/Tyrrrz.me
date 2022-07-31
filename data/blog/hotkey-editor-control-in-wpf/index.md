@@ -7,7 +7,7 @@ GUI applications sometimes offer a way for users to configure hotkeys, typically
 
 ## Hotkey class
 
-WPF has two useful enumerations for this task -- `System.Windows.Input.Key` and `System.Windows.Input.ModifierKeys`. Let's make a class that encapsulates the values of those enums and call it `Hotkey`.
+WPF has two useful enumerations for this task — `System.Windows.Input.Key` and `System.Windows.Input.ModifierKeys`. Let's make a class that encapsulates the values of those enums and call it `Hotkey`.
 
 ```csharp
 public class Hotkey

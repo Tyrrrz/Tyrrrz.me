@@ -103,7 +103,7 @@ const Header: FC = () => {
         )}
       >
         {/* Logo */}
-        <div className={c('my-1', 'text-2xl', 'font-mono', 'font-semibold', 'tracking-wide')}>
+        <div className={c('my-1', 'text-xl', 'font-mono', 'font-semibold', 'tracking-wide')}>
           <Link variant="hidden" href="/">
             <span className={c('text-neutral-400')}>://</span>
             <span>tyrrrz.me</span>

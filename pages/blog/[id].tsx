@@ -43,10 +43,11 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
   return (
     <Page>
       <Meta title={post.title} />
-      <Heading>{post.title}</Heading>
 
-      <section className={c('-mt-2')}>
-        <div className={c('flex', 'flex-wrap', 'gap-x-3', 'font-light')}>
+      <section>
+        <Heading>{post.title}</Heading>
+
+        <div className={c('flex', 'flex-wrap', '-mt-2', 'gap-x-3', 'font-light')}>
           <Inline>
             <FiCalendar strokeWidth={1} />
             <span>
@@ -66,7 +67,9 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
       </section>
 
       <section>
-        <Markdown source={post.source} />
+        <article>
+          <Markdown source={post.source} />
+        </article>
       </section>
 
       <section>

@@ -19,12 +19,12 @@ Similarly to Sprache and other parser combinator libraries, FParsec builds upon 
 
 Among these are:
 
-- `anyChar` -- parses any single character.
-- `pchar` -- parses a specific character.
-- `anyOf` -- parses any of the specified characters.
-- `satisfy` -- parses any character that satisfies a predicate.
-- `letter`, `digit`, `upper`, `lower` -- parses a character that belongs to a specific category.
-- `pstring` -- parses a specified string.
+- `anyChar` — parses any single character.
+- `pchar` — parses a specific character.
+- `anyOf` — parses any of the specified characters.
+- `satisfy` — parses any character that satisfies a predicate.
+- `letter`, `digit`, `upper`, `lower` — parses a character that belongs to a specific category.
+- `pstring` — parses a specified string.
 
 These can be used to parse basic inputs but, being primitives, they are obviously not very useful on their own. In order to compose these simple parsers into more sophisticated ones, we need to use combinators.
 
@@ -51,7 +51,7 @@ let sawtooth = anyChar >>= fun a -> satisfy <| isOppositeCase a >>= fun b -> pre
 //             ~~~~~~~              ~~~~~~~    ~~~~~~~~~~~~~~~~              ~~~~~~~~~~~~~~
 // parse any char --^                  ^         ^                              ^
 //                                     |         |                              |
-// then any char satisfying predicate --         -- partially applied function  |
+// then any char satisfying predicate —         — partially applied function  |
 //                                                                              |
 //             then combine the results in a tuple ------------------------------
 ```
@@ -62,9 +62,9 @@ Although it is quite flexible, the bind operator isn't very convenient to use. I
 
 This is why FParsec also offers a few high level chaining operators:
 
-- `.>>` -- chains two sequential parsers and retains the result of the one on the left.
-- `>>.` -- chains two sequential parsers and retains the result of the one on the right.
-- `.>>.` -- chains two sequential parsers and combines both of their results in a tuple.
+- `.>>` — chains two sequential parsers and retains the result of the one on the left.
+- `>>.` — chains two sequential parsers and retains the result of the one on the right.
+- `.>>.` — chains two sequential parsers and combines both of their results in a tuple.
 
 For example, here's how we can compose a parser that will consume `"5,9"` and turn it into an F# tuple consisting of characters `'5'` and `'9'`, discarding the comma in the middle:
 
@@ -78,7 +78,7 @@ Individual parsers in the expression are chained pairwise left to right. Here's 
 let commaSeparatedDigits = ((digit .>> pchar ',') .>>. digit)
 //                           ~~~~~ ^              ^  ^ ~~~~~
 //                                 |              |  |
-//   take result of the left side --              ---- take both
+//   take result of the left side —              ---- take both
 ```
 
 We can further improve this by using `skipChar` instead of `pchar` to avoid unnecessary allocations for the result we're not interested in:
@@ -89,10 +89,10 @@ let commaSeparatedDigits = digit .>> skipChar ',' .>>. digit
 
 This kind of parser chaining can be useful to express grammar rules with a fixed structure. Sometimes, however, we also need to express repetition, which is when a certain symbol may appear more than once. To do that, we can use one of the sequence combinators that FParsec offers:
 
-- `many` -- chains the same parser until it fails.
-- `sepBy` -- chains the same parser separated by another parser.
-- `manyTill` -- chains the same parser until another parser succeeds.
-- `manyChars`, `manyCharsTill` -- same as `many` and `manyTill` but optimized for strings.
+- `many` — chains the same parser until it fails.
+- `sepBy` — chains the same parser separated by another parser.
+- `manyTill` — chains the same parser until another parser succeeds.
+- `manyChars`, `manyCharsTill` — same as `many` and `manyTill` but optimized for strings.
 
 For example, we can use `manyChars` to enhance the original `commaSeparatedDigits` parser so that it can handle multiple consecutive digits around the comma:
 
@@ -113,9 +113,9 @@ let manyCommaSeparatedDigits = manyChars digit |> sepBy <| skipChar ','
 
 If we run the last parser on `"5,96,10"` we will get a matching list of strings `["5"; "96"; "10"]`, which we can operate on.
 
-I like to apply F#'s forward and backward pipes in compositions like this because it makes the parsers more readable -- the expression above is equivalent to `sepBy (manyChars digit) (skipChar ',')`.
+I like to apply F#'s forward and backward pipes in compositions like this because it makes the parsers more readable — the expression above is equivalent to `sepBy (manyChars digit) (skipChar ',')`.
 
-Note that the parsers created with these sequence combinators will always succeed -- if the parser `x` fails, `many x` will simply produce an empty list. If you need the underlying parser to succeed at least once, you can use the non-empty variants of these combinators instead: `many1`, `sepBy1`, `many1Chars`, etc.
+Note that the parsers created with these sequence combinators will always succeed — if the parser `x` fails, `many x` will simply produce an empty list. If you need the underlying parser to succeed at least once, you can use the non-empty variants of these combinators instead: `many1`, `sepBy1`, `many1Chars`, etc.
 
 ## Grouping alternatives
 
@@ -234,10 +234,10 @@ let fooBarOrFooXyz =
 
 These variants of chaining combinators are just like the regular ones, except that the constructed parser is treated as a single whole instead of two separate parsers:
 
-- `>>=?` -- same as `>>=` but doesn't change state.
-- `>>?` -- same as `>>.` but doesn't change state.
-- `.>>?` -- same as `.>>` but doesn't change state.
-- `.>>.?` -- same as `.>>.` but doesn't change state.
+- `>>=?` — same as `>>=` but doesn't change state.
+- `>>?` — same as `>>.` but doesn't change state.
+- `.>>?` — same as `.>>` but doesn't change state.
+- `.>>.?` — same as `.>>.` but doesn't change state.
 
 ## Mapping results
 
@@ -245,8 +245,8 @@ Let's not forget that the main purpose of a parser is to extract semantics from 
 
 There are two main operators associated with that:
 
-- Return operator (`>>%`) -- sets the result of a parser to the specified value.
-- Map operator (`|>>`) -- applies a function to the result of a parser.
+- Return operator (`>>%`) — sets the result of a parser to the specified value.
+- Map operator (`|>>`) — applies a function to the result of a parser.
 
 We can use the return operator to construct a parser that will simply produce a constant if it succeeds:
 
@@ -346,16 +346,16 @@ module JsonGrammar =
     //                           ~~~~  ~~~~~~~~     ~~~~~~
     //                            ^        ^           ^-- skip trailing whitespace
     //                            |        |
-    //                match this --        -- produce this
+    //                match this —        — produce this
 ```
 
-We are using `stringReturn` to consume a string `"null"` and return the corresponding value -- union case `JsonNull`.
+We are using `stringReturn` to consume a string `"null"` and return the corresponding value — union case `JsonNull`.
 
 Since whitespace is ignored in JSON, we have to also account for it in our parsers or else they will fail when they encounter any whitespace character. We can do that by chaining our parser with `spaces` which will consume and discard any trailing spaces. As long as we do that at the end of every parser, we will be fine.
 
 The traditional way of dealing with insignificant whitespace involves writing a separate _lexer_ component, which parses raw characters into so-called _tokens_. It can be done with FParsec as well, and it provides many benefits, but for the sake of simplicity we'll be writing a scanner-less parser this time.
 
-If you're following along and your IDE is complaining that the type of a parser can't be inferred -- help it by explicitly specifying it as `let jsonNull : Parser<_, unit> = ...`. We're not going to be using state, so we can set it to `unit`. By the end of this exercise we will have an entry point function that will help the F#'s compiler correctly determine the generic types, but for now we can write them out manually.
+If you're following along and your IDE is complaining that the type of a parser can't be inferred — help it by explicitly specifying it as `let jsonNull : Parser<_, unit> = ...`. We're not going to be using state, so we can set it to `unit`. By the end of this exercise we will have an entry point function that will help the F#'s compiler correctly determine the generic types, but for now we can write them out manually.
 
 With `JsonNull` out of the way, let's proceed on to our next data type, `JsonBool`:
 
@@ -374,7 +374,7 @@ module JsonGrammar =
     let jsonBool = jsonBoolTrue <|> jsonBoolFalse
 ```
 
-Since a boolean can be in either of two states, we can handle them separately and combine them using the choice operator. This is an advantage of combinatory parsing -- we can split a complex grammar rule into many simpler ones.
+Since a boolean can be in either of two states, we can handle them separately and combine them using the choice operator. This is an advantage of combinatory parsing — we can split a complex grammar rule into many simpler ones.
 
 When it comes to `jsonNumber`, FParsec already does most of the work by providing us with `pfloat`, a parser that matches text that represents a floating point number and converts it to `float` (which is an alias for `System.Double` in F#). That means we can just write our parser like this:
 
@@ -417,7 +417,7 @@ module JsonGrammar =
 
 The combinator `manyCharsBetween` applies `popen`, then repeatedly applies `pchar` until it encounters `pclose`. We build upon it and define a higher-level combinator `anyStringBetween` which will parse a string between two parsers consisting of any characters. It's effectively the same as the `.*?` regular expression.
 
-Finally, we also define `quotedString` which is `anyStringBetween` with double quotes already applied. Note how the use of forward and backward pipes makes the code fluent -- the order of tokens in this expression actually matches the order in which the parser consumes them!
+Finally, we also define `quotedString` which is `anyStringBetween` with double quotes already applied. Note how the use of forward and backward pipes makes the code fluent — the order of tokens in this expression actually matches the order in which the parser consumes them!
 
 Now, defining `jsonString` becomes really trivial:
 
@@ -455,7 +455,7 @@ module JsonGrammar =
         ]
 ```
 
-Our two remaining cases, `JsonArray` and `JsonObject`, are slightly more complicated. That's because the corresponding grammar rules are recursive -- arrays and objects can both be nested within each other.
+Our two remaining cases, `JsonArray` and `JsonObject`, are slightly more complicated. That's because the corresponding grammar rules are recursive — arrays and objects can both be nested within each other.
 
 What makes it harder is that the order of declarations in a file matters in F# as opposed to C#. This means we can't reference a parser if it hasn't been defined above, so it's not possible to introduce a cyclic recursion that easily.
 
@@ -475,7 +475,7 @@ module JsonGrammar =
 
 At this point we can temporarily pretend that `jsonNode` is already defined and will evaluate any valid JSON node, including arrays and objects.
 
-Now let's parse an array which is an enumeration of comma-separated items contained within square brackets. Each item in an array can be any literal, an object, or another array as well -- or in other words, any node.
+Now let's parse an array which is an enumeration of comma-separated items contained within square brackets. Each item in an array can be any literal, an object, or another array as well — or in other words, any node.
 
 We can define a helper function called `manyContained` which will take care of the list inside the brackets. With that, the implementation of `jsonArray` looks like this:
 
@@ -619,7 +619,7 @@ module Json =
         | _ -> None
 ```
 
-By defining our own `tryParse` function, we hide FParsec's API behind a layer of abstraction so that our library is slightly easier to use. We also wrap the original `jsonNode` in a parser that will discard leading whitespace and ensure that the end of the stream has been reached -- the latter is important because we don't want to only partially parse the input.
+By defining our own `tryParse` function, we hide FParsec's API behind a layer of abstraction so that our library is slightly easier to use. We also wrap the original `jsonNode` in a parser that will discard leading whitespace and ensure that the end of the stream has been reached — the latter is important because we don't want to only partially parse the input.
 
 Functions `tryBool`, `tryString`, `tryFloat`, `tryInt` make it easier to extract values without having to do pattern matching yourself. To make it simpler to work with objects and arrays, there's also `tryChild` which will get an object child by its name and `tryItem` which will get an array item by its index.
 
@@ -749,7 +749,7 @@ Writing the same thing using binds may not be as pleasant.
 
 ## Summary
 
-FParsec is an incredibly robust framework for building parsers with the combinatorial approach. With some careful fine-tuning, parsers written with this library may even outperform traditional hand-rolled parsers. If you're using .NET and want to build a text processor, compiler, or a DSL interpreter -- FParsec is likely a no-brainer.
+FParsec is an incredibly robust framework for building parsers with the combinatorial approach. With some careful fine-tuning, parsers written with this library may even outperform traditional hand-rolled parsers. If you're using .NET and want to build a text processor, compiler, or a DSL interpreter — FParsec is likely a no-brainer.
 
 Should you ever get stuck, I recommend reading the [API reference](https://quanttec.com/fparsec/reference/parser-overview.html) and the [user guide](https://quanttec.com/fparsec/users-guide).
 

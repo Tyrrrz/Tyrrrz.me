@@ -65,7 +65,7 @@ There are scenarios, however, where we may want the type inference to work in th
 
 If you have been writing code in a functional style before, it's very likely that you're intimately familiar with the `Option<T>` type. It's a container that encapsulates a single value (or absence thereof) and allows us to perform various operations on the content without actually observing its state.
 
-In C#, an option type is usually defined by encapsulating two fields -- a generic value and a flag that indicates whether that value is actually set. It could look something like this:
+In C#, an option type is usually defined by encapsulating two fields — a generic value and a flag that indicates whether that value is actually set. It could look something like this:
 
 ```csharp
 public readonly struct Option<T>
@@ -364,7 +364,7 @@ Here `Result.Error<TError>(...)` and `Result.Ok<TOk>(...)` both return `DelayedR
 Cannot convert expression type 'DelayedResult<string>' to return type 'Result<string,string>'
 ```
 
-Luckily, the fix is simple -- we just need to represent each of the individual states separately:
+Luckily, the fix is simple — we just need to represent each of the individual states separately:
 
 ```csharp
 public readonly struct Result<TOk, TError>

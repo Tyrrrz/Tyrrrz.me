@@ -84,7 +84,7 @@ The main difference between the two is that rules in regular grammar, unlike con
 
 HTML is a good example of a context-free language, because an element in HTML can contain other elements, which in turn can contain other elements, and so on. This is also why it inherently [can't be parsed using regular expressions](https://stackoverflow.com/a/1732454/2205454).
 
-As a result, while an input that adheres to a regular grammar can be represented using a sequence of syntactic components, context-free grammar is represented using a higher-level structure -- a syntax tree:
+As a result, while an input that adheres to a regular grammar can be represented using a sequence of syntactic components, context-free grammar is represented using a higher-level structure — a syntax tree:
 
 ```html
        [ HTML document ]
@@ -327,7 +327,7 @@ internal static class JsonGrammar
 
 As you can see, Sprache already provides `Parse.DecimalInvariant` out of the box, which we can use to match a number. Since that returns `Parser<string>` as it parses the text that represents the number, we need to transform it to `double` first and then to our `JsonNumber` object.
 
-The `Select` method here works quite similarly to LINQ's `Select` -- it lazily transforms the underlying value of the container into a different shape. This lets us map raw character sequences into more complex higher-level domain objects.
+The `Select` method here works quite similarly to LINQ's `Select` — it lazily transforms the underlying value of the container into a different shape. This lets us map raw character sequences into more complex higher-level domain objects.
 
 By the way, types that have a `Select` operation (or more colloquially known, "map" operation) are called "functors". As you can see, they are not limited to collections (i.e. `IEnumerable<T>`) but can also be containers with a single value, just like our `Parser<T>` here.
 
@@ -373,9 +373,9 @@ internal static class JsonGrammar
 
 Structurally, a JSON array is just a sequence of entities separated by commas, contained within a pair of square brackets. We can define that using the `DelimitedBy` combinator which tries to match the first parser repeatedly separated by the second one.
 
-Notice how this combinator takes `Parse.Char(',')` instead of simply `','`. We could actually have used a more complicated parser in its place, one that doesn't even return a `char` or `string`. This is the power of parser combinators -- as we're gradually moving up the structure of our data, we're working with parsers of increasingly higher order.
+Notice how this combinator takes `Parse.Char(',')` instead of simply `','`. We could actually have used a more complicated parser in its place, one that doesn't even return a `char` or `string`. This is the power of parser combinators — as we're gradually moving up the structure of our data, we're working with parsers of increasingly higher order.
 
-If you've followed the steps here closely, you probably noticed that the code above doesn't actually compile. That's because we're referencing `JsonEntity` which is a parser that we haven't defined yet. This is because this grammar rule is recursive -- an array can contain any entity, which can be, among other things, an array as well, which can contain any entity, which can be an array, which... you get the point.
+If you've followed the steps here closely, you probably noticed that the code above doesn't actually compile. That's because we're referencing `JsonEntity` which is a parser that we haven't defined yet. This is because this grammar rule is recursive — an array can contain any entity, which can be, among other things, an array as well, which can contain any entity, which can be an array, which... you get the point.
 
 As a temporary solution, we can define a dummy in place of `JsonEntity`, just to make it compile:
 

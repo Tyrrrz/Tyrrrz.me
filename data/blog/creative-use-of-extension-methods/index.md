@@ -3,7 +3,7 @@ title: 'Creative Use of Extension Methods'
 date: '2019-01-26'
 ---
 
-I'm sure everyone with at least some background in C# is aware of extension methods -- a nice feature that lets developers extend existing types with new methods.
+I'm sure everyone with at least some background in C# is aware of extension methods — a nice feature that lets developers extend existing types with new methods.
 
 This is extremely convenient in cases where you want to add functionality to types you don't have control over. In fact, I think everyone at some point authored extensions for the base class library just to make some things more accessible.
 
@@ -65,7 +65,7 @@ There are cases where you may not want to add a method directly to a class, for 
 
 Anemic models are typically represented by a set of public get-only immutable properties, so adding methods to a model class may make it look impure or may give off a suspicion that the methods are accessing some private state. Extension methods don't have that problem because they can't access model's private members and, by nature, aren't part of the model itself.
 
-So consider this example of two models -- one represents a closed caption track for a video and another represents an individual caption:
+So consider this example of two models — one represents a closed caption track for a video and another represents an individual caption:
 
 ```csharp
 public class ClosedCaption
@@ -143,7 +143,7 @@ public interface IExportService
 }
 ```
 
-It works just fine, but a few weeks later you come back to it with a new requirement -- classes implementing `IExportService`, on top of exporting to a file, should now also be able to write to memory.
+It works just fine, but a few weeks later you come back to it with a new requirement — classes implementing `IExportService`, on top of exporting to a file, should now also be able to write to memory.
 
 So in order to satisfy that requirement, you add a new method to the contract:
 
@@ -169,7 +169,7 @@ public interface IExportService
 
 This way, the interface enforces writing to the most generic destination, a `Stream`. Now we are no longer limited to files and can target a variety of different outputs as well.
 
-The only downside to this approach is that the more basic operations are not as straightforward as they used to be -- now you need to set up a concrete instance of a `Stream`, wrap it in a `using` statement, and pass it as a parameter.
+The only downside to this approach is that the more basic operations are not as straightforward as they used to be — now you need to set up a concrete instance of a `Stream`, wrap it in a `using` statement, and pass it as a parameter.
 
 Fortunately, this downside can be completely negated with the use of extension methods:
 

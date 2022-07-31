@@ -3,6 +3,7 @@ import Inline from '@/components/inline';
 import Link from '@/components/link';
 import Meta from '@/components/meta';
 import Page from '@/components/page';
+import Paragraph from '@/components/paragraph';
 import Timeline from '@/components/timeline';
 import TimelineItem from '@/components/timelineItem';
 import { BlogPost, loadBlogPosts } from '@/data';
@@ -28,15 +29,19 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
   return (
     <Page>
       <Meta title="Blog" />
-      <Heading>Blog</Heading>
 
       <section>
-        I write about software design, architecture, programming languages, and other technical
-        topics. Follow me on <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or subscribe to
-        the <Link href="/blog/rss.xml">RSS Feed</Link> to get notified when I post a new article.
+        <Heading>Blog</Heading>
+
+        <Paragraph>
+          I write about software design, architecture, programming languages, and other technical
+          topics. Follow me on <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or subscribe
+          to the <Link href="/blog/rss.xml">RSS Feed</Link> to get notified when I post a new
+          article.
+        </Paragraph>
       </section>
 
-      <div className={c('mt-8', 'space-y-6')}>
+      <section className={c('mt-8', 'space-y-6')}>
         {groups.map(({ year, posts }, i) => (
           <section key={i}>
             <Heading variant="h2">{year}</Heading>
@@ -72,7 +77,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
             </div>
           </section>
         ))}
-      </div>
+      </section>
     </Page>
   );
 };

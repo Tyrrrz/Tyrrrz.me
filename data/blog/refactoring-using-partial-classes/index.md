@@ -19,7 +19,7 @@ In this article I will show you how I typically utilize partial classes when ref
 
 One thing that I like to do nearly all the time is separate static properties and methods from the rest of the class. That might seem like an arbitrary criterion, but I find it makes sense because we do reason about static and non-static members in different ways.
 
-Let's have a look at an example. Imagine we're working on an abstraction called `PartitionedTextWriter` that implements the _rolling file_ concept -- it acts as a streaming text writer that automatically switches to a new file after reaching a certain character threshold in the previous one.
+Let's have a look at an example. Imagine we're working on an abstraction called `PartitionedTextWriter` that implements the _rolling file_ concept — it acts as a streaming text writer that automatically switches to a new file after reaching a certain character threshold in the previous one.
 
 The class is initialized with a base path, which it needs to use that to generate file names for each partition. Because that's pure business logic without side effects, it makes perfect sense to put it into a static helper method.
 
@@ -166,7 +166,7 @@ public partial class NativeDeviceContext
 }
 ```
 
-Similarly to the previous example, this makes the code a lot more readable by visually separating two unrelated (albeit coupled) concerns -- resource initialization and resource management.
+Similarly to the previous example, this makes the code a lot more readable by visually separating two unrelated (albeit coupled) concerns — resource initialization and resource management.
 
 ## Separating interface implementations
 

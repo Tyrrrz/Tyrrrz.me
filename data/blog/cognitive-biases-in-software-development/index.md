@@ -21,7 +21,7 @@ Needless to say, the effects of this bias can negatively impact motivation. Simi
 
 I've found this bias reflected well in how developers defend their decisions far more vigorously when their changes were already pushed and merged to master. The regret associated with making revert commits is something we all prefer to avoid, due to the induced shame of having made bad choices and spending efforts on what ultimately didn't bring the desired value.
 
-I can often find myself standing by something I've done, not noticing that I'm simply trying to justify my decision-making, instead of focusing on what's best for the project in the long run. At the time the action was taken, it may have made perfect sense, but some months later the circumstances could be different -- yet your brain is conditioned to remember it only for being the best option, instead of the thought process that brought you to that conclusion.
+I can often find myself standing by something I've done, not noticing that I'm simply trying to justify my decision-making, instead of focusing on what's best for the project in the long run. At the time the action was taken, it may have made perfect sense, but some months later the circumstances could be different — yet your brain is conditioned to remember it only for being the best option, instead of the thought process that brought you to that conclusion.
 
 In situations like this, it helps to think of each incremental change as an improvement over the previous, without overindulging in how a particular issue was introduced in the first place.
 
@@ -43,7 +43,7 @@ Negativity bias is ubiquitous enough that it can be attributed to almost everyth
 
 Sometimes a few hacks here and there, broken dependency isolation or implementation-aware tests can save a release from missing a deadline, but will definitely leave a bad aftertaste in your mouth. Working with such code triggers negative emotions, easily overshadowing the bigger picture and the goals your project is meant to meet. What makes it worse is that you're usually not at liberty to allocate time for refactoring, which, objectively speaking, might not even be worth doing at all.
 
-I'm definitely not advocating that such issues should be completely ignored -- technical debt can be very detrimental to the development process, once it piles up. That said, more often than not we're subconsciously making a bigger deal out of it than it really is. A lot of times you can eliminate such thoughts by switching from "why is something bad" to "how can I make it better" -- maybe there's no real solution that is worth the effort.
+I'm definitely not advocating that such issues should be completely ignored — technical debt can be very detrimental to the development process, once it piles up. That said, more often than not we're subconsciously making a bigger deal out of it than it really is. A lot of times you can eliminate such thoughts by switching from "why is something bad" to "how can I make it better" — maybe there's no real solution that is worth the effort.
 
 ## Bottom line
 

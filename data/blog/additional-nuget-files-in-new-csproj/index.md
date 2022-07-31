@@ -5,7 +5,7 @@ date: '2017-11-05'
 
 [New csproj format](https://docs.microsoft.com/en-us/dotnet/core/tools/csproj), among other things, has an option to generate a NuGet package on every successful build. It resolves dependencies, target frameworks and documentation automatically and doesn't require a predefined nuspec file as all metadata is now also part of the csproj file.
 
-Sometimes NuGet packages may require additional files to work -- a native library or a CLI executable, for example. These dependencies are not resolved automatically but still need to be somehow included in the package.
+Sometimes NuGet packages may require additional files to work — a native library or a CLI executable, for example. These dependencies are not resolved automatically but still need to be somehow included in the package.
 
 When defining a nuspec file manually, you can include such files by listing them in the `<Files>` section. To instruct the referencing project to copy these files to the output folder, you can add a `.targets` file which will extend the build with additional steps.
 

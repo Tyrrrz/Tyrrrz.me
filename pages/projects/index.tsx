@@ -3,6 +3,7 @@ import Inline from '@/components/inline';
 import Link from '@/components/link';
 import Meta from '@/components/meta';
 import Page from '@/components/page';
+import Paragraph from '@/components/paragraph';
 import { loadProjects, Project } from '@/data';
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
@@ -16,16 +17,19 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
   return (
     <Page>
       <Meta title="Projects" />
-      <Heading>Projects</Heading>
 
       <section>
-        These are the open source projects that I currently maintain. Most of these started out of
-        personal necessity and over time evolved into popular tools used by thousands of people
-        across the world. If you want to support the development of my projects, please consider{' '}
-        <Link href="/donate">donating.</Link>
+        <Heading>Projects</Heading>
+
+        <Paragraph>
+          These are open source projects that I currently maintain. Most of these started out of
+          personal necessity and over time evolved into popular tools used by thousands of people
+          around the world. If you want to support the development of my projects, please consider{' '}
+          <Link href="/donate">donating.</Link>
+        </Paragraph>
       </section>
 
-      <div
+      <section
         className={c('grid', 'sm:grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3', 'mt-8', 'gap-3')}
       >
         {projects.map((project, i) => (
@@ -83,7 +87,7 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
             </div>
           </section>
         ))}
-      </div>
+      </section>
     </Page>
   );
 };

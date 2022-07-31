@@ -436,7 +436,7 @@ By extracting all the pure code out of `GetRecommendationsAsync`, we can now wri
 
 However, instead of having one cohesive element to reason about, we ended up with multiple fragments, each having no meaning or value of their own. While unit testing of individual parts may have become easier, the benefit is very questionable, as it provides no confidence in the correctness of the algorithm as a whole.
 
-Ultimately, we weren't able to push impurities out towards the system boundaries -- what we did was simply push the pure code further in instead. In other words, the flow of data in the program remains completely unchanged.
+Ultimately, we weren't able to push impurities out towards the system boundaries — what we did was simply push the pure code further in instead. In other words, the flow of data in the program remains completely unchanged.
 
 The main issue is that each stage of the recommendation algorithm depends on additional data derived from the previous stages. Since this behavior is inherently non-deterministic, it's impossible to express it using pure functions alone.
 

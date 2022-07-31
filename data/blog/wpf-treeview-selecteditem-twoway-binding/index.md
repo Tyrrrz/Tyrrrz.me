@@ -5,7 +5,7 @@ date: '2016-10-30'
 
 The longer I work with WPF, the more I notice how many things it's missing. Recently I realized that `TreeView.SelectedItem` property is read-only and unbindable. I think there's no point explaining why binding `SelectedItem` would be useful, so there should be no surprise in my disappointment.
 
-I googled the problem and every resource I've found was guiding me into either handling it in code-behind or adding `IsSelected` property to my model class. Both of these approaches suffer from the same problem -- an item won't get selected if its parents are not yet expanded. This was a deal-breaker for me because I wanted the tree view to navigate to the newly selected item, even if it wasn't immediately visible.
+I googled the problem and every resource I've found was guiding me into either handling it in code-behind or adding `IsSelected` property to my model class. Both of these approaches suffer from the same problem — an item won't get selected if its parents are not yet expanded. This was a deal-breaker for me because I wanted the tree view to navigate to the newly selected item, even if it wasn't immediately visible.
 
 I solved this problem by writing a small behavior that takes care of this for me.
 

@@ -3,9 +3,10 @@ import { FC, PropsWithChildren } from 'react';
 
 type ListProps = PropsWithChildren<{
   variant?: 'unordered' | 'ordered';
+  start?: number;
 }>;
 
-const List: FC<ListProps> = ({ variant = 'unordered', children }) => {
+const List: FC<ListProps> = ({ variant = 'unordered', start = 1, children }) => {
   const RawList = variant === 'unordered' ? 'ul' : 'ol';
 
   return (
@@ -18,6 +19,7 @@ const List: FC<ListProps> = ({ variant = 'unordered', children }) => {
         },
         'list-inside'
       )}
+      start={start}
     >
       {children}
     </RawList>

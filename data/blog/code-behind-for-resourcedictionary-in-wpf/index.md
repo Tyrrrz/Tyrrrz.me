@@ -3,7 +3,7 @@ title: 'Code-Behind for ResourceDictionary in WPF'
 date: '2016-10-29'
 ---
 
-As any WPF developer knows, XAML can get messy due to all the nested elements and indentation. One common problematic area is data templates -- they are naturally decoupled from the surrounding layout but are still nested quite deep in the hierarchy.
+As any WPF developer knows, XAML can get messy due to all the nested elements and indentation. One common problematic area is data templates — they are naturally decoupled from the surrounding layout but are still nested quite deep in the hierarchy.
 
 To deal with it, you can refactor some of the commonly used objects as resources into a `ResourceDictionary`, which can also be self-contained in its own separate XAML file. Dictionaries can later be referenced using the `Source` property or by including them in a `MergedDictionary`.
 

@@ -155,7 +155,7 @@ var result = await task;
 Console.WriteLine(result);
 ```
 
-Although the syntax for the query operators remains the same, the semantics are a little different compared to what we're used to when dealing with collections. Here, the range variable (the part between `from` and `in`) only has a single possible value -- the eventual result of the task on the right. The terminal `select` clause is then used to transform and aggregate results from individual operations to produce a single top-level task.
+Although the syntax for the query operators remains the same, the semantics are a little different compared to what we're used to when dealing with collections. Here, the range variable (the part between `from` and `in`) only has a single possible value — the eventual result of the task on the right. The terminal `select` clause is then used to transform and aggregate results from individual operations to produce a single top-level task.
 
 Just like the `SelectMany(...)` method that this notation internally relies on, every action is encoded in a lazy manner. To get the final result, the composed task needs to be awaited.
 
@@ -175,7 +175,7 @@ Nevertheless, this example should hopefully highlight the primary use case for i
 
 ## Chaining operations with optional return values
 
-Different programming paradigms utilize different ways of representing and handling failures. Object-oriented languages, traditionally, employ exceptions and `try`/`catch` blocks for this purpose -- a very convenient approach that helps keep the code focused on the happy path, while implicitly routing potential errors towards dedicated handlers at the top of the call stack.
+Different programming paradigms utilize different ways of representing and handling failures. Object-oriented languages, traditionally, employ exceptions and `try`/`catch` blocks for this purpose — a very convenient approach that helps keep the code focused on the happy path, while implicitly routing potential errors towards dedicated handlers at the top of the call stack.
 
 When writing in a functional style, on the other hand, failures are typically encoded directly within function signatures using container types such as `Option<T>` and `Result<TValue, TError>`. This makes the representation of error states explicit and forces the caller to properly account for each of them before proceeding further with the execution.
 
@@ -375,7 +375,7 @@ public Option<int> GetMaxInstances() =>
     select value >= 1 ? value : 1;
 ```
 
-In this syntax, the range variable in the `from` clause refers to the underlying value within the optional container. The corresponding expression is only evaluated in case the value actually exists -- if a _none_ result is returned at any stage of the pipeline, the execution short-circuits without proceeding further. Conceptually, this works very similarly to collections, seeing as `Option<T>` is really just a special case of `IEnumerable<T>` that can only have one or zero elements.
+In this syntax, the range variable in the `from` clause refers to the underlying value within the optional container. The corresponding expression is only evaluated in case the value actually exists — if a _none_ result is returned at any stage of the pipeline, the execution short-circuits without proceeding further. Conceptually, this works very similarly to collections, seeing as `Option<T>` is really just a special case of `IEnumerable<T>` that can only have one or zero elements.
 
 On the surface using LINQ resulted in more succinct and readable code, but most importantly it provided us with a convenient comprehension model that allows us to express operations on optional values by treating them as if they are already materialized. This lets us more easily create execution chains while implicitly pushing the concern of unwrapping the container towards upstream callers.
 
