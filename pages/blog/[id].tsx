@@ -1,4 +1,5 @@
 import Heading from '@/components/heading';
+import Image from '@/components/image';
 import Inline from '@/components/inline';
 import Markdown from '@/components/markdown';
 import Meta from '@/components/meta';
@@ -20,7 +21,19 @@ type BlogPostPageParams = {
   id: string;
 };
 
-const Article: FC<BlogPostPageProps> = ({ post }) => {
+const CoverSection: FC<BlogPostPageProps> = ({ post }) => {
+  if (!post.isCoverAvailable) {
+    return null;
+  }
+
+  return (
+    <section className={c('my-4', 'text-center')}>
+      <Image src={`/blog/${post.id}/cover.png`} alt="Cover image" priority />
+    </section>
+  );
+};
+
+const ArticleSection: FC<BlogPostPageProps> = ({ post }) => {
   // Transform local-relative URLs to site-relative URLs
   const transformUrl = (url: string) => {
     if (isAbsoluteUrl(url) || url.startsWith('/')) {
@@ -31,39 +44,49 @@ const Article: FC<BlogPostPageProps> = ({ post }) => {
   };
 
   return (
-    <article>
-      <Markdown
-        source={post.source}
-        transformLinkHref={transformUrl}
-        transformImageSrc={transformUrl}
-      />
-    </article>
+    <section>
+      <article>
+        <Markdown
+          source={post.source}
+          transformLinkHref={transformUrl}
+          transformImageSrc={transformUrl}
+        />
+      </article>
+    </section>
   );
 };
 
-const Discussion: FC<BlogPostPageProps> = ({ post }) => {
+const CommentSection: FC<BlogPostPageProps> = ({ post }) => {
   const disqusId = getDisqusId();
   if (!disqusId) {
     return null;
   }
 
   return (
-    <DiscussionEmbed
-      shortname={disqusId}
-      config={{
-        identifier: `Blog/${post.id}`,
-        url: getSiteUrl(`/blog/${post.id}`),
-        title: post.title,
-        language: 'en'
-      }}
-    />
+    <section>
+      <DiscussionEmbed
+        shortname={disqusId}
+        config={{
+          identifier: `Blog/${post.id}`,
+          url: getSiteUrl(`/blog/${post.id}`),
+          title: post.title,
+          language: 'en'
+        }}
+      />
+    </section>
   );
 };
 
 const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
   return (
     <Page>
-      <Meta title={post.title} />
+      <Meta
+        title={post.title}
+        imageLayout={post.isCoverAvailable ? 'fill' : 'aside'}
+        imageUrl={getSiteUrl(
+          post.isCoverAvailable ? `/blog/${post.id}/cover.png` : '/blog-cover-fallback.png'
+        )}
+      />
 
       <section>
         <Heading>{post.title}</Heading>
@@ -87,13 +110,9 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
         </div>
       </section>
 
-      <section>
-        <Article post={post} />
-      </section>
-
-      <section>
-        <Discussion post={post} />
-      </section>
+      <CoverSection post={post} />
+      <ArticleSection post={post} />
+      <CommentSection post={post} />
     </Page>
   );
 };

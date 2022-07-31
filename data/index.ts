@@ -7,6 +7,7 @@ export type BlogPost = {
   title: string;
   date: string;
   timeToReadMs: number;
+  isCoverAvailable: boolean;
   source: string;
 };
 
@@ -20,12 +21,13 @@ export const loadBlogPosts = async function* () {
     }
 
     const id = entry.name;
-    const filePath = path.join(dirPath, id, 'index.md');
+    const indexFilePath = path.join(dirPath, id, 'index.md');
+    const coverFilePath = path.join(dirPath, id, 'cover.png');
 
     const {
       attributes: { title, date },
       body
-    } = frontmatter(await fs.readFile(filePath, 'utf8'));
+    } = frontmatter(await fs.readFile(indexFilePath, 'utf8'));
 
     if (!title || typeof title !== 'string') {
       throw new Error(`Blog post '${id}' has no title`);
@@ -37,11 +39,17 @@ export const loadBlogPosts = async function* () {
 
     const timeToReadMs = (body.split(/\s/g).length * 60000) / 350;
 
+    const isCoverAvailable = await fs
+      .access(coverFilePath)
+      .then(() => true)
+      .catch(() => false);
+
     const post: BlogPost = {
       id,
       title,
       date,
       timeToReadMs,
+      isCoverAvailable,
       source: body
     };
 
@@ -67,7 +75,8 @@ export const loadBlogPostRefs = async function* () {
       id: post.id,
       title: post.title,
       date: post.date,
-      timeToReadMs: post.timeToReadMs
+      timeToReadMs: post.timeToReadMs,
+      isCoverAvailable: post.isCoverAvailable
     };
 
     yield ref;

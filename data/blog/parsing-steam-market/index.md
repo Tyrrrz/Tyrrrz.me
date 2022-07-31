@@ -105,7 +105,7 @@ To get the image, we need to parse the HTML inside `results_html` and find an `<
 http://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpKKqPrxN7LEmyVQ7MEpiLuSrYmnjQO3-UdsZGHyd4_Bd1RvNQ7T_FDrw-_ng5Pu75iY1zI97bhLsvQz/62fx62f/
 ```
 
-![AK-47 | Redline](https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpKKqPrxN7LEmyVQ7MEpiLuSrYmnjQO3-UdsZGHyd4_Bd1RvNQ7T_FDrw-_ng5Pu75iY1zI97bhLsvQz/256fx128f/)
+![AK-47 | Redline](image.png)
 
 If you take a look at the end of the URL, you can see the portion where it specifies desired image dimensions, which is set to `62fx62f` in this case. We can change these to anything we want and the server will return an image of that size. However, if you specify a size which is too big, the image will be centered and remain at its maximum size while the rest of the canvas will be transparent.
 
