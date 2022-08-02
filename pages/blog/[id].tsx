@@ -83,9 +83,7 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
       <Meta
         title={post.title}
         imageLayout={post.isCoverAvailable ? 'fill' : 'aside'}
-        imageUrl={getSiteUrl(
-          post.isCoverAvailable ? `/blog/${post.id}/cover.png` : '/blog-cover-fallback.png'
-        )}
+        imageUrl={post.isCoverAvailable ? `/blog/${post.id}/cover.png` : undefined}
       />
 
       <section>

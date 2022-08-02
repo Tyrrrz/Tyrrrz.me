@@ -32,6 +32,12 @@ const Markdown: FC<MarkdownProps> = ({ source, transformLinkHref, transformImage
         h3: ({ children }) => {
           return <Heading variant="h3">{children}</Heading>;
         },
+        h4: ({ children }) => {
+          return <Heading variant="h4">{children}</Heading>;
+        },
+        h5: ({ children }) => {
+          return <Heading variant="h5">{children}</Heading>;
+        },
         a: ({ href, children }) => {
           return <Link href={href!}>{children}</Link>;
         },
