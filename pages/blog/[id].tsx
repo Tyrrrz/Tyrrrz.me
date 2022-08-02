@@ -82,6 +82,7 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
     <Page>
       <Meta
         title={post.title}
+        description={post.excerpt}
         imageLayout={post.isCoverAvailable ? 'fill' : 'aside'}
         imageUrl={post.isCoverAvailable ? `/blog/${post.id}/cover.png` : undefined}
         rssUrl="/blog/rss.xml"

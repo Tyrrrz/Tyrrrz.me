@@ -1,5 +1,6 @@
 import frontmatter from 'front-matter';
 import fs from 'fs/promises';
+import markdownToTxt from 'markdown-to-txt';
 import path from 'path';
 
 export type BlogPost = {
@@ -8,6 +9,7 @@ export type BlogPost = {
   date: string;
   timeToReadMs: number;
   isCoverAvailable: boolean;
+  excerpt: string;
   source: string;
 };
 
@@ -44,12 +46,15 @@ export const loadBlogPosts = async function* () {
       .then(() => true)
       .catch(() => false);
 
+    const excerpt = markdownToTxt(body).slice(0, 160) + '...';
+
     const post: BlogPost = {
       id,
       title,
       date,
       timeToReadMs,
       isCoverAvailable,
+      excerpt,
       source: body
     };
 
@@ -76,7 +81,8 @@ export const loadBlogPostRefs = async function* () {
       title: post.title,
       date: post.date,
       timeToReadMs: post.timeToReadMs,
-      isCoverAvailable: post.isCoverAvailable
+      isCoverAvailable: post.isCoverAvailable,
+      excerpt: post.excerpt
     };
 
     yield ref;

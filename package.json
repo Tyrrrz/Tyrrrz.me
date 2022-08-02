@@ -33,6 +33,7 @@
     "eslint-config-next": "^12.2.2",
     "front-matter": "^4.0.2",
     "fs-extra": "^10.1.0",
+    "markdown-to-txt": "^2.0.1",
     "postcss": "^8.4.14",
     "prettier": "^2.7.1",
     "prettier-plugin-organize-imports": "^3.0.0",
