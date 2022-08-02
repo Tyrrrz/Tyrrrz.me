@@ -27,7 +27,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
 
   return (
     <Page>
-      <Meta title="Blog" />
+      <Meta title="Blog" rssUrl="/blog/rss.xml" />
 
       <section>
         <Heading>Blog</Heading>

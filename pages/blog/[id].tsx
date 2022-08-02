@@ -84,6 +84,7 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
         title={post.title}
         imageLayout={post.isCoverAvailable ? 'fill' : 'aside'}
         imageUrl={post.isCoverAvailable ? `/blog/${post.id}/cover.png` : undefined}
+        rssUrl="/blog/rss.xml"
       />
 
       <section>
