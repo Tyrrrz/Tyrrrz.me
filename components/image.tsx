@@ -11,9 +11,21 @@ type ImageProps = {
 
 const Image: FC<ImageProps> = ({ src, alt, width, height, priority }) => {
   // NextJS's image component doesn't work with images of unknown size
-  if (!width && !height) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt={alt} loading={priority ? 'eager' : 'lazy'} />;
+  if (!width || !height) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt={alt}
+        loading={priority ? 'eager' : 'lazy'}
+        width={width}
+        height={height}
+        style={{
+          width: width ? `${width}px` : undefined,
+          height: height ? `${height}px` : undefined
+        }}
+      />
+    );
   }
 
   return (

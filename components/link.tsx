@@ -11,7 +11,7 @@ type LinkProps = PropsWithChildren<{
 const Link: FC<LinkProps> = ({ variant = 'normal', href, children }) => {
   const isAbsolute = isAbsoluteUrl(href);
 
-  const rawLink = (
+  const link = (
     <a
       className={c({
         'text-blue-500': variant === 'normal',
@@ -27,10 +27,10 @@ const Link: FC<LinkProps> = ({ variant = 'normal', href, children }) => {
   );
 
   return isAbsolute ? (
-    rawLink
+    link
   ) : (
     <NextLink href={href} passHref>
-      {rawLink}
+      {link}
     </NextLink>
   );
 };
