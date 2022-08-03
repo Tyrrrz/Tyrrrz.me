@@ -15,7 +15,7 @@ const UkraineAlert: FC = () => {
       </div>
 
       <div>
-        As you&apos;re reading this page, Russia continues waging a bloody war against Ukraine —
+        While you&apos;re reading this page, Russia wages a genocidal war against Ukraine —
         destroying homes, ripping apart families, and taking away lives. Be on the right side of
         history, help us defend our freedom!
       </div>
