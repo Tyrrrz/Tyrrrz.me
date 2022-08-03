@@ -4,6 +4,7 @@ import Inline from '@/components/inline';
 import Markdown from '@/components/markdown';
 import Meta from '@/components/meta';
 import Page from '@/components/page';
+import UkraineAlert from '@/components/ukraineAlert';
 import { BlogPost, loadBlogPost, loadBlogPostRefs, publishBlogPostAssets } from '@/data/blog';
 import { getDisqusId, getSiteUrl } from '@/utils/env';
 import { isAbsoluteUrl } from '@/utils/url';
@@ -111,6 +112,7 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
       </section>
 
       <CoverSection post={post} />
+      <UkraineAlert />
       <ArticleSection post={post} />
       <CommentSection post={post} />
     </Page>

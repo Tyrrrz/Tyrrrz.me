@@ -21,7 +21,7 @@ const UkrainePage: NextPage = () => {
         <Heading>Support Ukraine</Heading>
 
         <div className={c('text-center')}>
-          <Image src="/ukraine-flag.png" alt="Flag of Ukraine" width={200} height={120} priority />
+          <Image src="/ukraine-flag.png" alt="Flag of Ukraine" width={1080} height={150} priority />
         </div>
 
         <Paragraph>My name is Oleksii, I&apos;m a software developer from Kyiv, Ukraine.</Paragraph>
