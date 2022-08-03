@@ -13,6 +13,7 @@ const List: FC<ListProps> = ({ variant = 'unordered', start = 1, children }) => 
     <RawList
       className={c(
         'ml-4',
+        'my-4',
         {
           'list-disc': variant === 'unordered',
           'list-decimal': variant === 'ordered'
