@@ -6,17 +6,17 @@
   },
   {
     "name": "96-LB",
-    "amount": 5,
+    "amount": 10,
     "platform": "GitHub Sponsors"
   },
   {
     "name": "JetBrains",
-    "amount": 100,
+    "amount": 200,
     "platform": "GitHub Sponsors"
   },
   {
     "name": "KirillOsenkov",
-    "amount": 5,
+    "amount": 10,
     "platform": "GitHub Sponsors"
   },
   {
@@ -56,7 +56,7 @@
   },
   {
     "name": "A dude",
-    "amount": 123.60,
+    "amount": 128.75,
     "platform": "Patreon"
   },
   {
@@ -86,7 +86,7 @@
   },
   {
     "name": "Peter Wesselius",
-    "amount": 456,
+    "amount": 468,
     "platform": "Patreon"
   },
   {
@@ -96,22 +96,22 @@
   },
   {
     "name": "Matei Radu",
-    "amount": 19.28,
+    "amount": 23.88,
     "platform": "Patreon"
   },
   {
     "name": "Greg H",
-    "amount": 55,
+    "amount": 70,
     "platform": "Patreon"
   },
   {
     "name": "Stuart Lang",
-    "amount": 20.18,
+    "amount": 25.05,
     "platform": "Patreon"
   },
   {
     "name": "Thomas Sobieck",
-    "amount": 40,
+    "amount": 50,
     "platform": "Patreon"
   },
   {
@@ -121,7 +121,7 @@
   },
   {
     "name": "Chet Husk",
-    "amount": 10,
+    "amount": 15,
     "platform": "Patreon"
   },
   {
@@ -426,7 +426,7 @@
   },
   {
     "name": "Filip Navara",
-    "amount": 10,
+    "amount": 20,
     "platform": "BuyMeACoffee"
   },
   {
@@ -562,6 +562,11 @@
   {
     "name": null,
     "amount": 25,
+    "platform": "BuyMeACoffee"
+  },
+  {
+    "name": "Eva",
+    "amount": 5,
     "platform": "BuyMeACoffee"
   },
   {
