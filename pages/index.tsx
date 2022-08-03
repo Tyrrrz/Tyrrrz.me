@@ -14,7 +14,7 @@ const HomePage: NextPage = () => {
   const age = new Date(Date.now() - Date.UTC(1995, 4, 28)).getUTCFullYear() - 1970;
 
   const microsoftMvpUrl = 'https://mvp.microsoft.com/en-us/PublicProfile/5004136';
-  const githubStarUrl = 'https://stars.github.com/profiles/Tyrrrz';
+  const githubStarUrl = 'https://stars.github.com/profiles/tyrrrz';
 
   return (
     <Page>
