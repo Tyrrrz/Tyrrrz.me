@@ -6,7 +6,7 @@ import Page from '@/components/page';
 import Paragraph from '@/components/paragraph';
 import Timeline from '@/components/timeline';
 import TimelineItem from '@/components/timelineItem';
-import { loadSpeakingEngagements, SpeakingEngagement } from '@/data';
+import { loadSpeakingEngagements, SpeakingEngagement } from '@/data/speaking';
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
 import { FiCalendar, FiMapPin, FiMessageCircle, FiMic, FiRadio, FiTool } from 'react-icons/fi';

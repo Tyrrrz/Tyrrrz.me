@@ -4,7 +4,7 @@ import Link from '@/components/link';
 import Meta from '@/components/meta';
 import Page from '@/components/page';
 import Paragraph from '@/components/paragraph';
-import { loadProjects, Project } from '@/data';
+import { loadProjects, Project } from '@/data/projects';
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
 import { FiCode, FiDownload, FiExternalLink, FiStar } from 'react-icons/fi';

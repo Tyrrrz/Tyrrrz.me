@@ -4,7 +4,7 @@ import Inline from '@/components/inline';
 import Markdown from '@/components/markdown';
 import Meta from '@/components/meta';
 import Page from '@/components/page';
-import { BlogPost, loadBlogPost, loadBlogPostRefs } from '@/data';
+import { BlogPost, loadBlogPost, loadBlogPostRefs, publishBlogPostAssets } from '@/data/blog';
 import { getDisqusId, getSiteUrl } from '@/utils/env';
 import { isAbsoluteUrl } from '@/utils/url';
 import c from 'classnames';
@@ -136,6 +136,8 @@ export const getStaticProps: GetStaticProps<BlogPostPageProps, BlogPostPageParam
   if (!id) {
     throw new Error('Missing blog post ID');
   }
+
+  await publishBlogPostAssets(id);
 
   return {
     props: {

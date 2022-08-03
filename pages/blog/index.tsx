@@ -6,7 +6,7 @@ import Page from '@/components/page';
 import Paragraph from '@/components/paragraph';
 import Timeline from '@/components/timeline';
 import TimelineItem from '@/components/timelineItem';
-import { BlogPostRef, loadBlogPostRefs } from '@/data';
+import { BlogPostRef, loadBlogPostRefs, publishBlogFeed } from '@/data/blog';
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
 import { FiCalendar, FiClock } from 'react-icons/fi';
@@ -88,6 +88,8 @@ export const getStaticProps: GetStaticProps<BlogPageProps> = async () => {
   }
 
   posts.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+
+  await publishBlogFeed();
 
   return {
     props: {

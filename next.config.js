@@ -1,6 +1,4 @@
 const { spawnSync } = require('child_process');
-const fs = require('fs-extra');
-const path = require('path');
 const withPlugins = require('next-compose-plugins');
 const withPWA = require('next-pwa');
 const runtimeCaching = require('next-pwa/cache');
@@ -28,30 +26,6 @@ const nextConfig = {
 
     GOOGLE_ANALYTICS_ID: process.env.GOOGLE_ANALYTICS_ID,
     DISQUS_ID: process.env.DISQUS_ID
-  },
-
-  webpack: (config, { isServer }) => {
-    // Copy blog assets to the static folder
-    if (isServer) {
-      config.plugins.push({
-        apply: (compiler) => {
-          console.log('> [~~~] Copying blog assets...');
-
-          compiler.hooks.compile.tap('copyBlogAssets', () => {
-            fs.removeSync('public/blog');
-            fs.copySync('data/blog/', 'public/blog/', {
-              recursive: true,
-              filter: (file) => {
-                const ext = path.extname(file);
-                return !ext || ['.jpg', '.png', '.gif'].includes(ext);
-              }
-            });
-          });
-        }
-      });
-    }
-
-    return config;
   }
 };
 

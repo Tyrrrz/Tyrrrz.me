@@ -7,7 +7,7 @@ import ListItem from '@/components/listItem';
 import Meta from '@/components/meta';
 import Page from '@/components/page';
 import Paragraph from '@/components/paragraph';
-import { Donation, loadDonations } from '@/data';
+import { Donation, loadDonations } from '@/data/donate';
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
 import { FiDollarSign } from 'react-icons/fi';
