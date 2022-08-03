@@ -57,9 +57,9 @@ const HomePage: NextPage = () => {
         </div>
       </section>
 
-      <div className={c('my-2')}>
+      <section className={c('my-2')}>
         <UkraineAlert />
-      </div>
+      </section>
 
       <div className={c('my-8', 'h-1', 'rounded', 'bg-purple-500')} />
 

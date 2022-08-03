@@ -112,7 +112,11 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
       </section>
 
       <CoverSection post={post} />
-      <UkraineAlert />
+
+      <section className={c('my-2')}>
+        <UkraineAlert />
+      </section>
+
       <ArticleSection post={post} />
       <CommentSection post={post} />
     </Page>
