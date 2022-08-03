@@ -33,12 +33,14 @@ const HomePage: NextPage = () => {
         </div>
 
         <div>
-          <Heading>
-            <Inline>
-              <Emoji code="👋" />
-              <span>Hello!</span>
-            </Inline>
-          </Heading>
+          <div className={c('text-center', 'md:text-left')}>
+            <Heading>
+              <Inline>
+                <Emoji code="👋" />
+                <span>Hello!</span>
+              </Inline>
+            </Heading>
+          </div>
           <Paragraph>
             My name is Oleksii, also known online as Tyrrrz. I&apos;m a {age} y/o software developer
             from Kyiv, Ukraine. I&apos;m also a <Link href={microsoftMvpUrl}>Microsoft MVP</Link>{' '}
