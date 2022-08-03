@@ -6,10 +6,10 @@ import List from '@/components/list';
 import Paragraph from '@/components/paragraph';
 import Pre from '@/components/pre';
 import Quote from '@/components/quote';
+import Syntax from '@/components/syntax';
 import c from 'classnames';
 import { FC } from 'react';
 import ReactMarkdown from 'react-markdown';
-import Syntax from './syntax';
 
 type MarkdownProps = {
   source: string;

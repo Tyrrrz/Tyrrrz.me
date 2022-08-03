@@ -1,7 +1,6 @@
 import Code from '@/components/code';
 import Emoji from '@/components/emoji';
 import Heading from '@/components/heading';
-import Image from '@/components/image';
 import Inline from '@/components/inline';
 import Link from '@/components/link';
 import List from '@/components/list';
@@ -20,8 +19,9 @@ const UkrainePage: NextPage = () => {
       <section>
         <Heading>Support Ukraine</Heading>
 
-        <div className={c('text-center')}>
-          <Image src="/ukraine-flag.png" alt="Flag of Ukraine" width={1080} height={150} priority />
+        <div>
+          <div className={c('h-10', 'bg-blue-500')} />
+          <div className={c('h-10', 'bg-yellow-400')} />
         </div>
 
         <Paragraph>My name is Oleksii, I&apos;m a software developer from Kyiv, Ukraine.</Paragraph>
