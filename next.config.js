@@ -25,7 +25,8 @@ const nextConfig = {
       'http://localhost:3000',
 
     GOOGLE_ANALYTICS_ID: process.env.GOOGLE_ANALYTICS_ID,
-    DISQUS_ID: process.env.DISQUS_ID
+    DISQUS_ID: process.env.DISQUS_ID,
+    ETHICAL_ADS_ID: process.env.ETHICAL_ADS_ID
   }
 };
 

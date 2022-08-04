@@ -35,3 +35,7 @@ export const getGoogleAnalyticsId = () => {
 export const getDisqusId = () => {
   return process.env.DISQUS_ID;
 };
+
+export const getEthicalAdsId = () => {
+  return process.env.ETHICAL_ADS_ID;
+};

@@ -1,4 +1,6 @@
+import Advert from '@/components/advert';
 import Link from '@/components/link';
+import Meta from '@/components/meta';
 import useDebounce from '@/hooks/useDebounce';
 import useRouterStatus from '@/hooks/useRouterStatus';
 import c from 'classnames';
@@ -6,6 +8,7 @@ import { useRouter } from 'next/router';
 import { FC, PropsWithChildren, useEffect, useState } from 'react';
 import FadeIn from 'react-fade-in';
 import { FiMenu } from 'react-icons/fi';
+import Tracker from './tracker';
 
 const Loader: FC = () => {
   const status = useRouterStatus();
@@ -155,7 +158,7 @@ const Header: FC = () => {
 
 const Main: FC<PropsWithChildren> = ({ children }) => {
   return (
-    <main className={c('mx-4', 'mt-6', 'mb-8')}>
+    <main className={c('mx-4', 'mt-6', 'mb-20')}>
       <FadeIn>{children}</FadeIn>
     </main>
   );
@@ -166,6 +169,9 @@ type PageProps = PropsWithChildren;
 const Page: FC<PageProps> = ({ children }) => {
   return (
     <>
+      <Meta />
+      <Tracker />
+
       <Loader />
 
       <div className={c('max-w-4xl', 'mx-auto')}>
@@ -174,6 +180,8 @@ const Page: FC<PageProps> = ({ children }) => {
           <Main>{children}</Main>
         </div>
       </div>
+
+      <Advert variant="text" orientation="horizontal" sticky="footer" />
     </>
   );
 };
