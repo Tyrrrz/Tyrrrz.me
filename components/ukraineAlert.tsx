@@ -10,7 +10,7 @@ const UkraineAlert: FC = () => {
       <div className={c('text-lg', 'font-semibold')}>
         <Inline>
           <Emoji code="❗" />
-          <span>My Home is Under Attack</span>
+          <span>My Country is Under Attack</span>
         </Inline>
       </div>
 
