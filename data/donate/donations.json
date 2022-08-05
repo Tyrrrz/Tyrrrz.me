@@ -583,5 +583,10 @@
     "name": null,
     "amount": 10,
     "platform": "Bitcoin"
+  },
+  {
+    "name": null,
+    "amount": 100,
+    "platform": "Ethereum"
   }
 ]
