@@ -5,6 +5,7 @@ import Meta from '@/components/meta';
 import Page from '@/components/page';
 import Paragraph from '@/components/paragraph';
 import { loadProjects, Project } from '@/data/projects';
+import { deleteUndefined } from '@/utils/object';
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
 import { FiCode, FiDownload, FiExternalLink, FiStar } from 'react-icons/fi';
@@ -95,6 +96,9 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
 export const getStaticProps: GetStaticProps<ProjectsPageProps> = async () => {
   const projects: Project[] = [];
   for await (const project of loadProjects()) {
+    // Undefined values cannot be serialized
+    deleteUndefined(project);
+
     projects.push(project);
   }
 

@@ -7,6 +7,7 @@ import Paragraph from '@/components/paragraph';
 import Timeline from '@/components/timeline';
 import TimelineItem from '@/components/timelineItem';
 import { loadSpeakingEngagements, SpeakingEngagement } from '@/data/speaking';
+import { deleteUndefined } from '@/utils/object';
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
 import { FiCalendar, FiMapPin, FiMessageCircle, FiMic, FiRadio, FiTool } from 'react-icons/fi';
@@ -113,6 +114,9 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
 export const getStaticProps: GetStaticProps<SpeakingPageProps> = async () => {
   const engagements: SpeakingEngagement[] = [];
   for await (const engagement of loadSpeakingEngagements()) {
+    // Undefined values cannot be serialized
+    deleteUndefined(engagement);
+
     engagements.push(engagement);
   }
 

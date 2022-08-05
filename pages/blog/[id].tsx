@@ -7,6 +7,7 @@ import Page from '@/components/page';
 import UkraineAlert from '@/components/ukraineAlert';
 import { BlogPost, loadBlogPost, loadBlogPostRefs, publishBlogPostAssets } from '@/data/blog';
 import { getDisqusId, getSiteUrl } from '@/utils/env';
+import { deleteUndefined } from '@/utils/object';
 import { isAbsoluteUrl } from '@/utils/url';
 import c from 'classnames';
 import { DiscussionEmbed } from 'disqus-react';
@@ -144,10 +145,14 @@ export const getStaticProps: GetStaticProps<BlogPostPageProps, BlogPostPageParam
   }
 
   await publishBlogPostAssets(id);
+  const post = await loadBlogPost(id);
+
+  // Undefined values cannot be serialized
+  deleteUndefined(post);
 
   return {
     props: {
-      post: await loadBlogPost(id)
+      post
     }
   };
 };

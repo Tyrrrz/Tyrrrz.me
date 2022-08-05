@@ -28,6 +28,10 @@ export const getSiteUrl = (path?: string) => {
   return value;
 };
 
+export const getGitHubToken = () => {
+  return process.env.GITHUB_TOKEN;
+};
+
 export const getGoogleAnalyticsId = () => {
   return process.env.GOOGLE_ANALYTICS_ID;
 };
