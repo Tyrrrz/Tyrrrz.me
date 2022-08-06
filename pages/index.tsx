@@ -28,7 +28,7 @@ const HomePage: NextPage = () => {
           'gap-x-6'
         )}
       >
-        <div className={c('flex-none', 'w-48', 'md:w-56', 'md:mt-8')}>
+        <div className={c('flex-none', 'w-48', 'md:w-56', 'md:mt-12')}>
           <Image src="/logo-trans.png" alt="picture" priority />
         </div>
 
@@ -42,19 +42,22 @@ const HomePage: NextPage = () => {
             </Heading>
           </div>
           <Paragraph>
-            My name is Oleksii, also known online as Tyrrrz. I&apos;m a {age} y/o software developer
-            from Kyiv, Ukraine. I&apos;m also a <Link href={microsoftMvpUrl}>Microsoft MVP</Link>{' '}
-            and a <Link href={githubStarUrl}>GitHub Star</Link>.
+            My name is Oleksii, also known online as Tyrrrz. I&apos;m a {age}-year-old software
+            developer from Kyiv, Ukraine.
           </Paragraph>
           <Paragraph>
-            Most of my endeavors are in C#, but every now and then I code in F# and TypeScript as
-            well. I&apos;m primarily interested in the cloud, distributed systems, and web
-            applications.
+            Currently, I work as a consultant, focusing on developer tooling and infrastructure,
+            with background interest in cloud technologies, distributed systems, and web
+            applications. I enjoy seeking out creative solutions to complex problems and building
+            things that empower others to do the same.
           </Paragraph>
           <Paragraph>
-            My professional hobbies involve open source, conference speaking, and blogging. Outside
-            of that I&apos;m also into outdoor photography, digital art, playing guitar, and
-            learning foreign languages.
+            I&apos;m also an active member of the developer community, a{' '}
+            <Link href={microsoftMvpUrl}>Microsoft MVP</Link> and a{' '}
+            <Link href={githubStarUrl}>GitHub Star</Link> — I spend most of my free time maintaining
+            a few popular <Link href="/projects">open source projects</Link>, speaking at various{' '}
+            <Link href="/speaking">technical conferences</Link>, or sharing knowledge and experience
+            on <Link href="/blog">my blog</Link>.
           </Paragraph>
         </div>
       </section>
