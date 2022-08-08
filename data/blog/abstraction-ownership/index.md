@@ -13,9 +13,9 @@ Who owns the abstraction — whether it's the provider or the consumer — carri
 
 In this article, we'll explore the concept of abstraction ownership, discuss its implications, and look at some examples of how it manifests in practice.
 
-## Abstraction ownership
+## Nominal vs structural type systems
 
-## Nominal typing
+
 
 ## Structural typing
 
