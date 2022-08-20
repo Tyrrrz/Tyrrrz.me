@@ -590,6 +590,11 @@
     "platform": "BuyMeACoffee"
   },
   {
+    "name": "Baksa Krisztián",
+    "amount": 30,
+    "platform": "BuyMeACoffee"
+  },
+  {
     "name": null,
     "amount": 365,
     "platform": "Ethereum"
