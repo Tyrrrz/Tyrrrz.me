@@ -1,4 +1,3 @@
-import Advert from '@/components/advert';
 import Link from '@/components/link';
 import Meta from '@/components/meta';
 import useDebounce from '@/hooks/useDebounce';
@@ -180,8 +179,6 @@ const Page: FC<PageProps> = ({ children }) => {
           <Main>{children}</Main>
         </div>
       </div>
-
-      <Advert variant="text" orientation="horizontal" sticky="footer" />
     </>
   );
 };

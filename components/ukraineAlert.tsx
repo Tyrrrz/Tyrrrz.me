@@ -1,3 +1,4 @@
+import Callout from '@/components/callout';
 import Emoji from '@/components/emoji';
 import Inline from '@/components/inline';
 import Link from '@/components/link';
@@ -6,8 +7,8 @@ import { FC } from 'react';
 
 const UkraineAlert: FC = () => {
   return (
-    <section className={c('p-4', 'border', 'border-red-500', 'rounded', 'bg-red-100', 'space-y-1')}>
-      <div className={c('text-lg', 'font-semibold')}>
+    <Callout variant="red">
+      <div className={c('font-semibold')}>
         <Inline>
           <Emoji code="❗" />
           <span>My Country is Under Attack</span>
@@ -23,7 +24,7 @@ const UkraineAlert: FC = () => {
       <div className={c('font-semibold')}>
         <Link href="/ukraine">Learn what you can do</Link>
       </div>
-    </section>
+    </Callout>
   );
 };
 
