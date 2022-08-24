@@ -15,7 +15,7 @@ In this article, we'll explore the idea of abstraction ownership, discuss its im
 
 ## Type systems
 
-Abstraction is a mental construct, but in software design, it is usually formalized by the means of the programming language's **type system**. When modelling our domain, defining types is a way for us to describe the relevant concepts and outline relationships between them.
+Abstraction is a mental construct, but in software design, it is usually formalized by the means of the programming language's **type system**. Defining types is a way for us to express the relevant concepts in our domain and model the relationships between them.
 
 Different languages have different type systems, with slightly different semantics and capabilities, which in turn affects how we can use abstractions to model our domain. In order to understand these differences better, we need to look at how types are defined in each system.
 
