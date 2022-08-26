@@ -14,12 +14,12 @@ const Loader: FC = () => {
 
   // Only show loading indicator if the navigation takes a while.
   // This prevents indicator from flashing during faster navigation.
-  const isVisible = useDebounce(status === 'loading', 300);
+  const visible = useDebounce(status === 'loading', 300);
 
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    if (!isVisible) {
+    if (!visible) {
       return;
     }
 
@@ -32,12 +32,12 @@ const Loader: FC = () => {
     }, 100);
 
     return () => clearInterval(interval);
-  }, [isVisible]);
+  }, [visible]);
 
   return (
     <div
       className={c('h-1', {
-        'bg-purple-500': isVisible
+        'bg-purple-500': visible
       })}
       style={{
         width: `${progress * 100}%`,
@@ -55,7 +55,7 @@ type NavLinkProps = PropsWithChildren<{
 
 const NavLink: FC<NavLinkProps> = ({ href, children }) => {
   const { route } = useRouter();
-  const isActive = route === href || route.startsWith(href + '/');
+  const active = route === href || route.startsWith(href + '/');
 
   return (
     <div
@@ -65,11 +65,11 @@ const NavLink: FC<NavLinkProps> = ({ href, children }) => {
         'rounded',
         'border-2',
         {
-          'border-transparent': !isActive,
-          'border-purple-500': isActive
+          'border-transparent': !active,
+          'border-purple-500': active
         },
         {
-          'bg-purple-100': isActive
+          'bg-purple-100': active
         }
       )}
     >
@@ -89,7 +89,7 @@ const Header: FC = () => {
     { href: '/donate', label: 'donate' }
   ];
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
 
   return (
     <header>
@@ -123,8 +123,8 @@ const Header: FC = () => {
 
         {/* Mobile nav button */}
         <button
-          className={c('sm:hidden', 'text-2xl', { 'text-purple-500': isMenuOpen })}
-          onClick={() => setIsMenuOpen((v) => !v)}
+          className={c('sm:hidden', 'text-2xl', { 'text-purple-500': menuVisible })}
+          onClick={() => setMenuVisible((v) => !v)}
         >
           <FiMenu />
         </button>
@@ -134,7 +134,7 @@ const Header: FC = () => {
       <div className={c('sm:hidden', 'overflow-hidden')}>
         <nav
           className={c(
-            { '-mt-[100%]': !isMenuOpen },
+            { '-mt-[100%]': !menuVisible },
             'p-2',
             'border-b-2',
             'border-neutral-100',

@@ -9,7 +9,7 @@ type LinkProps = PropsWithChildren<{
 }>;
 
 const Link: FC<LinkProps> = ({ variant = 'normal', href, children }) => {
-  const isAbsolute = isAbsoluteUrl(href);
+  const absolute = isAbsoluteUrl(href);
 
   const link = (
     <a
@@ -19,14 +19,14 @@ const Link: FC<LinkProps> = ({ variant = 'normal', href, children }) => {
         'hover:text-blue-500': variant === 'discreet'
       })}
       href={href}
-      target={isAbsolute ? '_blank' : undefined}
+      target={absolute ? '_blank' : undefined}
       rel="noreferrer"
     >
       {children}
     </a>
   );
 
-  return isAbsolute ? (
+  return absolute ? (
     link
   ) : (
     <NextLink href={href} passHref>

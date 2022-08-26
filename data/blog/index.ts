@@ -9,8 +9,8 @@ export type BlogPost = {
   id: string;
   title: string;
   date: string;
-  timeToReadMs: number;
-  isCoverAvailable: boolean;
+  readTimeMs: number;
+  coverUrl?: string;
   excerpt: string;
   source: string;
 };
@@ -27,13 +27,14 @@ export const loadBlogPosts = async function* () {
     }
 
     const id = entry.name;
-    const indexFilePath = path.join(dirPath, id, 'index.md');
-    const coverFilePath = path.join(dirPath, id, 'cover.png');
+
+    const indexFilePath = path.resolve(dirPath, id, 'index.md');
+    const data = await fs.readFile(indexFilePath, 'utf8');
 
     const {
       attributes: { title, date },
       body
-    } = frontmatter(await fs.readFile(indexFilePath, 'utf8'));
+    } = frontmatter(data);
 
     if (!title || typeof title !== 'string') {
       throw new Error(`Blog post '${id}' has missing or invalid title`);
@@ -43,12 +44,13 @@ export const loadBlogPosts = async function* () {
       throw new Error(`Blog post '${id}' has missing or invalid date`);
     }
 
-    const timeToReadMs = (body.split(/\s/g).length * 60000) / 350;
+    const readTimeMs = (body.split(/\s/g).length * 60000) / 350;
 
-    const isCoverAvailable = await fs
-      .access(coverFilePath)
-      .then(() => true)
-      .catch(() => false);
+    const coverFileName = (await fs.readdir(path.resolve(dirPath, id))).find(
+      (file) => path.parse(file).name === 'cover'
+    );
+
+    const coverUrl = coverFileName && `/blog/${id}/${coverFileName}`;
 
     const excerpt = markdownToTxt(body).slice(0, 256) + '…';
 
@@ -56,8 +58,8 @@ export const loadBlogPosts = async function* () {
       id,
       title,
       date,
-      timeToReadMs,
-      isCoverAvailable,
+      readTimeMs,
+      coverUrl,
       excerpt,
       source: body
     };
@@ -72,8 +74,8 @@ export const loadBlogPostRefs = async function* () {
       id: post.id,
       title: post.title,
       date: post.date,
-      timeToReadMs: post.timeToReadMs,
-      isCoverAvailable: post.isCoverAvailable,
+      readTimeMs: post.readTimeMs,
+      coverUrl: post.coverUrl,
       excerpt: post.excerpt
     };
 

@@ -24,13 +24,13 @@ type BlogPostPageParams = {
 };
 
 const CoverSection: FC<BlogPostPageProps> = ({ post }) => {
-  if (!post.isCoverAvailable) {
+  if (!post.coverUrl) {
     return null;
   }
 
   return (
     <section className={c('w-fit', 'mx-auto', 'my-4')}>
-      <Image src={`/blog/${post.id}/cover.png`} alt="Cover image" priority />
+      <Image src={post.coverUrl} alt="Cover image" priority />
     </section>
   );
 };
@@ -85,8 +85,8 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
       <Meta
         title={post.title}
         description={post.excerpt}
-        imageLayout={post.isCoverAvailable ? 'fill' : 'aside'}
-        imageUrl={post.isCoverAvailable ? `/blog/${post.id}/cover.png` : undefined}
+        imageLayout={post.coverUrl ? 'fill' : 'aside'}
+        imageUrl={post.coverUrl}
         rssUrl="/blog/rss.xml"
       />
 
@@ -107,7 +107,7 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
 
           <Inline>
             <FiClock strokeWidth={1} />
-            <span>{Math.ceil(post.timeToReadMs / 60000)} min read</span>
+            <span>{Math.ceil(post.readTimeMs / 60000)} min read</span>
           </Inline>
         </div>
       </section>
