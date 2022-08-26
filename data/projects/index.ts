@@ -6,6 +6,7 @@ import { isProduction } from '@/utils/env';
 export type Project = {
   name: string;
   url: string;
+  archived: boolean;
   description?: string;
   homepageUrl?: string;
   stars: number;
@@ -33,6 +34,7 @@ export const loadProjects = async function* () {
     const project: Project = {
       name: repo.name,
       url: repo.html_url,
+      archived: repo.archived || false,
       description: repo.description || undefined,
       homepageUrl: repo.homepage || undefined,
       stars: repo.stargazers_count || 0,

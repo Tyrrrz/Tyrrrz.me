@@ -8,7 +8,7 @@ import { loadProjects, Project } from '@/data/projects';
 import { deleteUndefined } from '@/utils/object';
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
-import { FiCode, FiDownload, FiExternalLink, FiStar } from 'react-icons/fi';
+import { FiArchive, FiCode, FiDownload, FiExternalLink, FiStar } from 'react-icons/fi';
 
 type ProjectsPageProps = {
   projects: Project[];
@@ -52,8 +52,18 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
               <Link href={project.url}>{project.name}</Link>
             </div>
 
+            {project.archived && (
+              <div className={c('mt-1', 'text-sm', 'text-neutral-600')}>
+                <Inline>
+                  <FiArchive strokeWidth={1} />
+                  <span>Archived</span>
+                </Inline>
+              </div>
+            )}
+
             <div className={c('grow', 'my-1', 'space-y-2')}>
               <div>{project.description}</div>
+
               {project.homepageUrl && (
                 <div>
                   <Inline>
