@@ -52,7 +52,7 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
               <Link href={project.url}>{project.name}</Link>
             </div>
 
-            <div className={c('grow', 'my-1', 'space-y-2')}>
+            <div className={c('grow', 'my-1', 'space-y-1')}>
               {project.archived && (
                 <div className={c('font-light')}>
                   <Inline>
