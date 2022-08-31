@@ -5,7 +5,7 @@ type TimelineItemProps = PropsWithChildren;
 
 const TimelineItem: FC<TimelineItemProps> = ({ children }) => {
   return (
-    <section className={c('relative')}>
+    <li className={c('relative')}>
       <div
         className={c(
           'absolute',
@@ -19,7 +19,7 @@ const TimelineItem: FC<TimelineItemProps> = ({ children }) => {
         )}
       />
       <div className={c('ml-4')}>{children}</div>
-    </section>
+    </li>
   );
 };
 
