@@ -7,7 +7,7 @@ import { FC } from 'react';
 
 const UkraineAlert: FC = () => {
   return (
-    <Callout variant="red">
+    <Callout variant="danger">
       <div className={c('font-semibold')}>
         <Inline>
           <Emoji code="❗" />

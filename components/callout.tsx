@@ -2,18 +2,24 @@ import c from 'classnames';
 import { FC, PropsWithChildren } from 'react';
 
 type CalloutProps = PropsWithChildren<{
-  variant?: 'blue' | 'red';
+  variant?: 'info' | 'danger';
 }>;
 
-const Callout: FC<CalloutProps> = ({ variant = 'blue', children }) => {
+const Callout: FC<CalloutProps> = ({ variant = 'info', children }) => {
   return (
     <section
       className={c(
         'p-4',
         'border',
-        { 'border-red-500': variant === 'red', 'border-blue-500': variant === 'blue' },
+        {
+          'border-blue-500': variant === 'info',
+          'border-red-500': variant === 'danger'
+        },
         'rounded',
-        { 'bg-red-100': variant === 'red', 'bg-blue-100': variant === 'blue' },
+        {
+          'bg-blue-100': variant === 'info',
+          'bg-red-100': variant === 'danger'
+        },
         'space-y-1'
       )}
     >

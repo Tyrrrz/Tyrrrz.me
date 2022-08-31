@@ -52,16 +52,16 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
               <Link href={project.url}>{project.name}</Link>
             </div>
 
-            {project.archived && (
-              <div className={c('mt-1', 'text-sm', 'text-neutral-600')}>
-                <Inline>
-                  <FiArchive strokeWidth={1} />
-                  <span>Archived</span>
-                </Inline>
-              </div>
-            )}
-
             <div className={c('grow', 'my-1', 'space-y-2')}>
+              {project.archived && (
+                <div className={c('font-light')}>
+                  <Inline>
+                    <FiArchive strokeWidth={1} />
+                    <span>Archived</span>
+                  </Inline>
+                </div>
+              )}
+
               <div>{project.description}</div>
 
               {project.homepageUrl && (
