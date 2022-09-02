@@ -81,11 +81,11 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
 
                       <Inline>
                         {{
-                          Talk: <FiMic strokeWidth={1} />,
-                          Workshop: <FiTool strokeWidth={1} />,
-                          Podcast: <FiRadio strokeWidth={1} />
+                          talk: <FiMic strokeWidth={1} />,
+                          workshop: <FiTool strokeWidth={1} />,
+                          podcast: <FiRadio strokeWidth={1} />
                         }[engagement.kind] || <FiMic strokeWidth={1} />}
-                        <span>{engagement.kind}</span>
+                        <span className={c('capitalize')}>{engagement.kind}</span>
                       </Inline>
 
                       <Inline>
