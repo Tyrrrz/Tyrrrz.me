@@ -1,7 +1,7 @@
 [
   {
     "name": null,
-    "amount": 10,
+    "amount": 15,
     "platform": "GitHub Sponsors"
   },
   {
@@ -11,12 +11,12 @@
   },
   {
     "name": "JetBrains",
-    "amount": 200,
+    "amount": 300,
     "platform": "GitHub Sponsors"
   },
   {
     "name": "KirillOsenkov",
-    "amount": 10,
+    "amount": 15,
     "platform": "GitHub Sponsors"
   },
   {
@@ -61,12 +61,12 @@
   },
   {
     "name": "Greg Engle",
-    "amount": 115,
+    "amount": 125,
     "platform": "Patreon"
   },
   {
     "name": "A dude",
-    "amount": 128.75,
+    "amount": 133.90,
     "platform": "Patreon"
   },
   {
@@ -96,7 +96,7 @@
   },
   {
     "name": "Peter Wesselius",
-    "amount": 468,
+    "amount": 480,
     "platform": "Patreon"
   },
   {
@@ -111,17 +111,17 @@
   },
   {
     "name": "Greg H",
-    "amount": 70,
+    "amount": 85,
     "platform": "Patreon"
   },
   {
     "name": "Stuart Lang",
-    "amount": 25.05,
+    "amount": 29.71,
     "platform": "Patreon"
   },
   {
     "name": "Thomas Sobieck",
-    "amount": 50,
+    "amount": 60,
     "platform": "Patreon"
   },
   {
@@ -131,12 +131,17 @@
   },
   {
     "name": "Chet Husk",
-    "amount": 15,
+    "amount": 20,
     "platform": "Patreon"
   },
   {
     "name": "Keri Svoboda",
     "amount": 5,
+    "platform": "Patreon"
+  },
+  {
+    "name": null,
+    "amount": 10,
     "platform": "Patreon"
   },
   {
