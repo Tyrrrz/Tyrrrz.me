@@ -97,7 +97,7 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
 
                       <Inline>
                         <FiMessageCircle strokeWidth={1} />
-                        <span>{engagement.language}</span>
+                        <span className={c('capitalize')}>{engagement.language}</span>
                       </Inline>
                     </div>
                   </TimelineItem>
