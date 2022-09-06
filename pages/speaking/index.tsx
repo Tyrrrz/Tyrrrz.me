@@ -7,6 +7,7 @@ import Paragraph from '@/components/paragraph';
 import Timeline from '@/components/timeline';
 import TimelineItem from '@/components/timelineItem';
 import { loadSpeakingEngagements, SpeakingEngagement } from '@/data/speaking';
+import { bufferIterable } from '@/utils/async';
 import { deleteUndefined } from '@/utils/object';
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
@@ -112,12 +113,11 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
 };
 
 export const getStaticProps: GetStaticProps<SpeakingPageProps> = async () => {
-  const engagements: SpeakingEngagement[] = [];
-  for await (const engagement of loadSpeakingEngagements()) {
-    // Undefined values cannot be serialized
-    deleteUndefined(engagement);
+  const engagements = await bufferIterable(loadSpeakingEngagements());
 
-    engagements.push(engagement);
+  // Remove undefined values because they cannot be serialized
+  for (const engagement of engagements) {
+    deleteUndefined(engagement);
   }
 
   engagements.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));

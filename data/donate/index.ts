@@ -1,15 +1,19 @@
-import fs from 'fs/promises';
-import path from 'path';
+import fakes from '@/data/donate/fakes';
+import { isProduction } from '@/utils/env';
+import { getPatreonDonations } from './patreon';
 
 export type Donation = {
-  name: string;
+  name?: string;
   amount: number;
   platform: string;
 };
 
 export const loadDonations = async function* () {
-  const filePath = path.resolve(process.cwd(), 'data', 'donate', 'donations.json');
-  const donations: Donation[] = JSON.parse(await fs.readFile(filePath, 'utf8'));
+  // Use fake data in development
+  if (!isProduction()) {
+    yield* fakes;
+    return;
+  }
 
-  yield* donations;
+  yield* getPatreonDonations();
 };

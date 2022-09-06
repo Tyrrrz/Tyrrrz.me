@@ -29,7 +29,21 @@ export const getSiteUrl = (path?: string) => {
 };
 
 export const getGitHubToken = () => {
-  return process.env.GITHUB_TOKEN;
+  const value = process.env.GITHUB_TOKEN;
+  if (!value) {
+    throw new Error(`Environment variable 'GITHUB_TOKEN' is not defined`);
+  }
+
+  return value;
+};
+
+export const getPatreonToken = () => {
+  const value = process.env.PATREON_TOKEN;
+  if (!value) {
+    throw new Error(`Environment variable 'PATREON_TOKEN' is not defined`);
+  }
+
+  return value;
 };
 
 export const getGoogleAnalyticsId = () => {
