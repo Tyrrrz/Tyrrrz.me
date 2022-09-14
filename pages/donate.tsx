@@ -9,6 +9,7 @@ import Page from '@/components/page';
 import Paragraph from '@/components/paragraph';
 import { Donation, loadDonations } from '@/data/donate';
 import { bufferIterable } from '@/utils/async';
+import { deleteUndefined } from '@/utils/object';
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
 import { FiDollarSign } from 'react-icons/fi';
@@ -104,6 +105,11 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
 
 export const getStaticProps: GetStaticProps<DonationPageProps> = async () => {
   const donations = await bufferIterable(loadDonations());
+
+  // Remove undefined values because they cannot be serialized
+  for (const donation of donations) {
+    deleteUndefined(donation);
+  }
 
   donations.sort((a, b) => b.amount - a.amount);
 

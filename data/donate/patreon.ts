@@ -1,7 +1,8 @@
 import type { Donation } from '@/data/donate';
+import { delay } from '@/utils/async';
 import { getPatreonToken } from '@/utils/env';
 import { formatUrlWithQuery } from '@/utils/url';
-import 'isomorphic-fetch';
+import axios from 'axios';
 
 const getCampaigns = async function* () {
   let cursor = '';
@@ -11,16 +12,7 @@ const getCampaigns = async function* () {
       'page[cursor]': cursor
     });
 
-    const response = await fetch(url, {
-      headers: {
-        authorization: `Bearer ${getPatreonToken()}`
-      }
-    });
-
-    if (response.status !== 200) {
-      throw new Error(`Failed to fetch campaigns: ${response.statusText}`);
-    }
-
+    // https://docs.patreon.com/#get-api-oauth2-v2-identity
     type ResponsePayload = {
       data: {
         id: string;
@@ -34,14 +26,22 @@ const getCampaigns = async function* () {
       };
     };
 
-    const payload: ResponsePayload = await response.json();
-    yield* payload.data;
+    const response = await axios.get<ResponsePayload>(url, {
+      headers: {
+        authorization: `Bearer ${getPatreonToken()}`
+      }
+    });
 
-    if (!payload.meta.pagination.cursors?.next) {
+    yield* response.data.data;
+
+    if (!response.data.meta.pagination.cursors?.next) {
       break;
     }
 
-    cursor = payload.meta.pagination.cursors.next;
+    cursor = response.data.meta.pagination.cursors.next;
+
+    // Rate limit: 120 requests per minute
+    await delay(500);
   }
 };
 
@@ -57,16 +57,7 @@ const getPledges = async function* (campaignId: string) {
       }
     );
 
-    const response = await fetch(url, {
-      headers: {
-        authorization: `Bearer ${getPatreonToken()}`
-      }
-    });
-
-    if (response.status !== 200) {
-      throw new Error(`Failed to fetch pledges: ${response.statusText}`);
-    }
-
+    // https://docs.patreon.com/#get-api-oauth2-v2-campaigns-campaign_id
     type ResponsePayload = {
       data: {
         id: string;
@@ -84,27 +75,39 @@ const getPledges = async function* (campaignId: string) {
       };
     };
 
-    const payload: ResponsePayload = await response.json();
-    yield* payload.data;
+    const response = await axios.get<ResponsePayload>(url, {
+      headers: {
+        Authorization: `Bearer ${getPatreonToken()}`
+      }
+    });
 
-    if (!payload.meta.pagination.cursors?.next) {
+    yield* response.data.data;
+
+    if (!response.data.meta.pagination.cursors?.next) {
       break;
     }
 
-    cursor = payload.meta.pagination.cursors.next;
+    cursor = response.data.meta.pagination.cursors.next;
+
+    // Rate limit: 120 requests per minute
+    await delay(500);
   }
 };
 
 export const getPatreonDonations = async function* () {
   for await (const campaign of getCampaigns()) {
     for await (const pledge of getPledges(campaign.id)) {
+      // Some pledges could be cancelled before the first payment was made
       if (pledge.attributes.lifetime_support_cents <= 0) {
         continue;
       }
 
+      const name = pledge.attributes.full_name;
+      const amount = pledge.attributes.lifetime_support_cents / 100;
+
       const donation: Donation = {
-        name: pledge.attributes.full_name,
-        amount: pledge.attributes.lifetime_support_cents / 100,
+        name,
+        amount,
         platform: 'Patreon'
       };
 

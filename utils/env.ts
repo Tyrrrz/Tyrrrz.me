@@ -46,6 +46,15 @@ export const getPatreonToken = () => {
   return value;
 };
 
+export const getBuyMeACoffeeToken = () => {
+  const value = process.env.BUYMEACOFFEE_TOKEN;
+  if (!value) {
+    throw new Error(`Environment variable 'BUYMEACOFFEE_TOKEN' is not defined`);
+  }
+
+  return value;
+};
+
 export const getGoogleAnalyticsId = () => {
   return process.env.GOOGLE_ANALYTICS_ID;
 };

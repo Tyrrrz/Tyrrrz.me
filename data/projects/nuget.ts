@@ -1,22 +1,24 @@
-import 'isomorphic-fetch';
+import axios from 'axios';
 
 export const getNuGetDownloads = async (packageId: string) => {
-  const response = await fetch(
-    `https://azuresearch-usnc.nuget.org/query?q=packageid:${packageId.toLowerCase()}`
-  );
-
-  // Not all projects are on NuGet
-  if (response.status !== 200) {
-    return 0;
-  }
-
+  // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource#response
   type ResponsePayload = {
     data: {
       totalDownloads: number;
     }[];
   };
 
-  const payload: ResponsePayload = await response.json();
+  const response = await axios.get<ResponsePayload>(
+    `https://azuresearch-usnc.nuget.org/query?q=packageid:${packageId.toLowerCase()}`,
+    {
+      validateStatus: (status) => status < 400 || status === 404
+    }
+  );
 
-  return payload.data.reduce((acc, val) => acc + val.totalDownloads, 0);
+  // If the package doesn't exist, return 0 instead of failing
+  if (response.status === 404) {
+    return 0;
+  }
+
+  return response.data.data.reduce((acc, val) => acc + val.totalDownloads, 0);
 };
