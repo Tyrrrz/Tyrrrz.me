@@ -5,6 +5,7 @@ import Meta from '@/components/meta';
 import Page from '@/components/page';
 import Paragraph from '@/components/paragraph';
 import { loadProjects, Project } from '@/data/projects';
+import { bufferIterable } from '@/utils/async';
 import { deleteUndefined } from '@/utils/object';
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
@@ -104,12 +105,11 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
 };
 
 export const getStaticProps: GetStaticProps<ProjectsPageProps> = async () => {
-  const projects: Project[] = [];
-  for await (const project of loadProjects()) {
-    // Undefined values cannot be serialized
-    deleteUndefined(project);
+  const projects = await bufferIterable(loadProjects());
 
-    projects.push(project);
+  // Remove undefined values because they cannot be serialized
+  for (const project of projects) {
+    deleteUndefined(project);
   }
 
   projects.sort((a, b) => b.stars - a.stars);

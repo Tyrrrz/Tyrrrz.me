@@ -7,6 +7,7 @@ import Paragraph from '@/components/paragraph';
 import Timeline from '@/components/timeline';
 import TimelineItem from '@/components/timelineItem';
 import { BlogPostRef, loadBlogPostRefs, publishBlogFeed } from '@/data/blog';
+import { bufferIterable } from '@/utils/async';
 import { deleteUndefined } from '@/utils/object';
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
@@ -85,12 +86,11 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
 export const getStaticProps: GetStaticProps<BlogPageProps> = async () => {
   await publishBlogFeed();
 
-  const posts: BlogPostRef[] = [];
-  for await (const post of loadBlogPostRefs()) {
-    // Undefined values cannot be serialized
-    deleteUndefined(post);
+  const posts = await bufferIterable(loadBlogPostRefs());
 
-    posts.push(post);
+  // Remove undefined values because they cannot be serialized
+  for (const post of posts) {
+    deleteUndefined(post);
   }
 
   posts.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));

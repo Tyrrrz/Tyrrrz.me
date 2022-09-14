@@ -1,11 +1,15 @@
 import { getGitHubToken } from '@/utils/env';
 import { Octokit } from '@octokit/rest';
 
-const github = new Octokit({
-  auth: getGitHubToken()
-});
+const createClient = () => {
+  return new Octokit({
+    auth: getGitHubToken()
+  });
+};
 
 export const getGitHubRepos = async () => {
+  const github = createClient();
+
   return await github.paginate(github.repos.listForUser, {
     username: 'Tyrrrz',
     type: 'owner',
@@ -14,10 +18,12 @@ export const getGitHubRepos = async () => {
   });
 };
 
-export const getGitHubDownloads = async (repo: string) => {
+export const getGitHubDownloads = async (repositoryName: string) => {
+  const github = createClient();
+
   const releases = await github.paginate(github.repos.listReleases, {
     owner: 'Tyrrrz',
-    repo,
+    repo: repositoryName,
     per_page: 100
   });
 
