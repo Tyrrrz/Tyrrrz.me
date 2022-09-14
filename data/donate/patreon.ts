@@ -77,7 +77,7 @@ const getPledges = async function* (campaignId: string) {
 
     const response = await axios.get<ResponsePayload>(url, {
       headers: {
-        Authorization: `Bearer ${getPatreonToken()}`
+        authorization: `Bearer ${getPatreonToken()}`
       }
     });
 

@@ -27,7 +27,7 @@ const getSupporters = async function* () {
 
     const response = await axios.get<ResponsePayload>(url, {
       headers: {
-        Authorization: `Bearer ${getBuyMeACoffeeToken()}`
+        authorization: `Bearer ${getBuyMeACoffeeToken()}`
       }
     });
 
@@ -68,11 +68,9 @@ export const getBuyMeACoffeeDonations = async function* () {
   ];
 
   for (const supporter of groupedSupporters) {
-    const name =
-      supporter.support_visibility !== 0
-        ? supporter.supporter_name || supporter.payer_name
-        : undefined;
+    const isPrivate = supporter.support_visibility === 0;
 
+    const name = !isPrivate ? supporter.supporter_name || supporter.payer_name : undefined;
     const amount = Number(supporter.support_coffee_price) * supporter.support_coffees;
 
     const donation: Donation = {

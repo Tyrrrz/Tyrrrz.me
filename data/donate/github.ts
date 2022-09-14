@@ -11,12 +11,6 @@ const createClient = () => {
   });
 };
 
-export type GitHubSponsor = {
-  name: string;
-  isPrivate: boolean;
-  amount: number;
-};
-
 const getSponsorActivities = async function* () {
   const github = createClient();
   let cursor: string | undefined;
@@ -41,7 +35,7 @@ const getSponsorActivities = async function* () {
             sponsor: {
               login: string;
               name: string;
-              sponsorshipForViewerAsSponsorable: {
+              sponsorshipForViewerAsSponsorable?: {
                 privacyLevel: 'PUBLIC' | 'PRIVATE';
               };
             };
@@ -54,7 +48,7 @@ const getSponsorActivities = async function* () {
       };
     };
 
-    const payload = await github<ResponsePayload>(
+    const data = await github<ResponsePayload>(
       `
       query($cursor: String) {
         viewer {
@@ -93,9 +87,9 @@ const getSponsorActivities = async function* () {
       { cursor }
     );
 
-    yield* payload.viewer.sponsorsActivities.nodes;
+    yield* data.viewer.sponsorsActivities.nodes;
 
-    if (!payload.viewer.sponsorsActivities.pageInfo.hasNextPage) {
+    if (!data.viewer.sponsorsActivities.pageInfo.hasNextPage) {
       break;
     }
   }
@@ -145,9 +139,16 @@ export const getGitHubSponsorsDonations = async function* () {
       })
       .reduce((acc, amount) => acc + amount, 0);
 
+    const isPrivate =
+      activities.find((activity) => activity.sponsor.login === sponsor)?.sponsor
+        .sponsorshipForViewerAsSponsorable?.privacyLevel === 'PRIVATE';
+
+    const name = !isPrivate ? sponsor : undefined;
+    const amount = oneTimeTotal + monthlyTotal;
+
     const donation: Donation = {
-      name: sponsor,
-      amount: oneTimeTotal + monthlyTotal,
+      name,
+      amount,
       platform: 'GitHub Sponsors'
     };
 
