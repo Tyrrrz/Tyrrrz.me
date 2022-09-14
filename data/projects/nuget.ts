@@ -20,5 +20,5 @@ export const getNuGetDownloads = async (packageId: string) => {
     return 0;
   }
 
-  return response.data.data.reduce((acc, val) => acc + val.totalDownloads, 0);
+  return response.data.data.reduce((acc, cur) => acc + cur.totalDownloads, 0);
 };
