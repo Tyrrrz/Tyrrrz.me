@@ -7,6 +7,9 @@ const runtimeCaching = require('next-pwa/cache');
 const nextConfig = {
   reactStrictMode: true,
 
+  // Pulling donations takes a very long time, so we need to make sure we don't time out too early
+  staticPageGenerationTimeout: 60 * 60,
+
   images: {
     domains: ['twemoji.maxcdn.com']
   },
