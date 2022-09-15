@@ -49,7 +49,7 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
               'rounded'
             )}
           >
-            <div className={c('text-lg')}>
+            <div className={c('text-lg', 'break-all')}>
               <Link href={project.url}>{project.name}</Link>
             </div>
 
@@ -66,7 +66,7 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
               <div>{project.description}</div>
 
               {project.homepageUrl && (
-                <div>
+                <div className={c('overflow-hidden')}>
                   <Inline>
                     <FiExternalLink strokeWidth={1} />
                     <span>

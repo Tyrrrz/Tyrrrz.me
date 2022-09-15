@@ -93,7 +93,9 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
                 </Inline>
               </div>
 
-              <div className={c('font-semibold')}>{donation.name || '[ anonymous ]'}</div>
+              <div className={c('font-semibold', 'break-all')}>
+                {donation.name || '[ anonymous ]'}
+              </div>
               <div className={c('font-light')}>{donation.platform}</div>
             </section>
           ))}
