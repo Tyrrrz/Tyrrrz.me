@@ -1,5 +1,5 @@
 import type { Donation } from '@/data/donate';
-import { bufferIterable, delay } from '@/utils/async';
+import { bufferIterable } from '@/utils/async';
 import { getBuyMeACoffeeToken } from '@/utils/env';
 import { formatUrlWithQuery } from '@/utils/url';
 import axios from 'axios';
@@ -8,7 +8,9 @@ const getSupporters = async function* () {
   let page = 1;
 
   while (true) {
-    const url = formatUrlWithQuery('https://developers.buymeacoffee.com/api/v1/supporters', {
+    // BMAC's rate limits are absolutely absurd, so we'll use a caching layer that I made.
+    // https://github.com/Tyrrrz/BMAC-API-Cache
+    const url = formatUrlWithQuery('https://bmac-api-cache-server.onrender.com/api/v1/supporters', {
       page: page.toString()
     });
 
@@ -38,9 +40,6 @@ const getSupporters = async function* () {
     }
 
     page++;
-
-    // Rate limit: 15 requests per minute
-    await delay(4000);
   }
 };
 

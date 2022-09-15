@@ -1,5 +1,4 @@
 import type { Donation } from '@/data/donate';
-import { delay } from '@/utils/async';
 import { getPatreonToken } from '@/utils/env';
 import { formatUrlWithQuery } from '@/utils/url';
 import axios from 'axios';
@@ -39,9 +38,6 @@ const getCampaigns = async function* () {
     }
 
     cursor = response.data.meta.pagination.cursors.next;
-
-    // Rate limit: 120 requests per minute
-    await delay(500);
   }
 };
 
@@ -88,9 +84,6 @@ const getPledges = async function* (campaignId: string) {
     }
 
     cursor = response.data.meta.pagination.cursors.next;
-
-    // Rate limit: 120 requests per minute
-    await delay(500);
   }
 };
 

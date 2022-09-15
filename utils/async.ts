@@ -1,5 +1,3 @@
-export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export const bufferIterable = async <T>(
   generator: AsyncIterable<T>,
   callback?: (item: T) => void
