@@ -90,17 +90,14 @@ const getPledges = async function* (campaignId: string) {
 export const getPatreonDonations = async function* () {
   for await (const campaign of getCampaigns()) {
     for await (const pledge of getPledges(campaign.id)) {
-      // Some pledges could be cancelled before the first payment was made
+      // Some pledges could have been cancelled before the first payment was made
       if (pledge.attributes.lifetime_support_cents <= 0) {
         continue;
       }
 
-      const name = pledge.attributes.full_name;
-      const amount = pledge.attributes.lifetime_support_cents / 100;
-
       const donation: Donation = {
-        name,
-        amount,
+        name: pledge.attributes.full_name,
+        amount: pledge.attributes.lifetime_support_cents / 100,
         platform: 'Patreon'
       };
 

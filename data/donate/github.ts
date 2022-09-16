@@ -100,7 +100,7 @@ export const getGitHubSponsorsDonations = async function* () {
   const sponsors = [...new Set(activities.map((activity) => activity.sponsor.login))];
 
   for (const sponsor of sponsors) {
-    // Aggregate one-time donations
+    // Sum up all one-time donations
     const oneTimeTotal = activities
       .filter(
         (activity) =>
@@ -110,7 +110,7 @@ export const getGitHubSponsorsDonations = async function* () {
       )
       .reduce((acc, activity) => acc + activity.sponsorsTier.monthlyPriceInCents / 100, 0);
 
-    // Aggregate monthly donations
+    // Sum up all monthly donations
     const monthlyTotal = activities
       .filter(
         (activity) =>
@@ -139,16 +139,17 @@ export const getGitHubSponsorsDonations = async function* () {
       })
       .reduce((acc, amount) => acc + amount, 0);
 
-    const isPrivate =
-      activities.find((activity) => activity.sponsor.login === sponsor)?.sponsor
-        .sponsorshipForViewerAsSponsorable?.privacyLevel === 'PRIVATE';
-
-    const name = !isPrivate ? sponsor : undefined;
-    const amount = oneTimeTotal + monthlyTotal;
+    const isPrivate = activities
+      .filter((activity) => activity.sponsor.login === sponsor)
+      .filter((activity) => activity.action === 'NEW_SPONSORSHIP')
+      .map(
+        (activity) => activity.sponsor.sponsorshipForViewerAsSponsorable?.privacyLevel === 'PRIVATE'
+      )
+      .at(-1);
 
     const donation: Donation = {
-      name,
-      amount,
+      name: !isPrivate ? sponsor : undefined,
+      amount: oneTimeTotal + monthlyTotal,
       platform: 'GitHub Sponsors'
     };
 

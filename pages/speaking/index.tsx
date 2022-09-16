@@ -7,6 +7,7 @@ import Paragraph from '@/components/paragraph';
 import Timeline from '@/components/timeline';
 import TimelineItem from '@/components/timelineItem';
 import { loadSpeakingEngagements, SpeakingEngagement } from '@/data/speaking';
+import { groupBy } from '@/utils/array';
 import { bufferIterable } from '@/utils/async';
 import { deleteUndefined } from '@/utils/object';
 import c from 'classnames';
@@ -18,18 +19,9 @@ type SpeakingPageProps = {
 };
 
 const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
-  const years = [
-    ...new Set(engagements.map((engagement) => new Date(engagement.date).getFullYear()))
-  ];
-
-  const groups = years
-    .sort((a, b) => b - a)
-    .map((year) => ({
-      year,
-      engagements: engagements.filter(
-        (engagement) => new Date(engagement.date).getFullYear() === year
-      )
-    }));
+  const engagementsByYear = groupBy(engagements, (engagement) =>
+    new Date(engagement.date).getFullYear()
+  ).sort((a, b) => b.key - a.key);
 
   return (
     <Page>
@@ -47,13 +39,13 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
       </section>
 
       <section className={c('mt-8', 'space-y-6')}>
-        {groups.map(({ year, engagements }, i) => (
+        {engagementsByYear.map(({ key: year, items }, i) => (
           <section key={i}>
             <Heading variant="h2">{year}</Heading>
 
             <div className={c('ml-4')}>
               <Timeline>
-                {engagements.map((engagement, i) => (
+                {items.map((engagement, i) => (
                   <TimelineItem key={i}>
                     <div className={c('text-lg')}>
                       <Link

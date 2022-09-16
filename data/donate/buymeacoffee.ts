@@ -1,4 +1,5 @@
 import type { Donation } from '@/data/donate';
+import { groupBy } from '@/utils/array';
 import { bufferIterable } from '@/utils/async';
 import { getBuyMeACoffeeToken } from '@/utils/env';
 import { formatUrlWithQuery } from '@/utils/url';
@@ -17,11 +18,12 @@ const getSupporters = async function* () {
     // https://developers.buymeacoffee.com/#/apireference?id=onetime-supporters-v1supporters
     type ResponsePayload = {
       data: {
-        payer_name: string;
+        payer_email: string;
+        payer_name?: string;
+        supporter_name?: string;
         support_visibility: number;
         support_coffees: number;
         support_coffee_price: string;
-        supporter_name?: string;
         is_refunded?: boolean;
       }[];
       last_page: number;
@@ -44,37 +46,49 @@ const getSupporters = async function* () {
 };
 
 export const getBuyMeACoffeeDonations = async function* () {
-  const supporters = await bufferIterable(getSupporters());
+  // Filter out refunds and project into a simpler structure
+  const pledges = (await bufferIterable(getSupporters()))
+    .filter((supporter) => !supporter.is_refunded)
+    .map((supporter) => {
+      const isPrivate = supporter.support_visibility === 0;
+      const email = supporter.payer_email;
+      const name = supporter.supporter_name || supporter.payer_name;
+      const amount = Number(supporter.support_coffee_price) * supporter.support_coffees;
 
-  const groupedSupporters = [
-    ...supporters
-      .reduce((acc, supporter) => {
-        // Skip refunded
-        if (supporter.is_refunded) {
-          return acc;
-        }
+      return {
+        isPrivate,
+        email,
+        name,
+        amount
+      };
+    });
 
-        const name = supporter.supporter_name || supporter.payer_name;
+  // Sum up all pledges with the same email
+  const pledgesByEmail = groupBy(pledges, (pledge) => pledge.email).map(({ items }) => {
+    const last = items.at(-1);
+    const amount = items.reduce((acc, cur) => acc + cur.amount, 0);
 
-        acc.set(name, {
-          ...supporter,
-          support_coffees: (acc.get(name)?.support_coffees || 0) + supporter.support_coffees
-        });
+    return {
+      ...last,
+      amount
+    };
+  });
 
-        return acc;
-      }, new Map<string, typeof supporters[0]>())
-      .values()
-  ];
+  // Sum up all pledges with the same name
+  const pledgesByName = groupBy(pledgesByEmail, (pledge) => pledge.name).map(({ items }) => {
+    const last = items.at(-1);
+    const amount = items.reduce((acc, cur) => acc + cur.amount, 0);
 
-  for (const supporter of groupedSupporters) {
-    const isPrivate = supporter.support_visibility === 0;
+    return {
+      ...last,
+      amount
+    };
+  });
 
-    const name = !isPrivate ? supporter.supporter_name || supporter.payer_name : undefined;
-    const amount = Number(supporter.support_coffee_price) * supporter.support_coffees;
-
+  for (const pledge of pledgesByName) {
     const donation: Donation = {
-      name,
-      amount,
+      name: !pledge.isPrivate ? pledge.name : undefined,
+      amount: pledge.amount,
       platform: 'BuyMeACoffee'
     };
 

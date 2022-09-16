@@ -7,6 +7,7 @@ import Paragraph from '@/components/paragraph';
 import Timeline from '@/components/timeline';
 import TimelineItem from '@/components/timelineItem';
 import { BlogPostRef, loadBlogPostRefs, publishBlogFeed } from '@/data/blog';
+import { groupBy } from '@/utils/array';
 import { bufferIterable } from '@/utils/async';
 import { deleteUndefined } from '@/utils/object';
 import c from 'classnames';
@@ -18,14 +19,9 @@ type BlogPageProps = {
 };
 
 const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
-  const years = [...new Set(posts.map((post) => new Date(post.date).getFullYear()))];
-
-  const groups = years
-    .sort((a, b) => b - a)
-    .map((year) => ({
-      year,
-      posts: posts.filter((post) => new Date(post.date).getFullYear() === year)
-    }));
+  const postsByYear = groupBy(posts, (post) => new Date(post.date).getFullYear()).sort(
+    (a, b) => b.key - a.key
+  );
 
   return (
     <Page>
@@ -43,13 +39,13 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
       </section>
 
       <section className={c('mt-8', 'space-y-6')}>
-        {groups.map(({ year, posts }, i) => (
+        {postsByYear.map(({ key: year, items }, i) => (
           <section key={i}>
             <Heading variant="h2">{year}</Heading>
 
             <div className={c('ml-4')}>
               <Timeline>
-                {posts.map((post, i) => (
+                {items.map((post, i) => (
                   <TimelineItem key={i}>
                     <div className={c('text-lg')}>
                       <Link href={`/blog/${post.id}`}>{post.title}</Link>
