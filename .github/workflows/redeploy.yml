@@ -8,21 +8,9 @@ jobs:
   redeploy:
     runs-on: ubuntu-latest
 
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Install NodeJS
-        uses: actions/setup-node@v3
-        with:
-          node-version: current
-
-      - name: Install Vercel CLI
-        run: npm i -g vercel
-
       - name: Trigger deploy
-        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
+        uses: satak/webrequest-action@v1.2.4
+        with:
+          url: ${{ secrets.VERCEL_WEBHOOK }}
+          method: POST
