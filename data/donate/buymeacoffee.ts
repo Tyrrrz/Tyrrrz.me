@@ -32,8 +32,15 @@ const getSupporters = async function* () {
     const response = await axios.get<ResponsePayload>(url, {
       headers: {
         authorization: `Bearer ${getBuyMeACoffeeToken()}`
-      }
+      },
+      validateStatus: () => true
     });
+
+    if (response.status !== 200) {
+      throw new Error(
+        `Failed to fetch BuyMeACoffee supporters. Status code: ${response.status}. Request URL: ${url}.`
+      );
+    }
 
     yield* response.data.data;
 

@@ -28,8 +28,15 @@ const getCampaigns = async function* () {
     const response = await axios.get<ResponsePayload>(url, {
       headers: {
         authorization: `Bearer ${getPatreonToken()}`
-      }
+      },
+      validateStatus: () => true
     });
+
+    if (response.status !== 200) {
+      throw new Error(
+        `Failed to fetch Patreon campaigns. Status code: ${response.status}. Request URL: ${url}.`
+      );
+    }
 
     yield* response.data.data;
 
@@ -74,8 +81,15 @@ const getPledges = async function* (campaignId: string) {
     const response = await axios.get<ResponsePayload>(url, {
       headers: {
         authorization: `Bearer ${getPatreonToken()}`
-      }
+      },
+      validateStatus: () => true
     });
+
+    if (response.status !== 200) {
+      throw new Error(
+        `Failed to fetch Patreon pledges. Status code: ${response.status}. Request URL: ${url}.`
+      );
+    }
 
     yield* response.data.data;
 
