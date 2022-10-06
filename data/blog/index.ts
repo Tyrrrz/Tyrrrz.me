@@ -34,7 +34,7 @@ export const loadBlogPosts = async function* () {
     const {
       attributes: { title, date },
       body
-    } = frontmatter(data);
+    } = frontmatter<{ title: string; date: string }>(data);
 
     if (!title || typeof title !== 'string') {
       throw new Error(`Blog post '${id}' has missing or invalid title`);

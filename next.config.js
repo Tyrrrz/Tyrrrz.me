@@ -1,10 +1,9 @@
 const { spawnSync } = require('child_process');
-const withPlugins = require('next-compose-plugins');
 const withPWA = require('next-pwa');
 const runtimeCaching = require('next-pwa/cache');
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const config = {
   reactStrictMode: true,
 
   // Pulling donations takes a very long time, so we need to make sure we don't time out too early
@@ -32,17 +31,14 @@ const nextConfig = {
   }
 };
 
-module.exports = withPlugins(
-  [
-    withPWA,
-    {
-      pwa: {
-        dest: 'public',
-        disable: process.env.NODE_ENV === 'development',
-        runtimeCaching
-      }
-    }
-  ],
+const plugins = [
+  withPWA({
+    dest: 'public',
+    disable: process.env.NODE_ENV === 'development',
+    runtimeCaching
+  })
+];
 
-  nextConfig
-);
+module.exports = (_phase) => {
+  return plugins.reduce((config, plugin) => plugin(config), config);
+};
