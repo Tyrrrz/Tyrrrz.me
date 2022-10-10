@@ -7,11 +7,11 @@ The primary purpose of software testing is to detect any potential defects in a 
 
 Consequentially, the value provided by such tests is directly dependent on how well the scenarios they simulate resemble the way the software is actually used. Any deviation therein diminishes that value, as it becomes harder to reason about the state of the would-be production system based on the result of a test run.
 
-In an ideal world, our test scenarios, including the environment they execute in, should perfectly match real-life conditions. This is always desirable, but might not always be practical, as the system can rely on components that are difficult to test with, either because they are not available or because their behavior is inconsistent or slow.
+In an ideal world, our test scenarios, including the environment they execute in, should perfectly match real-life conditions. This is always desirable, but might not always be practical, as the system may rely on components that are difficult to test with, either because they are not readily accessible or because their behavior is inconsistent or slow.
 
-A common practice in cases like this is to replace such dependencies with lightweight substitutes that act as _test doubles_. Although doing so does lead to lower confidence, it's often an unavoidable trade-off when it comes to designing a robust and consistent test suite.
+A common practice in cases like this is to replace such dependencies with lightweight substitutes that act as _test doubles_. Although doing so does lead to lower confidence, it's often an unavoidable trade-off when it comes to designing a robust and deterministic test suite.
 
-That said, while test doubles can be implemented in different ways, most of the time developers tend to resort to _mocking_ as the default choice. This is unfortunate, as it leads to overuse of mocks where other forms of substitutes are typically more suitable, making tests [implementation-aware and fragile](https://en.wikipedia.org/wiki/Mock_object#Limitations) as a result.
+That said, while test doubles can be implemented in different ways, most of the time developers tend to resort to _mocking_ as their default choice. This is unfortunate, as it leads to overuse of mocks where other forms of substitutes are typically more suitable, making tests [implementation-aware and fragile](https://en.wikipedia.org/wiki/Mock_object#Limitations) as a result.
 
 When writing tests, I prefer to avoid mocks as much as possible and rely on _fake_ implementations instead. They require a bit of additional upfront investment, but provide many practical advantages which are important to consider.
 
@@ -23,7 +23,7 @@ As we enter the realm of software terminology, words slowly start to lose their 
 
 Unsurprisingly, the concept of "mock" or how it's fundamentally different from other types of substitutes is also one of those cases. Despite its highly ubiquitous usage, this term [doesn't have a single universally accepted interpretation](https://stackoverflow.com/questions/346372/whats-the-difference-between-faking-mocking-and-stubbing).
 
-According to the [original definitions introduced by Gerard Meszaros](https://martinfowler.com/bliki/TestDouble.html), a mock object is a very specific type of substitute which is used to verify interactions between the system under test and its dependencies. Nowadays, however, the distinction has become a bit blurry, as this term is commonly used to refer to a broader class of objects created with frameworks such as [Moq](https://github.com/moq/moq4), [Mockito](https://github.com/mockito/mockito), [Jest](https://github.com/facebook/jest), and others.
+According to the [original definitions introduced by Gerard Meszaros](https://martinfowler.com/bliki/TestDouble.html), a mock object is a very specific type of substitute which is used to verify interactions between the system under test and its dependencies. Nowadays, however, the distinction has become a bit blurry, as this term is commonly used to refer to a broader category of objects created with frameworks such as [Moq](https://github.com/moq/moq4), [Mockito](https://github.com/mockito/mockito), [Jest](https://github.com/facebook/jest), and others.
 
 Such substitutes may not necessarily be mocks under the original definition, but there's very little benefit in acknowledging these technicalities. So to make matters simpler, we will stick to this more colloquial understanding of the term throughout the article.
 
@@ -181,7 +181,7 @@ The mocking framework we're using ([Moq](https://github.com/Moq/moq4)) doesn't a
 
 As you can probably see, this change increased the complexity of the test rather significantly, as suddenly we find ourselves dealing with some additional state and a much more involved mocking setup. It also became less clear what exactly is it that we're trying to verify or whether we're doing it correctly, making the whole scenario harder to reason about.
 
-Even despite all that effort, this test is still not as resilient as we would've wanted. For example, adding another method to `IBlobStorage` and calling it from `DocumentManager` will cause the test to break as the mock wasn't previously taught how to deal with it. You can see how all of these issues and complexity can only extrapolate poorly in real projects with large test suites.
+Even despite all that effort, this test is still not as resilient as we would've wanted. For example, adding another method to `IBlobStorage` and calling it from `DocumentManager` will cause the test to break as the mock wasn't previously taught how to deal with it. You can see how all of these issues and complexity can only exacerbate in real projects with large test suites.
 
 One way or another, **tests that rely on mocks are inherently coupled to the implementation of the system and are fragile as the result**. This does not only impose an additional maintenance cost, as such tests need to be constantly updated, but makes them considerably less valuable as well.
 
@@ -244,7 +244,7 @@ As seen above, our fake blob storage uses a hash map to keep track of uploaded f
 
 Note that the above implementation doesn't make any assumptions about how it's going to be used in tests. Instead, it provides what can effectively be a drop-in replacement for the actual blob storage component in our system.
 
-Because of that, it's also important that the fake replicates the behavior of the real dependency as closely as possible. This means that we might have to consider various nuances, some of which are:
+Because of that, it's also important that the fake replicates the behavior of the real dependency as closely as possible. This means that we might have to consider various nuances like:
 
 - Whether the file names are treated as case-sensitive
 - Whether `ReadFileAsync()` throws on a non-existing file or returns an empty stream
@@ -309,9 +309,9 @@ public async Task I_can_get_the_content_of_a_previously_saved_document()
 
 Now, rather than create a file directly through `FakeBlobStorage`, we do it using `DocumentManager` instead. This brings the scenario closer to how an actual consumer would interact with the class that we are testing.
 
-From the perspective of the behavior of the system, the only thing we care about is whether a document that was saved can be retrieved afterwards. Any unrelated details do not concern us, so there is no reason to be testing them.
+From the perspective of the behavior of the system, the only thing we care about is whether a document that was saved can be retrieved afterwards. Other unrelated details do not concern us, so there is no reason to be testing them.
 
-Because of this, we don't have to worry about where the file is persisted inside the storage, how exactly it gets uploaded, which format or encoding is used, and other similar aspects. Since the test above only validates the external behavior, it doesn't have any overreaching assumptions about internal specifics.
+Because of this, we don't have to worry about where the file is persisted inside the storage, how exactly it gets uploaded, which format or encoding is used, or other similar aspects. Since the test above only validates the external behavior, it doesn't have any overreaching assumptions about internal specifics.
 
 It is also worth noting how little code we had to write, comparing to our previous attempts when we relied on mocking. This additional benefit comes from the fact that well-designed fakes are inherently reusable, which helps a lot with maintainability.
 
