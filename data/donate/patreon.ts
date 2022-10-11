@@ -1,7 +1,7 @@
 import type { Donation } from '@/data/donate';
 import { getPatreonToken } from '@/utils/env';
 import { formatUrlWithQuery } from '@/utils/url';
-import axios from 'axios';
+import fetch from 'node-fetch';
 
 const getCampaigns = async function* () {
   let cursor = '';
@@ -10,6 +10,18 @@ const getCampaigns = async function* () {
     const url = formatUrlWithQuery('https://patreon.com/api/oauth2/v2/campaigns', {
       'page[cursor]': cursor
     });
+
+    const response = await fetch(url, {
+      headers: {
+        authorization: `Bearer ${getPatreonToken()}`
+      }
+    });
+
+    if (response.status !== 200) {
+      throw new Error(
+        `Failed to fetch Patreon campaigns. Status code: ${response.status}. Request URL: '${url}'.`
+      );
+    }
 
     // https://docs.patreon.com/#get-api-oauth2-v2-identity
     type ResponsePayload = {
@@ -25,19 +37,15 @@ const getCampaigns = async function* () {
       };
     };
 
-    const response = await axios.get<ResponsePayload>(url, {
-      headers: {
-        authorization: `Bearer ${getPatreonToken()}`
-      }
-    });
+    const payload = (await response.json()) as ResponsePayload;
 
-    yield* response.data.data;
+    yield* payload.data;
 
-    if (!response.data.meta.pagination.cursors?.next) {
+    if (!payload.meta.pagination.cursors?.next) {
       break;
     }
 
-    cursor = response.data.meta.pagination.cursors.next;
+    cursor = payload.meta.pagination.cursors.next;
   }
 };
 
@@ -52,6 +60,18 @@ const getPledges = async function* (campaignId: string) {
         'fields[member]': 'full_name,lifetime_support_cents'
       }
     );
+
+    const response = await fetch(url, {
+      headers: {
+        authorization: `Bearer ${getPatreonToken()}`
+      }
+    });
+
+    if (response.status !== 200) {
+      throw new Error(
+        `Failed to fetch Patreon pledges. Status code: ${response.status}. Request URL: '${url}'.`
+      );
+    }
 
     // https://docs.patreon.com/#get-api-oauth2-v2-campaigns-campaign_id
     type ResponsePayload = {
@@ -71,19 +91,15 @@ const getPledges = async function* (campaignId: string) {
       };
     };
 
-    const response = await axios.get<ResponsePayload>(url, {
-      headers: {
-        authorization: `Bearer ${getPatreonToken()}`
-      }
-    });
+    const payload = (await response.json()) as ResponsePayload;
 
-    yield* response.data.data;
+    yield* payload.data;
 
-    if (!response.data.meta.pagination.cursors?.next) {
+    if (!payload.meta.pagination.cursors?.next) {
       break;
     }
 
-    cursor = response.data.meta.pagination.cursors.next;
+    cursor = payload.meta.pagination.cursors.next;
   }
 };
 

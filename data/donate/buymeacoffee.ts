@@ -3,7 +3,7 @@ import { groupBy } from '@/utils/array';
 import { bufferIterable } from '@/utils/async';
 import { getBuyMeACoffeeToken } from '@/utils/env';
 import { formatUrlWithQuery } from '@/utils/url';
-import axios from 'axios';
+import fetch from 'node-fetch';
 
 const getSupporters = async function* () {
   let page = 1;
@@ -14,6 +14,18 @@ const getSupporters = async function* () {
     const url = formatUrlWithQuery('https://bmac-api-cache-server.onrender.com/api/v1/supporters', {
       page: page.toString()
     });
+
+    const response = await fetch(url, {
+      headers: {
+        authorization: `Bearer ${getBuyMeACoffeeToken()}`
+      }
+    });
+
+    if (response.status !== 200) {
+      throw new Error(
+        `Failed to fetch BuyMeACoffee supporters. Status code: ${response.status}. Request URL: '${url}'.`
+      );
+    }
 
     // https://developers.buymeacoffee.com/#/apireference?id=onetime-supporters-v1supporters
     type ResponsePayload = {
@@ -29,15 +41,11 @@ const getSupporters = async function* () {
       last_page: number;
     };
 
-    const response = await axios.get<ResponsePayload>(url, {
-      headers: {
-        authorization: `Bearer ${getBuyMeACoffeeToken()}`
-      }
-    });
+    const payload = (await response.json()) as ResponsePayload;
 
-    yield* response.data.data;
+    yield* payload.data;
 
-    if (page >= response.data.last_page) {
+    if (page >= payload.last_page) {
       break;
     }
 

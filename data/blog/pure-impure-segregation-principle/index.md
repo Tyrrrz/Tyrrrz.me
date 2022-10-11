@@ -9,7 +9,7 @@ In particular, one person mentioned that the drawbacks I've described, especiall
 
 More specifically, the suggested solution was to refactor the presented class hierarchy by extracting the pure business logic away from the rest of the code. Getting rid of the impure dependency eliminates the need for mocking, which in turn simplifies unit testing.
 
-This exact approach was actually mentioned in later parts of the post as well, albeit in a slightly different context. Although it does make isolated testing easier for that particular code sample, it doesn't actually invalidate the main issues raised by the article.
+This exact approach was actually mentioned in later parts of the post as well, albeit in a slightly different context. Although it does make isolated testing easier for that particular code sample, it doesn't invalidate the main issues raised by the article.
 
 That said, I also think that the underlying principle of code separation based on purity is very important and often overlooked. When used correctly, it can guide software design, providing benefits in terms of readability, portability and, as mentioned, unit testing.
 
