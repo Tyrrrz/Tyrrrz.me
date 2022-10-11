@@ -9,7 +9,7 @@ Carefully designed abstractions can help better understand the problem domain an
 
 When evaluating one abstraction against another, we are used to considering factors such as encapsulation, consistency, mental overhead, cohesion, and so on. However, there is one interesting aspect that is often overlooked, which is **ownership**.
 
-Who owns the abstraction — whether it's the provider of or the consumer — plays a significant role in how it's used, and shapes the design of the system as a whole. Some programming languages and frameworks are also more conducive to one ownership model over the other, which may affect the way we approach the problem at hand.
+Who owns the abstraction — whether it's the provider or the consumer — plays a significant role in how it's used, and shapes the design of the system as a whole. Some programming languages and frameworks are also more conducive to one ownership model over the other, which may affect the way we approach the problem at hand.
 
 In this article, we'll explore the idea of abstraction ownership, discuss its implications, and look at some examples of how it manifests in practice.
 
