@@ -67,9 +67,11 @@ const Markdown: FC<MarkdownProps> = ({ source, transformLinkHref, transformImage
           // Language is set on the child <code> element
           if (
             node.children.length === 1 &&
+            node.children[0] &&
             node.children[0].type === 'element' &&
             node.children[0].tagName === 'code' &&
             node.children[0].children.length === 1 &&
+            node.children[0].children[0] &&
             node.children[0].children[0].type === 'text'
           ) {
             const source = node.children[0].children[0].value;
