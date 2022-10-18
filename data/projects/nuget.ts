@@ -9,20 +9,20 @@ export const getNuGetDownloads = async (packageId: string) => {
     return 0;
   }
 
-  if (response.status !== 200) {
+  if (!response.ok) {
     throw new Error(
-      `Failed to fetch NuGet package data. Status code: ${response.status}. Request URL: '${url}'.`
+      `Request 'GET ${url}' failed. Status: ${response.status}. Body: '${await response.text()}'.`
     );
   }
 
   // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource#response
-  type ResponsePayload = {
+  type ResponseBody = {
     data: {
       totalDownloads: number;
     }[];
   };
 
-  const payload = (await response.json()) as ResponsePayload;
+  const body = (await response.json()) as ResponseBody;
 
-  return payload.data.reduce((acc, cur) => acc + cur.totalDownloads, 0);
+  return body.data.reduce((acc, cur) => acc + cur.totalDownloads, 0);
 };

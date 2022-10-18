@@ -17,14 +17,14 @@ const getCampaigns = async function* () {
       }
     });
 
-    if (response.status !== 200) {
+    if (!response.ok) {
       throw new Error(
-        `Failed to fetch Patreon campaigns. Status code: ${response.status}. Request URL: '${url}'.`
+        `Request 'GET ${url}' failed. Status: ${response.status}. Body: '${await response.text()}'.`
       );
     }
 
     // https://docs.patreon.com/#get-api-oauth2-v2-identity
-    type ResponsePayload = {
+    type ResponseBody = {
       data: {
         id: string;
       }[];
@@ -37,15 +37,15 @@ const getCampaigns = async function* () {
       };
     };
 
-    const payload = (await response.json()) as ResponsePayload;
+    const body = (await response.json()) as ResponseBody;
 
-    yield* payload.data;
+    yield* body.data;
 
-    if (!payload.meta.pagination.cursors?.next) {
+    if (!body.meta.pagination.cursors?.next) {
       break;
     }
 
-    cursor = payload.meta.pagination.cursors.next;
+    cursor = body.meta.pagination.cursors.next;
   }
 };
 
@@ -67,14 +67,14 @@ const getPledges = async function* (campaignId: string) {
       }
     });
 
-    if (response.status !== 200) {
+    if (!response.ok) {
       throw new Error(
-        `Failed to fetch Patreon pledges. Status code: ${response.status}. Request URL: '${url}'.`
+        `Request 'GET ${url}' failed. Status: ${response.status}. Body: '${await response.text()}'.`
       );
     }
 
     // https://docs.patreon.com/#get-api-oauth2-v2-campaigns-campaign_id
-    type ResponsePayload = {
+    type ResponseBody = {
       data: {
         id: string;
         attributes: {
@@ -91,15 +91,15 @@ const getPledges = async function* (campaignId: string) {
       };
     };
 
-    const payload = (await response.json()) as ResponsePayload;
+    const body = (await response.json()) as ResponseBody;
 
-    yield* payload.data;
+    yield* body.data;
 
-    if (!payload.meta.pagination.cursors?.next) {
+    if (!body.meta.pagination.cursors?.next) {
       break;
     }
 
-    cursor = payload.meta.pagination.cursors.next;
+    cursor = body.meta.pagination.cursors.next;
   }
 };
 

@@ -21,14 +21,14 @@ const getSupporters = async function* () {
       }
     });
 
-    if (response.status !== 200) {
+    if (!response.ok) {
       throw new Error(
-        `Failed to fetch BuyMeACoffee supporters. Status code: ${response.status}. Request URL: '${url}'.`
+        `Request 'GET ${url}' failed. Status: ${response.status}. Body: '${await response.text()}'.`
       );
     }
 
     // https://developers.buymeacoffee.com/#/apireference?id=onetime-supporters-v1supporters
-    type ResponsePayload = {
+    type ResponseBody = {
       data: {
         payer_email: string;
         payer_name?: string;
@@ -41,11 +41,11 @@ const getSupporters = async function* () {
       last_page: number;
     };
 
-    const payload = (await response.json()) as ResponsePayload;
+    const body = (await response.json()) as ResponseBody;
 
-    yield* payload.data;
+    yield* body.data;
 
-    if (page >= payload.last_page) {
+    if (page >= body.last_page) {
       break;
     }
 

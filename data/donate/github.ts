@@ -16,7 +16,7 @@ const getSponsorActivities = async function* () {
   let cursor: string | undefined;
 
   while (true) {
-    type ResponsePayload = {
+    type QueryResult = {
       viewer: {
         sponsorsActivities: {
           pageInfo: {
@@ -48,7 +48,7 @@ const getSponsorActivities = async function* () {
       };
     };
 
-    const data = await github<ResponsePayload>(
+    const data = await github<QueryResult>(
       `
       query($cursor: String) {
         viewer {
