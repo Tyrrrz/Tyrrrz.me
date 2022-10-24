@@ -3,7 +3,6 @@ import { groupBy } from '@/utils/array';
 import { bufferIterable } from '@/utils/async';
 import { getBuyMeACoffeeToken } from '@/utils/env';
 import { formatUrlWithQuery } from '@/utils/url';
-import fetch from 'node-fetch';
 
 const getSupporters = async function* () {
   let page = 1;

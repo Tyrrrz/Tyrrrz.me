@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 export const getNuGetDownloads = async (packageId: string) => {
   const url = `https://azuresearch-usnc.nuget.org/query?q=packageid:${packageId.toLowerCase()}`;
   const response = await fetch(url);
