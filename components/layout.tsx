@@ -53,8 +53,8 @@ type NavLinkProps = PropsWithChildren<{
 }>;
 
 const NavLink: FC<NavLinkProps> = ({ href, children }) => {
-  const { route } = useRouter();
-  const active = route === href || route.startsWith(href + '/');
+  const router = useRouter();
+  const isActive = router.route === href || router.route.startsWith(href + '/');
 
   return (
     <div
@@ -64,12 +64,14 @@ const NavLink: FC<NavLinkProps> = ({ href, children }) => {
         'rounded',
         'border-2',
         {
-          'border-transparent': !active,
-          'border-purple-500': active
+          'border-transparent': !isActive,
+          'border-purple-500': isActive
         },
         {
-          'bg-purple-100': active
-        }
+          'bg-purple-100': isActive
+        },
+        'transition-colors',
+        'duration-300'
       )}
     >
       <Link variant="discreet" href={href}>
