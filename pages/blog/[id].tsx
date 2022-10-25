@@ -3,7 +3,6 @@ import Image from '@/components/image';
 import Inline from '@/components/inline';
 import Markdown from '@/components/markdown';
 import Meta from '@/components/meta';
-import Page from '@/components/page';
 import UkraineAlert from '@/components/ukraineAlert';
 import { BlogPost, loadBlogPost, loadBlogPostRefs, publishBlogPostAssets } from '@/data/blog';
 import { getDisqusId, getSiteUrl } from '@/utils/env';
@@ -81,7 +80,7 @@ const CommentSection: FC<BlogPostPageProps> = ({ post }) => {
 
 const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
   return (
-    <Page>
+    <>
       <Meta
         title={post.title}
         description={post.excerpt}
@@ -120,7 +119,7 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
 
       <ArticleSection post={post} />
       <CommentSection post={post} />
-    </Page>
+    </>
   );
 };
 

@@ -2,7 +2,6 @@ import Heading from '@/components/heading';
 import Inline from '@/components/inline';
 import Link from '@/components/link';
 import Meta from '@/components/meta';
-import Page from '@/components/page';
 import Paragraph from '@/components/paragraph';
 import { loadProjects, Project } from '@/data/projects';
 import { bufferIterable } from '@/utils/async';
@@ -17,7 +16,7 @@ type ProjectsPageProps = {
 
 const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
   return (
-    <Page>
+    <>
       <Meta title="Projects" />
 
       <section>
@@ -100,7 +99,7 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
           </section>
         ))}
       </section>
-    </Page>
+    </>
   );
 };
 

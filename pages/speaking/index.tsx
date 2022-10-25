@@ -2,7 +2,6 @@ import Heading from '@/components/heading';
 import Inline from '@/components/inline';
 import Link from '@/components/link';
 import Meta from '@/components/meta';
-import Page from '@/components/page';
 import Paragraph from '@/components/paragraph';
 import Timeline from '@/components/timeline';
 import TimelineItem from '@/components/timelineItem';
@@ -24,7 +23,7 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
   ).sort((a, b) => b.key - a.key);
 
   return (
-    <Page>
+    <>
       <Meta title="Speaking" />
 
       <section>
@@ -100,7 +99,7 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
           </section>
         ))}
       </section>
-    </Page>
+    </>
   );
 };
 

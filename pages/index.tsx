@@ -3,7 +3,6 @@ import Heading from '@/components/heading';
 import Image from '@/components/image';
 import Inline from '@/components/inline';
 import Link from '@/components/link';
-import Page from '@/components/page';
 import Paragraph from '@/components/paragraph';
 import UkraineAlert from '@/components/ukraineAlert';
 import c from 'classnames';
@@ -17,7 +16,7 @@ const HomePage: NextPage = () => {
   const githubStarUrl = 'https://stars.github.com/profiles/tyrrrz';
 
   return (
-    <Page>
+    <>
       <section
         className={c(
           'flex',
@@ -85,7 +84,7 @@ const HomePage: NextPage = () => {
           </div>
         </Link>
       </section>
-    </Page>
+    </>
   );
 };
 

@@ -6,14 +6,13 @@ import Link from '@/components/link';
 import List from '@/components/list';
 import ListItem from '@/components/listItem';
 import Meta from '@/components/meta';
-import Page from '@/components/page';
 import Paragraph from '@/components/paragraph';
 import c from 'classnames';
 import { NextPage } from 'next';
 
 const UkrainePage: NextPage = () => {
   return (
-    <Page>
+    <>
       <Meta title="Support Ukraine" />
 
       <section>
@@ -120,7 +119,7 @@ const UkrainePage: NextPage = () => {
           <Emoji code="🇺🇦" />
         </Inline>
       </div>
-    </Page>
+    </>
   );
 };
 

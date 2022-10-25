@@ -2,7 +2,6 @@ import Heading from '@/components/heading';
 import Inline from '@/components/inline';
 import Link from '@/components/link';
 import Meta from '@/components/meta';
-import Page from '@/components/page';
 import Paragraph from '@/components/paragraph';
 import Timeline from '@/components/timeline';
 import TimelineItem from '@/components/timelineItem';
@@ -24,7 +23,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
   );
 
   return (
-    <Page>
+    <>
       <Meta title="Blog" rssUrl="/blog/rss.xml" />
 
       <section>
@@ -75,7 +74,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
           </section>
         ))}
       </section>
-    </Page>
+    </>
   );
 };
 

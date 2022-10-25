@@ -5,7 +5,6 @@ import Link from '@/components/link';
 import List from '@/components/list';
 import ListItem from '@/components/listItem';
 import Meta from '@/components/meta';
-import Page from '@/components/page';
 import Paragraph from '@/components/paragraph';
 import { Donation, loadDonations } from '@/data/donate';
 import { bufferIterable } from '@/utils/async';
@@ -20,7 +19,7 @@ type DonationPageProps = {
 
 const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
   return (
-    <Page>
+    <>
       <Meta title="Donate" />
 
       <section>
@@ -101,7 +100,7 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
           ))}
         </div>
       </section>
-    </Page>
+    </>
   );
 };
 

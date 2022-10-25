@@ -2,10 +2,6 @@ import Image from '@/components/image';
 import c from 'classnames';
 import { FC, useMemo } from 'react';
 
-type EmojiProps = {
-  code: string;
-};
-
 const getTwemojiId = (code: string) => {
   // Sourced from: https://github.com/twitter/twemoji/blob/21c0f5cc0c23bec2d433632cee9e3ebf4ed183e2/scripts/build.js#L571-L589
 
@@ -32,6 +28,10 @@ const getTwemojiId = (code: string) => {
 
 const getTwemojiUrl = (code: string) => {
   return `https://twemoji.maxcdn.com/v/latest/svg/${getTwemojiId(code)}.svg`;
+};
+
+type EmojiProps = {
+  code: string;
 };
 
 const Emoji: FC<EmojiProps> = ({ code }) => {
