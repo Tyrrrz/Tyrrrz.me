@@ -20,7 +20,7 @@ export const getNuGetDownloads = async (packageId: string) => {
     }[];
   };
 
-  const body = (await response.json()) as ResponseBody;
+  const body: ResponseBody = await response.json();
 
   return body.data.reduce((acc, cur) => acc + cur.totalDownloads, 0);
 };

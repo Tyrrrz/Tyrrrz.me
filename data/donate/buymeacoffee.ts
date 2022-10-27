@@ -40,7 +40,7 @@ const getSupporters = async function* () {
       last_page: number;
     };
 
-    const body = (await response.json()) as ResponseBody;
+    const body: ResponseBody = await response.json();
 
     yield* body.data;
 

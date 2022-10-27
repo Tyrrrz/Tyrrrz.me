@@ -36,7 +36,7 @@ const getCampaigns = async function* () {
       };
     };
 
-    const body = (await response.json()) as ResponseBody;
+    const body: ResponseBody = await response.json();
 
     yield* body.data;
 
@@ -90,7 +90,7 @@ const getPledges = async function* (campaignId: string) {
       };
     };
 
-    const body = (await response.json()) as ResponseBody;
+    const body: ResponseBody = await response.json();
 
     yield* body.data;
 
