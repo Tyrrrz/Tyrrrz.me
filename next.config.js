@@ -39,6 +39,6 @@ const plugins = [
   })
 ];
 
-module.exports = (_phase) => {
+module.exports = () => {
   return plugins.reduce((config, plugin) => plugin(config), config);
 };
