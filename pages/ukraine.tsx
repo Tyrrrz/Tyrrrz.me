@@ -75,8 +75,17 @@ const UkrainePage: NextPage = () => {
             (military & humanitarian aid)
           </ListItem>
           <ListItem>
-            <Link href="https://hospitallers.life/needs-hospitallers">Hospitallers Battalion</Link>{' '}
-            (front-line medical assistance)
+            <Link href="https://koloua.com/en/donate">NGO &quot;Koloua&quot;</Link> (military aid)
+          </ListItem>
+          <ListItem>
+            <Link href="https://hospitallers.life/needs-hospitallers">
+              NGO &quot;Hospitallers&quot;
+            </Link>{' '}
+            (medical aid)
+          </ListItem>
+          <ListItem>
+            <Link href="https://voices.org.ua/en/donat">NGO &quot;Voices of Children&quot;</Link>{' '}
+            (humanitarian aid)
           </ListItem>
           <ListItem>
             Any <Link href="/donate">personal donations</Link> during this time will also be
