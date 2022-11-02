@@ -75,7 +75,7 @@ const UkrainePage: NextPage = () => {
             (military & humanitarian aid)
           </ListItem>
           <ListItem>
-            <Link href="https://koloua.com/en/donate">NGO &quot;Koloua&quot;</Link> (military aid)
+            <Link href="https://koloua.com/en/donate">NGO &quot;Kolo&quot;</Link> (military aid)
           </ListItem>
           <ListItem>
             <Link href="https://hospitallers.life/needs-hospitallers">
