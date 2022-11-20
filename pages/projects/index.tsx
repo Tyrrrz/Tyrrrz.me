@@ -57,7 +57,7 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
                 <div className={c('font-light')}>
                   <Inline>
                     <FiArchive strokeWidth={1} />
-                    <span>Archived</span>
+                    <span>Not maintained</span>
                   </Inline>
                 </div>
               )}
