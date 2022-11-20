@@ -7,7 +7,7 @@ At some point, I was contracted to make a WordPress plugin that displays some ba
 
 I was initially hoping that there would be some sort of API for this, but unfortunately there isn't. Probably because it would make developing bots a bit too easy.
 
-Having spent some time inspecting the listing pages with Chrome’s developer console, I’ve discovered that all the pricing information is pulled using a single AJAX request which can be easily reverse-engineered. Let’s take a look at how it works.
+Having spent some time inspecting the listing pages with Chrome Developer Tools, I’ve discovered that all the pricing information is pulled using a single AJAX request which can be easily reverse-engineered. Let’s take a look at how it works.
 
 ## Getting pricing info
 

@@ -34,7 +34,7 @@ var result = RunCommand(
 );
 ```
 
-In this snippet, we are calling the `RunCommand` method to spawn a child process and block until it completes. Relevant settings, such as command line arguments, working directory, and environment variables are specified through input parameters.
+In this snippet, we are calling the `RunCommand` method to spawn a child process and block until it completes. Relevant settings, such as command line arguments, working directory, and environment variables are specified through the input parameters.
 
 Although completely functional, the method invocation expression above is not very human-readable. At a glance, it's hard to even tell what each of the parameters does without relying on code comments.
 
@@ -51,7 +51,7 @@ var result = new Command("git")
     .Run();
 ```
 
-With this approach, the consumer can create a stateful `Command` object by specifying the required executable name, after which they may use the available methods to freely configure additional options they may need. The resulting expression is not only significantly more readable, but is also much more flexible due to not being constrained by the inherent limitations of method parameters.
+With this approach, the consumer can create a stateful `Command` object by specifying the required executable name, after which they may use the available methods to freely configure any additional options they need. The resulting expression is not only significantly more readable, but is also much more flexible as it's not constrained by the inherent limitations of method parameters.
 
 ## Fluent type definitions
 
@@ -114,7 +114,7 @@ public class SignInEndpoint : Endpoint<SignInRequest, SignInResponse>
 
 By inheriting from `Endpoint<SignInRequest, SignInResponse>`, the compiler automatically enforces the correct signature on the entry point method. This is very convenient as it helps avoid potential mistakes and also makes the structure of the application more consistent.
 
-However, even though the `SignInEndpoint` fits perfectly in this design, not all endpoints are necessarily going to have a request and a response. For example, an analogous `SignUpEndpoint` will likely just return a status code and not include a response body, while `SignOutEndpoint` won't even need a specific request either.
+However, even though the `SignInEndpoint` fits perfectly in this design, not all endpoints are necessarily going to have both request and response models. For example, an analogous `SignUpEndpoint` will likely just return a status code without any response body, while `SignOutEndpoint` won't expect any request data either.
 
 In order to properly accommodate endpoints like that, we could try to extend our model by adding a few additional generic type overloads:
 

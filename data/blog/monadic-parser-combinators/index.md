@@ -101,7 +101,7 @@ So if we can't use regular expressions to build these syntax trees, what should 
 
 ## Parser combinators
 
-There are many approaches for writing parsers for context-free languages. Most language tools you know are built with either manual loop-stack parsers, parser generator frameworks, or parser combinators.
+There are many approaches for writing parsers for context-free languages. Most language tools you know are built using manual recursive-descent parsers, parser generator frameworks, or parser combinators.
 
 Parser combinators, as a concept, revolves around representing each parser as a modular function that takes on some input and produces either a successful result or an error:
 
@@ -228,7 +228,7 @@ public class JsonNull : JsonLiteral<object>
 
 You can see that all of our JSON types inherit from `JsonEntity` class which defines a few virtual methods. These methods throw an exception by default, but they are overridden with proper implementation on types that support them.
 
-Using `JsonEntity.Parse` you are able to convert a piece of JSON text into our domain objects and traverse the whole hierarchy using indexers:
+Using `JsonEntity.Parse` we should be able to convert a piece of JSON text into our domain objects and traverse the whole hierarchy using indexers:
 
 ```csharp
 var price = JsonEntity.Parse(json)["order"]["items"][0]["price"].GetValue<double>();
@@ -373,11 +373,9 @@ internal static class JsonGrammar
 
 Structurally, a JSON array is just a sequence of entities separated by commas, contained within a pair of square brackets. We can define that using the `DelimitedBy` combinator which tries to match the first parser repeatedly separated by the second one.
 
-Notice how this combinator takes `Parse.Char(',')` instead of simply `','`. We could actually have used a more complicated parser in its place, one that doesn't even return a `char` or `string`. This is the power of parser combinators — as we're gradually moving up the structure of our data, we're working with parsers of increasingly higher order.
+If you've followed the steps here closely, you probably noticed that the code above doesn't actually compile. We're referencing `JsonEntity` which is a parser that we haven't defined yet. This is because this grammar rule is recursive — an array can contain any entity, which can be, among other things, an array as well, which can contain any entity, which can be an array, which... you get the point.
 
-If you've followed the steps here closely, you probably noticed that the code above doesn't actually compile. That's because we're referencing `JsonEntity` which is a parser that we haven't defined yet. This is because this grammar rule is recursive — an array can contain any entity, which can be, among other things, an array as well, which can contain any entity, which can be an array, which... you get the point.
-
-As a temporary solution, we can define a dummy in place of `JsonEntity`, just to make it compile:
+As a temporary solution, we can define a dummy in place of `JsonEntity`, just to make it compile (we will return to it later):
 
 ```csharp
 internal static class JsonGrammar
@@ -419,7 +417,7 @@ internal static class JsonGrammar
 }
 ```
 
-Since our model implements `JsonObject` using a dictionary, an individual property is expressed using `KeyValuePair<string, JsonEntity>`, that is the name of the property (`string`) and its value (`JsonEntity`).
+Since our model implements `JsonObject` using a dictionary, an individual property can be expressed using `KeyValuePair<string, JsonEntity>` — the name of the property (`string`) and its value (`JsonEntity`).
 
 As you can see, we used LINQ comprehension syntax again to combine sequential parsers. A `JsonProperty` is made out of a `JsonString` for the name, a colon, and a `JsonEntity` which denotes its value. We use `Select()` on `JsonString` to lazily extract only the raw `string` value, as we're not interested in the object itself.
 

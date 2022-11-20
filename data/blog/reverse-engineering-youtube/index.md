@@ -3,7 +3,7 @@ title: 'Reverse-Engineering YouTube'
 date: '2017-12-15'
 ---
 
-Almost a year ago, I started developing [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode), a library that scraps information on YouTube videos and lets you download them. Originally, my main motivation for developing it was simply to gain experience, as the task involved a lot of research and reverse-engineering. Nowadays, YoutubeExplode is arguably the most consistent and robust .NET library for dealing with YouTube.
+Almost a year ago, I started developing [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode), a library that scraps information on YouTube videos and lets you download them. Originally, my main motivation for developing it was simply to gain experience, as the task involved a lot of research and reverse-engineering. Nowadays, YoutubeExplode is arguably the most consistent and robust .NET library for working with YouTube.
 
 Since this is a relatively popular discussion topic among many beginner developers, I thought that I could help out by sharing the knowledge I found by spending dozens of hours staring at Chrome Developer Tools.
 
@@ -59,11 +59,11 @@ dashmpd=...
 
 As you can see, there is quite a lot of information that can be extracted straight away.
 
-Let's also look at some important optional parameters that this request can take:
+Let's also look at some important optional query parameters that this request can take:
 
-- `hl` — name of the culture used to localize some strings. If not set, it defaults to culture inferred from your IP. Use `hl=en` to force English language on all strings.
+- `hl` — name of the locale used to localize some strings. If not set, it defaults to the locale inferred from your IP address. Use `hl=en` to force English language on all strings.
 - `el` — type of YouTube page from where the request was made. This decides what kind of information will be available in the response. In some cases, you will need to set this parameter to a certain value depending on the type of the video, in order to avoid errors. Defaults to `embedded`.
-- `sts` — some kind of session identifier, used to synchronize information between requests. Defaults to empty.
+- `sts` — signature timestamp, used to identify the version of the signature cipher used in stream URLs. Defaults to empty.
 
 ### The "el" parameter
 
@@ -156,7 +156,7 @@ Adaptive streams have a slightly extended set of properties. I'll list the usefu
 
 ### Adaptive streams in DASH manifest
 
-Video info may contain URL of a DASH manifest inside the `dashmpd` parameter. It's not always present and some videos might never have it at all.
+Video info may contain the URL of a DASH manifest inside the `dashmpd` parameter. It's not always present and some videos might never have it at all.
 
 To resolve metadata of these streams, you need to first download the manifest using the provided URL. Sometimes a manifest can be protected. If it is, you should be able to find the signature inside the URL — it's the value separated by slashes that comes after `/s/`.
 
@@ -201,7 +201,7 @@ When your browser opens a YouTube video, it transforms these signatures using a 
 
 Every video uses a slightly different version of the player, which means you need to figure out which one to download. If you get the HTML of the [video's embed page](https://www.youtube.com/embed/e_S9VvJM1PI), you can search for `"js":` to find a JSON property that contains the player's relative source code URL. Once you prepend YouTube's host you'll end up with a URL like this one: https://www.youtube.com/yts/jsbin/player-vflYXLM5n/en_US/base.js.
 
-Besides obtaining the player source URL, you also need to get something called `sts`, which appears to be some sort of session token. You will need to send it as a parameter to `get_video_info` endpoint mentioned earlier — this makes sure that the returned metadata is valid for this player context. You can extract the value of `sts` similarly, just search for `"sts":` and you should find it.
+Besides obtaining the player source URL, you also need to get something called `sts`, which is a timestamp that's used to identify the version of the signature cipher. You will need to send it as a parameter to `get_video_info` endpoint mentioned earlier — this makes sure that the returned metadata is valid for this player context. You can extract the value of `sts` similarly, just search for `"sts":` and you should find it.
 
 Once you locate the source code URL and download it, you need to parse it. There are few ways to do it, for simplicity reasons I chose to parse it using regular expressions.
 
@@ -426,7 +426,7 @@ Things like bit rate, resolution and frame rate are not strictly regulated by `i
 
 By default, adaptive streams are served at a limited rate — just enough to download the next parts as the video plays. This is not optimal if the goal is to download the video as fast as possible.
 
-To circumvent this, you may download the stream in multiple segments by sending HTTP requests with `Range` header. For each request you make, YouTube first provides a small chunk instantly, followed by the rest of the data which is throttled.
+To circumvent this, you may download the stream in multiple segments by sending HTTP requests with a `Range` header. For each request you make, YouTube first provides a small chunk instantly, followed by the rest of the data which is throttled.
 
 Interestingly, even just by having the header set, the throttling seems to kick in much later than usual. After experimenting for some time, I've found that splitting up the requests in segments of around 10mb is optimal for videos of all sizes.
 

@@ -25,7 +25,7 @@ Unsurprisingly, the concept of "mock" or how it's fundamentally different from o
 
 According to the [original definitions introduced by Gerard Meszaros](https://martinfowler.com/bliki/TestDouble.html), a mock object is a very specific type of substitute which is used to verify interactions between the system under test and its dependencies. Nowadays, however, the distinction has become a bit blurry, as this term is commonly used to refer to a broader category of objects created with frameworks such as [Moq](https://github.com/moq/moq4), [Mockito](https://github.com/mockito/mockito), [Jest](https://github.com/facebook/jest), and others.
 
-Such substitutes may not necessarily be mocks under the original definition, but there's very little benefit in acknowledging these technicalities. So to make matters simpler, we will stick to this more colloquial understanding of the term throughout the article.
+Such substitutes may not necessarily be mocks under the original definition, but there's very little benefit in acknowledging these technicalities. So to make matters simpler, let's agree to stick to the more colloquial understanding of the term throughout the article.
 
 Generally speaking, a **mock object is a substitute, that pretends to function like its real counterpart, but returns predefined responses instead**. From a structural standpoint, it does implement the same external interface as the actual component, however that **implementation is entirely superficial**.
 
@@ -48,7 +48,7 @@ public interface IBlobStorage
 }
 ```
 
-As we can see, it provides basic operations to read and upload files, as well as a few more specialized methods. The actual implementation of the above abstraction does not concern us, but for the sake of complexity we can pretend that it relies on some expensive cloud vendor and doesn't lend itself well for testing.
+As we can see, it provides basic operations to read and upload files, as well as a few more specialized methods. The actual implementation of the above abstraction does not concern us, but for the sake of the thought experiment we can pretend that it relies on some expensive cloud vendor and doesn't lend itself well for testing.
 
 Built on top of it, we also have another component which is responsible for loading and saving text documents:
 
@@ -183,9 +183,9 @@ As you can probably see, this change increased the complexity of the test rather
 
 Even despite all that effort, this test is still not as resilient as we would've wanted. For example, adding another method to `IBlobStorage` and calling it from `DocumentManager` will cause the test to break as the mock wasn't previously taught how to deal with it. You can see how all of these issues and complexity can only exacerbate in real projects with large test suites.
 
-One way or another, **tests that rely on mocks are inherently coupled to the implementation of the system and are fragile as the result**. This does not only impose an additional maintenance cost, as such tests need to be constantly updated, but makes them considerably less valuable as well.
+One way or another, **tests that rely on mocks are inherently coupled to the implementation of the system, which makes them fragile as a result**. This does not only impose additional maintenance cost as such tests need to be constantly updated, but also makes them considerably less valuable due to poor signal-to-noise ratio.
 
-Instead of providing us with a safety net in the face of potential regressions, they **lock us into an existing implementation and discourage evolution**. Because of that, introducing substantial changes and refactoring code becomes a much more difficult and ultimately discouraging experience.
+Instead of providing us with a safety net in the face of potential regressions, they **lock us into the existing implementation and discourage evolution**. Because of that, introducing substantial changes and refactoring code becomes a much more difficult and ultimately discouraging experience.
 
 ## Behavioral testing with fakes
 
@@ -195,7 +195,7 @@ In essence, a **fake is a substitute that represents a lightweight but otherwise
 
 Although its functionality resembles that of the real component, a **fake implementation is intentionally made simpler by taking certain shortcuts**. For example, rather than relying on a remote database server, the fake can be programmed to use an in-memory provider instead. This makes it more accessible in testing, while retaining most of its core behavior.
 
-In contrast to mocks, fakes are usually not created in runtime via dynamic proxies, but defined statically like other regular types. While it is technically possible to generate a fake implementation using mocking frameworks as well, there are rarely any benefits in doing so.
+In contrast to mocks, fakes are usually not created in run-time via dynamic proxies, but defined statically like other regular types. While it is technically possible to generate a fake implementation using mocking frameworks as well, there are rarely any benefits in doing so.
 
 Now let's come back to our file storage interface and make a fake implementation that we can use in tests. Here's one of the ways that we can do it:
 
@@ -271,7 +271,6 @@ public async Task I_can_get_the_content_of_an_existing_document()
     );
 
     await blobStorage.UploadFileAsync("docs/test.txt", documentStream);
-    //          still implementation-aware --^
 
     // Act
     var content = await documentManager.GetDocumentAsync("test.txt");
@@ -283,7 +282,7 @@ public async Task I_can_get_the_content_of_an_existing_document()
 
 Here we take an existing test and rather than configure a mock to return a pre-configured response, we create a fake blob storage and fill it with data directly. This way we don't need to assume that retrieving a document should call a certain method, but instead just rely on the completeness of the behavior provided by our fake.
 
-However, despite being able to eliminate most of the assumptions, we didn't get rid of all of them. Namely, our test still expects that calling `GetDocumentAsync()` should look for the file inside the `docs/` namespace, as that's where we're uploading it to in the arrange phase.
+However, despite being able to eliminate most of the assumptions, we didn't get rid of all of them. Namely, our test still expects that calling `GetDocumentAsync()` should look for the file inside the `docs/` namespace, as that's where we're uploading it in the arrange phase.
 
 This problem stems from the fact that we are yet again relying on how `DocumentManager` interacts with `IBlobStorage`, but this time it's not caused by the test double but by the design of the test itself. To avoid it, we need to adapt the scenario so that it revolves around the external behavior of the system and not its relationship with the dependencies.
 

@@ -55,7 +55,7 @@ Which in turn can be used like this:
 var list = List.Create(1, 3, 5); // List<int>
 ```
 
-In the above scenario we could've specified the type explicitly by writing `List.Create<int>(...)`, but we didn't have to. The compiler is able to detect it automatically based on the parameters we passed into the method, which are constrained by the same type as the returned list itself.
+In the above scenario we could've specified the type explicitly by writing `List.Create<int>(...)`, but we didn't have to. The compiler was able to detect it automatically based on the arguments we passed into the method, which are constrained by the same type as the returned list itself.
 
 Interestingly enough, all the examples shown above are in fact based on the same form of type inference, which works by analyzing the constraints imposed by other expressions, whose type is already known. In other words, it examines the flow of data that _goes in_ and draws conclusions about the data that _goes out_.
 

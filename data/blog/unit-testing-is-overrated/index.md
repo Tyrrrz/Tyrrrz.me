@@ -25,8 +25,6 @@ _Note: this article contains code examples which are written in C#, but the lang
 
 _Note 2: I've come to realize that programming terms are completely useless at conveying meanings because everyone seems to understand them differently. In this article I will be relying on the "standard" definitions, where unit testing targets the smallest separable parts of code, end-to-end testing targets software's outermost entry points, while integration testing is for everything in-between._
 
-_Note 3: if you don't feel like reading the entirety of the article, you can skip to the end for the summary._
-
 ## Fallacies of unit testing
 
 Unit tests, as evident by the name, revolve around the concept of a "unit", which denotes a very small isolated part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a module (or method of an object).

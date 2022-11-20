@@ -9,7 +9,7 @@ LINQ itself is made up of multiple pieces, but from the consumer perspective it 
 
 However, there is one aspect of query syntax that makes it particularly intriguing in my opinion, and that's the fact that **its usage is actually not limited to collections**. As long as a specific type implements a few key methods required by the compiler, C#'s query notation can be enabled on virtually any type.
 
-This presents a very interesting opportunity where we can use this feature to enhance other types (including our own) with a special comprehension syntax that can help express certain operations in a more concise and clear way. In practice, it allows us to achieve something similar to [F#'s computation expressions](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions) or [Haskell's `do` notation](https://en.wikibooks.org/wiki/Haskell/do_notation).
+This presents a very interesting opportunity where we can use this feature to enhance other types (including our own) with a special comprehension syntax that helps express certain operations in a more concise and clear way. In practice, it allows us to achieve something similar to [F#'s computation expressions](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions) or [Haskell's `do` notation](https://en.wikibooks.org/wiki/Haskell/do_notation).
 
 In this article we will see how the LINQ query syntax works under the hood, how to make it work with custom types, and look at some practical scenarios where that can actually be useful.
 
@@ -139,7 +139,7 @@ public static Task<TResult> SelectMany<TFirst, TSecond, TResult>(
 
 The usage of nested `ContinueWith(...)` callbacks allows us to sequence derived tasks and lazily compose their results without actually waiting for the entire process to complete. Calling `SelectMany(...)` will effectively produce a new higher-order task that has all the specified transformations encoded within it, and whose result can be observed once all of the underlying operations have finished.
 
-Having that extension method defined, we can use query syntax on tasks to write code similar to this:
+Having that extension method defined, we can use the query syntax on tasks to write code similar to this:
 
 ```csharp
 // Lazily compose tasks
@@ -217,7 +217,7 @@ public readonly struct Option<T>
 }
 ```
 
-Since C# doesn't [yet](https://github.com/dotnet/csharplang/issues/113) offer a way to define unions directly, this type is implemented as a `struct` that encapsulates a value and a boolean flag used as a discriminator for its two potential states. Importantly, both the value and the flag are intentionally kept private, leaving the `Match(...)` method as the only way to observe the contents of an `Option<T>` instance from outside. This makes the design safer as it prevents possible runtime errors which would otherwise occur if the consumer tried to unwrap a container that didn't actually have a value.
+Since C# doesn't [yet](https://github.com/dotnet/csharplang/issues/113) offer a way to define unions directly, this type is implemented as a `struct` that encapsulates a value and a boolean flag used as a discriminator for its two potential states. Importantly, both the value and the flag are intentionally kept private, leaving the `Match(...)` method as the only way to observe the contents of an `Option<T>` instance from outside. This makes the design safer as it prevents possible run-time errors which would otherwise occur if the consumer tried to unwrap a container that didn't actually have a value.
 
 In order to create new instances, we can use the `Some(...)` and `None()` factory methods, depending on which state we want to represent. For example, a simple function that parses an integer number from a string can then look like this:
 
@@ -472,7 +472,7 @@ paymentId.Match(
 );
 ```
 
-Here, just like in the previous examples, LINQ allows us to work directly on the underlying values by skipping layers of containers around it. In the end the query expression evaluates to a task that represents a chain of composed asynchronous operations with an optional result.
+Here, just like in the previous examples, LINQ allows us to work directly on the underlying values by skipping layers of containers around it. In the end, the query expression evaluates to a task that represents a chain of composed asynchronous operations with an optional result.
 
 Similarly, if any stage of the pipeline ends up failing (i.e. returning a _none_ option), the execution will terminate early with an error:
 

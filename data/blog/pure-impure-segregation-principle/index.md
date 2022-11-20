@@ -112,7 +112,7 @@ While the concept of purity forms the foundation of functional programming, it i
 
 Software written with OOP in mind follows a hierarchical design, where objects are composed together to represent different layers of abstraction in a connected fashion. Any impurities that may exist in those objects are free to spread from child to parent, potentially contaminating the entire dependency tree.
 
-To better understand what that means in practice, let's revisit an example from my previous article. The idea was to build a simple web API application that calculates user's sunrise and sunset times based on their IP. This functionality can be modeled using three classes:
+To better understand what that means in practice, let's revisit an example from my previous article. The idea was to build a simple web API application that calculates user's sunrise and sunset times based on their IP address. This functionality can be modeled using three classes:
 
 - `LocationProvider` to get a location from an IP address, using a public GeoIP database
 - `SolarCalculator` to calculate solar times from that location
@@ -209,7 +209,7 @@ This is a very typical scenario for "classically" designed object-oriented softw
 
 If we consider this relationship from a standpoint of purity, we'll also notice that the entire call chain is impure. And while for `LocationProvider` it makes sense because it performs non-deterministic I/O, the `SolarCalculator` is impure only due to its dependency on the former.
 
-That design is not ideal, because we lose out on the benefits of pure functions without really getting anything in return. Now if we wanted to, for example, test `SolarCalculator.GetSolarTimesAsync` in isolation, we would only be able to do that with the help of an autotelic abstraction and a mock object, which is not desirable.
+That design is not ideal, because we lose out on the benefits of pure functions without really getting anything in return. Now if we wanted to, for example, test `SolarCalculator.GetSolarTimesAsync` in isolation, we would only be able to do that with the help of an autotelic abstraction and a test double, which is not desirable.
 
 This issue could've been avoided if we architected our code with the pure-impure segregation principle in mind. Let's see how we can refactor our classes to push the impurities out of `SolarCalculator`:
 
