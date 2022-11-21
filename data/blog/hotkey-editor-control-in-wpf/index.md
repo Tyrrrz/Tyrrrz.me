@@ -96,10 +96,15 @@ As for the code-behind, it looks like this:
 public partial class HotkeyEditorControl
 {
     public static readonly DependencyProperty HotkeyProperty =
-        DependencyProperty.Register(nameof(Hotkey), typeof(Hotkey),
+        DependencyProperty.Register(
+            nameof(Hotkey),
+            typeof(Hotkey),
             typeof(HotkeyEditorControl),
-            new FrameworkPropertyMetadata(default(Hotkey),
-                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+            new FrameworkPropertyMetadata(
+                default(Hotkey),
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault
+            )
+        );
 
     public Hotkey Hotkey
     {

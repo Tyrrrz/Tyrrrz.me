@@ -33,21 +33,32 @@ public class TreeViewSelectionBehavior : Behavior<TreeView>
     public delegate bool IsChildOfPredicate(object nodeA, object nodeB);
 
     public static readonly DependencyProperty SelectedItemProperty =
-        DependencyProperty.Register(nameof(SelectedItem), typeof(object),
+        DependencyProperty.Register(
+            nameof(SelectedItem),
+            typeof(object),
             typeof(TreeViewSelectionBehavior),
-            new FrameworkPropertyMetadata(null,
+            new FrameworkPropertyMetadata(
+                null,
                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
-                OnSelectedItemChanged));
+                OnSelectedItemChanged
+            )
+        );
 
     public static readonly DependencyProperty HierarchyPredicateProperty =
-        DependencyProperty.Register(nameof(HierarchyPredicate), typeof(IsChildOfPredicate),
+        DependencyProperty.Register(
+            nameof(HierarchyPredicate),
+            typeof(IsChildOfPredicate),
             typeof(TreeViewSelectionBehavior),
-            new FrameworkPropertyMetadata(null));
+            new FrameworkPropertyMetadata(null)
+        );
 
     public static readonly DependencyProperty ExpandSelectedProperty =
-        DependencyProperty.Register(nameof(ExpandSelected), typeof(bool),
+        DependencyProperty.Register(
+            nameof(ExpandSelected),
+            typeof(bool),
             typeof(TreeViewSelectionBehavior),
-            new FrameworkPropertyMetadata(false));
+            new FrameworkPropertyMetadata(false)
+        );
 
     private static void OnSelectedItemChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
     {
@@ -88,8 +99,10 @@ public class TreeViewSelectionBehavior : Behavior<TreeView>
 
     public TreeViewSelectionBehavior()
     {
-        _treeViewItemEventSetter = new EventSetter(FrameworkElement.LoadedEvent,
-            new RoutedEventHandler(OnTreeViewItemLoaded));
+        _treeViewItemEventSetter = new EventSetter(
+            FrameworkElement.LoadedEvent,
+            new RoutedEventHandler(OnTreeViewItemLoaded)
+        );
     }
 
     // Update state of all items starting with given, with optional recursion

@@ -15,10 +15,16 @@ Here's the behavior that allows two-way binding on `SelectedItems`:
 public class ListBoxSelectionBehavior<T> : Behavior<ListBox>
 {
     public static readonly DependencyProperty SelectedItemsProperty =
-        DependencyProperty.Register(nameof(SelectedItems), typeof(IList),
+        DependencyProperty.Register(
+            nameof(SelectedItems),
+            typeof(IList),
             typeof(ListBoxSelectionBehavior),
-            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
-                OnSelectedItemsChanged));
+            new FrameworkPropertyMetadata(
+                null,
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                OnSelectedItemsChanged
+            )
+        );
 
     private static void OnSelectedItemsChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
     {
@@ -136,16 +142,28 @@ This could also be very useful for multi-select, but unfortunately the plural ve
 public class ListBoxSelectionBehavior<T> : Behavior<ListBox>
 {
     public static readonly DependencyProperty SelectedItemsProperty =
-        DependencyProperty.Register(nameof(SelectedItems), typeof(IList),
+        DependencyProperty.Register(
+            nameof(SelectedItems),
+            typeof(IList),
             typeof(ListBoxSelectionBehavior),
-            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
-                OnSelectedItemsChanged));
+            new FrameworkPropertyMetadata(
+                null,
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                OnSelectedItemsChanged
+            )
+        );
 
     public static readonly DependencyProperty SelectedValuesProperty =
-        DependencyProperty.Register(nameof(SelectedValues), typeof(IList),
+        DependencyProperty.Register(
+            nameof(SelectedValues),
+            typeof(IList),
             typeof(ListBoxSelectionBehavior),
-            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
-                OnSelectedValuesChanged));
+            new FrameworkPropertyMetadata(
+                null,
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                OnSelectedValuesChanged
+            )
+        );
 
     private static void OnSelectedItemsChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
     {

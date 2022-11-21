@@ -131,12 +131,14 @@ public Func<string, string?> ConstructGreetingFunction()
         .GetMethod(nameof(string.IsNullOrWhiteSpace));
 
     var condition = Expression.Not(
-        Expression.Call(isNullOrWhiteSpaceMethod, personNameParameter));
+        Expression.Call(isNullOrWhiteSpaceMethod, personNameParameter)
+    );
 
     // True clause
     var trueClause = Expression.Add(
         Expression.Constant("Greetings, "),
-        personNameParameter);
+        personNameParameter
+    );
 
     // False clause
     var falseClause = Expression.Constant(null, typeof(string));
@@ -192,7 +194,8 @@ public Func<string, string?> ConstructGreetingFunction()
     var trueClause = Expression.Call(
         concatMethod,
         Expression.Constant("Greetings, "),
-        personNameParameter);
+        personNameParameter
+    );
 
     // False clause
     var falseClause = Expression.Constant(null, typeof(string));
@@ -252,7 +255,8 @@ public Expression CreateStatementBlock()
 
     return Expression.Block(
         Expression.Call(consoleWriteMethod, Expression.Constant("Hello ")),
-        Expression.Call(consoleWriteLineMethod, Expression.Constant("world!")));
+        Expression.Call(consoleWriteLineMethod, Expression.Constant("world!"))
+    );
 }
 ```
 
@@ -301,7 +305,8 @@ public Expression CreateStatementBlock()
 
         // Call methods
         Expression.Call(consoleWriteMethod, variableA),
-        Expression.Call(consoleWriteLineMethod, variableB));
+        Expression.Call(consoleWriteLineMethod, variableB)
+    );
 }
 ```
 
@@ -329,7 +334,8 @@ var s1 = Expression.Constant(42).ToString(); // 42
 
 var s2 = Expression.Multiply(
     Expression.Constant(5),
-    Expression.Constant(11)).ToString();     // (5 * 11)
+    Expression.Constant(11)
+).ToString(); // (5 * 11)
 ```
 
 The bad news, however, is that it only works nicely with simple expressions like the ones above. For example, if we try to call `ToString` on the ternary expression we compiled earlier, we will get:
@@ -662,12 +668,14 @@ public class CompiledDictionary<TKey, TValue> : IDictionary<TKey, TValue>
         // Expression that gets the key's hash code
         var keyGetHashCodeCall = Expression.Call(
             keyParameter,
-            typeof(object).GetMethod(nameof(GetHashCode)));
+            typeof(object).GetMethod(nameof(GetHashCode))
+        );
 
         // Expression that converts the key to string
         var keyToStringCall = Expression.Call(
             keyParameter,
-            typeof(object).GetMethod(nameof(ToString)));
+            typeof(object).GetMethod(nameof(ToString))
+        );
 
         // Expression that throws 'not found' exception in case of failure
         var exceptionCtor = typeof(KeyNotFoundException)
@@ -675,7 +683,8 @@ public class CompiledDictionary<TKey, TValue> : IDictionary<TKey, TValue>
 
         var throwException = Expression.Throw(
             Expression.New(exceptionCtor, keyToStringCall),
-            typeof(TValue));
+            typeof(TValue)
+        );
 
         // Switch expression with cases for every hash code
         var body = Expression.Switch(
@@ -689,9 +698,12 @@ public class CompiledDictionary<TKey, TValue> : IDictionary<TKey, TValue>
                 {
                     // No collision, construct constant expression
                     if (g.Count() == 1)
+                    {
                         return Expression.SwitchCase(
                             Expression.Constant(g.Single().Value), // body
-                            Expression.Constant(g.Key)); // test value
+                            Expression.Constant(g.Key) // test value
+                        );
+                    }
 
                     // Collision, construct inner switch for the key's value
                     return Expression.SwitchCase(
@@ -703,9 +715,12 @@ public class CompiledDictionary<TKey, TValue> : IDictionary<TKey, TValue>
                             g.Select(p => Expression.SwitchCase(
                                 Expression.Constant(p.Value),
                                 Expression.Constant(p.Key)
-                            ))),
-                        Expression.Constant(g.Key));
-                }));
+                            ))
+                        ),
+                        Expression.Constant(g.Key)
+                    );
+                })
+        );
 
         var lambda = Expression.Lambda<Func<TKey, TValue>>(body, keyParameter);
 
@@ -1122,7 +1137,8 @@ public static class AssertEx
             throw new AssertionException(
                 expression.Body.ToReadableString() +
                 Environment.NewLine +
-                ex.Message);
+                ex.Message
+            );
         }
     }
 }
@@ -1373,7 +1389,8 @@ So now we can try to convert our expression from earlier and see what it returns
 
 ```csharp
 var fsharpCode = FSharpTranspiler.Convert<Action<int, int>>(
-    (a, b) => Console.WriteLine("a + b = {0}", a + b));
+    (a, b) => Console.WriteLine("a + b = {0}", a + b)
+);
 
 // fun (a, b) -> printfn "a + b = %O" (a + b)
 ```

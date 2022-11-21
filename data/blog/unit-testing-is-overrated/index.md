@@ -486,7 +486,8 @@ public class Startup
         services.AddMvc(o => o.EnableEndpointRouting = false);
 
         services.AddSingleton<IConnectionMultiplexer>(
-            ConnectionMultiplexer.Connect(GetRedisConnectionString()));
+            ConnectionMultiplexer.Connect(GetRedisConnectionString())
+        );
 
         services.AddSingleton<CachingLayer>();
 
