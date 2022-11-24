@@ -125,15 +125,15 @@ public class LocationProvider
 
     /* ... */
 
-    public async Task<Location> GetLocationAsync(IPAddress ip)
+    public async Task<Location> GetLocationAsync(IPAddress ipAddress)
     {
         // Pure
-        var ipFormatted = !ip.IsLocal()
-            ? ip.MapToIPv4().ToString()
+        var ipAddressFormatted = !ipAddress.IsLocal()
+            ? ipAddress.MapToIPv4().ToString()
             : "";
 
         // Impure
-        var json = await _httpClient.GetJsonAsync($"http://ip-api.com/json/{ipFormatted}");
+        var json = await _httpClient.GetJsonAsync($"http://ip-api.com/json/{ipAddressFormatted}");
 
         // Pure
         var latitude = json.GetProperty("lat").GetDouble();
@@ -159,10 +159,10 @@ public class SolarCalculator
         /* Pure (implementation omitted) */
     }
 
-    public async Task<SolarTimes> GetSolarTimesAsync(IPAddress ip, DateTimeOffset date)
+    public async Task<SolarTimes> GetSolarTimesAsync(IPAddress ipAddress, DateTimeOffset date)
     {
         // Impure
-        var location = await _locationProvider.GetLocationAsync(ip);
+        var location = await _locationProvider.GetLocationAsync(ipAddress);
 
         // Pure
         var sunrise = CalculateSunrise(location, date);

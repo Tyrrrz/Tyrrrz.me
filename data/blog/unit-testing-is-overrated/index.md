@@ -45,7 +45,7 @@ public class LocationProvider : IDisposable
     // Gets location by query
     public async Task<Location> GetLocationAsync(string locationQuery) { /* ... */ }
 
-    // Gets current location by IP
+    // Gets current location by IP address
     public async Task<Location> GetLocationAsync() { /* ... */ }
 
     public void Dispose() => _httpClient.Dispose();
@@ -324,13 +324,13 @@ The idea is that, instead of focusing on a specific scope or distribution of sco
 
 There might still be some confusion as to what constitutes functional testing or how exactly it's supposed to look especially if you've never done it before, so it makes sense to show a simple but complete example. For this, we will turn the solar calculator from earlier into a web service and cover it with tests according to the rules we've outlined in the previous part of the article. This app will be based on ASP.NET Core, which is a web framework I'm most familiar with, but the same idea should also equally apply to any other platform.
 
-Our web service is going to expose endpoints to calculate sunrise and sunset times based on the user's IP or provided location. To make things a bit more interesting, we'll also add a Redis caching layer to store previous calculations for faster responses.
+Our web service is going to expose endpoints to calculate sunrise and sunset times based on the user's IP address or provided location. To make things a bit more interesting, we'll also add a Redis caching layer to store previous calculations for faster responses.
 
 The tests will work by launching the app in a simulated environment where it can receive HTTP requests, handle routing, perform validation, and exhibit almost identical behavior to an app running in production. At the same time, we will also use Docker to make sure our tests rely on the same infrastructural dependencies as the real app does.
 
 Let us first go over the implementation of the web app to understand what we're dealing with. Note, some parts in the code snippets below are omitted for brevity, but you can also check out the full project on [GitHub](https://github.com/Tyrrrz/FuncTestingInAspNetCoreExample).
 
-First off, we will need a way to get the user's location by IP, which is done by the `LocationProvider` class we've seen in earlier examples. It works simply by wrapping an external GeoIP lookup service called [IP-API](https://ip-api.com/):
+First off, we will need a way to get the user's location by IP address, which is done by the `LocationProvider` class we've seen in earlier examples. It works simply by wrapping an external GeoIP lookup service called [IP-API](https://ip-api.com/):
 
 ```csharp
 public class LocationProvider
@@ -340,12 +340,12 @@ public class LocationProvider
     public LocationProvider(HttpClient httpClient) =>
         _httpClient = httpClient;
 
-    public async Task<Location> GetLocationAsync(IPAddress ip)
+    public async Task<Location> GetLocationAsync(IPAddress ipAddress)
     {
-        // If IP is local, just don't pass anything (useful when running on localhost)
-        var ipFormatted = !ip.IsLocal() ? ip.MapToIPv4().ToString() : "";
+        // If IP address is local, just don't pass anything (useful when running on localhost)
+        var ipAddressFormatted = !ipAddress.IsLocal() ? ipAddress.MapToIPv4().ToString() : "";
 
-        var json = await _httpClient.GetJsonAsync($"http://ip-api.com/json/{ipFormatted}");
+        var json = await _httpClient.GetJsonAsync($"http://ip-api.com/json/{ipAddressFormatted}");
 
         var latitude = json.GetProperty("lat").GetDouble();
         var longitude = json.GetProperty("lon").GetDouble();
@@ -384,9 +384,9 @@ public class SolarCalculator
         /* ... */
     }
 
-    public async Task<SolarTimes> GetSolarTimesAsync(IPAddress ip, DateTimeOffset date)
+    public async Task<SolarTimes> GetSolarTimesAsync(IPAddress ipAddress, DateTimeOffset date)
     {
-        var location = await _locationProvider.GetLocationAsync(ip);
+        var location = await _locationProvider.GetLocationAsync(ipAddress);
 
         var sunriseOffset = CalculateSolarTimeOffset(location, date, 90.83, true);
         var sunsetOffset = CalculateSolarTimeOffset(location, date, 90.83, false);
@@ -422,14 +422,14 @@ public class SolarTimeController : ControllerBase
     [HttpGet("by_ip")]
     public async Task<IActionResult> GetByIp(DateTimeOffset? date)
     {
-        var ip = HttpContext.Connection.RemoteIpAddress;
-        var cacheKey = $"{ip},{date}";
+        var ipAddress = HttpContext.Connection.RemoteIpAddress;
+        var cacheKey = $"{ipAddress},{date}";
 
         var cachedSolarTimes = await _cachingLayer.TryGetAsync<SolarTimes>(cacheKey);
         if (cachedSolarTimes != null)
             return Ok(cachedSolarTimes);
 
-        var solarTimes = await _solarCalculator.GetSolarTimesAsync(ip, date ?? DateTimeOffset.Now);
+        var solarTimes = await _solarCalculator.GetSolarTimesAsync(ipAddress, date ?? DateTimeOffset.Now);
         await _cachingLayer.SetAsync(cacheKey, solarTimes);
 
         return Ok(solarTimes);
@@ -606,7 +606,7 @@ public class SolarTimeSpecs : IClassFixture<RedisFixture>, IAsyncLifetime
 
 As you can see, the setup is really simple. All we need to do is create an instance of `FakeApp` and use the provided `HttpClient` to send requests to one of the endpoints, just like you would if it were a real web app.
 
-This specific test works by querying the `/solartimes/by_ip` route, which determines user's sunrise and sunset times for the current date based on their IP. Since we're relying on an actual GeoIP provider and don't know what the result is going to be, we're performing property-based assertions to ensure that the solar times are valid.
+This specific test works by querying the `/solartimes/by_ip` route, which determines user's sunrise and sunset times for the current date based on their IP address. Since we're relying on an actual GeoIP provider and don't know what the result is going to be, we're performing property-based assertions to ensure that the solar times are valid.
 
 Although those assertions will be able to catch a multitude of potential bugs, it doesn't give us full confidence that the result is fully correct. There are a couple of different ways we can improve on this, however.
 
@@ -619,7 +619,7 @@ To accomplish this, we will need to create a startup filter that lets us inject 
 ```csharp
 public class FakeIpStartupFilter : IStartupFilter
 {
-    public IPAddress Ip { get; set; } = IPAddress.Parse("::1");
+    public IPAddress IpAddress { get; set; } = IPAddress.Parse("::1");
 
     public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> nextFilter)
     {
@@ -627,7 +627,7 @@ public class FakeIpStartupFilter : IStartupFilter
         {
             app.Use(async (ctx, next) =>
             {
-                ctx.Connection.RemoteIpAddress = Ip;
+                ctx.Connection.RemoteIpAddress = IpAddress;
                 await next();
             });
 
@@ -647,10 +647,10 @@ public class FakeApp : IDisposable
 
     public HttpClient Client { get; }
 
-    public IPAddress ClientIp
+    public IPAddress ClientIpAddress
     {
-        get => _fakeIpStartupFilter.Ip;
-        set => _fakeIpStartupFilter.Ip = value;
+        get => _fakeIpStartupFilter.IpAddress;
+        set => _fakeIpStartupFilter.IpAddress = value;
     }
 
     public FakeApp()
@@ -679,7 +679,7 @@ public async Task User_can_get_solar_times_for_their_location_by_ip()
     // Arrange
     using var app = new FakeApp
     {
-        ClientIp = IPAddress.Parse("20.112.101.1")
+        ClientIpAddress = IPAddress.Parse("20.112.101.1")
     };
 
     var date = new DateTimeOffset(2020, 07, 03, 0, 0, 0, TimeSpan.FromHours(-5));
@@ -795,15 +795,15 @@ public class SolarTimeController : ControllerBase
     [HttpGet("by_ip")]
     public async Task<IActionResult> GetByIp(DateTimeOffset? date)
     {
-        var ip = HttpContext.Connection.RemoteIpAddress;
-        var cacheKey = ip.ToString();
+        var ipAddress = HttpContext.Connection.RemoteIpAddress;
+        var cacheKey = ipAddress.ToString();
 
         var cachedSolarTimes = await _cachingLayer.TryGetAsync<SolarTimes>(cacheKey);
         if (cachedSolarTimes != null)
             return Ok(cachedSolarTimes);
 
         // Composition instead of dependency injection
-        var location = await _locationProvider.GetLocationAsync(ip);
+        var location = await _locationProvider.GetLocationAsync(ipAddress);
         var solarTimes = _solarCalculator.GetSolarTimes(location, date ?? DateTimeOffset.Now);
 
         await _cachingLayer.SetAsync(cacheKey, solarTimes);
