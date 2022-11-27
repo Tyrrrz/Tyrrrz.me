@@ -1,6 +1,6 @@
-import Image from '@/components/image';
 import c from 'classnames';
 import { FC, useMemo } from 'react';
+import Image from '~/components/image';
 
 const getTwemojiId = (code: string) => {
   // Sourced from: https://github.com/twitter/twemoji/blob/21c0f5cc0c23bec2d433632cee9e3ebf4ed183e2/scripts/build.js#L571-L589

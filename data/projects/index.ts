@@ -1,7 +1,7 @@
-import fakes from '@/data/projects/fakes';
-import { getGitHubDownloads, getGitHubRepos } from '@/data/projects/github';
-import { getNuGetDownloads } from '@/data/projects/nuget';
-import { isProduction } from '@/utils/env';
+import fakes from '~/data/projects/fakes';
+import { getGitHubDownloads, getGitHubRepos } from '~/data/projects/github';
+import { getNuGetDownloads } from '~/data/projects/nuget';
+import { isProduction } from '~/utils/env';
 
 export type Project = {
   name: string;

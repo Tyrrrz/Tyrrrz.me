@@ -1,17 +1,17 @@
-import Code from '@/components/code';
-import Heading from '@/components/heading';
-import Inline from '@/components/inline';
-import Link from '@/components/link';
-import List from '@/components/list';
-import ListItem from '@/components/listItem';
-import Meta from '@/components/meta';
-import Paragraph from '@/components/paragraph';
-import { Donation, loadDonations } from '@/data/donate';
-import { bufferIterable } from '@/utils/async';
-import { deleteUndefined } from '@/utils/object';
 import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
 import { FiDollarSign } from 'react-icons/fi';
+import Code from '~/components/code';
+import Heading from '~/components/heading';
+import Inline from '~/components/inline';
+import Link from '~/components/link';
+import List from '~/components/list';
+import ListItem from '~/components/listItem';
+import Meta from '~/components/meta';
+import Paragraph from '~/components/paragraph';
+import { Donation, loadDonations } from '~/data/donate';
+import { bufferIterable } from '~/utils/async';
+import { deleteUndefined } from '~/utils/object';
 
 type DonationPageProps = {
   donations: Donation[];

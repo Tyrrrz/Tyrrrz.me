@@ -1,9 +1,9 @@
-import Callout from '@/components/callout';
-import Emoji from '@/components/emoji';
-import Inline from '@/components/inline';
-import Link from '@/components/link';
 import c from 'classnames';
 import { FC } from 'react';
+import Callout from '~/components/callout';
+import Emoji from '~/components/emoji';
+import Inline from '~/components/inline';
+import Link from '~/components/link';
 
 const UkraineAlert: FC = () => {
   return (

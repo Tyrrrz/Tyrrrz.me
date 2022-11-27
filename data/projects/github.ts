@@ -1,5 +1,5 @@
-import { getGitHubToken } from '@/utils/env';
 import { Octokit } from '@octokit/rest';
+import { getGitHubToken } from '~/utils/env';
 
 const createClient = () => {
   return new Octokit({

@@ -1,6 +1,6 @@
-import type { Donation } from '@/data/donate';
-import { getPatreonToken } from '@/utils/env';
-import { formatUrlWithQuery } from '@/utils/url';
+import type { Donation } from '~/data/donate';
+import { getPatreonToken } from '~/utils/env';
+import { formatUrlWithQuery } from '~/utils/url';
 
 const getCampaigns = async function* () {
   let cursor = '';

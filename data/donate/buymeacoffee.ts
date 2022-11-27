@@ -1,8 +1,8 @@
-import type { Donation } from '@/data/donate';
-import { groupBy } from '@/utils/array';
-import { bufferIterable } from '@/utils/async';
-import { getBuyMeACoffeeToken } from '@/utils/env';
-import { formatUrlWithQuery } from '@/utils/url';
+import type { Donation } from '~/data/donate';
+import { groupBy } from '~/utils/array';
+import { bufferIterable } from '~/utils/async';
+import { getBuyMeACoffeeToken } from '~/utils/env';
+import { formatUrlWithQuery } from '~/utils/url';
 
 const getSupporters = async function* () {
   let page = 1;

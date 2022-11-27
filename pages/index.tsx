@@ -1,13 +1,13 @@
-import Emoji from '@/components/emoji';
-import Heading from '@/components/heading';
-import Image from '@/components/image';
-import Inline from '@/components/inline';
-import Link from '@/components/link';
-import Paragraph from '@/components/paragraph';
-import UkraineAlert from '@/components/ukraineAlert';
 import c from 'classnames';
 import type { NextPage } from 'next';
 import { FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
+import Emoji from '~/components/emoji';
+import Heading from '~/components/heading';
+import Image from '~/components/image';
+import Inline from '~/components/inline';
+import Link from '~/components/link';
+import Paragraph from '~/components/paragraph';
+import UkraineAlert from '~/components/ukraineAlert';
 
 const HomePage: NextPage = () => {
   const age = new Date(Date.now() - Date.UTC(1995, 4, 28)).getUTCFullYear() - 1970;

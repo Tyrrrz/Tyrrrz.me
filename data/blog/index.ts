@@ -1,9 +1,9 @@
-import { getSiteUrl } from '@/utils/env';
 import { Feed } from 'feed';
 import frontmatter from 'front-matter';
 import fs from 'fs/promises';
 import markdownToTxt from 'markdown-to-txt';
 import path from 'path';
+import { getSiteUrl } from '~/utils/env';
 
 export type BlogPost = {
   id: string;

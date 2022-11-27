@@ -1,14 +1,14 @@
-import Code from '@/components/code';
-import Emoji from '@/components/emoji';
-import Heading from '@/components/heading';
-import Inline from '@/components/inline';
-import Link from '@/components/link';
-import List from '@/components/list';
-import ListItem from '@/components/listItem';
-import Meta from '@/components/meta';
-import Paragraph from '@/components/paragraph';
 import c from 'classnames';
 import { NextPage } from 'next';
+import Code from '~/components/code';
+import Emoji from '~/components/emoji';
+import Heading from '~/components/heading';
+import Inline from '~/components/inline';
+import Link from '~/components/link';
+import List from '~/components/list';
+import ListItem from '~/components/listItem';
+import Meta from '~/components/meta';
+import Paragraph from '~/components/paragraph';
 
 const UkrainePage: NextPage = () => {
   return (

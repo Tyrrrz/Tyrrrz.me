@@ -1,15 +1,15 @@
-import Code from '@/components/code';
-import Heading from '@/components/heading';
-import Image from '@/components/image';
-import Link from '@/components/link';
-import List from '@/components/list';
-import Paragraph from '@/components/paragraph';
-import Pre from '@/components/pre';
-import Quote from '@/components/quote';
-import Syntax from '@/components/syntax';
 import c from 'classnames';
 import { FC } from 'react';
 import ReactMarkdown from 'react-markdown';
+import Code from '~/components/code';
+import Heading from '~/components/heading';
+import Image from '~/components/image';
+import Link from '~/components/link';
+import List from '~/components/list';
+import Paragraph from '~/components/paragraph';
+import Pre from '~/components/pre';
+import Quote from '~/components/quote';
+import Syntax from '~/components/syntax';
 
 type MarkdownProps = {
   source: string;

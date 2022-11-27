@@ -1,7 +1,7 @@
-import type { Donation } from '@/data/donate';
-import { bufferIterable } from '@/utils/async';
-import { getGitHubToken } from '@/utils/env';
 import { graphql } from '@octokit/graphql';
+import type { Donation } from '~/data/donate';
+import { bufferIterable } from '~/utils/async';
+import { getGitHubToken } from '~/utils/env';
 
 const createClient = () => {
   return graphql.defaults({

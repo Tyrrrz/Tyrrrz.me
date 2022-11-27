@@ -1,4 +1,4 @@
-import type { Project } from '@/data/projects';
+import type { Project } from '~/data/projects';
 
 const fakes: Project[] = [
   {

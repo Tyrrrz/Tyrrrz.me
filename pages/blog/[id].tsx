@@ -1,18 +1,18 @@
-import Heading from '@/components/heading';
-import Image from '@/components/image';
-import Inline from '@/components/inline';
-import Markdown from '@/components/markdown';
-import Meta from '@/components/meta';
-import UkraineAlert from '@/components/ukraineAlert';
-import { BlogPost, loadBlogPost, loadBlogPostRefs, publishBlogPostAssets } from '@/data/blog';
-import { getDisqusId, getSiteUrl } from '@/utils/env';
-import { deleteUndefined } from '@/utils/object';
-import { isAbsoluteUrl } from '@/utils/url';
 import c from 'classnames';
 import { DiscussionEmbed } from 'disqus-react';
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import { FC } from 'react';
 import { FiCalendar, FiClock } from 'react-icons/fi';
+import Heading from '~/components/heading';
+import Image from '~/components/image';
+import Inline from '~/components/inline';
+import Markdown from '~/components/markdown';
+import Meta from '~/components/meta';
+import UkraineAlert from '~/components/ukraineAlert';
+import { BlogPost, loadBlogPost, loadBlogPostRefs, publishBlogPostAssets } from '~/data/blog';
+import { getDisqusId, getSiteUrl } from '~/utils/env';
+import { deleteUndefined } from '~/utils/object';
+import { isAbsoluteUrl } from '~/utils/url';
 
 type BlogPostPageProps = {
   post: BlogPost;
