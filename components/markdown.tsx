@@ -47,6 +47,9 @@ const Markdown: FC<MarkdownProps> = ({ source, transformLinkHref, transformImage
         strong: ({ children }) => {
           return <span className={c('font-semibold')}>{children}</span>;
         },
+        em: ({ children }) => {
+          return <span className={c('italic')}>{children}</span>;
+        },
         ul: ({ children }) => {
           return <List variant="unordered">{children}</List>;
         },
