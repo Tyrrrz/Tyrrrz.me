@@ -21,7 +21,7 @@ In this article we will look at what actually makes something pure or impure, wh
 
 ## Pure vs impure
 
-As I'm writing this in 2020, there is no doubt that most readers are already familiar with the concept of purity in programming. Nevertheless, let's go over it one more time to make sure we are on the same page.
+The idea of purity is not novel in programming, so I have no doubt that most readers are already familiar with this concept. Nevertheless, let's go over it one more time to make sure we are on the same page.
 
 In essence, _pure code_ is code encapsulated within a function, whose **evaluation is influenced only by its parameters** and whose **evaluation influences only its returned value**. In other words, a pure function doesn't have any implicit arguments, doesn't depend on or interact with external state, and doesn't generate any observable _side effects_.
 
