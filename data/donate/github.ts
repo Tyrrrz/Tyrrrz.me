@@ -104,9 +104,9 @@ export const getGitHubSponsorsDonations = async function* () {
     const oneTimeTotal = activities
       .filter(
         (activity) =>
+          activity.action === 'NEW_SPONSORSHIP' &&
           activity.sponsor.login === sponsor &&
-          activity.sponsorsTier.isOneTime &&
-          activity.action === 'NEW_SPONSORSHIP'
+          activity.sponsorsTier.isOneTime
       )
       .reduce((acc, activity) => acc + activity.sponsorsTier.monthlyPriceInCents / 100, 0);
 
@@ -114,9 +114,9 @@ export const getGitHubSponsorsDonations = async function* () {
     const monthlyTotal = activities
       .filter(
         (activity) =>
+          (activity.action === 'NEW_SPONSORSHIP' || activity.action === 'TIER_CHANGE') &&
           activity.sponsor.login === sponsor &&
-          !activity.sponsorsTier.isOneTime &&
-          (activity.action === 'NEW_SPONSORSHIP' || activity.action === 'TIER_CHANGE')
+          !activity.sponsorsTier.isOneTime
       )
       .map((activity) => {
         const periodStart = new Date(activity.timestamp);
