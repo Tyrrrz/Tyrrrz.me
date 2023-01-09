@@ -18,8 +18,7 @@ const engagements: SpeakingEngagement[] = [
     language: 'english',
     eventUrl: 'https://facebook.com/Lifeat3shape',
     presentationUrl:
-      'https://slideshare.net/AlexeyGolub/alexey-golub-writing-parsers-in-c-3shape-meetup',
-    recordingUrl: 'https://youtube.com/watch?v=_yz1DRNpmPo'
+      'https://slideshare.net/AlexeyGolub/alexey-golub-writing-parsers-in-c-3shape-meetup'
   },
   {
     title: 'Monadic Parser Combinators in C#',
