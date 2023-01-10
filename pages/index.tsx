@@ -1,10 +1,8 @@
 import c from 'classnames';
 import type { NextPage } from 'next';
 import { FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
-import Emoji from '~/components/emoji';
 import Heading from '~/components/heading';
 import Image from '~/components/image';
-import Inline from '~/components/inline';
 import Link from '~/components/link';
 import Paragraph from '~/components/paragraph';
 import UkraineAlert from '~/components/ukraineAlert';
@@ -33,12 +31,7 @@ const HomePage: NextPage = () => {
 
         <div>
           <div className={c('text-center', 'md:text-left')}>
-            <Heading>
-              <Inline>
-                <Emoji code="👋" />
-                <span>Hello!</span>
-              </Inline>
-            </Heading>
+            <Heading>👋 Hello!</Heading>
           </div>
           <Paragraph>
             My name is Oleksii, also known online as Tyrrrz. I&apos;m a {age}-year-old software

@@ -1,28 +1,25 @@
 import c from 'classnames';
 import { FC } from 'react';
 import Callout from '~/components/callout';
-import Emoji from '~/components/emoji';
 import Inline from '~/components/inline';
 import Link from '~/components/link';
 
 const UkraineAlert: FC = () => {
   return (
-    <Callout variant="danger">
+    <Callout variant="info">
       <div className={c('font-semibold')}>
         <Inline>
-          <Emoji code="❗" />
-          <span>My Country is Under Attack</span>
+          <span>❤️ Thank You for Supporting Ukraine!</span>
         </Inline>
       </div>
 
       <div>
-        While you&apos;re reading this page, Russia wages a genocidal war against Ukraine —
-        destroying homes, ripping apart families, and taking away lives. Be on the right side of
-        history, help us defend our freedom!
+        As Russia wages a genocidal war against my country, I&apos;m grateful to everyone who
+        continues to stand with Ukraine in our fight for freedom.
       </div>
 
       <div className={c('font-semibold')}>
-        <Link href="/ukraine">Learn what you can do</Link>
+        <Link href="/ukraine">See how you can help</Link>
       </div>
     </Callout>
   );

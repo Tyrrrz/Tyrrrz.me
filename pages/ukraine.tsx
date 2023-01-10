@@ -1,9 +1,7 @@
 import c from 'classnames';
 import { NextPage } from 'next';
 import Code from '~/components/code';
-import Emoji from '~/components/emoji';
 import Heading from '~/components/heading';
-import Inline from '~/components/inline';
 import Link from '~/components/link';
 import List from '~/components/list';
 import ListItem from '~/components/listItem';
@@ -13,25 +11,24 @@ import Paragraph from '~/components/paragraph';
 const UkrainePage: NextPage = () => {
   return (
     <>
-      <Meta title="Support Ukraine" />
+      <Meta title="#StandWithUkraine" />
 
       <section>
-        <Heading>Support Ukraine</Heading>
+        <Heading>#StandWithUkraine</Heading>
 
         <div>
           <div className={c('h-10', 'bg-blue-500')} />
           <div className={c('h-10', 'bg-yellow-400')} />
         </div>
 
-        <Paragraph>My name is Oleksii, I&apos;m a software developer from Kyiv, Ukraine.</Paragraph>
         <Paragraph>
-          On{' '}
+          My name is Oleksii, I&apos;m a software developer from Kyiv, Ukraine. On{' '}
           <Link href="https://twitter.com/Tyrrrz/status/1496665421277184000">
             24th of February 2022
           </Link>{' '}
           I woke up to war:{' '}
           <span className={c('font-semibold')}>
-            <Link href="https://war.ukraine.ua">Russian armed forces have invaded my country</Link>
+            <Link href="https://war.ukraine.ua">Russian Armed Forces have invaded my country</Link>
           </span>
           . Driven by chauvinistic ideals and determination to eradicate the Ukrainian people, this
           act of aggression can only be described as{' '}
@@ -40,79 +37,127 @@ const UkrainePage: NextPage = () => {
         <Paragraph>
           Russian soldiers spare no thought when bombing residential areas, hospitals, schools,
           museums, cultural heritages, and civilian infrastructure. The{' '}
-          <Link href="https://newdirection.online/ukraine-monitoring/article/crimes_in_ukraine_committed_by_the_russian_federation">
-            list of committed war crimes
+          <Link href="https://en.wikipedia.org/wiki/War_crimes_in_the_2022_Russian_invasion_of_Ukraine">
+            list of war crimes
           </Link>{' '}
-          grows longer by the minute, while the rest of the world largely remains passive.
+          grows by the minute, while the Russian war machine still enjoys both active and tacit
+          public support back home.
         </Paragraph>
         <Paragraph>
-          Be on the right side of history!{' '}
-          <span className={c('font-semibold')}>Today it&apos;s us, tomorrow it could be you</span>.
+          In Ukraine, everyone&apos;s life has been irrecoverably affected. Some of us lost our
+          homes, friends, loved ones, while the rest are struggling to maintain a sense of normalcy
+          in-between the sounds of sirens and regular blackouts. War is a surreal thing to try to
+          comprehend, but unfortunately it&apos;s real and it&apos;s here —{' '}
+          <span className={c('font-semibold')}>all we can do is fight back</span>.
+        </Paragraph>
+        <Paragraph>
+          Luckily, we don&apos;t have to endure this fight in solitude and I&apos;m immensely
+          thankful to everyone who supports us! Every bit of help, no matter how big or small,
+          brings us closer to victory.
         </Paragraph>
       </section>
 
       <section>
-        <Heading variant="h2">Help financially</Heading>
+        <Heading variant="h2">How to help financially</Heading>
 
         <Paragraph>
-          Please consider helping Ukraine fight back by donating to local charitable funds. Avoid
-          donating to global funds such as Red Cross, UNCR, or other non-UA based NGOs — their
-          support is ineffective.
+          When it comes to financial aid, the most effective thing you can do is donate to one of
+          the local non-government charities that supply our defenders with critical equipment —
+          power stations, medical supplies, armored vests, light vehicles, reconnaissance drones,
+          weapon attachments, etc. It&apos;s best to avoid donating to global funds, such as Red
+          Cross or UN Crisis Relief, because they have very limited presence in Ukraine and
+          typically can&apos;t provide the most necessary support.
         </Paragraph>
 
         <List>
           <ListItem>
-            <Link href="https://u24.gov.ua">Official government donation page</Link>
-          </ListItem>
-          <ListItem>
-            <Link href="https://savelife.in.ua/en/donate-en">NGO &quot;Come Back Alive&quot;</Link>{' '}
-            (military aid)
-          </ListItem>
-          <ListItem>
-            <Link href="https://prytulafoundation.org/en/home/support_page">
-              NGO &quot;Serhiy Prytula Foundation&quot;
+            <Link href="https://dzygaspaw.com/support?source=tyrrrz">
+              <span className={c('font-semibold')}>Dzyga&apos;s Paw</span> Foundation
             </Link>{' '}
-            (military & humanitarian aid)
+            (defensive & humanitarian aid)
           </ListItem>
           <ListItem>
-            <Link href="https://koloua.com/en/donate">NGO &quot;Kolo&quot;</Link> (military aid)
+            <Link href="https://savelife.in.ua/en/donate-en/?source=tyrrrz">
+              <span className={c('font-semibold')}>Come Back Alive</span> Foundation
+            </Link>{' '}
+            (defensive aid)
           </ListItem>
           <ListItem>
-            <Link href="https://hospitallers.life/needs-hospitallers">
-              NGO &quot;Hospitallers&quot;
+            <Link href="https://prytulafoundation.org/en/home/support_page?source=tyrrrz">
+              <span className={c('font-semibold')}>Serhiy Prytula</span> Foundation
+            </Link>{' '}
+            (defensive & humanitarian aid)
+          </ListItem>
+          <ListItem>
+            <Link href="https://koloua.com/en/donate?source=tyrrrz">
+              <span className={c('font-semibold')}>Kolo</span> Foundation
+            </Link>{' '}
+            (defensive aid)
+          </ListItem>
+          <ListItem>
+            <Link href="https://hospitallers.life/needs-hospitallers?source=tyrrrz">
+              <span className={c('font-semibold')}>Hospitallers Battalion</span>
             </Link>{' '}
             (medical aid)
           </ListItem>
           <ListItem>
-            <Link href="https://voices.org.ua/en/donat">NGO &quot;Voices of Children&quot;</Link>{' '}
+            <Link href="https://voices.org.ua/en/donat?source=tyrrrz">
+              <span className={c('font-semibold')}>Voices of Children</span> Foundation
+            </Link>{' '}
             (humanitarian aid)
           </ListItem>
           <ListItem>
-            Any <Link href="/donate">personal donations</Link> during this time will also be
-            directed to local charities at my own discretion
+            <Link href="https://u24.gov.ua">Government donation portal</Link> (humanitarian aid)
+          </ListItem>
+          <ListItem>
+            <Link href="/donate">Personal donations to me</Link> are also directed to local
+            charities at my own discretion
           </ListItem>
         </List>
       </section>
 
       <section>
-        <Heading variant="h2">Help in other ways</Heading>
+        <Heading variant="h2">Other ways to help</Heading>
 
-        <Paragraph>If you don&apos;t have the means to help financially, you can also:</Paragraph>
+        <Paragraph>
+          If you don&apos;t have the means to help financially, there are also other things you can
+          do:
+        </Paragraph>
 
         <List>
-          <ListItem>Spread the information about the war throughout your local networks</ListItem>
           <ListItem>
-            Avoid products made in Russia (bar codes starting with <Code>460</Code>-<Code>469</Code>
-            )
+            Donate unused clothes, medical supplies, tools & equipment to refugee centers or
+            Ukrainian charities
+          </ListItem>
+          <ListItem>Reach out to Ukrainian friends or colleagues, offer them help</ListItem>
+          <ListItem>
+            <Link href="https://www.ethicalconsumer.org/ethicalcampaigns/boycotts/should-we-boycott-russia">
+              Avoid physical products made in Russia
+            </Link>{' '}
+            (bar codes starting with <Code>460</Code>-<Code>469</Code>)
           </ListItem>
           <ListItem>
-            Urge your employer to implement sanctions against Russia, or help in other ways
+            <Link href="https://stand-with-ukraine.pp.ua/Boycott.html">
+              Avoid software products made in Russia
+            </Link>
+          </ListItem>
+          <ListItem>
+            <Link href="https://boycottrussia.info/list-of-shame">
+              Boycott international companies that continue operating in Russia
+            </Link>
+          </ListItem>
+          <ListItem>
+            Ask your employer to implement sanctions against Russia, or help in other ways
           </ListItem>
           <ListItem>
             Ask your politicians to provide stronger support to Ukraine, including heavy weapons
           </ListItem>
+          <ListItem>Join your local protests to empower Ukrainian voices</ListItem>
+          <ListItem>Spread the word about the war in your local networks</ListItem>
           <ListItem>
-            Join your local demonstrations and protests to empower Ukrainian voices
+            <Link href="https://spellingukraine.com">
+              Use the correct transliteration when referring to Ukrainian toponyms
+            </Link>
           </ListItem>
           <ListItem>
             <Link href="https://fightforua.org">
@@ -123,10 +168,7 @@ const UkrainePage: NextPage = () => {
       </section>
 
       <div className={c('my-6', 'text-xl', 'text-center', 'font-light')}>
-        <Inline>
-          <span>Glory to Ukraine! Glory to Heroes!</span>
-          <Emoji code="🇺🇦" />
-        </Inline>
+        <span>Glory to Ukraine! Glory to Heroes!</span>
       </div>
     </>
   );
