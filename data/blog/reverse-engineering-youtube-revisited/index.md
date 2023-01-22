@@ -19,7 +19,7 @@ If you've worked with YouTube in the past, you'll probably remember `get_video_i
 
 Besides `get_video_info`, YouTube has also dropped many other endpoints, such as `get_video_metadata` ([in November 2017](https://github.com/Tyrrrz/YoutubeExplode/issues/66#issuecomment-347455728)) and `list_ajax` ([in February 2021](https://github.com/Tyrrrz/YoutubeExplode/issues/501#issuecomment-774802535)), as part of a larger effort to establish a more organized API structure. Now, instead of having a bunch of randomly scattered endpoints with unpredictable formats and usage patterns, YouTube's internal API is comprised out of a coherent set of routes nested underneath the `/youtubei/v1/` path.
 
-In particular, much of the data previously available from `get_video_info` can now be pulled using the `/youtubei/v1/player` route. Unlike its predecessor, this endpoint expects a POST request with JSON data, which is also a fair bit more involved. Here is how it looks:
+In particular, much of the data previously available from `get_video_info` can now be pulled using the `/youtubei/v1/player` route. Unlike its predecessor, this endpoint expects a `POST` request with JSON data, which is also a fair bit more involved. Here is how it looks:
 
 ```json
 // POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8
@@ -111,20 +111,21 @@ Finally, assuming the video is marked as playable, `streamingData` should contai
   /* ... */
   "streamingData": {
     "formats": [
+      /* ... */
       {
         "itag": 18,
-        "url": "https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?expire=1669027268&ei=ZAF7Y8WaA4i3yQWsxLyYDw&ip=111.111.111.111&id=o-AC63-WVHdIW_Ueyvj6ZZ1eC3oHHyfY14KZOpHNncjXa4&itag=18&source=youtube&requiressl=yes&mh=Qv&mm=31%2C26&mn=sn-3c27sn7d%2Csn-f5f7lnld&ms=au%2Conr&mv=m&mvi=12&pl=24&gcr=ua&initcwndbps=1521250&vprv=1&svpuc=1&xtags=heaudio%3Dtrue&mime=video%2Fmp4&cnr=14&ratebypass=yes&dur=183.994&lmt=1665725827618480&mt=1669005418&fvip=1&fexp=24001373%2C24007246&c=ANDROID&txp=5538434&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cgcr%2Cvprv%2Csvpuc%2Cxtags%2Cmime%2Ccnr%2Cratebypass%2Cdur%2Clmt&sig=AOq0QJ8wRQIge8aU9csL5Od685kA1to0PB6ggVeuLJjfSfTpZVsgEToCIQDZEk4dQyXJViNJr9EyGUhecGCk2RCFzXIJAZuuId4Bug%3D%3D&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AG3C_xAwRgIhAP5rrAq5OoZ0e5bgNZpztkbKGgayb-tAfBbM3Z4VrpDfAiEAkcg66j1nSan1vbvg79sZJkJMMFv1jb2tDR_Z7kS2z9M%3D",
         "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+        "url": "https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?expire=1669027268&ei=ZAF7Y8WaA4i3yQWsxLyYDw&ip=111.111.111.111&id=o-AC63-WVHdIW_Ueyvj6ZZ1eC3oHHyfY14KZOpHNncjXa4&itag=18&source=youtube&requiressl=yes&mh=Qv&mm=31%2C26&mn=sn-3c27sn7d%2Csn-f5f7lnld&ms=au%2Conr&mv=m&mvi=12&pl=24&gcr=ua&initcwndbps=1521250&vprv=1&svpuc=1&xtags=heaudio%3Dtrue&mime=video%2Fmp4&cnr=14&ratebypass=yes&dur=183.994&lmt=1665725827618480&mt=1669005418&fvip=1&fexp=24001373%2C24007246&c=ANDROID&txp=5538434&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cgcr%2Cvprv%2Csvpuc%2Cxtags%2Cmime%2Ccnr%2Cratebypass%2Cdur%2Clmt&sig=AOq0QJ8wRQIge8aU9csL5Od685kA1to0PB6ggVeuLJjfSfTpZVsgEToCIQDZEk4dQyXJViNJr9EyGUhecGCk2RCFzXIJAZuuId4Bug%3D%3D&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AG3C_xAwRgIhAP5rrAq5OoZ0e5bgNZpztkbKGgayb-tAfBbM3Z4VrpDfAiEAkcg66j1nSan1vbvg79sZJkJMMFv1jb2tDR_Z7kS2z9M%3D",
+        "lastModified": "1665725827618480",
+        "approxDurationMs": "183994",
         "bitrate": 503351,
         "width": 640,
         "height": 360,
-        "lastModified": "1665725827618480",
-        "quality": "medium",
-        "fps": 30,
-        "qualityLabel": "360p",
         "projectionType": "RECTANGULAR",
+        "fps": 30,
+        "quality": "medium",
+        "qualityLabel": "360p",
         "audioQuality": "AUDIO_QUALITY_LOW",
-        "approxDurationMs": "183994",
         "audioSampleRate": "22050",
         "audioChannels": 2
       }
@@ -134,11 +135,21 @@ Finally, assuming the video is marked as playable, `streamingData` should contai
 }
 ```
 
-// Muxed/adaptive streams
+Here you will find that every stream has something called an `itag` — a numeric code that uniquely identifies the encoding preset used internally by YouTube to transform the originally uploaded video into a given representation. Regardless of the video you're working with, a specific code always corresponds to the same media container, set of codecs, maximum resolution, average bitrate, and related parameters. You can use this value to determine the format and overall quality of the stream, but it's largely unnecessary since all that information can be parsed from the other properties anyway.
+
+However, YouTube streams differ not only in format and quality, but also in the type of content they carry. Specifically, you'll find that most of the playback options, especially the higher-fidelity ones, are actually split into two separate streams: one for video and one for audio. This allows the player to switch the streams independently, which is helpful when adapting to potentially varying network conditions of the device, as well as the playback context — for example, by requesting only the audio stream if the user is listening to the video in the background.
+
+You can tell what type of content you're dealing with by inspecting the `mimeType` property. If the value starts with `audio/`, then you have an audio-only stream. If it starts with `video/`, then you either have a video-only or a muxed stream — something that you can further infer by looking at the number of codecs used. Additionally, other properties like `width`, `height`, and `fps` will predictably be missing from audio-only streams, while `audioQuality`, `audioSampleRate`, and `audioChannels` will be missing from video-only streams.
+
+Of course, the most interesting part of the object is the `url` property, which contains the location of the actual media stream. You can use this URL to play the stream in your browser, or download it to a file by sending a simple `GET` request.
+
+YouTube stream URLs are not static — they are generated individually for each client and have a fixed expiration time. You can confirm this by looking at the `ip` and `expire` query parameters, which contain the client's IP address and the timestamp of the expiration time, respectively. These parameters, along with others, are secured by a checksum signature include inside the URL, which means that attempting to modify one of them will result in an invalid URL.
 
 // URLs stop working after a while
 
 // Explain how using ANDROID client helps
+
+## Descrambling the signature
 
 ## DASH manifest
 
@@ -157,6 +168,12 @@ only needed for HTML5 clients
 ## Bypassing rate limits
 
 still needed for some streams
+
+## Muxing streams
+
+FFmpeg
+
+This works out well for YouTube because it allows them to offer different combinations by playing two streams simultaneously, but if your goal is to download the video, you need to do more work. his is done to allow the player to switch between them independently, which is especially useful for adaptive bitrate streaming.
 
 ## Summary
 

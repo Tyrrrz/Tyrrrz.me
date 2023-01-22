@@ -39,7 +39,7 @@ Our final URL with all the parameters set should look like this:
 http://steamcommunity.com/market/priceoverview/?market_hash_name=AK-47%20%7C%20Redline%20%28Field-Tested%29&appid=730&currency=1
 ```
 
-If we send a GET request with this URL we will get a response such as this one:
+If we send a `GET` request with this URL we will get a response such as this one:
 
 ```json
 {
@@ -87,7 +87,7 @@ Finally, the fully formed URL should look something like this:
 http://steamcommunity.com/market/listings/730/AK-47%20%7C%20Redline%20%28Field-Tested%29/render?start=0&count=1&currency=1&format=json
 ```
 
-A GET request with this URL will return a rather large JSON response that contains raw HTML inside (I truncated most of it for brevity):
+A `GET` request with this URL will return a rather large JSON response that contains raw HTML inside (I truncated most of it for brevity):
 
 ```json
 {
