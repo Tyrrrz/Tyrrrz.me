@@ -145,9 +145,9 @@ You can tell which type of stream you're dealing with by inspecting the `mimeTyp
 - If the value starts with `video/` and lists two codecs, then the stream contains both an audio and a video track.
 - If the value starts with `video/` but only lists a single codec, then it's a video-only stream.
 
-Additionally, all video and audio-specific properties, such as `width`, `height`, `fps`, `audioQuality`, `audioSampleRate`, and `audioChannels`, will only be present in streams that contain the corresponding tracks.
+Additionally, all video and audio-specific properties, such as `width`, `height`, `fps`, `audioQuality`, `audioSampleRate`, and `audioChannels`, will only be present in a stream if it contains the corresponding track.
 
-Finally, there's also the `url` property, which is the most interesting part of the entire object. It contains the URL you can use to request the actual stream data.
+Finally, there's also the `url` property, which is the most interesting part of the object — it contains the actual URL of the stream which you can use to download it. Once you identify the stream you're interested in, you can send a `GET` request to this URL to retrieve the raw binary data.
 
 YouTube stream URLs are not static — they are generated individually for each client and have a fixed expiration time. You can confirm this by looking at the `ip` and `expire` query parameters, which contain the client's IP address and the timestamp of the expiration time, respectively. These parameters, along with others, are secured by a checksum signature include inside the URL, which means that attempting to modify one of them will result in an invalid URL.
 
