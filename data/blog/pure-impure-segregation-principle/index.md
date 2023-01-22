@@ -3,7 +3,7 @@ title: 'Pure-Impure Segregation Principle'
 date: '2020-08-24'
 ---
 
-Two months ago I posted an article detailing why I think [unit testing is overrated](/blog/unit-testing-is-overrated), which seemed to resonate quite a lot with the readers, prompting very involved and interesting discussions. And although most commentators mainly shared their personal experiences, a few have also voiced criticism of the way some arguments were presented.
+Two months ago I posted an article detailing why I think that [Unit Testing is Overrated](/blog/unit-testing-is-overrated), which seemed to resonate quite a lot with the readers, prompting very involved and interesting discussions. And although most commentators mainly shared their personal experiences, a few have also voiced criticism of the way some arguments were presented.
 
 In particular, one person mentioned that the drawbacks I've described, especially those pertaining to abstractions and mocking, are really just a byproduct of object-oriented programming and its inherent flaws. Had my example been designed with functional principles in mind, many of the outlined problems would never have surfaced.
 

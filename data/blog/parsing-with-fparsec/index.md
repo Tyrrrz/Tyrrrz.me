@@ -3,7 +3,7 @@ title: 'Parsing in F# with FParsec'
 date: '2020-01-04'
 ---
 
-Two months ago I wrote an article about [monadic parser combinators in C#](/blog/monadic-parser-combinators) and how you can use this approach to express complex recursive grammar. To extend this topic a bit, I also wanted to show how the same approach can be applied in a functional-first language such as F#.
+Two months ago I wrote an article about [Monadic Parser Combinators in C#](/blog/monadic-parser-combinators) and how you can use this approach to express complex recursive grammar. To extend this topic a bit, I also wanted to show how the same approach can be applied in a functional-first language such as F#.
 
 FParsec may not be the only, but is definitely the most popular F# framework for building parsers. Designed as a clone to Haskell's [Parsec](https://github.com/haskell/parsec), with which it shares a very similar API, this library is focused on high throughput and human-readable error messages.
 
