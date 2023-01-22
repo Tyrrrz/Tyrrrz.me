@@ -172,7 +172,7 @@ const engagements: SpeakingEngagement[] = [
     date: '2022-07-14',
     language: 'ukrainian',
     eventUrl: 'https://dou.ua/forums/topic/39124',
-    recordingUrl: 'https://soundcloud.com/doupodcast/pro-rozvitok-personalnogo-brendu-za-kordonom'
+    recordingUrl: 'https://dou.ua/forums/topic/39124'
   },
   {
     title: 'Intro to CliWrap',
