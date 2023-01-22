@@ -135,13 +135,19 @@ Finally, assuming the video is marked as playable, `streamingData` should contai
 }
 ```
 
-Here you will find that every stream has something called an `itag` — a numeric code that uniquely identifies the encoding preset used internally by YouTube to transform the originally uploaded video into a given representation. Regardless of the video you're working with, a specific code always corresponds to the same media container, set of codecs, maximum resolution, average bitrate, and related parameters. You can use this value to determine the format and overall quality of the stream, but it's largely unnecessary since all that information can be parsed from the other properties anyway.
+Here you will find that every stream has something called an `itag` — a numeric code that uniquely identifies the encoding preset used internally to transform the original upload into a given representation. Regardless of the video, a specific code will always correspond to the same container, maximum resolution, average bitrate, etc. You can use this value to determine the format and overall quality of the stream, but it's largely unnecessary since all that information can be parsed from the other properties anyway.
 
-However, YouTube streams differ not only in format and quality, but also in the type of content they carry. Specifically, you'll find that most of the playback options, especially the higher-fidelity ones, are actually split into two separate streams: one for video and one for audio. This allows the player to switch the streams independently, which is helpful when adapting to potentially varying network conditions of the device, as well as the playback context — for example, by requesting only the audio stream if the user is listening to the video in the background.
+However, YouTube streams differ not only in format and quality, but also in the type of content they carry. Specifically, you'll notice that most of the playback options, especially the higher-fidelity ones, are actually split into two separate streams: one for audio and one for video. This allows the player to switch between streams independently to adjust for varying network conditions, as well as different playback contexts — for example, by requesting only the audio stream if the user is consuming content from YouTube Music.
 
-You can tell what type of content you're dealing with by inspecting the `mimeType` property. If the value starts with `audio/`, then you have an audio-only stream. If it starts with `video/`, then you either have a video-only or a muxed stream — something that you can further infer by looking at the number of codecs used. Additionally, other properties like `width`, `height`, and `fps` will predictably be missing from audio-only streams, while `audioQuality`, `audioSampleRate`, and `audioChannels` will be missing from video-only streams.
+You can tell which type of stream you're dealing with by inspecting the `mimeType` property:
 
-Of course, the most interesting part of the object is the `url` property, which contains the location of the actual media stream. You can use this URL to play the stream in your browser, or download it to a file by sending a simple `GET` request.
+- If the value starts with `audio/`, then it's an audio-only stream.
+- If the value starts with `video/` and lists two codecs, then the stream contains both an audio and a video track.
+- If the value starts with `video/` but only lists a single codec, then it's a video-only stream.
+
+Additionally, all video and audio-specific properties, such as `width`, `height`, `fps`, `audioQuality`, `audioSampleRate`, and `audioChannels`, will only be present in streams that contain the corresponding tracks.
+
+Finally, there's also the `url` property, which is the most interesting part of the entire object. It contains the URL you can use to request the actual stream data.
 
 YouTube stream URLs are not static — they are generated individually for each client and have a fixed expiration time. You can confirm this by looking at the `ip` and `expire` query parameters, which contain the client's IP address and the timestamp of the expiration time, respectively. These parameters, along with others, are secured by a checksum signature include inside the URL, which means that attempting to modify one of them will result in an invalid URL.
 
