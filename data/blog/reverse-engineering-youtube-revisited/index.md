@@ -3,13 +3,13 @@ title: 'Reverse-Engineering YouTube: Revisited'
 date: '2022-12-15'
 ---
 
-Back in 2017, I wrote an article titled [Reverse-Engineering YouTube](/blog/reverse-engineering-youtube), in which I attempted to explain how YouTube works under the hood, how it serves streams for playback on the client, and also how you can exploit that knowledge to download videos from the site. The primary goal of that write-up was to share some of the things that I learned while working on [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) — an open-source library that lets you pull various data from YouTube by leveraging its internal API.
+Back in 2017, I wrote an article titled [Reverse-Engineering YouTube](/blog/reverse-engineering-youtube), in which I attempted to explain how YouTube works under the hood, how it serves streams for playback on the client, and also how you can exploit that knowledge to download videos from the site. The primary goal of that write-up was to share some of the things I learned while working on [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) — an open-source library that lets you pull various data from YouTube by leveraging its internal API.
 
 There is one thing that developers like more than building things — and that is breaking things built by other people. So, naturally, my article attracted quite a bit of attention and still remains one of the most popular posts on this blog. One way or another, I had lots of fun doing the research, and I'm glad that it was also useful to other people.
 
 However, many things have changed in the five years since the article was published. YouTube has evolved as a platform, went through multiple UI redesigns, and completely overhauled its frontend codebase. Most of the internal endpoints that were reverse-engineered in the early days have been gradually getting removed altogether. In fact, nearly everything I wrote in the original post has become obsolete and now only serves as a historical reference.
 
-I know that there's still a lot of interest around this topic, so I've been meaning to revisit it and make a follow-up article with new and updated information. Seeing as YouTube has been pretty stable lately, I figured that now is finally a good time to do it.
+I know that there's still a lot of interest around this topic, so I've been meaning to revisit it and make a follow-up article with new and updated information. Seeing as YouTube has once again entered a quiet phase in terms of change and innovation, I figured that now is finally a good time to do it.
 
 In this article, I'll cover the current state of YouTube's internal API, highlight the most important changes, and explain how everything works today. Just like before, I will focus on the video playback aspect of the platform, outlining everything you need to do in order to resolve video streams and download them.
 
@@ -104,7 +104,7 @@ As you can immediately see, the response contains a lot of useful information. F
 
 Next, the `playabilityStatus` object indicates whether the video is playable in the context of the client that made the request. In case it's not, a `reason` property will be included with a human-readable message explaining why — for example, because the video is intended for mature audiences, or because it's not available in the current region. When dealing with unplayable videos, you'll still be able to access their metadata in the `videoDetails` object, but you won't be able to retrieve any streams.
 
-Finally, assuming the video is marked as playable, `streamingData` should contain a list of all streams that YouTube provided for the playback. This list indirectly represents the quality options available in the player, which may vary greatly depending on the video, as well as the client you impersonate. Each element in the `formats` array describes a single stream, and contains the following properties:
+Finally, assuming the video is marked as playable, `streamingData` should contain the list of streams that YouTube provided for the playback. This list indirectly represents the quality options available in the player, which may vary greatly depending on the video, as well as the client you impersonate. Each element in the `formats` array describes a single stream, and contains the following properties:
 
 ```json
 {
