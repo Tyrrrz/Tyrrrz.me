@@ -3,7 +3,7 @@ title: 'Reverse-Engineering YouTube: Revisited'
 date: '2022-12-15'
 ---
 
-Back in 2017, I wrote an article titled [Reverse-Engineering YouTube](/blog/reverse-engineering-youtube), in which I attempted to explain how YouTube works under the hood, how it serves streams for playback on the client, and also how you can exploit that knowledge to download videos from the site. The primary goal of that write-up was to share some of the things I learned while working on [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) — an open-source library that lets you pull various data from YouTube by leveraging its internal API.
+Back in 2017 I wrote [an article](/blog/reverse-engineering-youtube) in which I attempted to explain how YouTube works under the hood, how it serves streams to the client, and also how you can exploit that knowledge to download videos from the site. The primary goal of that write-up was to share some of the things I learned while working on [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) — an open-source library that provides a structured abstraction layer over YouTube's internal API.
 
 There is one thing that developers like more than building things — and that is breaking things built by other people. So, naturally, my article attracted quite a bit of attention and still remains one of the most popular posts on this blog. One way or another, I had lots of fun doing the research, and I'm glad that it was also useful to other people.
 
@@ -135,7 +135,7 @@ Finally, assuming the video is marked as playable, `streamingData` should contai
 }
 ```
 
-Here you will find that every stream has something called an `itag` — a numeric code that uniquely identifies the encoding preset used internally to transform the original upload into a given representation. Regardless of the video, a specific code will always correspond to the same container, maximum resolution, average bitrate, etc. You can use this value to determine the format and overall quality of the stream, but it's largely unnecessary since all that information can be parsed from the other properties anyway.
+Here you will find that every stream has something called an `itag` — a numeric code that uniquely identifies the encoding preset used internally by YouTube to transform the original upload into a given representation. Regardless of the video, a specific code will always correspond to the same container, maximum resolution, average bitrate, etc. You can use this value to determine the format and overall quality of the stream, but it's largely unnecessary since all that information can be parsed from the other properties anyway.
 
 However, YouTube streams differ not only in format and quality, but also in the type of content they carry. Specifically, you'll notice that most of the playback options, especially the higher-fidelity ones, are actually split into two separate streams: one for audio and one for video. This allows the player to switch between streams independently to adjust for varying network conditions, as well as different playback contexts — for example, by requesting only the audio stream if the user is consuming content from YouTube Music.
 
@@ -147,9 +147,11 @@ You can tell which type of stream you're dealing with by inspecting the `mimeTyp
 
 Additionally, all video and audio-specific properties, such as `width`, `height`, `fps`, `audioQuality`, `audioSampleRate`, and `audioChannels`, will only be present in a stream if it contains the corresponding track.
 
-Finally, there's also the `url` property, which is the most interesting part of the object — it contains the actual URL of the stream which you can use to download it. Once you identify the stream you're interested in, you can send a `GET` request to this URL to retrieve the raw binary data.
+Finally, there's also the `url` property, which is the most interesting part of the object. This is the URL which you can use to fetch the actual binary stream data, either to play it in real time or to download to a file. You can open it in a browser to test it out:
 
-YouTube stream URLs are not static — they are generated individually for each client and have a fixed expiration time. You can confirm this by looking at the `ip` and `expire` query parameters, which contain the client's IP address and the timestamp of the expiration time, respectively. These parameters, along with others, are secured by a checksum signature include inside the URL, which means that attempting to modify one of them will result in an invalid URL.
+![Stream played in a browser](stream-in-browser.png)
+
+Note that YouTube stream URLs are not static — they are generated individually for each client and have a fixed expiration time. You can confirm this by looking at the `ip` and `expire` query parameters, which contain the client's IP address and the expiration timestamp, respectively.
 
 // URLs stop working after a while
 
