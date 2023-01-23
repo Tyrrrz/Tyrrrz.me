@@ -94,17 +94,24 @@ After you receive the response, you should get a JSON payload that contains the 
     "expiresInSeconds": "21540",
     "formats": [
       /* ... */
+    ],
+    "adaptiveFormats": [
+      /* ... */
     ]
   }
   /* ... omitted ~1800 more lines of irrelevant data ... */
 }
 ```
 
-As you can immediately see, the response contains a lot of useful information. From `videoDetails`, you can extract the video title, duration, author, view count, thumbnails, and other relevant metadata. This includes most of the stuff you will find on the video page, with the exception of likes, dislikes, channel subscribers, and other bits that are not rendered directly by the player. If you want to get that data as well, you will have to scrape the `/watch` page separately.
+As you can immediately see, the response contains a range of useful information. From `videoDetails`, you can extract the video title, duration, author, view count, thumbnails, and other relevant metadata. This includes most of the stuff you will find on the video page, with the exception of likes, dislikes, channel subscribers, and other bits that are not rendered directly by the player. If you want to get that data as well, you will have to scrape the `/watch` page separately.
 
 Next, the `playabilityStatus` object indicates whether the video is playable in the context of the client that made the request. In case it's not, a `reason` property will be included with a human-readable message explaining why — for example, because the video is intended for mature audiences, or because it's not available in the current region. When dealing with unplayable videos, you'll still be able to access their metadata in the `videoDetails` object, but you won't be able to retrieve any streams.
 
-Finally, assuming the video is marked as playable, `streamingData` should contain the list of streams that YouTube provided for the playback. This list indirectly represents the quality options available in the player, which may vary greatly depending on the video, as well as the client you impersonate. Each element in the `formats` array describes a single stream, and contains the following properties:
+Finally, assuming the video is marked as playable, `streamingData` should contain the list of streams that YouTube provided for the playback. These are divided into `formats` and `adaptiveFormats` arrays inside the response, and correspond to the various quality options available in the player.
+
+The separation between `formats` and `adaptiveFormats` is a bit confusing and I found that it doesn't refer so much to the [delivery method](https://en.wikipedia.org/wiki/Adaptive_bitrate_streaming) of the data, but rather to the way the streams are encoded. Specifically, the streams described in the `formats` array carry both the audio and the video track inside the same container, while `adaptiveFormats` lists dedicated audio-only and video-only streams.
+
+You'll find that most of the playback options, especially the higher-fidelity ones, are provided using the latter approach, because it allows the player to switch between the audio and video streams independently. This is helpful for adapting to varying network conditions, as well as different playback contexts — for example, by requesting only the audio stream if the user is consuming content from YouTube Music.
 
 ```json
 {
@@ -135,9 +142,9 @@ Finally, assuming the video is marked as playable, `streamingData` should contai
 }
 ```
 
-Here you will find that every stream has something called an `itag` — a numeric code that uniquely identifies the encoding preset used internally by YouTube to transform the original upload into a given representation. Regardless of the video, a specific code will always correspond to the same container, maximum resolution, average bitrate, etc. You can use this value to determine the format and overall quality of the stream, but it's largely unnecessary since all that information can be parsed from the other properties anyway.
+Here you will find that every stream is identified by an `itag` — a numeric code that refers to the encoding preset used internally by YouTube to transform the original upload into a given representation. In the past, this value was the most reliable way to determine the format and overall quality of the stream, but nowadays the response always includes properties like `mimeType`, `width`, `height`, `fps`, and `qualityLabel`, which are more accurate and easier to work with.
 
-However, YouTube streams differ not only in format and quality, but also in the type of content they carry. Specifically, you'll notice that most of the playback options, especially the higher-fidelity ones, are actually split into two separate streams: one for audio and one for video. This allows the player to switch between streams independently to adjust for varying network conditions, as well as different playback contexts — for example, by requesting only the audio stream if the user is consuming content from YouTube Music.
+Looking at the `mimeType` property in particular, you'll notice that YouTube streams differ not only in format and quality, but also in the type of content they carry. Most of the playback options, especially the higher-fidelity ones, are actually split into two separate streams: one for audio and one for video. This allows the player to switch between streams independently to adjust for varying network conditions, as well as different playback contexts — for example, by requesting only the audio stream if the user is consuming content from YouTube Music.
 
 You can tell which type of stream you're dealing with by inspecting the `mimeType` property:
 
