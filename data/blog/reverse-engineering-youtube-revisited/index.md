@@ -1,6 +1,6 @@
 ---
 title: 'Reverse-Engineering YouTube: Revisited'
-date: '2022-12-15'
+date: '2023-02-15'
 ---
 
 Back in 2017 I wrote [an article](/blog/reverse-engineering-youtube) in which I attempted to explain how YouTube works under the hood, how it serves streams to the client, and also how you can exploit that knowledge to download videos from the site. The primary goal of that write-up was to share some of the things I learned while working on [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) — an open-source library that provides a structured abstraction layer over YouTube's internal API.
@@ -105,56 +105,41 @@ After you receive the response, you should get a JSON payload that contains the 
 
 As you can immediately see, the response contains a range of useful information. From `videoDetails`, you can extract the video title, duration, author, view count, thumbnails, and other relevant metadata. This includes most of the stuff you will find on the video page, with the exception of likes, dislikes, channel subscribers, and other bits that are not rendered directly by the player. If you want to get that data as well, you will have to scrape the `/watch` page separately.
 
-Next, the `playabilityStatus` object indicates whether the video is playable in the context of the client that made the request. In case it's not, a `reason` property will be included with a human-readable message explaining why — for example, because the video is intended for mature audiences, or because it's not available in the current region. When dealing with unplayable videos, you'll still be able to access their metadata in the `videoDetails` object, but you won't be able to retrieve any streams.
+Next, the `playabilityStatus` object indicates whether the video is playable within the context of the client that made the request. In case it's not, a `reason` property will be included with a human-readable message explaining why — for example, because the video is intended for mature audiences, or because it's not available in the current region. When dealing with unplayable videos, you'll still be able to access their metadata, but you won't be able to retrieve any streams.
 
 Finally, assuming the video is marked as playable, `streamingData` should contain the list of streams that YouTube provided for the playback. These are divided into `formats` and `adaptiveFormats` arrays inside the response, and correspond to the various quality options available in the player.
 
-The separation between `formats` and `adaptiveFormats` is a bit confusing and I found that it doesn't refer so much to the [delivery method](https://en.wikipedia.org/wiki/Adaptive_bitrate_streaming) of the data, but rather to the way the streams are encoded. Specifically, the streams described in the `formats` array carry both the audio and the video track inside the same container, while `adaptiveFormats` lists dedicated audio-only and video-only streams.
+The separation between `formats` and `adaptiveFormats` is a bit confusing and I found that it doesn't refer so much to the [delivery method](https://en.wikipedia.org/wiki/Adaptive_bitrate_streaming), but rather to the way the streams are encoded. Specifically, the `formats` array describes traditional video streams, where both the audio and the video tracks are combined into a single container ahead of time, while `adaptiveFormats` lists dedicated audio-only and video-only streams, which are overlaid at run-time by the player.
 
-You'll find that most of the playback options, especially the higher-fidelity ones, are provided using the latter approach, because it allows the player to switch between the audio and video streams independently. This is helpful for adapting to varying network conditions, as well as different playback contexts — for example, by requesting only the audio stream if the user is consuming content from YouTube Music.
+You'll find that most of the playback options, especially the higher-fidelity ones, are provided using the latter approach, because it's more flexible from the perspective of bandwidth. By being able to switch the audio and video streams independently, the player can adapt to varying network conditions, as well as different playback contexts — for example, by requesting only the audio stream if the user is consuming content from YouTube Music.
+
+As far as the metadata is concerned, both arrays have very similar structure and contain objects with the following properties:
 
 ```json
 {
-  /* ... */
-  "streamingData": {
-    "formats": [
-      /* ... */
-      {
-        "itag": 18,
-        "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
-        "url": "https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?expire=1669027268&ei=ZAF7Y8WaA4i3yQWsxLyYDw&ip=111.111.111.111&id=o-AC63-WVHdIW_Ueyvj6ZZ1eC3oHHyfY14KZOpHNncjXa4&itag=18&source=youtube&requiressl=yes&mh=Qv&mm=31%2C26&mn=sn-3c27sn7d%2Csn-f5f7lnld&ms=au%2Conr&mv=m&mvi=12&pl=24&gcr=ua&initcwndbps=1521250&vprv=1&svpuc=1&xtags=heaudio%3Dtrue&mime=video%2Fmp4&cnr=14&ratebypass=yes&dur=183.994&lmt=1665725827618480&mt=1669005418&fvip=1&fexp=24001373%2C24007246&c=ANDROID&txp=5538434&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cgcr%2Cvprv%2Csvpuc%2Cxtags%2Cmime%2Ccnr%2Cratebypass%2Cdur%2Clmt&sig=AOq0QJ8wRQIge8aU9csL5Od685kA1to0PB6ggVeuLJjfSfTpZVsgEToCIQDZEk4dQyXJViNJr9EyGUhecGCk2RCFzXIJAZuuId4Bug%3D%3D&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AG3C_xAwRgIhAP5rrAq5OoZ0e5bgNZpztkbKGgayb-tAfBbM3Z4VrpDfAiEAkcg66j1nSan1vbvg79sZJkJMMFv1jb2tDR_Z7kS2z9M%3D",
-        "lastModified": "1665725827618480",
-        "approxDurationMs": "183994",
-        "bitrate": 503351,
-        "width": 640,
-        "height": 360,
-        "projectionType": "RECTANGULAR",
-        "fps": 30,
-        "quality": "medium",
-        "qualityLabel": "360p",
-        "audioQuality": "AUDIO_QUALITY_LOW",
-        "audioSampleRate": "22050",
-        "audioChannels": 2
-      }
-      /* ... */
-    ]
-  }
+  "itag": 18,
+  "url": "https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?expire=1669027268&ei=ZAF7Y8WaA4i3yQWsxLyYDw&ip=111.111.111.111&id=o-AC63-WVHdIW_Ueyvj6ZZ1eC3oHHyfY14KZOpHNncjXa4&itag=18&source=youtube&requiressl=yes&mh=Qv&mm=31%2C26&mn=sn-3c27sn7d%2Csn-f5f7lnld&ms=au%2Conr&mv=m&mvi=12&pl=24&gcr=ua&initcwndbps=1521250&vprv=1&svpuc=1&xtags=heaudio%3Dtrue&mime=video%2Fmp4&cnr=14&ratebypass=yes&dur=183.994&lmt=1665725827618480&mt=1669005418&fvip=1&fexp=24001373%2C24007246&c=ANDROID&txp=5538434&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cgcr%2Cvprv%2Csvpuc%2Cxtags%2Cmime%2Ccnr%2Cratebypass%2Cdur%2Clmt&sig=AOq0QJ8wRQIge8aU9csL5Od685kA1to0PB6ggVeuLJjfSfTpZVsgEToCIQDZEk4dQyXJViNJr9EyGUhecGCk2RCFzXIJAZuuId4Bug%3D%3D&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AG3C_xAwRgIhAP5rrAq5OoZ0e5bgNZpztkbKGgayb-tAfBbM3Z4VrpDfAiEAkcg66j1nSan1vbvg79sZJkJMMFv1jb2tDR_Z7kS2z9M%3D",
+  "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+  "lastModified": "1665725827618480",
+  "approxDurationMs": "183994",
+  "bitrate": 503351,
+  "width": 640,
+  "height": 360,
+  "projectionType": "RECTANGULAR",
+  "fps": 30,
+  "quality": "medium",
+  "qualityLabel": "360p",
+  "audioQuality": "AUDIO_QUALITY_LOW",
+  "audioSampleRate": "22050",
+  "audioChannels": 2
 }
 ```
 
-Here you will find that every stream is identified by an `itag` — a numeric code that refers to the encoding preset used internally by YouTube to transform the original upload into a given representation. In the past, this value was the most reliable way to determine the format and overall quality of the stream, but nowadays the response always includes properties like `mimeType`, `width`, `height`, `fps`, and `qualityLabel`, which are more accurate and easier to work with.
+Most of the properties are fairly self-explanatory, except for `itag`. This is a numeric code that refers to the encoding preset used internally by YouTube to transform the source media into a given representation. In the past, its value was the most reliable way to determine the format and overall quality of a stream, but has become less useful as the response was eventually extended to include more metadata.
 
-Looking at the `mimeType` property in particular, you'll notice that YouTube streams differ not only in format and quality, but also in the type of content they carry. Most of the playback options, especially the higher-fidelity ones, are actually split into two separate streams: one for audio and one for video. This allows the player to switch between streams independently to adjust for varying network conditions, as well as different playback contexts — for example, by requesting only the audio stream if the user is consuming content from YouTube Music.
+Once you've scanned through the list and identified the stream you want to download, you can use the `url` property to retrieve the actual stream data.
 
-You can tell which type of stream you're dealing with by inspecting the `mimeType` property:
-
-- If the value starts with `audio/`, then it's an audio-only stream.
-- If the value starts with `video/` and lists two codecs, then the stream contains both an audio and a video track.
-- If the value starts with `video/` but only lists a single codec, then it's a video-only stream.
-
-Additionally, all video and audio-specific properties, such as `width`, `height`, `fps`, `audioQuality`, `audioSampleRate`, and `audioChannels`, will only be present in a stream if it contains the corresponding track.
-
-Finally, there's also the `url` property, which is the most interesting part of the object. This is the URL which you can use to fetch the actual binary stream data, either to play it in real time or to download to a file. You can open it in a browser to test it out:
+Of course, the most interesting part of the stream object is the `url` property, which specifies the URL that serves the actual stream data. You can open the URL in a browser, or fetch the content by sending a `GET` request to download it to a file or play it in real time:
 
 ![Stream played in a browser](stream-in-browser.png)
 
