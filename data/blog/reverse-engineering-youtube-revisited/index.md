@@ -13,7 +13,7 @@ I know that there's still a lot of interest around this topic, so I've been mean
 
 In this article, I'll cover the current state of YouTube's internal API, highlight the most important changes, and explain how everything works today. Just like before, I will focus on the video playback aspect of the platform, outlining everything you need to do in order to resolve video streams and download them.
 
-## Understanding how the videos are served
+## Resolving video metadata and stream manifest
 
 If you've worked with YouTube in the past, you'll probably remember `get_video_info`. This internal API controller was used throughout YouTube's client code to retrieve video metadata, available streams, and everything else the player needed to render it. The origin of this endpoint traces back to the Flash Player days of YouTube, and it was still available as late as July 2021, before it was finally removed.
 
@@ -139,17 +139,17 @@ Most of the properties here are fairly self-explanatory as they detail the forma
 
 Each stream is also uniquely identified by something called an `itag`, which is a numeric code that refers to the encoding preset used internally by YouTube to transform the source media into a given representation. In the past, this value was the most reliable way to determine the exact encoding parameters of a particular stream, but the new response has enough metadata to make it redundant.
 
-Of course, the most interesting part of the entire object is the `url` property. This is the URL that you can use to fetch the actual binary stream data, either by sending a simple `GET` request or by opening it in a browser:
+Of course, the most interesting part of the entire object is the `url` property. This is the URL that you can use to fetch the actual binary stream data, either by sending a `GET` request or by opening it in a browser:
 
 ![Stream played in a browser](stream-in-browser.png)
 
-Note that if you try to open the URL from the JSON snippet I've shown above, you'll get a `403 Forbidden` error. That's because YouTube stream URLs are not static, but in fact generated individually for each client and also have a fixed expiration time. Once you obtain the stream manifest, the URLs inside it are only valid for roughly 6 hours and cannot be accessed from an IP address other than the one that requested them.
+Note that if you try to open the URL from the JSON snippet I've shown above, you'll get a `403 Forbidden` error. That's because YouTube stream URLs are not static — they are generated individually for each client and have a fixed expiration time. Once you obtain the stream manifest, the URLs inside it are only valid for roughly 6 hours and cannot be accessed from an IP address other than the one that requested them.
 
-You can confirm this by looking at the `ip` and `expire` query parameters in the URL, which contain the (redacted) client's IP address and the expiration timestamp, respectively. While it may be temping, these values cannot be changed manually to lift the restrictions, because their integrity is protected by a special checksum signature parameter called `sig`. Trying to change any of the parameters enumerated inside `sparams` without correctly updating the signature will also result in a `403 Forbidden` error.
+You can confirm this by looking at the `ip` and `expire` query parameters in the URL, which contain the client's IP address and the expiration timestamp respectively. While it may be temping, these values cannot be changed manually to lift the restrictions, because their integrity is protected by a special checksum parameter called `sig`. Trying to change any of the parameters listed inside `sparams` without correctly updating the signature will result in a `403 Forbidden` error as well.
 
-Nevertheless, the steps outlined so far should be enough to resolve most YouTube videos and download them to your local storage. There are a few more things to consider though, but I'll cover that in the next section.
+Nevertheless, the steps outlined so far should be enough to resolve and download streams for most YouTube videos. There are a few more things to consider though, which is what I'm going to cover in the following sections.
 
-## Breaking the limits
+## Bypassing content restrictions
 
 // Explain how using ANDROID client helps
 
@@ -157,18 +157,20 @@ racy check etc
 
 TVHTML5 workaround
 
-## Muxing streams
+## Muxing adaptive streams together
 
 FFmpeg
 
-## Bypassing rate limits
+## Bypassing speed throttling
 
 still needed for some streams
 
-## DASH manifest
+## Resolving streams from DASH manifest
 
 doesn't require signature anymore
 
 ## Summary
 
 And remember: **if it happens in the browser, it can be replicated in code**.
+
+If you want code: yte. Working example: ytd.
