@@ -139,7 +139,7 @@ Most of the properties here are fairly self-explanatory as they detail the forma
 
 Each stream is also uniquely identified by something called an `itag`, which is a numeric code that refers to the encoding preset used internally by YouTube to transform the source media into a given representation. In the past, this value was the most reliable way to determine the exact encoding parameters of a given stream, but the new response has enough metadata to make it redundant.
 
-Of course, the most interesting part of the entire object is the `url` property. This is the URL that you can use to download the actual stream to a file or play it back in the browser:
+Of course, the most interesting part of the entire object is the `url` property. This is the URL that you can use to play the stream in real-time or download it to a file:
 
 ![Stream played in a browser](stream-in-browser.png)
 
