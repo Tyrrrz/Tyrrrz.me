@@ -45,7 +45,7 @@ This setup splits the notes into three logical types — tasks, events and ideas
 
 Although creating new notes can be done at any time, they should not be acted upon until they are drafted for a week plan. A week plan is a subset of tasks and events, manually selected for completion during a specific week.
 
-Before the start of a new week, usually on a Sunday, I make a plan for the upcoming seven days by creating a new note in a special notebook titled "/" — a weird name, but I chose it to make this notebook appear at the very top of the list.
+Before the start of a new week, usually on a Sunday, I make a plan for the upcoming seven days by creating a new note in a special notebook entitled "/" — a weird name, but I chose it to make this notebook appear at the very top of the list.
 
 ![The planning notebook](planning.png)
 
