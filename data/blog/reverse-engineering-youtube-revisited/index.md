@@ -145,9 +145,9 @@ Of course, the most interesting part of the entire object is the `url` property.
 
 Note that if you try to open the URL from the JSON snippet I've shown above, you'll get a `403 Forbidden` error. That's because YouTube stream URLs are not static, but in fact generated individually for each client and also have a fixed expiration time. Once you obtain the stream manifest, the URLs inside it are only valid for roughly 6 hours and cannot be accessed from an IP address other than the one that requested them.
 
-You can confirm this by looking at the `ip` and `expire` query parameters, which contain the (redacted) client's IP address and the expiration timestamp, respectively. While it may be temping, these values cannot be changed manually to lift the restrictions, because their integrity is protected by a special checksum signature parameter called `sig`. Trying to change any of the parameters enumerated inside `sparams` without correctly updating the signature will also result in a `403 Forbidden` error.
+You can confirm this by looking at the `ip` and `expire` query parameters in the URL, which contain the (redacted) client's IP address and the expiration timestamp, respectively. While it may be temping, these values cannot be changed manually to lift the restrictions, because their integrity is protected by a special checksum signature parameter called `sig`. Trying to change any of the parameters enumerated inside `sparams` without correctly updating the signature will also result in a `403 Forbidden` error.
 
-Nevertheless, the steps outlined so far should be enough to download most YouTube videos out there. There are a few more things to consider though, but I'll cover them in the next section.
+Nevertheless, the steps outlined so far should be enough to resolve most YouTube videos and download them to your local storage. There are a few more things to consider though, but I'll cover them in the next section.
 
 ## Descrambling the signature & Age-restricted videos
 
