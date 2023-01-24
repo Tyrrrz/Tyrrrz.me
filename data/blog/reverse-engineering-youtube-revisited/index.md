@@ -5,7 +5,7 @@ date: '2023-02-15'
 
 Back in 2017 I wrote [an article](/blog/reverse-engineering-youtube) in which I attempted to explain how YouTube works under the hood, how it serves streams to the client, and also how you can exploit that knowledge to download videos from the site. The primary goal of that write-up was to share some of the things I learned while working on [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) — an open-source library that provides a structured abstraction layer over YouTube's internal API.
 
-There is one thing that developers like more than building things — and that is breaking things built by other people. So, naturally, my article attracted quite a bit of attention and still remains one of the most popular posts on this blog. One way or another, I had lots of fun doing the research, and I'm glad that it was also useful to other people.
+There is one thing that developers like more than building things — and that is breaking things built by other people. So, naturally, my article attracted quite a bit of attention and still remains one of the most popular posts on this blog. Either way, I had lots of fun doing the research, and I'm glad that it was also useful to other people.
 
 However, many things have changed in the five years since the article was published. YouTube has evolved as a platform, went through multiple UI redesigns, and completely overhauled its frontend codebase. Most of the internal endpoints that were reverse-engineered in the early days have been gradually getting removed altogether. In fact, nearly everything I wrote in the original post has become obsolete and now only serves as a historical reference.
 
@@ -13,7 +13,7 @@ I know that there's still a lot of interest around this topic, so I've been mean
 
 In this article, I'll cover the current state of YouTube's internal API, highlight the most important changes, and explain how everything works today. Just like before, I will focus on the video playback aspect of the platform, outlining everything you need to do in order to resolve video streams and download them.
 
-## Retrieving video metadata
+## Understanding how the videos are served
 
 If you've worked with YouTube in the past, you'll probably remember `get_video_info`. This internal API controller was used throughout YouTube's client code to retrieve video metadata, available streams, and everything else the player needed to render it. The origin of this endpoint traces back to the Flash Player days of YouTube, and it was still available as late as July 2021, before it was finally removed.
 
@@ -137,7 +137,7 @@ As far as the metadata is concerned, both arrays have a very similar structure a
 
 Most of the properties here are fairly self-explanatory as they detail the format and overall quality of the stream. For example, from the information above you can tell that this is a muxed (i.e. audio and video combined) `mp4` stream, encoded using the `H.264` video codec and `AAC` audio codec, with a resolution of `640x360` pixels, `30` frames per second, and a bitrate of `503 kbps`. When played on YouTube, this stream would be available as the `360p` quality option.
 
-Each stream is also uniquely identified by something called an `itag`, which is a numeric code that refers to the encoding preset used internally by YouTube to transform the source media into a given representation. In the past, this value was the most reliable way to determine the exact encoding parameters of a given stream, but the new response has enough metadata to make it redundant.
+Each stream is also uniquely identified by something called an `itag`, which is a numeric code that refers to the encoding preset used internally by YouTube to transform the source media into a given representation. In the past, this value was the most reliable way to determine the exact encoding parameters of a particular stream, but the new response has enough metadata to make it redundant.
 
 Of course, the most interesting part of the entire object is the `url` property. This is the URL that you can use to fetch the actual binary stream data, either by sending a simple `GET` request or by opening it in a browser:
 
@@ -147,9 +147,9 @@ Note that if you try to open the URL from the JSON snippet I've shown above, you
 
 You can confirm this by looking at the `ip` and `expire` query parameters in the URL, which contain the (redacted) client's IP address and the expiration timestamp, respectively. While it may be temping, these values cannot be changed manually to lift the restrictions, because their integrity is protected by a special checksum signature parameter called `sig`. Trying to change any of the parameters enumerated inside `sparams` without correctly updating the signature will also result in a `403 Forbidden` error.
 
-Nevertheless, the steps outlined so far should be enough to resolve most YouTube videos and download them to your local storage. There are a few more things to consider though, but I'll cover them in the next section.
+Nevertheless, the steps outlined so far should be enough to resolve most YouTube videos and download them to your local storage. There are a few more things to consider though, but I'll cover that in the next section.
 
-## Descrambling the signature & Age-restricted videos
+## Breaking the limits
 
 // Explain how using ANDROID client helps
 
