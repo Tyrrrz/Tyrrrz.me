@@ -111,9 +111,9 @@ Finally, assuming the video is marked as playable, `streamingData` should contai
 
 The separation between `formats` and `adaptiveFormats` is a bit confusing and I found that it doesn't refer so much to the [delivery method](https://en.wikipedia.org/wiki/Adaptive_bitrate_streaming), but rather to the way the streams are encoded. Specifically, the `formats` array describes traditional video streams, where both the audio and the video tracks are combined into a single container ahead of time, while `adaptiveFormats` lists dedicated audio-only and video-only streams, which are overlaid at run-time by the player.
 
-You'll find that most of the playback options, especially the higher-fidelity ones, are provided using the latter approach, because it's more flexible from the perspective of bandwidth. By being able to switch the audio and video streams independently, the player can adapt to varying network conditions, as well as different playback contexts — for example, by requesting only the audio stream if the user is consuming content from YouTube Music.
+You'll find that most of the playback options, especially the higher-fidelity ones, are provided using the latter approach, because it's more flexible in terms of bandwidth. By being able to switch the audio and video streams independently, the player can adapt to varying network conditions, as well as different playback contexts — for example, by requesting only the audio stream if the user is consuming content from YouTube Music.
 
-As far as the metadata is concerned, both arrays have very similar structure and contain objects with the following properties:
+As far as the metadata is concerned, both arrays have a very similar structure and contain objects that look like this:
 
 ```json
 {
@@ -135,45 +135,39 @@ As far as the metadata is concerned, both arrays have very similar structure and
 }
 ```
 
-Most of the properties are fairly self-explanatory, except for `itag`. This is a numeric code that refers to the encoding preset used internally by YouTube to transform the source media into a given representation. In the past, its value was the most reliable way to determine the format and overall quality of a stream, but has become less useful as the response was eventually extended to include more metadata.
+Most of the properties here are fairly self-explanatory as they detail the format and overall quality of the stream. For example, from the information above you can tell that this is a muxed (i.e. audio and video combined) `mp4` stream, encoded using the `H.264` video codec and `AAC` audio codec, with a resolution of `640x360` pixels, `30` frames per second, and a bitrate of `503 kbps`. When played on YouTube, this stream would be available as the `360p` quality option.
 
-Once you've scanned through the list and identified the stream you want to download, you can use the `url` property to retrieve the actual stream data.
+Each stream is also uniquely identified by something called an `itag`, which is a numeric code that refers to the encoding preset used internally by YouTube to transform the source media into a given representation. In the past, this value was the most reliable way to determine the exact encoding parameters of a given stream, but the new response has enough metadata to make it redundant.
 
-Of course, the most interesting part of the stream object is the `url` property, which specifies the URL that serves the actual stream data. You can open the URL in a browser, or fetch the content by sending a `GET` request to download it to a file or play it in real time:
+Of course, the most interesting part of the entire object is the `url` property. This is the URL that you can use to download the actual stream to a file or play it back in the browser:
 
 ![Stream played in a browser](stream-in-browser.png)
 
-Note that YouTube stream URLs are not static — they are generated individually for each client and have a fixed expiration time. You can confirm this by looking at the `ip` and `expire` query parameters, which contain the client's IP address and the expiration timestamp, respectively.
+Note that if you try to open the URL from the JSON snippet I've shown above, you'll get a `403 Forbidden` error. That's because YouTube stream URLs are not static, but in fact generated individually for each client and also have a fixed expiration time. Once you obtain the stream manifest, the URLs inside it are only valid for roughly 6 hours and cannot be accessed from an IP address other than the one that requested them.
 
-// URLs stop working after a while
+You can confirm this by looking at the `ip` and `expire` query parameters, which contain the (redacted) client's IP address and the expiration timestamp, respectively. While it may be temping, these values cannot be changed manually to lift the restrictions, because their integrity is protected by a special checksum signature parameter called `sig`. Trying to change any of the parameters enumerated inside `sparams` without correctly updating the signature will also result in a `403 Forbidden` error.
+
+Nevertheless, the steps outlined so far should be enough to download most YouTube videos out there. There are a few more things to consider though, but I'll cover them in the next section.
+
+## Descrambling the signature & Age-restricted videos
 
 // Explain how using ANDROID client helps
-
-## Descrambling the signature
-
-## DASH manifest
-
-doesn't require signature anymore
-
-## Age-restricted videos
 
 racy check etc
 
 TVHTML5 workaround
 
-## Signature-protected streams
+## Muxing streams
 
-only needed for HTML5 clients
+FFmpeg
 
 ## Bypassing rate limits
 
 still needed for some streams
 
-## Muxing streams
+## DASH manifest
 
-FFmpeg
-
-This works out well for YouTube because it allows them to offer different combinations by playing two streams simultaneously, but if your goal is to download the video, you need to do more work. his is done to allow the player to switch between them independently, which is especially useful for adaptive bitrate streaming.
+doesn't require signature anymore
 
 ## Summary
 
