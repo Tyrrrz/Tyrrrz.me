@@ -13,13 +13,13 @@ I know that there's still a lot of interest around this topic, so I've been mean
 
 In this article, I'll cover the current state of YouTube's internal API, highlight the most important changes, and explain how everything works today. Just like before, I will focus on the video playback aspect of the platform, outlining everything you need to do in order to resolve video streams and download them.
 
-## Resolving video metadata and stream manifest
+## Retrieving video metadata and downloading streams
 
 If you've worked with YouTube in the past, you'll probably remember `get_video_info`. This internal API controller was used throughout YouTube's client code to retrieve video metadata, available streams, and everything else the player needed to render it. The origin of this endpoint traces back to the Flash Player days of YouTube, and it was still available as late as July 2021, before it was finally removed.
 
 Besides `get_video_info`, YouTube has also dropped many other endpoints, such as `get_video_metadata` ([in November 2017](https://github.com/Tyrrrz/YoutubeExplode/issues/66)) and `list_ajax` ([in February 2021](https://github.com/Tyrrrz/YoutubeExplode/issues/501)), as part of a larger effort to establish a more organized API structure. Now, instead of having a bunch of randomly scattered endpoints with unpredictable formats and usage patterns, YouTube's internal API is comprised out of a coherent set of routes nested underneath the `/youtubei/v1/` path.
 
-In particular, much of the data previously available from `get_video_info` can now be pulled using the `/youtubei/v1/player` route. Unlike its predecessor, this endpoint expects a `POST` request with JSON data, which is also a fair bit more involved. Here is how it looks:
+In particular, much of the data previously available from `get_video_info` can now be pulled using the `/youtubei/v1/player` route. Unlike its predecessor, this endpoint expects a `POST` request with JSON data, which is also a fair bit more involved than before. Here is how it looks:
 
 ```json
 // POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8
@@ -145,13 +145,15 @@ Of course, the most interesting part of the entire object is the `url` property.
 
 Note that if you try to open the URL from the JSON snippet I've shown above, you'll get a `403 Forbidden` error. That's because YouTube stream URLs are not static — they are generated individually for each client and have a fixed expiration time. Once you obtain the stream manifest, the URLs inside it are only valid for roughly 6 hours and cannot be accessed from an IP address other than the one that requested them.
 
-You can confirm this by looking at the `ip` and `expire` query parameters in the URL, which contain the client's IP address and the expiration timestamp respectively. While it may be temping, these values cannot be changed manually to lift the restrictions, because their integrity is protected by a special checksum parameter called `sig`. Trying to change any of the parameters listed inside `sparams` without correctly updating the signature will result in a `403 Forbidden` error as well.
+You can confirm this by looking at the `ip` and `expire` query parameters in the URL, which contain the client's IP address and the expiration timestamp respectively. While it may be tempting, these values cannot be changed manually to lift the restrictions, because their integrity is protected by a special checksum parameter called `sig`. Trying to change any of the parameters listed inside `sparams` without correctly updating the signature will result in a `403 Forbidden` error as well.
 
 Nevertheless, the steps outlined so far should be enough to resolve and download streams for most YouTube videos. There are a few more things to consider though, which is what I'm going to cover in the following sections.
 
 ## Bypassing content restrictions
 
-// Explain how using ANDROID client helps
+As I mentioned earlier in the article, the client you choose to impersonate as part of the initial request to `/youtubei/v1/player` is very important. The major advantage of using the `ANDROID` client is that it greatly simplifies the task of resolving video streams.
+
+Normally, when you request the stream manifest from YouTube, the URLs you receive in the payload are not usable directly. That's because those URLs don't include the required signature parameter, which instead comes in a scrambled form as a separate property in the metadata. The scrambling algorithm and the order of operations is effectively random, so you have to extract it from the minified JavaScript source code of the player itself. This security measure is meant to discourage third-party clients from downloading streams from YouTube, by making the reversing process tedious and error-prone.
 
 racy check etc
 
