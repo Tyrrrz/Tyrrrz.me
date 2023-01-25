@@ -145,19 +145,13 @@ Of course, the most interesting part of the entire object is the `url` property.
 
 Note that if you try to open the URL from the JSON snippet I've shown above, you'll get a `403 Forbidden` error. That's because YouTube stream URLs are not static — they are generated individually for each client and have a fixed expiration time. Once you obtain the stream manifest, the URLs inside it are only valid for roughly 6 hours and cannot be accessed from an IP address other than the one that requested them.
 
-You can confirm this by looking at the `ip` and `expire` query parameters in the URL, which contain the client's IP address and the expiration timestamp respectively. While it may be tempting, these values cannot be changed manually to lift the restrictions, because their integrity is protected by a special checksum parameter called `sig`. Trying to change any of the parameters listed inside `sparams` without correctly updating the signature will result in a `403 Forbidden` error as well.
+You can confirm this by looking at the `ip` and `expire` query parameters in the URL, which contain the client's IP address and the expiration timestamp respectively. While it may be tempting, these values cannot be changed manually to lift the restrictions, because their integrity is protected by a special checksum parameter called `sig`. Trying to change any of the parameters listed inside `sparams`, without correctly updating the signature, will result in a `403 Forbidden` error as well.
 
-Nevertheless, the steps outlined so far should be enough to resolve and download streams for most YouTube videos. There are a few more things to consider though, which is what I'm going to cover in the following sections.
+Either way, the steps outlined so far should be enough to resolve and download streams for most YouTube videos. There are a few more things to consider though, which is what I'm going to cover in the following sections.
 
 ## Bypassing content restrictions
 
-As I mentioned earlier in the article, the client you choose to impersonate as part of the initial request to `/youtubei/v1/player` is very important. The major advantage of using the `ANDROID` client is that it greatly simplifies the task of resolving video streams.
-
-Normally, when you request the stream manifest from YouTube, the URLs you receive in the payload are not usable directly. That's because those URLs don't include the required signature parameter, which instead comes in a scrambled form as a separate property in the metadata. The scrambling algorithm and the order of operations is effectively random, so you have to extract it from the minified JavaScript source code of the player itself. This security measure is meant to discourage third-party clients from downloading streams from YouTube, by making the reversing process tedious and error-prone.
-
-racy check etc
-
-TVHTML5 workaround
+When going through videos on YouTube, you'll occasionally encounter content that cannot be played. The two most common type of restrictions are geo-blocking and age restriction.
 
 ## Muxing adaptive streams together
 
