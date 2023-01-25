@@ -22,7 +22,7 @@ Besides `get_video_info`, YouTube has also dropped many other endpoints, such as
 In particular, much of the data previously available from `get_video_info` can now be pulled using the `/youtubei/v1/player` route. Unlike its predecessor, this endpoint expects a `POST` request with JSON data, which is also a fair bit more involved than before. Here is how it looks:
 
 ```json
-// POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8
+// POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
 {
   "videoId": "e_S9VvJM1PI",
   "context": {
@@ -36,7 +36,7 @@ In particular, much of the data previously available from `get_video_info` can n
 }
 ```
 
-First thing you'll notice is that this endpoint requires authentication, which is done by passing a `key` parameter in the URL. One can assume that it corresponds to some sort of API key which is meant to identify a particular client and maybe even rotate over time — however, I found that it's actually a static value that never changes. This means that it's safe to simply hard code it as part of the URL.
+First thing you'll notice is that this endpoint requires an API key, which is done by passing the `key` parameter in the URL. Each YouTube client has its own key assigned to it, but I found that the endpoint doesn't actually validate it beyond making sure it's one of the known values. The key also doesn't change, so it's safe to simple hard code it as part of the URL.
 
 The request body itself is a JSON object with two top-level properties: `videoId` and `context`. The former is pretty self-explanatory — it's the 11-character ID of the video you want to retrieve the metadata for. The latter is more complicated, however, as it represents a container for various information that YouTube uses to tailor the response to the client's preferences and capabilities.
 
@@ -158,6 +158,10 @@ YouTube has an extensive content moderation system, so you may occasionally enco
 
 The way region-based restrictions work is fairly straightforward — YouTube identifies if your IP address maps to one of the blocked countries and prohibits access to the video if so. There is not much that can be done about it, other than using a VPN to spoof your location.
 
-For age-based restrictions, on the other hand, YouTube does not infer any information about the client, but rather relies on the user's consent. This is done by having the user sign in to their account and confirm that they are 18 years or older.
+For age-based restrictions, on the other hand, YouTube does not infer any information about the client, but rather relies on the user's consent. This is done by having the user sign in to their account and confirm that they are 18 years or older:
 
-It's possible to simulate the same flow programmatically, by authenticating on the user's behalf and then passing cookies to the `/youtubei/v1/player` endpoint, but it's a very cumbersome and error-prone process. Luckily, there is an easier way to bypass this restriction altogether.
+![Age-restricted video](age-restricted-video.png)
+
+It's possible to simulate the same flow programmatically — by authenticating on the user's behalf and then passing cookies to the `/youtubei/v1/player` endpoint — but it's a very cumbersome and error-prone process. Luckily, there is a way to bypass this restriction altogether.
+
+For some reason, if you
