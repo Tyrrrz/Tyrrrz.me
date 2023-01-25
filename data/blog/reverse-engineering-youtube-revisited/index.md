@@ -149,24 +149,15 @@ You can confirm this by looking at the `ip` and `expire` query parameters in the
 
 Either way, the steps outlined so far should be enough to resolve and download streams for most YouTube videos. There are a few more things to consider though, which is what I'm going to cover in the following sections.
 
-## Bypassing content restrictions
+## Working around content restrictions
 
-When going through videos on YouTube, you'll occasionally encounter content that cannot be played. The two most common type of restrictions are geo-blocking and age restriction.
+YouTube has an extensive content moderation system, so you may occasionally encounter videos that cannot be played. The two most common reasons for that are:
 
-## Muxing adaptive streams together
+- The video is blocked in your country, which happens when it features content that the uploader has not licensed for use in your region.
+- The video is age-restricted, which happens when it features content that is not suitable for minors, as determined by YouTube or the uploader themselves.
 
-FFmpeg
+The way region-based restrictions work is fairly straightforward — YouTube identifies if your IP address maps to one of the blocked countries and prohibits access to the video if so. There is not much that can be done about it, other than using a VPN to spoof your location.
 
-## Bypassing speed throttling
+For age-based restrictions, on the other hand, YouTube does not infer any information about the client, but rather relies on the user's consent. This is done by having the user sign in to their account and confirm that they are 18 years or older.
 
-still needed for some streams
-
-## Resolving streams from DASH manifest
-
-doesn't require signature anymore
-
-## Summary
-
-And remember: **if it happens in the browser, it can be replicated in code**.
-
-If you want code: yte. Working example: ytd.
+It's possible to simulate the same flow programmatically, by authenticating on the user's behalf and then passing cookies to the `/youtubei/v1/player` endpoint, but it's a very cumbersome and error-prone process. Luckily, there is an easier way to bypass this restriction altogether.
