@@ -153,20 +153,20 @@ Either way, the steps outlined so far should be enough to resolve and download s
 
 ## Working around content restrictions
 
-YouTube has an extensive content moderation system, so you may occasionally encounter videos that cannot be played. The two most common reasons for that are:
+YouTube has an extensive content moderation system, so you may occasionally encounter videos that cannot be played — and, thus, downloaded. The two most common reasons for that are:
 
 - The video is blocked in your country, which happens when it features content that the uploader has not licensed for use in your region.
-- The video is age-restricted, which happens when it features content that is not suitable for minors, as determined by YouTube or the uploader themselves.
+- The video is age-gated, which happens when it features content that is not suitable for minors, as determined by YouTube or the uploader themselves.
 
-The way region-based restrictions work is fairly straightforward — YouTube identifies if your IP address maps to one of the blocked countries and prohibits access to the video if so. There is not much that can be done about it, other than using a VPN to spoof your location.
+The way region-based restrictions work is fairly straightforward — YouTube identifies whether your IP address maps to one of the blocked countries and prohibits access to the video if that's the case. There is not much that can be done about it, other than using a VPN to spoof your location.
 
-For age-based restrictions, on the other hand, YouTube does not infer any information about the client, but rather relies on the user's consent. This is done by having the user sign in to their account and confirm that they are 18 years or older:
+For age-based restrictions, on the other hand, YouTube does not infer any information from the client, but rather relies on the user's consent. This is done by having the user sign in to their account and confirm that they are 18 years or older:
 
 ![Age-restricted video](age-restricted-video.png)
 
 It's possible to simulate the same flow programmatically — by authenticating on the user's behalf and then passing cookies to the `/youtubei/v1/player` endpoint — but it's a very cumbersome and error-prone process. Luckily, there is a way to bypass this restriction altogether.
 
-For some reason, there is one obscure client that allows unauthenticated access to age-restricted videos: [embedded YouTube player used for Smart TV browsers](https://github.com/TeamNewPipe/NewPipe/issues/8102#issuecomment-1081085801). To use it, change the initial request to look like this:
+Interestingly enough, there appears to be one obscure YouTube client that lets you access age-gated videos completely unauthenticated, and that's the [embedded player used for Smart TV browsers](https://github.com/TeamNewPipe/NewPipe/issues/8102#issuecomment-1081085801). This means that if we impersonate this client in our request, we will get a working stream manifest for such videos, without worrying about cookies or user credentials. To do that, updated the initial request body as follows:
 
 ```json
 // POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
@@ -185,9 +185,9 @@ For some reason, there is one obscure client that allows unauthenticated access 
 }
 ```
 
-The main difference from the `ANDROID` client is that `TVHTML5_SIMPLY_EMBEDDED_PLAYER` also requires an additional `thirdParty` object that contains the URL of the page where the video is supposedly embedded. This value is not validated in any way, but it needs to be present for the request to succeed.
+The main difference from the `ANDROID` client is that `TVHTML5_SIMPLY_EMBEDDED_PLAYER` also requires a `thirdParty` object that contains the URL of the page where the video is supposedly embedded. This value is not validated in any way, but it still needs to be present for the request to succeed.
 
-However, because this is a JavaScript-based client, it's not subject to the same luxuries as the `ANDROID` client, meaning the streams returned by the endpoint require additional work to be usable. We can get the stream metadata, but this is how it looks:
+One significant drawback of using this client moniker, however, is that it does not represent an installable app like `ANDROID`, but a JavaScript-based player that runs in the browser. As mentioned before, this means that YouTube can impose an additional protection mechanism, by obfuscating the URLs inside the stream metadata with a random cipher. Below is how an individual stream descriptor would look in that case:
 
 ```json
 {

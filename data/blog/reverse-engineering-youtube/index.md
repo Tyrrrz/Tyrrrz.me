@@ -305,7 +305,7 @@ Output of this method is a collection of `ICipherOperation`s. At this point in t
 - Slice — truncates leading characters in signature which come before given position.
 - Reverse — reverses the entire signature.
 
-Once you successfully extract the type and order of the used operations, you need to store them somewhere so that you can execute them on a signature.
+Once you successfully extract the types and order of the used operations, you need to store them somewhere so that you can execute them on a signature.
 
 ### Deciphering signatures and updating URLs
 
