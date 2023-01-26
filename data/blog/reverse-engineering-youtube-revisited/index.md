@@ -40,7 +40,7 @@ First thing you'll notice is that this endpoint requires an API key, which is do
 
 The request body itself is a JSON object with two top-level properties: `videoId` and `context`. The former is the 11-character ID of the video you want to retrieve the metadata for, while the latter contains various information that YouTube uses to tailor the response to the client's preferences and capabilities.
 
-In particular, depending on the client you choose to impersonate using the `clientName` and `clientVersion` properties, the response may contain different data, or just fail to resolve altogether for certain videos. This, of course, can be leveraged to your advantage — which is why I specifically used the `ANDROID` client in the example above — but I'll explain that in more detail later on.
+In particular, depending on the client you choose to impersonate using the `clientName` and `clientVersion` properties, the response may contain slightly different data, or just fail to resolve altogether for certain videos. This, of course, can be leveraged to your advantage — which is why we specifically used the `ANDROID` client in the example above — but I'll explain that in more detail later on.
 
 After you receive the response, you should find a JSON payload that contains the video metadata, stream descriptors, closed captions, activity tracking URLs, ad placements, post-playback screen elements — basically everything that the client needs in order to show the video to the user. It's a massive blob of data, but to make things simpler I've outlined only the most interesting parts below:
 
@@ -103,7 +103,7 @@ After you receive the response, you should find a JSON payload that contains the
 }
 ```
 
-As you can immediately see, the response contains a range of useful information. From `videoDetails`, you can extract the video title, duration, author, view count, thumbnails, and other relevant metadata. This includes most of the stuff you will find on the video page, with the exception of likes, dislikes, channel subscribers, and other bits that are not rendered directly by the player. If you want to get that data as well, you will have to scrape the `/watch` page separately.
+As you can immediately see, the response contains a range of useful information. From `videoDetails`, we can extract the video title, duration, author, view count, thumbnails, and other relevant metadata. This includes most of the stuff you will find on the video page, with the exception of likes, dislikes, channel subscribers, and other bits that are not rendered directly by the player. If you want to get that data as well, you will have to scrape the `/watch` page separately.
 
 Next, the `playabilityStatus` object indicates whether the video is playable within the context of the client that made the request. In case it's not, a `reason` property will be included with a human-readable message explaining why — for example, because the video is intended for mature audiences, or because it's not available in the current region. When dealing with unplayable videos, you'll still be able to access their metadata, but you won't be able to retrieve any streams.
 
@@ -187,7 +187,7 @@ For some reason, there is one obscure client that allows unauthenticated access 
 
 The main difference from the `ANDROID` client is that `TVHTML5_SIMPLY_EMBEDDED_PLAYER` also requires an additional `thirdParty` object that contains the URL of the page where the video is supposedly embedded. This value is not validated in any way, but it needs to be present for the request to succeed.
 
-However, because this is a JavaScript-based client, the streams returned by the endpoint require additional work to be usable. Here's an example of how they look:
+However, because this is a JavaScript-based client, it's not subject to the same luxuries as the `ANDROID` client, meaning the streams returned by the endpoint require additional work to be usable. We can get the stream metadata, but this is how it looks:
 
 ```json
 {
@@ -218,4 +218,67 @@ sp:  sig
 url: https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?expire=1674722398&ei=_ufRY5XOJsnoyQWFno_IBg&ip=111.111.111.111&id=o-AGdzTbHeYCSShTUoAvdKXasA0mPM9YKXx5XP2lYQDkgI&itag=18&source=youtube&requiressl=yes&mh=Qv&mm=31%2C26&mn=sn-3c27sn7d%2Csn-f5f7lnld&ms=au%2Conr&mv=m&mvi=12&pl=24&gcr=ua&initcwndbps=2188750&vprv=1&xtags=heaudio%3Dtrue&mime=video%2Fmp4&ns=iTmK1jXtWdMktMzKoaHSpR4L&cnr=14&ratebypass=yes&dur=183.994&lmt=1665725827618480&mt=1674700623&fvip=1&fexp=24007246&c=TVHTML5_SIMPLY_EMBEDDED_PLAYER&txp=5538434&n=MzirMb1rQM4r8h6gw&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cgcr%2Cvprv%2Cxtags%2Cmime%2Cns%2Ccnr%2Cratebypass%2Cdur%2Clmt&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AG3C_xAwRQIgXGtBJv7BPshy6oDP4ghnH1Fhq_AFSAZAcwYs93fbYVMCIQDC-RKyYocOttpdf9_X_98thhRLy2TaKDvjgrg8fQtw7w%3D%3D
 ```
 
-Here, the `url` parameter is the actual stream URL, but with the signature parameter omitted from it. In order to recover the full URL, we need to decipher the original signature from the `s` parameter, and then append it to the URL as the query parameter specified by `sp` (`sig` in this case).
+Here, the `url` parameter is the actual stream URL, but with the signature parameter omitted from it. In order to recover the full URL, we need to decipher the original signature from the `s` parameter, and then append it to the URL as an additional query parameter. The name of that parameter is specified by `sp`, which is `sig` in this case.
+
+When running in a browser, the deciphering process is normally done by the player itself. The exact set of operations and their order is not known ahead of time, but it's possible to reverse-engineer it by inspecting the player's source code. Unfortunately, the source code changes frequently, so this process has to be performed programmatically.
+
+The easiest way to obtain the player's source code is by using the same `iframe` API that YouTube uses for embedded videos. To do this, send a basic `GET` request to `https://www.youtube.com/iframe_api`. It should return a response that looks like this:
+
+```js
+var scriptUrl = 'https://www.youtube.com/s/player/4248d311/www-widgetapi.vflset/www-widgetapi.js';
+try {
+  var ttPolicy = window.trustedTypes.createPolicy('youtube-widget-api', {
+    createScriptURL: function (x) {
+      return x;
+    }
+  });
+  scriptUrl = ttPolicy.createScriptURL(scriptUrl);
+} catch (e) {}
+var YT;
+if (!window['YT'])
+  YT = {
+    loading: 0,
+    loaded: 0
+  };
+var YTConfig;
+if (!window['YTConfig'])
+  YTConfig = {
+    host: 'https://www.youtube.com'
+  };
+if (!YT.loading) {
+  YT.loading = 1;
+  (function () {
+    var l = [];
+    YT.ready = function (f) {
+      if (YT.loaded) f();
+      else l.push(f);
+    };
+    window.onYTReady = function () {
+      YT.loaded = 1;
+      for (var i = 0; i < l.length; i++)
+        try {
+          l[i]();
+        } catch (e$0) {}
+    };
+    YT.setConfig = function (c) {
+      for (var k in c) if (c.hasOwnProperty(k)) YTConfig[k] = c[k];
+    };
+    var a = document.createElement('script');
+    a.type = 'text/javascript';
+    a.id = 'www-widgetapi-script';
+    a.src = scriptUrl;
+    a.async = true;
+    var c = document.currentScript;
+    if (c) {
+      var n = c.nonce || c.getAttribute('nonce');
+      if (n) a.setAttribute('nonce', n);
+    }
+    var b = document.getElementsByTagName('script')[0];
+    b.parentNode.insertBefore(a, b);
+  })();
+}
+```
+
+Here we can find the `scriptUrl`, but this is not the URL of the player's source code. However, it's useful for us because it contains the player's version number, which is `4248d311` in this case. Having obtained the version number, we can now finally get the player's source code by fetching `https://www.youtube.com/s/player/4248d311/player_ias.vflset/en_US/base.js`.
+
+The whole file is massive, and I won't try to include it here.
