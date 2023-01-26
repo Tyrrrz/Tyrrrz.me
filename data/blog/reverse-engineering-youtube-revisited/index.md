@@ -143,11 +143,11 @@ Of course, the most interesting part of the entire object is the `url` property.
 
 ![Stream played in a browser](stream-in-browser.png)
 
-In the past, when using `get_video_info`
-
 Note that if you try to open the URL from the JSON snippet I've shown above, you'll get a `403 Forbidden` error. That's because YouTube stream URLs are not static — they are generated individually for each client and have a fixed expiration time. Once you obtain the stream manifest, the URLs inside it are only valid for roughly 6 hours and cannot be accessed from an IP address other than the one that requested them.
 
-You can confirm this by looking at the `ip` and `expire` query parameters in the URL, which contain the client's IP address and the expiration timestamp respectively. While it may be tempting, these values cannot be changed manually to lift the restrictions, because their integrity is protected by a special checksum parameter called `sig`. Trying to change any of the parameters listed inside `sparams`, without correctly updating the signature, will result in a `403 Forbidden` error as well.
+You can confirm this by looking at the `ip` and `expire` query parameters in the URL, which contain the client's IP address and the expiration timestamp respectively. While it may be tempting, these values cannot be changed manually to lift the restrictions, because their integrity is protected by a special parameter called `sig`. Trying to change any of the parameters listed inside `sparams`, without correctly updating the signature, will result in a `403 Forbidden` error as well.
+
+In some cases, YouTube may also decide to employ an additional security measure, where the signature is omitted from the URL and comes as a separate, enciphered parameter — but that measure is exclusive to JavaScript-based clients. Because we specified `ANDROID` as part of the initial request, the retrieved stream URLs are always returned in their final form, ready to be used.
 
 Either way, the steps outlined so far should be enough to resolve and download streams for most YouTube videos. There are a few more things to consider though, which is what I'm going to cover in the following sections.
 
@@ -166,4 +166,56 @@ For age-based restrictions, on the other hand, YouTube does not infer any inform
 
 It's possible to simulate the same flow programmatically — by authenticating on the user's behalf and then passing cookies to the `/youtubei/v1/player` endpoint — but it's a very cumbersome and error-prone process. Luckily, there is a way to bypass this restriction altogether.
 
-For some reason, if you
+For some reason, there is one obscure client that allows unauthenticated access to age-restricted videos: [embedded YouTube player used for Smart TV browsers](https://github.com/TeamNewPipe/NewPipe/issues/8102#issuecomment-1081085801). To use it, change the initial request to look like this:
+
+```json
+// POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
+{
+  "videoId": "e_S9VvJM1PI",
+  "context": {
+    "client": {
+      "clientName": "TVHTML5_SIMPLY_EMBEDDED_PLAYER",
+      "clientVersion": "2.0",
+      "hl": "en"
+    },
+    "thirdParty": {
+      "embedUrl": "https://www.youtube.com"
+    }
+  }
+}
+```
+
+The main difference from the `ANDROID` client is that `TVHTML5_SIMPLY_EMBEDDED_PLAYER` also requires an additional `thirdParty` object that contains the URL of the page where the video is supposedly embedded. This value is not validated in any way, but it needs to be present for the request to succeed.
+
+However, because this is a JavaScript-based client, the streams returned by the endpoint require additional work to be usable. Here's an example of how they look:
+
+```json
+{
+  "itag": 18,
+  "signatureCipher": "s=CC%3DQ8o2zpxwirVyNq_miGGr282CaNsFfzUBBPgQU-8sKj2BiANNbb7LJ8ukTN%3DNAn-PJD-m57czWRI1DsA6uqrtC0slMAhIQRw8JQ0qOTT&sp=sig&url=https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback%3Fexpire%3D1674722398%26ei%3D_ufRY5XOJsnoyQWFno_IBg%26ip%3D111.111.111.111%26id%3Do-AGdzTbHeYCSShTUoAvdKXasA0mPM9YKXx5XP2lYQDkgI%26itag%3D18%26source%3Dyoutube%26requiressl%3Dyes%26mh%3DQv%26mm%3D31%252C26%26mn%3Dsn-3c27sn7d%252Csn-f5f7lnld%26ms%3Dau%252Conr%26mv%3Dm%26mvi%3D12%26pl%3D24%26gcr%3Dua%26initcwndbps%3D2188750%26vprv%3D1%26xtags%3Dheaudio%253Dtrue%26mime%3Dvideo%252Fmp4%26ns%3DiTmK1jXtWdMktMzKoaHSpR4L%26cnr%3D14%26ratebypass%3Dyes%26dur%3D183.994%26lmt%3D1665725827618480%26mt%3D1674700623%26fvip%3D1%26fexp%3D24007246%26c%3DTVHTML5_SIMPLY_EMBEDDED_PLAYER%26txp%3D5538434%26n%3DMzirMb1rQM4r8h6gw%26sparams%3Dexpire%252Cei%252Cip%252Cid%252Citag%252Csource%252Crequiressl%252Cgcr%252Cvprv%252Cxtags%252Cmime%252Cns%252Ccnr%252Cratebypass%252Cdur%252Clmt%26lsparams%3Dmh%252Cmm%252Cmn%252Cms%252Cmv%252Cmvi%252Cpl%252Cinitcwndbps%26lsig%3DAG3C_xAwRQIgXGtBJv7BPshy6oDP4ghnH1Fhq_AFSAZAcwYs93fbYVMCIQDC-RKyYocOttpdf9_X_98thhRLy2TaKDvjgrg8fQtw7w%253D%253D",
+  "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+  "lastModified": "1665725827618480",
+  "xtags": "Cg8KB2hlYXVkaW8SBHRydWU",
+  "approxDurationMs": "183994",
+  "bitrate": 503351,
+  "width": 640,
+  "height": 360,
+  "projectionType": "RECTANGULAR",
+  "fps": 30,
+  "quality": "medium",
+  "qualityLabel": "360p",
+  "audioQuality": "AUDIO_QUALITY_LOW",
+  "audioSampleRate": "22050",
+  "audioChannels": 2
+}
+```
+
+As you can see, the `url` property is missing from the metadata. Instead, there's a new `signatureCipher` property that contains a URL-encoded string with three additional parameters:
+
+```
+s:   CC=Q8o2zpxwirVyNq_miGGr282CaNsFfzUBBPgQU-8sKj2BiANNbb7LJ8ukTN=NAn-PJD-m57czWRI1DsA6uqrtC0slMAhIQRw8JQ0qOTT
+sp:  sig
+url: https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?expire=1674722398&ei=_ufRY5XOJsnoyQWFno_IBg&ip=111.111.111.111&id=o-AGdzTbHeYCSShTUoAvdKXasA0mPM9YKXx5XP2lYQDkgI&itag=18&source=youtube&requiressl=yes&mh=Qv&mm=31%2C26&mn=sn-3c27sn7d%2Csn-f5f7lnld&ms=au%2Conr&mv=m&mvi=12&pl=24&gcr=ua&initcwndbps=2188750&vprv=1&xtags=heaudio%3Dtrue&mime=video%2Fmp4&ns=iTmK1jXtWdMktMzKoaHSpR4L&cnr=14&ratebypass=yes&dur=183.994&lmt=1665725827618480&mt=1674700623&fvip=1&fexp=24007246&c=TVHTML5_SIMPLY_EMBEDDED_PLAYER&txp=5538434&n=MzirMb1rQM4r8h6gw&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cgcr%2Cvprv%2Cxtags%2Cmime%2Cns%2Ccnr%2Cratebypass%2Cdur%2Clmt&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AG3C_xAwRQIgXGtBJv7BPshy6oDP4ghnH1Fhq_AFSAZAcwYs93fbYVMCIQDC-RKyYocOttpdf9_X_98thhRLy2TaKDvjgrg8fQtw7w%3D%3D
+```
+
+Here, the `url` parameter is the actual stream URL, but with the signature parameter omitted from it. In order to recover the full URL, we need to decipher the original signature from the `s` parameter, and then append it to the URL as the query parameter specified by `sp` (`sig` in this case).
