@@ -36,13 +36,13 @@ In particular, much of the data previously available from `get_video_info` can n
 }
 ```
 
-First thing you'll notice is that this endpoint requires an API key, which is done by passing the `key` parameter in the URL. Each YouTube client has its own key assigned to it, but I found that the endpoint doesn't actually validate it beyond making sure it's one of the known values. The key also doesn't change, so it's safe to simple hard code it as part of the URL.
+First thing you'll notice is that this endpoint requires an API key, which is done by passing the `key` parameter in the URL. Each YouTube client has its own key assigned to it, but I found that the endpoint doesn't actually care which one you use, as long as it's valid. Because the keys don't rotate either, it's safe to pick one and hard code it as part of the URL.
 
-The request body itself is a JSON object with two top-level properties: `videoId` and `context`. The former is pretty self-explanatory — it's the 11-character ID of the video you want to retrieve the metadata for. The latter is more complicated, however, as it represents a container for various information that YouTube uses to tailor the response to the client's preferences and capabilities.
+The request body itself is a JSON object with two top-level properties: `videoId` and `context`. The former is the 11-character ID of the video you want to retrieve the metadata for, while the latter contains various information that YouTube uses to tailor the response to the client's preferences and capabilities.
 
 In particular, depending on the client you choose to impersonate using the `clientName` and `clientVersion` properties, the response may contain different data, or just fail to resolve altogether for certain videos. This, of course, can be leveraged to your advantage — which is why I specifically used the `ANDROID` client in the example above — but I'll explain that in more detail later on.
 
-After you receive the response, you should get a JSON payload that contains the video metadata, stream descriptors, closed captions, activity tracking URLs, ad placements, post-playback screen elements — basically everything that the client needs in order to show the video to the user. It's a massive blob of data, but to make things simpler I've outlined only the most interesting parts below:
+After you receive the response, you should find a JSON payload that contains the video metadata, stream descriptors, closed captions, activity tracking URLs, ad placements, post-playback screen elements — basically everything that the client needs in order to show the video to the user. It's a massive blob of data, but to make things simpler I've outlined only the most interesting parts below:
 
 ```json
 {
@@ -142,6 +142,8 @@ Each stream is also uniquely identified by something called an `itag`, which is 
 Of course, the most interesting part of the entire object is the `url` property. This is the URL that you can use to fetch the actual binary stream data, either by sending a `GET` request or by opening it in a browser:
 
 ![Stream played in a browser](stream-in-browser.png)
+
+In the past, when using `get_video_info`
 
 Note that if you try to open the URL from the JSON snippet I've shown above, you'll get a `403 Forbidden` error. That's because YouTube stream URLs are not static — they are generated individually for each client and have a fixed expiration time. Once you obtain the stream manifest, the URLs inside it are only valid for roughly 6 hours and cannot be accessed from an IP address other than the one that requested them.
 
