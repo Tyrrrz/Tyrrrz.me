@@ -336,3 +336,5 @@ var v = {
 Now, after running the request with the right parameters, you should get a stream manifest that is bound to the current version of the algorithm.
 
 ## Muxing adaptive streams into a single file
+
+Earlier in this article I said that adopted formats come as separate audio only and video only streams and while that is very convenient for YouTube it's it's not so convenient when it comes to downloading videos
