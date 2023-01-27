@@ -166,7 +166,7 @@ For age-based restrictions, on the other hand, YouTube does not infer any inform
 
 It's possible to simulate the same flow programmatically — by authenticating on the user's behalf and then passing cookies to the `/youtubei/v1/player` endpoint — but it's a very cumbersome and error-prone process. Luckily, there is a way to bypass this restriction altogether.
 
-Interestingly enough, there appears to be one obscure YouTube client that lets you access age-gated videos completely unauthenticated, and that's the [embedded player used for Smart TV browsers](https://github.com/TeamNewPipe/NewPipe/issues/8102#issuecomment-1081085801). This means that if we impersonate this client in our request, we will get a working stream manifest for such videos, without worrying about cookies or user credentials. To do that, updated the initial request body as follows:
+Interestingly enough, there appears to be one obscure YouTube client that lets you access age-gated videos completely unauthenticated, and that's the [embedded player used for Smart TV browsers](https://github.com/TeamNewPipe/NewPipe/issues/8102#issuecomment-1081085801). This means that if we impersonate this client in our request, we can get working stream manifests for age-restricted videos, without worrying about cookies or user credentials. To do that, update the initial request body as follows:
 
 ```json
 // POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
@@ -210,75 +210,129 @@ One significant drawback of using this client moniker, however, is that it does 
 }
 ```
 
-As you can see, the `url` property is missing from the metadata. Instead, there's a new `signatureCipher` property that contains a URL-encoded string with three additional parameters:
+The structure of the metadata is mostly identical to the previous example, but you will notice that the `url` property is missing. Instead, it's replaced with `signatureCipher`, which is a URL-encoded dictionary that contains the following key-value pairs:
 
+```ini
+s=CC=Q8o2zpxwirVyNq_miGGr282CaNsFfzUBBPgQU-8sKj2BiANNbb7LJ8ukTN=NAn-PJD-m57czWRI1DsA6uqrtC0slMAhIQRw8JQ0qOTT
+sp=sig
+url=https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?expire=1674722398&ei=_ufRY5XOJsnoyQWFno_IBg&ip=111.111.111.111&id=o-AGdzTbHeYCSShTUoAvdKXasA0mPM9YKXx5XP2lYQDkgI&itag=18&source=youtube&requiressl=yes&mh=Qv&mm=31%2C26&mn=sn-3c27sn7d%2Csn-f5f7lnld&ms=au%2Conr&mv=m&mvi=12&pl=24&gcr=ua&initcwndbps=2188750&vprv=1&xtags=heaudio%3Dtrue&mime=video%2Fmp4&ns=iTmK1jXtWdMktMzKoaHSpR4L&cnr=14&ratebypass=yes&dur=183.994&lmt=1665725827618480&mt=1674700623&fvip=1&fexp=24007246&c=TVHTML5_SIMPLY_EMBEDDED_PLAYER&txp=5538434&n=MzirMb1rQM4r8h6gw&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cgcr%2Cvprv%2Cxtags%2Cmime%2Cns%2Ccnr%2Cratebypass%2Cdur%2Clmt&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AG3C_xAwRQIgXGtBJv7BPshy6oDP4ghnH1Fhq_AFSAZAcwYs93fbYVMCIQDC-RKyYocOttpdf9_X_98thhRLy2TaKDvjgrg8fQtw7w%3D%3D
 ```
-s:   CC=Q8o2zpxwirVyNq_miGGr282CaNsFfzUBBPgQU-8sKj2BiANNbb7LJ8ukTN=NAn-PJD-m57czWRI1DsA6uqrtC0slMAhIQRw8JQ0qOTT
-sp:  sig
-url: https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?expire=1674722398&ei=_ufRY5XOJsnoyQWFno_IBg&ip=111.111.111.111&id=o-AGdzTbHeYCSShTUoAvdKXasA0mPM9YKXx5XP2lYQDkgI&itag=18&source=youtube&requiressl=yes&mh=Qv&mm=31%2C26&mn=sn-3c27sn7d%2Csn-f5f7lnld&ms=au%2Conr&mv=m&mvi=12&pl=24&gcr=ua&initcwndbps=2188750&vprv=1&xtags=heaudio%3Dtrue&mime=video%2Fmp4&ns=iTmK1jXtWdMktMzKoaHSpR4L&cnr=14&ratebypass=yes&dur=183.994&lmt=1665725827618480&mt=1674700623&fvip=1&fexp=24007246&c=TVHTML5_SIMPLY_EMBEDDED_PLAYER&txp=5538434&n=MzirMb1rQM4r8h6gw&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cgcr%2Cvprv%2Cxtags%2Cmime%2Cns%2Ccnr%2Cratebypass%2Cdur%2Clmt&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AG3C_xAwRQIgXGtBJv7BPshy6oDP4ghnH1Fhq_AFSAZAcwYs93fbYVMCIQDC-RKyYocOttpdf9_X_98thhRLy2TaKDvjgrg8fQtw7w%3D%3D
-```
 
-Here, the `url` parameter is the actual stream URL, but with the signature parameter omitted from it. In order to recover the full URL, we need to decipher the original signature from the `s` parameter, and then append it to the URL as an additional query parameter. The name of that parameter is specified by `sp`, which is `sig` in this case.
+Here, the `url` value is the missing stream URL, but with the signature parameter omitted from it. In order to recover the signature, you need to decipher the `s` value and append it to the URL as an additional query parameter, whose name is specified by the `sp` value.
 
-When running in a browser, the deciphering process is normally done by the player itself. The exact set of operations and their order is not known ahead of time, but it's possible to reverse-engineer it by inspecting the player's source code. Unfortunately, the source code changes frequently, so this process has to be performed programmatically.
+Normally, when running in the browser, the deciphering process is performed by the player itself, using the instructions stored within its source code. These instructions change with each version, so you need a way to extract them programmatically.
 
-The easiest way to obtain the player's source code is by using the same `iframe` API that YouTube uses for embedded videos. To do this, send a basic `GET` request to `https://www.youtube.com/iframe_api`. It should return a response that looks like this:
+The easiest way to identify the latest version of the player is by querying the `https://www.youtube.com/iframe_api` endpoint, which is what YouTube relies on for embedding videos on third-party websites. This will return a script file that contains the following reference:
 
 ```js
 var scriptUrl = 'https://www.youtube.com/s/player/4248d311/www-widgetapi.vflset/www-widgetapi.js';
-try {
-  var ttPolicy = window.trustedTypes.createPolicy('youtube-widget-api', {
-    createScriptURL: function (x) {
-      return x;
+
+/* ...the rest of the code is not relevant... */
+```
+
+Now, this URL does not point to the player's source code itself, but it does contain the player's version number — which is `4248d311` in this case. Having obtained that, we can download the actual source code from `https://www.youtube.com/s/player/4248d311/player_ias.vflset/en_US/base.js`.
+
+The whole file is a massive blob of minified JavaScript code, but finding the deciphering instructions is fairly simple. All you need to do is search for `.split("");`, which is the entry step to the deciphering process. In my case, this lead me to the following block:
+
+```js
+fta = function (a) {
+  a = a.split('');
+  hD.mL(a, 79);
+  hD.L5(a, 2);
+  hD.mL(a, 24);
+  hD.L5(a, 3);
+  return a.join('');
+};
+```
+
+The function above is responsible for deciphering the `s` value from earlier, and here it's pretty obvious that it performs some operations on the string. If we look at the implementation of the referenced `hD` object, we will find that it contains the following three methods:
+
+```js
+var hD = {
+  i1: function (a, b) {
+    var c = a[0];
+    a[0] = a[b % a.length];
+    a[b % a.length] = c;
+  },
+  L5: function (a, b) {
+    a.splice(0, b);
+  },
+  mL: function (a) {
+    a.reverse();
+  }
+};
+```
+
+In general, YouTube's cipher algorithm is a combination of the following operations:
+
+- **Swap**, which replaces the first character in the string with the character at the specified index.
+- **Splice**, which removes the specified number of characters from the beginning of the string.
+- **Reverse**, which reverses the order of characters in the string.
+
+The current version of the player only uses two of the three operations as part of the deciphering process, and combines them in the following way:
+
+1. Reverse the string:
+
+```
+TTOq0QJ8wRQIhAMls0Ctrqu6AsD1IRWzc75m-DJP-nAN=NTku8JL7bbNNAiB2jKs8-UQgPBBUzfFsNaC282rGGim_qNyVriwxpz2o8Q=CC
+```
+
+2. Then, remove the first 2 characters:
+
+```
+Oq0QJ8wRQIhAMls0Ctrqu6AsD1IRWzc75m-DJP-nAN=NTku8JL7bbNNAiB2jKs8-UQgPBBUzfFsNaC282rGGim_qNyVriwxpz2o8Q=CC
+```
+
+3. Then, reverse the string again:
+
+```
+CC=Q8o2zpxwirVyNq_miGGr282CaNsFfzUBBPgQU-8sKj2BiANNbb7LJ8ukTN=NAn-PJD-m57czWRI1DsA6uqrtC0slMAhIQRw8JQ0qO
+```
+
+4. Finally, remove the first 3 characters to get the deciphered signature:
+
+```
+Q8o2zpxwirVyNq_miGGr282CaNsFfzUBBPgQU-8sKj2BiANNbb7LJ8ukTN=NAn-PJD-m57czWRI1DsA6uqrtC0slMAhIQRw8JQ0qO
+```
+
+However, we can't actually apply this algorithm to the `s` value from earlier, because the response we received from the `/youtubei/v1/player` endpoint was not bound to the current version of the player. To fix this, we need to pass an additional parameter in the request that specifies the `signatureTimestamp`, which is a special value that YouTube uses to identify a particular cipher algorithm:
+
+```json
+// POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
+{
+  "videoId": "e_S9VvJM1PI",
+  "context": {
+    "client": {
+      "clientName": "TVHTML5_SIMPLY_EMBEDDED_PLAYER",
+      "clientVersion": "2.0",
+      "hl": "en"
+    },
+    "thirdParty": {
+      "embedUrl": "https://www.youtube.com"
     }
-  });
-  scriptUrl = ttPolicy.createScriptURL(scriptUrl);
-} catch (e) {}
-var YT;
-if (!window['YT'])
-  YT = {
-    loading: 0,
-    loaded: 0
-  };
-var YTConfig;
-if (!window['YTConfig'])
-  YTConfig = {
-    host: 'https://www.youtube.com'
-  };
-if (!YT.loading) {
-  YT.loading = 1;
-  (function () {
-    var l = [];
-    YT.ready = function (f) {
-      if (YT.loaded) f();
-      else l.push(f);
-    };
-    window.onYTReady = function () {
-      YT.loaded = 1;
-      for (var i = 0; i < l.length; i++)
-        try {
-          l[i]();
-        } catch (e$0) {}
-    };
-    YT.setConfig = function (c) {
-      for (var k in c) if (c.hasOwnProperty(k)) YTConfig[k] = c[k];
-    };
-    var a = document.createElement('script');
-    a.type = 'text/javascript';
-    a.id = 'www-widgetapi-script';
-    a.src = scriptUrl;
-    a.async = true;
-    var c = document.currentScript;
-    if (c) {
-      var n = c.nonce || c.getAttribute('nonce');
-      if (n) a.setAttribute('nonce', n);
+  },
+  "playbackContext": {
+    "contentPlaybackContext": {
+      "signatureTimestamp": "19369"
     }
-    var b = document.getElementsByTagName('script')[0];
-    b.parentNode.insertBefore(a, b);
-  })();
+  }
 }
 ```
 
-Here we can find the `scriptUrl`, but this is not the URL of the player's source code. However, it's useful for us because it contains the player's version number, which is `4248d311` in this case. Having obtained the version number, we can now finally get the player's source code by fetching `https://www.youtube.com/s/player/4248d311/player_ias.vflset/en_US/base.js`.
+The timestamp itself can be extracted from the same player source code that we used earlier, by searching for `signatureTimestamp`. In my case, the value was contained within this block:
 
-The whole file is massive, and I won't try to include it here.
+```js
+var v = {
+  splay: !1,
+  lactMilliseconds: c.LACT.toString(),
+  playerHeightPixels: Math.trunc(c.P_H),
+  playerWidthPixels: Math.trunc(c.P_W),
+  vis: Math.trunc(c.VIS),
+  signatureTimestamp: 19369, // <--- this is the value we need
+  autonavState: MDa(a.player.V())
+};
+```
+
+Now, after running the request with the right parameters, you should get a stream manifest that is bound to the current version of the algorithm.
+
+## Muxing adaptive streams into a single file
