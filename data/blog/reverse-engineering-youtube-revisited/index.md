@@ -166,7 +166,7 @@ For age-based restrictions, on the other hand, YouTube does not infer any inform
 
 It's possible to simulate the same flow programmatically — by authenticating on the user's behalf and then passing cookies to the `/youtubei/v1/player` endpoint — but it's a very cumbersome and error-prone process. Luckily, there is a way to bypass this restriction altogether.
 
-Interestingly enough, there appears to be one obscure YouTube client that lets you access age-gated videos completely unauthenticated, and that's the [embedded player used for Smart TV browsers](https://github.com/TeamNewPipe/NewPipe/issues/8102#issuecomment-1081085801). This means that if we impersonate this client in our request, we can get working stream manifests for age-restricted videos, without worrying about cookies or user credentials. To do that, update the initial request body as follows:
+[As it turns out](https://github.com/TeamNewPipe/NewPipe/issues/8102#issuecomment-1081085801), there is one obscure YouTube client that lets you access age-gated videos completely unauthenticated, and that's the **embedded player used for Smart TV browsers**. This means that if you impersonate this client in the request, **you can get working stream manifests for age-restricted videos**, without worrying about cookies or user credentials. To do that, update the initial request body as follows:
 
 ```json
 // POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
@@ -187,7 +187,7 @@ Interestingly enough, there appears to be one obscure YouTube client that lets y
 
 The main difference from the `ANDROID` client is that `TVHTML5_SIMPLY_EMBEDDED_PLAYER` also requires a `thirdParty` object that contains the URL of the page where the video is supposedly embedded. This value is not validated in any way, but it still needs to be present for the request to succeed.
 
-One significant drawback of using this client moniker, however, is that it does not represent an installable app like `ANDROID`, but a JavaScript-based player that runs in the browser. As mentioned before, this means that YouTube can impose an additional protection mechanism, by obfuscating the URLs inside the stream metadata with a random cipher. Below is how an individual stream descriptor would look in that case:
+One significant drawback of using this client moniker, however, is that it does not represent an installable app like `ANDROID`, but a JavaScript-based player that runs in the browser. As mentioned before, this means that YouTube can impose an additional protection mechanism, by obfuscating the URLs inside the stream metadata with a random cipher. Below is how an individual stream descriptor looks in that case:
 
 ```json
 {
@@ -227,7 +227,7 @@ The easiest way to identify the latest version of the player is by querying the 
 ```js
 var scriptUrl = 'https://www.youtube.com/s/player/4248d311/www-widgetapi.vflset/www-widgetapi.js';
 
-/* ...the rest of the code is not relevant... */
+/* ... omitted ~40 lines of irrelevant code ... */
 ```
 
 Now, this URL does not point to the player's source code itself, but it does contain the player's version number — which is `4248d311` in this case. Having obtained that, we can download the actual source code from `https://www.youtube.com/s/player/4248d311/player_ias.vflset/en_US/base.js`.
