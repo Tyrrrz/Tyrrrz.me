@@ -19,7 +19,7 @@ If you've worked with YouTube in the past, you'll probably remember `get_video_i
 
 Besides `get_video_info`, YouTube has also dropped many other endpoints, such as `get_video_metadata` ([in November 2017](https://github.com/Tyrrrz/YoutubeExplode/issues/66)) and `list_ajax` ([in February 2021](https://github.com/Tyrrrz/YoutubeExplode/issues/501)), as part of a larger effort to establish a more organized API structure. Now, instead of having a bunch of randomly scattered endpoints with unpredictable formats and usage patterns, YouTube's internal API is comprised out of a coherent set of routes nested underneath the `/youtubei/v1/` path.
 
-In particular, much of the data previously available from `get_video_info` can now be pulled using the `/youtubei/v1/player` route. Unlike its predecessor, this endpoint expects a `POST` request with JSON data, which is also a fair bit more involved than before. Here is how it looks:
+In particular, much of the data previously available from `get_video_info` can now be pulled using the `/youtubei/v1/player` route. Unlike its predecessor, this endpoint expects a `POST` request and a payload that looks like this:
 
 ```json
 // POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
@@ -28,9 +28,8 @@ In particular, much of the data previously available from `get_video_info` can n
   "context": {
     "client": {
       "clientName": "ANDROID",
-      "clientVersion": "17.29.35",
-      "androidSdkVersion": 30,
-      "hl": "en"
+      "clientVersion": "17.10.35",
+      "androidSdkVersion": 30
     }
   }
 }
@@ -42,7 +41,7 @@ The request body itself is a JSON object with two top-level properties: `videoId
 
 In particular, depending on the client you choose to impersonate using the `clientName` and `clientVersion` properties, the response may contain slightly different data, or just fail to resolve altogether for certain videos. This, of course, can be leveraged to your advantage — which is why we specifically used the `ANDROID` client in the example above — but I'll explain that in more detail later on.
 
-After you receive the response, you should find a JSON payload that contains the video metadata, stream descriptors, closed captions, activity tracking URLs, ad placements, post-playback screen elements — basically everything that the client needs in order to show the video to the user. It's a massive blob of data, but to make things simpler I've outlined only the most interesting parts below:
+After you receive the response, you should find a JSON object that contains the video metadata, stream descriptors, closed captions, activity tracking URLs, ad placements, post-playback screen elements — basically everything that the client needs in order to show the video to the user. It's a massive blob of data, but to make things simpler I've outlined only the most interesting parts below:
 
 ```json
 {
@@ -113,7 +112,7 @@ The separation between `formats` and `adaptiveFormats` is a bit confusing and I 
 
 You'll find that most of the playback options, especially the higher-fidelity ones, are provided using the latter approach, because it's more flexible in terms of bandwidth. By being able to switch the audio and video streams independently, the player can adapt to varying network conditions, as well as different playback contexts — for example, by requesting only the audio stream if the user is consuming content from YouTube Music.
 
-As far as the metadata is concerned, both arrays have a very similar structure and contain objects that look like this:
+As far as the metadata is concerned, both arrays are very similar and contain objects with the following structure:
 
 ```json
 {
@@ -145,9 +144,7 @@ Of course, the most interesting part of the entire object is the `url` property.
 
 Note that if you try to open the URL from the JSON snippet I've shown above, you'll get a `403 Forbidden` error. That's because YouTube stream URLs are not static — they are generated individually for each client and have a fixed expiration time. Once you obtain the stream manifest, the URLs inside it are only valid for roughly 6 hours and cannot be accessed from an IP address other than the one that requested them.
 
-You can confirm this by looking at the `ip` and `expire` query parameters in the URL, which contain the client's IP address and the expiration timestamp respectively. While it may be tempting, these values cannot be changed manually to lift the restrictions, because their integrity is protected by a special parameter called `sig`. Trying to change any of the parameters listed inside `sparams`, without correctly updating the signature, will result in a `403 Forbidden` error as well.
-
-In some cases, YouTube may also decide to employ an additional security measure, where the signature is omitted from the URL and comes as a separate, enciphered parameter — but that measure is exclusive to JavaScript-based clients. Because we specified `ANDROID` as part of the initial request, the retrieved stream URLs are always returned in their final form, ready to be used.
+You can confirm this by looking at the `ip` and `expire` query parameters in the URL, which contain the client's IP address and the expiration timestamp respectively. While it may be tempting, these values cannot be changed manually to lift these limitations, because their integrity is protected by a special parameter called `sig`. Trying to change any of the parameters listed inside `sparams`, without correctly updating the signature, will result in a `403 Forbidden` error as well.
 
 Either way, the steps outlined so far should be enough to resolve and download streams for most YouTube videos. There are a few more things to consider though, which is what I'm going to cover in the following sections.
 
@@ -175,8 +172,7 @@ It's possible to simulate the same flow programmatically — by authenticating o
   "context": {
     "client": {
       "clientName": "TVHTML5_SIMPLY_EMBEDDED_PLAYER",
-      "clientVersion": "2.0",
-      "hl": "en"
+      "clientVersion": "2.0"
     },
     "thirdParty": {
       "embedUrl": "https://www.youtube.com"
@@ -185,9 +181,9 @@ It's possible to simulate the same flow programmatically — by authenticating o
 }
 ```
 
-The main difference from the `ANDROID` client is that `TVHTML5_SIMPLY_EMBEDDED_PLAYER` also requires a `thirdParty` object that contains the URL of the page where the video is supposedly embedded. This value is not validated in any way, but it still needs to be present for the request to succeed.
+The main difference from the `ANDROID` client is that `TVHTML5_SIMPLY_EMBEDDED_PLAYER` also supports a `thirdParty` object that contains the URL of the page where the video is supposedly embedded. It's not strictly required to include this parameter, but specifying `https://www.youtube.com` allows the request to succeed even on videos that prohibit embedding on third-party websites.
 
-One significant drawback of using this client moniker, however, is that it does not represent an installable app like `ANDROID`, but a JavaScript-based player that runs in the browser. As mentioned before, this means that YouTube can impose an additional protection mechanism, by obfuscating the URLs inside the stream metadata with a random cipher. Below is how an individual stream descriptor looks in that case:
+One significant drawback of impersonating this client, however, is that it does not represent an installable app like `ANDROID`, but a JavaScript-based player that runs in the browser. This types of clients are susceptible to an additional security measure used by YouTube, that results in the URLs inside the stream metadata being obfuscated. Here is how an individual stream descriptor looks in that case:
 
 ```json
 {
@@ -210,7 +206,7 @@ One significant drawback of using this client moniker, however, is that it does 
 }
 ```
 
-The structure of the metadata is mostly identical to the previous example, but you will notice that the `url` property is missing. Instead, it's replaced with `signatureCipher`, which is a URL-encoded dictionary that contains the following key-value pairs:
+The structure is mostly identical to the example from earlier, but you will find that the `url` property is absent from the metadata. Instead, it is replaced by `signatureCipher`, which is a URL-encoded dictionary that contains the following key-value pairs:
 
 ```ini
 s=CC=Q8o2zpxwirVyNq_miGGr282CaNsFfzUBBPgQU-8sKj2BiANNbb7LJ8ukTN=NAn-PJD-m57czWRI1DsA6uqrtC0slMAhIQRw8JQ0qOTT
@@ -218,11 +214,11 @@ sp=sig
 url=https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?expire=1674722398&ei=_ufRY5XOJsnoyQWFno_IBg&ip=111.111.111.111&id=o-AGdzTbHeYCSShTUoAvdKXasA0mPM9YKXx5XP2lYQDkgI&itag=18&source=youtube&requiressl=yes&mh=Qv&mm=31%2C26&mn=sn-3c27sn7d%2Csn-f5f7lnld&ms=au%2Conr&mv=m&mvi=12&pl=24&gcr=ua&initcwndbps=2188750&vprv=1&xtags=heaudio%3Dtrue&mime=video%2Fmp4&ns=iTmK1jXtWdMktMzKoaHSpR4L&cnr=14&ratebypass=yes&dur=183.994&lmt=1665725827618480&mt=1674700623&fvip=1&fexp=24007246&c=TVHTML5_SIMPLY_EMBEDDED_PLAYER&txp=5538434&n=MzirMb1rQM4r8h6gw&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cgcr%2Cvprv%2Cxtags%2Cmime%2Cns%2Ccnr%2Cratebypass%2Cdur%2Clmt&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AG3C_xAwRQIgXGtBJv7BPshy6oDP4ghnH1Fhq_AFSAZAcwYs93fbYVMCIQDC-RKyYocOttpdf9_X_98thhRLy2TaKDvjgrg8fQtw7w%3D%3D
 ```
 
-Here, the `url` value is the missing stream URL, but with the signature parameter omitted from it. In order to recover the signature, you need to decipher the `s` value and append it to the URL as an additional query parameter, whose name is specified by the `sp` value.
+The `url` value provided here is the base part of the stream URL, however it's missing an important element — the signature string. In order to reconstruct the complete URL, you need to decipher the `s` value — which is the scrambled form of the actual signature — and append it to the base URL as the query parameter identified by `sp`.
 
-Normally, when running in the browser, the deciphering process is performed by the player itself, using the instructions stored within its source code. These instructions change with each version, so you need a way to extract them programmatically.
+Normally, when running in the browser, the deciphering process is performed by the player itself, using the instructions stored within it. The exact set of operations and their order changes with each version, so the only way to reproduce this programmatically is by downloading the player source code and extracting the implementation from there.
 
-The easiest way to identify the latest version of the player is by querying the `https://www.youtube.com/iframe_api` endpoint, which is what YouTube relies on for embedding videos on third-party websites. This will return a script file that contains the following reference:
+To do that, you need to first identify the latest version of the player, which can be done by querying the `https://www.youtube.com/iframe_api` endpoint. It's the same endpoint that YouTube uses for embedding videos on third-party websites, and it returns a script file that looks like this:
 
 ```js
 var scriptUrl = 'https://www.youtube.com/s/player/4248d311/www-widgetapi.vflset/www-widgetapi.js';
@@ -230,11 +226,16 @@ var scriptUrl = 'https://www.youtube.com/s/player/4248d311/www-widgetapi.vflset/
 /* ... omitted ~40 lines of irrelevant code ... */
 ```
 
-Now, this URL does not point to the player's source code itself, but it does contain the player's version number — which is `4248d311` in this case. Having obtained that, we can download the actual source code from `https://www.youtube.com/s/player/4248d311/player_ias.vflset/en_US/base.js`.
+Inside it, you will find a variable named `scriptUrl` that references one of the player's JavaScript assets. This is not the file we're looking for, but the URL does include the version number, which is `4248d311` in this case. Having obtained that, you can download the player source code by substituting the version into the template below:
 
-The whole file is a massive blob of minified JavaScript code, but finding the deciphering instructions is fairly simple. All you need to do is search for `.split("");`, which is the entry step to the deciphering process. In my case, this lead me to the following block:
+```
+https://www.youtube.com/s/player/{version}/player_ias.vflset/en_US/base.js
+```
+
+Even though the source file is a massive blob of minified, unreadable JavaScript code, locating the deciphering instructions is fairly simple. All you need to do is search for `a=a.split("");` — the entry step to the deciphering process. In my case, this lead me to the following block:
 
 ```js
+// Prettified for readability
 fta = function (a) {
   a = a.split('');
   hD.mL(a, 79);
@@ -245,9 +246,10 @@ fta = function (a) {
 };
 ```
 
-The function above is responsible for deciphering the `s` value from earlier, and here it's pretty obvious that it performs some operations on the string. If we look at the implementation of the referenced `hD` object, we will find that it contains the following three methods:
+Here, the deciphering algorithm is implemented as the `fta` function that takes a single argument (the `s` value from earlier) and passes it through a series of filters. The filters themselves are defined as methods on the `hD` object, located in the same scope:
 
 ```js
+// Prettified for readability
 var hD = {
   i1: function (a, b) {
     var c = a[0];
@@ -263,39 +265,34 @@ var hD = {
 };
 ```
 
-In general, YouTube's cipher algorithm is a combination of the following operations:
+Depending on the version of the player, the names of the above objects and functions will be different, but the deciphering algorithm will always be implemented as a combination of the following three operations:
 
 - **Swap**, which replaces the first character in the string with the character at the specified index.
 - **Splice**, which removes the specified number of characters from the beginning of the string.
 - **Reverse**, which reverses the order of characters in the string.
 
-The current version of the player only uses two of the three operations as part of the deciphering process, and combines them in the following way:
+In our case, this version of the algorithm appears to rely on the last two operations and combines them like so:
 
-1. Reverse the string:
+1. Reverse the string
+2. Remove the first 2 characters
+3. Reverse the string again
+4. Remove the first 3 characters
 
-```
-TTOq0QJ8wRQIhAMls0Ctrqu6AsD1IRWzc75m-DJP-nAN=NTku8JL7bbNNAiB2jKs8-UQgPBBUzfFsNaC282rGGim_qNyVriwxpz2o8Q=CC
-```
+However, in order to actually be able to decipher the signature, the request to the `/youtubei/v1/player` endpoint must also be synchronized with the current implementation of the algorithm. This is achieved by passing a special `signatureTimestamp` parameter that YouTube uses as a seed to randomize the operations. You can extract the value of this parameter by searching for `signatureTimestamp` in the player source code:
 
-2. Then, remove the first 2 characters:
-
-```
-Oq0QJ8wRQIhAMls0Ctrqu6AsD1IRWzc75m-DJP-nAN=NTku8JL7bbNNAiB2jKs8-UQgPBBUzfFsNaC282rGGim_qNyVriwxpz2o8Q=CC
-```
-
-3. Then, reverse the string again:
-
-```
-CC=Q8o2zpxwirVyNq_miGGr282CaNsFfzUBBPgQU-8sKj2BiANNbb7LJ8ukTN=NAn-PJD-m57czWRI1DsA6uqrtC0slMAhIQRw8JQ0qO
-```
-
-4. Finally, remove the first 3 characters to get the deciphered signature:
-
-```
-Q8o2zpxwirVyNq_miGGr282CaNsFfzUBBPgQU-8sKj2BiANNbb7LJ8ukTN=NAn-PJD-m57czWRI1DsA6uqrtC0slMAhIQRw8JQ0qO
+```js
+var v = {
+  splay: !1,
+  lactMilliseconds: c.LACT.toString(),
+  playerHeightPixels: Math.trunc(c.P_H),
+  playerWidthPixels: Math.trunc(c.P_W),
+  vis: Math.trunc(c.VIS),
+  signatureTimestamp: 19369, // <--- this is the value you need
+  autonavState: MDa(a.player.V())
+};
 ```
 
-However, we can't actually apply this algorithm to the `s` value from earlier, because the response we received from the `/youtubei/v1/player` endpoint was not bound to the current version of the player. To fix this, we need to pass an additional parameter in the request that specifies the `signatureTimestamp`, which is a special value that YouTube uses to identify a particular cipher algorithm:
+To include the timestamp in the request, add it as part of the top-level `playbackContext` object:
 
 ```json
 // POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
@@ -304,8 +301,7 @@ However, we can't actually apply this algorithm to the `s` value from earlier, b
   "context": {
     "client": {
       "clientName": "TVHTML5_SIMPLY_EMBEDDED_PLAYER",
-      "clientVersion": "2.0",
-      "hl": "en"
+      "clientVersion": "2.0"
     },
     "thirdParty": {
       "embedUrl": "https://www.youtube.com"
@@ -319,21 +315,7 @@ However, we can't actually apply this algorithm to the `s` value from earlier, b
 }
 ```
 
-The timestamp itself can be extracted from the same player source code that we used earlier, by searching for `signatureTimestamp`. In my case, the value was contained within this block:
-
-```js
-var v = {
-  splay: !1,
-  lactMilliseconds: c.LACT.toString(),
-  playerHeightPixels: Math.trunc(c.P_H),
-  playerWidthPixels: Math.trunc(c.P_W),
-  vis: Math.trunc(c.VIS),
-  signatureTimestamp: 19369, // <--- this is the value we need
-  autonavState: MDa(a.player.V())
-};
-```
-
-Now, after running the request with the right parameters, you should get a stream manifest that is bound to the current version of the algorithm.
+Now, the returned manifest
 
 ## Muxing adaptive streams into a single file
 
