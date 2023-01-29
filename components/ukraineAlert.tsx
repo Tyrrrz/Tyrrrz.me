@@ -1,17 +1,12 @@
 import c from 'classnames';
 import { FC } from 'react';
 import Callout from '~/components/callout';
-import Inline from '~/components/inline';
 import Link from '~/components/link';
 
 const UkraineAlert: FC = () => {
   return (
     <Callout variant="info">
-      <div className={c('font-semibold')}>
-        <Inline>
-          <span>❤️ Thank You for Supporting Ukraine!</span>
-        </Inline>
-      </div>
+      <div className={c('font-semibold')}>❤️ Thank You for Supporting Ukraine!</div>
 
       <div>
         As Russia wages a genocidal war against my country, I&apos;m grateful to everyone who

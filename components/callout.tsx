@@ -2,10 +2,10 @@ import c from 'classnames';
 import { FC, PropsWithChildren } from 'react';
 
 type CalloutProps = PropsWithChildren<{
-  variant?: 'info' | 'danger';
+  variant?: 'neutral' | 'info' | 'danger';
 }>;
 
-const Callout: FC<CalloutProps> = ({ variant = 'info', children }) => {
+const Callout: FC<CalloutProps> = ({ variant = 'neutral', children }) => {
   return (
     <section
       className={c(

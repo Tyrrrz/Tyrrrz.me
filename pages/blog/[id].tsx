@@ -3,9 +3,11 @@ import { DiscussionEmbed } from 'disqus-react';
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import { FC } from 'react';
 import { FiCalendar, FiClock } from 'react-icons/fi';
+import Callout from '~/components/callout';
 import Heading from '~/components/heading';
 import Image from '~/components/image';
 import Inline from '~/components/inline';
+import Link from '~/components/link';
 import Markdown from '~/components/markdown';
 import Meta from '~/components/meta';
 import UkraineAlert from '~/components/ukraineAlert';
@@ -120,6 +122,19 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
       </section>
 
       <ArticleSection post={post} />
+
+      <section className={c('my-4')}>
+        <Callout>
+          <div className={c('font-semibold')}>🔔 Subscribe for more</div>
+
+          <div>
+            Want to know when I post a new article? Follow me on{' '}
+            <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or subscribe to the{' '}
+            <Link href="/blog/rss.xml">RSS Feed</Link>
+          </div>
+        </Callout>
+      </section>
+
       <CommentSection post={post} />
     </>
   );
