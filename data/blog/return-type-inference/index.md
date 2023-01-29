@@ -137,7 +137,7 @@ Of course, ideally, we would want the compiler to figure out the type of `T` in 
 
 Unfortunately, neither of these is possible with C#'s type system because it would need to work out the type in reverse, which it cannot do. That said, we can help it a little.
 
-We can simulate _return type inference_ by having `Option.None` return a special non-generic type representing an option with deferred initialization, which can be coerced into `Option<T>`. Here's how that would look:
+We can simulate _return type inference_ by having `Option.None` return a special non-generic type, representing an option with deferred initialization that can be coerced into `Option<T>`. Here's how that would look:
 
 ```csharp
 public readonly struct Option<T>
@@ -173,9 +173,9 @@ public static class Option
 }
 ```
 
-As you can see, `Option.None` now returns a dummy `NoneOption` object, which essentially represents an empty option whose type hasn't been decided yet. Because `NoneOption` is not generic, we were able to drop the generic arguments and turn `Option.None` into a property.
+With these changes, `Option.None` now returns a dummy `NoneOption` object, which essentially represents an empty option whose type hasn't been decided yet. Because `NoneOption` is not generic, we were able to drop the generic arguments and turn `Option.None` into a property.
 
-Additionally, we made it so `Option<T>` implements an implicit conversion from `NoneOption`. Although operators themselves can't be generic in C#, they still retain type arguments of the declaring type, which allows us to define this conversion for _every possible_ variant of `Option<T>`.
+Additionally, we made it so `Option<T>` implements an implicit conversion from `NoneOption`. Although operators themselves can't be generic in C#, they still retain type arguments of the declaring type, allowing us to define this conversion for _every possible_ variant of `Option<T>`.
 
 All of this allows us to write `Option.None` and have the compiler coerce it automatically to the destination type. From the consumer's point of view, it looks as though we've implemented return type inference:
 
