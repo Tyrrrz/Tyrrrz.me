@@ -322,3 +322,7 @@ Finally, update the original request to the `/youtubei/v1/player` endpoint to in
 ```
 
 With that, the returned stream descriptors should contain compatible signature ciphers, allowing you to correctly reconstruct the URLs using the deciphering instructions extracted earlier.
+
+## Bypassing download limits
+
+Sometimes, when trying to download a stream, you will notice that the transfer speed is abnormally low. That's because by default, adaptive streams are served at a limited rate — just enough to download the next parts as the video plays. This is not optimal if the goal is to download the video as fast as possible.
