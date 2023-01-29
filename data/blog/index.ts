@@ -1,3 +1,4 @@
+import ellipsize from 'ellipsize';
 import { Feed } from 'feed';
 import frontmatter from 'front-matter';
 import fs from 'fs/promises';
@@ -28,6 +29,7 @@ export const loadBlogPosts = async function* () {
     }
 
     const id = entry.name;
+    const childFileNames = await fs.readdir(path.resolve(dirPath, id));
 
     const indexFilePath = path.resolve(dirPath, id, 'index.md');
     const data = await fs.readFile(indexFilePath, 'utf8');
@@ -46,14 +48,9 @@ export const loadBlogPosts = async function* () {
     }
 
     const readingTimeMins = readingTime(body, { wordsPerMinute: 220 }).minutes;
-
-    const coverFileName = (await fs.readdir(path.resolve(dirPath, id))).find(
-      (file) => path.parse(file).name === 'cover'
-    );
-
+    const coverFileName = childFileNames.find((fileName) => path.parse(fileName).name === 'cover');
     const coverUrl = coverFileName && `/blog/${id}/${coverFileName}`;
-
-    const excerpt = markdownToTxt(body).slice(0, 256) + '…';
+    const excerpt = ellipsize(markdownToTxt(body), 256);
 
     const post: BlogPost = {
       id,
