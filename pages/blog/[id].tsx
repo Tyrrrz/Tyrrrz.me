@@ -3,7 +3,6 @@ import { DiscussionEmbed } from 'disqus-react';
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import { FC } from 'react';
 import { FiCalendar, FiClock } from 'react-icons/fi';
-import Callout from '~/components/callout';
 import Heading from '~/components/heading';
 import Image from '~/components/image';
 import Inline from '~/components/inline';
@@ -30,7 +29,9 @@ const CoverSection: FC<BlogPostPageProps> = ({ post }) => {
   }
 
   return (
-    <section className={c('my-4', 'bg-purple-100', 'rounded', 'border', 'border-purple-500')}>
+    <section
+      className={c('my-4', 'p-4', 'bg-purple-100', 'rounded', 'border', 'border-purple-500')}
+    >
       <div className={c('w-fit', 'mx-auto')}>
         <Image src={post.coverUrl} alt="Cover image" priority />
       </div>
@@ -57,6 +58,20 @@ const ArticleSection: FC<BlogPostPageProps> = ({ post }) => {
           transformImageSrc={transformUrl}
         />
       </article>
+    </section>
+  );
+};
+
+const SubscribeSection: FC = () => {
+  return (
+    <section className={c('p-4', 'border', 'rounded', 'space-y-1')}>
+      <div className={c('font-semibold')}>🔔 Subscribe for more</div>
+
+      <div>
+        Want to know when I post a new article? Follow me on{' '}
+        <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or subscribe to the{' '}
+        <Link href="/blog/rss.xml">RSS Feed</Link>
+      </div>
     </section>
   );
 };
@@ -122,19 +137,7 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
       </section>
 
       <ArticleSection post={post} />
-
-      <section className={c('my-4')}>
-        <Callout>
-          <div className={c('font-semibold')}>🔔 Subscribe for more</div>
-
-          <div>
-            Want to know when I post a new article? Follow me on{' '}
-            <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or subscribe to the{' '}
-            <Link href="/blog/rss.xml">RSS Feed</Link>
-          </div>
-        </Callout>
-      </section>
-
+      <SubscribeSection />
       <CommentSection post={post} />
     </>
   );

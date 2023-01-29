@@ -1,11 +1,21 @@
 import c from 'classnames';
 import { FC } from 'react';
-import Callout from '~/components/callout';
 import Link from '~/components/link';
 
 const UkraineAlert: FC = () => {
   return (
-    <Callout variant="info">
+    <section
+      className={c(
+        'p-4',
+        'border',
+        'border-l-blue-500',
+        'border-t-blue-500',
+        'border-r-yellow-400',
+        'border-b-yellow-400',
+        'rounded',
+        'space-y-1'
+      )}
+    >
       <div className={c('font-semibold')}>❤️ Thank You for Supporting Ukraine!</div>
 
       <div>
@@ -16,7 +26,7 @@ const UkraineAlert: FC = () => {
       <div className={c('font-semibold')}>
         <Link href="/ukraine">See how you can help</Link>
       </div>
-    </Callout>
+    </section>
   );
 };
 
