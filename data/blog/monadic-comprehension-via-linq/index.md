@@ -7,7 +7,7 @@ If you ask a C# developer to list the reasons why they enjoy working with the la
 
 LINQ itself is made up of multiple pieces, but from the consumer perspective it mainly comes in two forms: extension methods for `IEnumerable<T>` and `IQueryable<T>` interfaces, and the language-integrated query syntax which is built upon them. Interestingly enough, despite arguably being the most important part of the feature as a whole, query syntax sees very little use in practice, as most developers prefer to rely on extension methods directly due to their flexibility and overall homogeny with the rest of the language.
 
-However, there is one aspect of query syntax that makes it particularly intriguing in my opinion, and that's the fact that **its usage is actually not limited to collections**. As long as a specific type implements a few key methods required by the compiler, C#'s query notation can be enabled on virtually any type.
+However, there is one aspect of the query syntax that makes it particularly intriguing in my opinion, and that's the fact that **its usage is actually not limited to collections**. As long as a specific type implements a few key methods required by the compiler, C#'s query notation can be enabled on virtually any type.
 
 This presents a very interesting opportunity where we can use this feature to enhance other types (including our own) with a special comprehension syntax that helps express certain operations in a more concise and clear way. In practice, it allows us to achieve something similar to [F#'s computation expressions](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions) or [Haskell's `do` notation](https://en.wikibooks.org/wiki/Haskell/do_notation).
 
@@ -366,7 +366,7 @@ maxInstances.Match(
 );
 ```
 
-Or, if we wanted to, we could also wrap the expression in its own method like so:
+Or, if we wanted to, we could also wrap the expression in its own method as shown below:
 
 ```csharp
 public Option<int> GetMaxInstances() =>
