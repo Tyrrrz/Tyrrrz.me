@@ -41,7 +41,7 @@ The request body itself is a JSON object with two top-level properties: `videoId
 
 In particular, depending on the client you choose to impersonate using the `clientName` and `clientVersion` properties, the response may contain slightly different data, or just fail to resolve altogether for certain videos. This, of course, can be leveraged to your advantage — which is why we specifically used the `ANDROID` client in the example above — but I'll explain that in more detail later on.
 
-After you receive the response, you should find a JSON object that contains the video metadata, stream descriptors, closed captions, activity tracking URLs, ad placements, post-playback screen elements — basically everything that the client needs in order to show the video to the user. It's a massive blob of data, but to make things simpler I've outlined only the most interesting parts below:
+After you receive the response, you should find a JSON object that contains the video metadata, stream descriptors, closed captions, activity tracking URLs, ad placements, post-playback screen elements — basically everything that the client needs in order to show the video to the user. It's a massive blob of data, so to make things simpler I've outlined only the most interesting parts below:
 
 ```json
 {
@@ -157,13 +157,13 @@ YouTube has an extensive content moderation system, so you may occasionally enco
 
 The way region-based restrictions work is fairly straightforward — YouTube identifies whether your IP address maps to one of the blocked countries and prohibits access to the video if that's the case. There is not much that can be done about it, other than using a VPN to spoof your location.
 
-For age-based restrictions, on the other hand, YouTube does not infer any information from the client, but rather relies on the user's consent. This is done by having the user sign in to their account and confirm that they are 18 years or older:
+For age-based restrictions, on the other hand, YouTube does not infer any information from the client, but rather relies on the user's consent. To provide it, the user is required to sign in to their account and confirm that they are 18 years or older:
 
 ![Age-restricted video](age-restricted-video.png)
 
-It's possible to simulate the same flow programmatically — by authenticating on the user's behalf and then passing cookies to the `/youtubei/v1/player` endpoint — but it's a very cumbersome and error-prone process. Luckily, there is a way to bypass this restriction altogether.
+While it is possible to simulate the same flow programmatically — by authenticating on the user's behalf and then passing cookies to the `/youtubei/v1/player` endpoint — the process is very cumbersome and error-prone. Luckily, there is a way to bypass this restriction altogether.
 
-[As it turns out](https://github.com/TeamNewPipe/NewPipe/issues/8102#issuecomment-1081085801), there is one obscure YouTube client that lets you access age-gated videos completely unauthenticated, and that's the **embedded player used for Smart TV browsers**. This means that if you impersonate this client in the request, **you can get working stream manifests for age-restricted videos**, without worrying about cookies or user credentials. To do that, update the initial request body as follows:
+[As it turns out](https://github.com/TeamNewPipe/NewPipe/issues/8102#issuecomment-1081085801), there is one obscure YouTube client that lets you access age-gated videos completely unauthenticated, and that's the **embedded player used for Smart TV browsers**. This means that if you impersonate this client in the initial request, **you can get working stream manifests for age-restricted videos**, without worrying about cookies or user credentials. To do that, update the request body as follows:
 
 ```json
 // POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
@@ -181,9 +181,9 @@ It's possible to simulate the same flow programmatically — by authenticating o
 }
 ```
 
-The main difference from the `ANDROID` client is that `TVHTML5_SIMPLY_EMBEDDED_PLAYER` also supports a `thirdParty` object that contains the URL of the page where the video is supposedly embedded. It's not strictly required to include this parameter, but specifying `https://www.youtube.com` allows the request to succeed even on videos that prohibit embedding on third-party websites.
+The main difference from the `ANDROID` client is that `TVHTML5_SIMPLY_EMBEDDED_PLAYER` also supports a `thirdParty` object that contains the URL of the page where the video is supposedly embedded. While it's not strictly required to include this parameter, specifying `https://www.youtube.com` allows the request to succeed even on videos that prohibit embedding on third-party websites.
 
-One significant drawback of impersonating this client, however, is that it does not represent an installable app like `ANDROID`, but a JavaScript-based player that runs in the browser. This types of clients are susceptible to an additional security measure used by YouTube, that results in the URLs inside the stream metadata being obfuscated. Here is how an individual stream descriptor looks in that case:
+One significant drawback of impersonating this client, however, is that it does not represent an installable app like `ANDROID`, but a JavaScript-based player that runs in the browser. This type of client is susceptible to an additional security measure used by YouTube, that results in the URLs inside the stream metadata being obfuscated. Here is how an individual stream descriptor looks in that case:
 
 ```json
 {
@@ -206,7 +206,7 @@ One significant drawback of impersonating this client, however, is that it does 
 }
 ```
 
-The structure is mostly identical to the example from earlier, but you will find that the `url` property is absent from the metadata. Instead, it is replaced by `signatureCipher`, which is a URL-encoded dictionary that contains the following key-value pairs:
+Although the structure is mostly identical to the example from earlier, you will find that the `url` property is absent from the metadata. Instead, it's replaced by `signatureCipher` — a URL-encoded dictionary that contains the following key-value pairs:
 
 ```ini
 s=CC=Q8o2zpxwirVyNq_miGGr282CaNsFfzUBBPgQU-8sKj2BiANNbb7LJ8ukTN=NAn-PJD-m57czWRI1DsA6uqrtC0slMAhIQRw8JQ0qOTT
@@ -214,9 +214,9 @@ sp=sig
 url=https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?expire=1674722398&ei=_ufRY5XOJsnoyQWFno_IBg&ip=111.111.111.111&id=o-AGdzTbHeYCSShTUoAvdKXasA0mPM9YKXx5XP2lYQDkgI&itag=18&source=youtube&requiressl=yes&mh=Qv&mm=31%2C26&mn=sn-3c27sn7d%2Csn-f5f7lnld&ms=au%2Conr&mv=m&mvi=12&pl=24&gcr=ua&initcwndbps=2188750&vprv=1&xtags=heaudio%3Dtrue&mime=video%2Fmp4&ns=iTmK1jXtWdMktMzKoaHSpR4L&cnr=14&ratebypass=yes&dur=183.994&lmt=1665725827618480&mt=1674700623&fvip=1&fexp=24007246&c=TVHTML5_SIMPLY_EMBEDDED_PLAYER&txp=5538434&n=MzirMb1rQM4r8h6gw&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cgcr%2Cvprv%2Cxtags%2Cmime%2Cns%2Ccnr%2Cratebypass%2Cdur%2Clmt&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AG3C_xAwRQIgXGtBJv7BPshy6oDP4ghnH1Fhq_AFSAZAcwYs93fbYVMCIQDC-RKyYocOttpdf9_X_98thhRLy2TaKDvjgrg8fQtw7w%3D%3D
 ```
 
-The `url` value provided here is the base part of the stream URL, however it's missing an important element — the signature string. In order to reconstruct the complete URL, you need to decipher the `s` value — which is the scrambled form of the actual signature — and append it to the base URL as the query parameter identified by `sp`.
+Here, the provided `url` value is the base part of the stream URL, but it's missing an important element — the signature string. In order to obtain the correct link, you need to recover the signature from the `s` value and append it back to the base URL as a query parameter identified by `sp`. The challenge, however, is that the signature is stored in an enciphered form, meaning that you need to decipher it before you can use it.
 
-Normally, when running in the browser, the deciphering process is performed by the player itself, using the instructions stored within it. The exact set of operations and their order changes with each version, so the only way to reproduce this programmatically is by downloading the player source code and extracting the implementation from there.
+Normally, when running in the browser, the deciphering process is performed by the player itself, using the instructions stored within it. The exact set of operations and their order changes with each version, so the only way to reproduce this programmatically is by downloading the player source code and extracting the cipher implementation from there.
 
 To do that, you need to first identify the latest version of the player, which can be done by querying the `https://www.youtube.com/iframe_api` endpoint. It's the same endpoint that YouTube uses for embedding videos on third-party websites, and it returns a script file that looks like this:
 
@@ -226,13 +226,13 @@ var scriptUrl = 'https://www.youtube.com/s/player/4248d311/www-widgetapi.vflset/
 /* ... omitted ~40 lines of irrelevant code ... */
 ```
 
-Inside it, you will find a variable named `scriptUrl` that references one of the player's JavaScript assets. This is not the file we're looking for, but the URL does include the version number, which is `4248d311` in this case. Having obtained that, you can download the player source code by substituting the version into the template below:
+Within it, you will find a variable named `scriptUrl` that references one of the player's JavaScript assets. While this URL is not particularly useful on its own, it does include the player version inside, which is `4248d311` in this case. Having obtained that, you can download the player source code by substituting the version into the template below:
 
 ```
 https://www.youtube.com/s/player/{version}/player_ias.vflset/en_US/base.js
 ```
 
-Even though the source file is a massive blob of minified, unreadable JavaScript code, locating the deciphering instructions is fairly simple. All you need to do is search for `a=a.split("");` — the entry step to the deciphering process. In my case, this lead me to the following block:
+Even though the source file is a massive blob of minified, unreadable JavaScript code, locating the deciphering instructions is fairly simple. All you need to do is search for `a=a.split("");`, which should bring you to the entry step of the deciphering process. In my case, this lead me to the following block:
 
 ```js
 // Prettified for readability
@@ -246,53 +246,57 @@ fta = function (a) {
 };
 ```
 
-Here, the deciphering algorithm is implemented as the `fta` function that takes a single argument (the `s` value from earlier) and passes it through a series of filters. The filters themselves are defined as methods on the `hD` object, located in the same scope:
+As you can see, the deciphering algorithm is implemented as the `fta` function that takes a single argument (the `s` value from earlier) and passes it through a series of filters. The filters themselves are defined as methods on the `hD` object located in the same scope:
 
 ```js
 // Prettified for readability
 var hD = {
+  // Swap filter
   i1: function (a, b) {
     var c = a[0];
     a[0] = a[b % a.length];
     a[b % a.length] = c;
   },
+  // Splice filter
   L5: function (a, b) {
     a.splice(0, b);
   },
+  // Reverse filter
   mL: function (a) {
     a.reverse();
   }
 };
 ```
 
-Depending on the version of the player, the names of the above objects and functions will be different, but the deciphering algorithm will always be implemented as a combination of the following three operations:
+Depending on the version of the player, the names of the above objects and functions will be different, but the deciphering algorithm will always be implemented as a randomized sequence of the following operations:
 
 - **Swap**, which replaces the first character in the string with the character at the specified index.
 - **Splice**, which removes the specified number of characters from the beginning of the string.
 - **Reverse**, which reverses the order of characters in the string.
 
-In our case, this version of the algorithm appears to rely on the last two operations and combines them like so:
+Looking back at the `fta` function, we can conclude that this version of the algorithm only relies on the last two operations, and combines them like so:
 
-1. Reverse the string
-2. Remove the first 2 characters
-3. Reverse the string again
-4. Remove the first 3 characters
+1. `hD.mL(a)`: reverses the string.
+2. `hD.L5(a, 2)`: removes the first 2 characters.
+3. `hD.mL(a)`: reverses the string again.
+4. `hD.L5(a, 3)`: removes the first 3 characters.
 
-However, in order to actually be able to decipher the signature, the request to the `/youtubei/v1/player` endpoint must also be synchronized with the current implementation of the algorithm. This is achieved by passing a special `signatureTimestamp` parameter that YouTube uses as a seed to randomize the operations. You can extract the value of this parameter by searching for `signatureTimestamp` in the player source code:
+However, before you can actually apply these steps and recover the signature, you need to resolve a stream manifest that's synchronized with the current implementation of the cipher. This is achieved with the help of a special value called `signatureTimestamp` that YouTube uses as the randomization seed to generate the cipher instructions. You can extract this value by searching for `signatureTimestamp` in the player source code:
 
 ```js
+// Prettified for readability
 var v = {
   splay: !1,
   lactMilliseconds: c.LACT.toString(),
   playerHeightPixels: Math.trunc(c.P_H),
   playerWidthPixels: Math.trunc(c.P_W),
   vis: Math.trunc(c.VIS),
-  signatureTimestamp: 19369, // <--- this is the value you need
+  signatureTimestamp: 19369, // <--- the value we're looking for
   autonavState: MDa(a.player.V())
 };
 ```
 
-To include the timestamp in the request, add it as part of the top-level `playbackContext` object:
+After that, update the initial request to `/youtubei/v1/player` so that it includes the `signatureTimestamp` inside the payload. Here's how the request body should look in this case:
 
 ```json
 // POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
@@ -315,8 +319,8 @@ To include the timestamp in the request, add it as part of the top-level `playba
 }
 ```
 
-Now, the returned manifest
+This should return a slightly different stream manifest, with all the signatures enciphered using the same algorithm as the one you've extracted from the player source code. Now, you can apply the algorithm to recover the original signature and resolve the correct URL to download the video.
 
 ## Muxing adaptive streams into a single file
 
-Earlier in this article I said that adopted formats come as separate audio only and video only streams and while that is very convenient for YouTube it's it's not so convenient when it comes to downloading videos
+Earlier in this article I said that adopted formats come as separate audio only and video only streams and while that is very convenient for YouTube it's not so convenient when it comes to downloading videos
