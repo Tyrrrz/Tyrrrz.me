@@ -3,13 +3,14 @@ import frontmatter from 'front-matter';
 import fs from 'fs/promises';
 import markdownToTxt from 'markdown-to-txt';
 import path from 'path';
+import readingTime from 'reading-time';
 import { getSiteUrl } from '~/utils/env';
 
 export type BlogPost = {
   id: string;
   title: string;
   date: string;
-  readTimeMs: number;
+  readingTimeMins: number;
   coverUrl?: string;
   excerpt: string;
   source: string;
@@ -44,7 +45,7 @@ export const loadBlogPosts = async function* () {
       throw new Error(`Blog post '${id}' has missing or invalid date`);
     }
 
-    const readTimeMs = (body.split(/\s/g).length * 60000) / 350;
+    const readingTimeMins = readingTime(body, { wordsPerMinute: 220 }).minutes;
 
     const coverFileName = (await fs.readdir(path.resolve(dirPath, id))).find(
       (file) => path.parse(file).name === 'cover'
@@ -58,7 +59,7 @@ export const loadBlogPosts = async function* () {
       id,
       title,
       date,
-      readTimeMs,
+      readingTimeMins,
       coverUrl,
       excerpt,
       source: body
@@ -74,7 +75,7 @@ export const loadBlogPostRefs = async function* () {
       id: post.id,
       title: post.title,
       date: post.date,
-      readTimeMs: post.readTimeMs,
+      readingTimeMins: post.readingTimeMins,
       coverUrl: post.coverUrl,
       excerpt: post.excerpt
     };
