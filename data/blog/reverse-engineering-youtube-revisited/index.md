@@ -7,17 +7,17 @@ Back in 2017 I wrote [an article](/blog/reverse-engineering-youtube) in which I 
 
 There is one thing that developers like more than building things — and that is breaking things built by other people. So, naturally, my article attracted quite a bit of attention and still remains one of the most popular posts on this blog. Either way, I had lots of fun doing the research, and I'm glad that it was also useful to other people.
 
-However, many things have changed in the five years since the article was published. YouTube has evolved as a platform, went through multiple UI redesigns, and completely overhauled its frontend codebase. Most of the internal endpoints that were reverse-engineered in the early days have been gradually getting removed altogether. In fact, nearly everything I wrote in the original post has become obsolete and now only serves as a historical reference.
+However, many things have changed in the five years since the article was published: YouTube has evolved as a platform, went through multiple UI redesigns, and completely overhauled its frontend codebase. Most of the internal endpoints that were reverse-engineered in the early days have been gradually getting removed altogether. In fact, nearly everything I wrote in the original post has become obsolete and now only serves as a historical reference.
 
 I know that there's still a lot of interest around this topic, so I've been meaning to revisit it and make a follow-up article with new and updated information. Seeing as YouTube has once again entered a quiet phase in terms of change and innovation, I figured that now is finally a good time to do it.
 
 In this article, I'll cover the current state of YouTube's internal API, highlight the most important changes, and explain how everything works today. Just like before, I will focus on the video playback aspect of the platform, outlining everything you need to do in order to resolve video streams and download them.
 
-## Retrieving video metadata and downloading streams
+## Retrieving video metadata and media streams
 
 If you've worked with YouTube in the past, you'll probably remember `get_video_info`. This internal API controller was used throughout YouTube's client code to retrieve video metadata, available streams, and everything else the player needed to render it. The origin of this endpoint traces back to the Flash Player days of YouTube, and it was still available as late as July 2021, before it was finally removed.
 
-Besides `get_video_info`, YouTube has also dropped many other endpoints, such as `get_video_metadata` ([in November 2017](https://github.com/Tyrrrz/YoutubeExplode/issues/66)) and `list_ajax` ([in February 2021](https://github.com/Tyrrrz/YoutubeExplode/issues/501)), as part of a larger effort to establish a more organized API structure. Now, instead of having a bunch of randomly scattered endpoints with unpredictable formats and usage patterns, YouTube's internal API is comprised out of a coherent set of routes nested underneath the `/youtubei/v1/` path.
+Besides `get_video_info`, YouTube has also dropped many other endpoints, such as `get_video_metadata` ([in November 2017](https://github.com/Tyrrrz/YoutubeExplode/issues/66)) and `list_ajax` ([in February 2021](https://github.com/Tyrrrz/YoutubeExplode/issues/501)), as part of a larger effort to establish a more organized API structure. Now, instead of having a bunch of randomly scattered endpoints with unpredictable formats and usage patterns, YouTube's internal API is comprised out of a coherent set of routes nested underneath the `/youtubei/` path.
 
 In particular, much of the data previously available from `get_video_info` can now be pulled using the `/youtubei/v1/player` route. Unlike its predecessor, this endpoint expects a `POST` request and a payload that looks like this:
 
@@ -39,7 +39,7 @@ First thing you'll notice is that this endpoint requires an API key, which is do
 
 The request body itself is a JSON object with two top-level properties: `videoId` and `context`. The former is the 11-character ID of the video you want to retrieve the metadata for, while the latter contains various information that YouTube uses to tailor the response to the client's preferences and capabilities.
 
-In particular, depending on the client you choose to impersonate using the `clientName` and `clientVersion` properties, the response may contain slightly different data, or just fail to resolve altogether for certain videos. This, of course, can be leveraged to your advantage — which is why we specifically used the `ANDROID` client in the example above — but I'll explain that in more detail later on.
+In particular, depending on the client you choose to impersonate using the `clientName` and `clientVersion` properties, the response may contain slightly different data, or just fail to resolve altogether for certain videos. This, of course, can be leveraged to your advantage — which is why I specifically used the `ANDROID` client in the example above — but I'll explain that in more detail later on.
 
 After you receive the response, you should find a JSON object that contains the video metadata, stream descriptors, closed captions, activity tracking URLs, ad placements, post-playback screen elements — basically everything that the client needs in order to show the video to the user. It's a massive blob of data, so to make things simpler I've outlined only the most interesting parts below:
 
@@ -98,11 +98,11 @@ After you receive the response, you should find a JSON object that contains the 
       /* ... */
     ]
   }
-  /* ... omitted ~1800 more lines of irrelevant data ... */
+  /* ... omitted ~1800 lines of irrelevant data ... */
 }
 ```
 
-As you can immediately see, the response contains a range of useful information. From `videoDetails`, we can extract the video title, duration, author, view count, thumbnails, and other relevant metadata. This includes most of the stuff you will find on the video page, with the exception of likes, dislikes, channel subscribers, and other bits that are not rendered directly by the player. If you want to get that data as well, you will have to scrape the `/watch` page separately.
+As you can immediately see, the response contains a range of useful information. From `videoDetails`, you can extract the video title, duration, author, view count, thumbnails, and other relevant metadata. This includes most of the stuff you will find on the video page, with the exception of likes, dislikes, channel subscribers, and other bits that are not rendered directly by the player. If you want to get that data as well, you will have to scrape the `/watch` page separately.
 
 Next, the `playabilityStatus` object indicates whether the video is playable within the context of the client that made the request. In case it's not, a `reason` property will be included with a human-readable message explaining why — for example, because the video is intended for mature audiences, or because it's not available in the current region. When dealing with unplayable videos, you'll still be able to access their metadata, but you won't be able to retrieve any streams.
 
@@ -146,14 +146,14 @@ Note that if you try to open the URL from the JSON snippet I've shown above, you
 
 You can confirm this by looking at the `ip` and `expire` query parameters in the URL, which contain the client's IP address and the expiration timestamp respectively. While it may be tempting, these values cannot be changed manually to lift these limitations, because their integrity is protected by a special parameter called `sig`. Trying to change any of the parameters listed inside `sparams`, without correctly updating the signature, will result in a `403 Forbidden` error as well.
 
-Either way, the steps outlined so far should be enough to resolve and download streams for most YouTube videos. There are a few more things to consider though, which is what I'm going to cover in the following sections.
+In any case, the steps outlined so far should be enough to resolve and download streams for most YouTube videos. However, some videos may require a bit of extra work, which is what I'm going to cover in the next section.
 
 ## Working around content restrictions
 
-YouTube has an extensive content moderation system, so you may occasionally encounter videos that cannot be played — and, thus, downloaded. The two most common reasons for that are:
+YouTube has an extensive content moderation system, so you may occasionally encounter videos that cannot be played and, thus, downloaded. The two most common reasons for that are:
 
-- The video is blocked in your country, which happens when it features content that the uploader has not licensed for use in your region.
-- The video is age-gated, which happens when it features content that is not suitable for minors, as determined by YouTube or the uploader themselves.
+- The video is blocked in your country, because it features content that the uploader has not licensed for use in your region.
+- The video is age-gated, because it features content that is not suitable for minors, as determined by YouTube or the uploader themselves.
 
 The way region-based restrictions work is fairly straightforward — YouTube identifies whether your IP address maps to one of the blocked countries and prohibits access to the video if that's the case. There is not much that can be done about it, other than using a VPN to spoof your location.
 
@@ -216,7 +216,7 @@ url=https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?expire=1674722398&e
 
 Here, the provided `url` value is the base part of the stream URL, but it's missing an important element — the signature string. In order to obtain the correct link, you need to recover the signature from the `s` value and append it back to the base URL as a query parameter identified by `sp`. The challenge, however, is that the signature is stored in an enciphered form, meaning that you need to decipher it before you can use it.
 
-Normally, when running in the browser, the deciphering process is performed by the player itself, using the instructions stored within it. The exact set of operations and their order changes with each version, so the only way to reproduce this programmatically is by downloading the player source code and extracting the cipher implementation from there.
+Normally, when running in the browser, the deciphering process is performed by the player itself, using the instructions stored within it. The exact set of operations and their order changes with each version, so the only way to reproduce this programmatically is by downloading the player source code and extracting the implementation from there.
 
 To do that, you need to first identify the latest version of the player, which can be done by querying the `https://www.youtube.com/iframe_api` endpoint. It's the same endpoint that YouTube uses for embedding videos on third-party websites, and it returns a script file that looks like this:
 
@@ -281,7 +281,9 @@ Looking back at the `fta` function, we can conclude that this version of the alg
 3. `hD.mL(a)`: reverses the string again.
 4. `hD.L5(a, 3)`: removes the first 3 characters.
 
-However, before you can actually apply these steps and recover the signature, you need to resolve a stream manifest that's synchronized with the current implementation of the cipher. This is achieved with the help of a special value called `signatureTimestamp` that YouTube uses as the randomization seed to generate the cipher instructions. You can extract this value by searching for `signatureTimestamp` in the player source code:
+Before you can apply these steps on the stream signature, however, you need to resolve a manifest that's actually synchronized with the current implementation of the cipher. That's because there are many versions of the player in use at the same time, so the manifest returned by the initial request may not be compatible with the deciphering instructions you've extracted.
+
+To identify a particular implementation of the cipher, YouTube does not rely on the version of the player, but rather on a special value called `signatureTimestamp`. This value is used as a random seed to generate the cipher algorithm, and to keep it consistent between the client and the server. You can extract it from the player source code by searching for `signatureTimestamp`:
 
 ```js
 // Prettified for readability
@@ -291,12 +293,12 @@ var v = {
   playerHeightPixels: Math.trunc(c.P_H),
   playerWidthPixels: Math.trunc(c.P_W),
   vis: Math.trunc(c.VIS),
-  signatureTimestamp: 19369, // <--- the value we're looking for
+  signatureTimestamp: 19369, // <--- the value you're looking for
   autonavState: MDa(a.player.V())
 };
 ```
 
-After that, update the initial request to `/youtubei/v1/player` so that it includes the `signatureTimestamp` inside the payload. Here's how the request body should look in this case:
+After that, update the original request to the `/youtubei/v1/player` endpoint to include the retrieved timestamp in the body. The final JSON payload should look like this:
 
 ```json
 // POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
@@ -319,8 +321,4 @@ After that, update the initial request to `/youtubei/v1/player` so that it inclu
 }
 ```
 
-This should return a slightly different stream manifest, with all the signatures enciphered using the same algorithm as the one you've extracted from the player source code. Now, you can apply the algorithm to recover the original signature and resolve the correct URL to download the video.
-
-## Muxing adaptive streams into a single file
-
-Earlier in this article I said that adopted formats come as separate audio only and video only streams and while that is very convenient for YouTube it's not so convenient when it comes to downloading videos
+This time, the returned stream descriptors should contain compatible signature ciphers. You can now use the deciphering instructions extracted earlier to resolve the correct stream URLs and download them.
