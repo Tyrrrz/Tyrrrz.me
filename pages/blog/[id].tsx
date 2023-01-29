@@ -30,7 +30,7 @@ const CoverSection: FC<BlogPostPageProps> = ({ post }) => {
 
   return (
     <section
-      className={c('my-4', 'p-4', 'bg-purple-100', 'rounded', 'border', 'border-purple-500')}
+      className={c('mt-4', 'p-4', 'bg-purple-100', 'rounded', 'border', 'border-purple-500')}
     >
       <div className={c('w-fit', 'mx-auto')}>
         <Image src={post.coverUrl} alt="Cover image" priority />
@@ -50,7 +50,7 @@ const ArticleSection: FC<BlogPostPageProps> = ({ post }) => {
   };
 
   return (
-    <section>
+    <section className={c('mt-4')}>
       <article>
         <Markdown
           source={post.source}
@@ -64,7 +64,7 @@ const ArticleSection: FC<BlogPostPageProps> = ({ post }) => {
 
 const SubscribeSection: FC = () => {
   return (
-    <section className={c('p-4', 'border', 'rounded', 'space-y-1')}>
+    <section className={c('mt-4', 'p-4', 'border', 'rounded', 'space-y-1')}>
       <div className={c('font-semibold')}>🔔 Subscribe for more</div>
 
       <div>
@@ -83,7 +83,7 @@ const CommentSection: FC<BlogPostPageProps> = ({ post }) => {
   }
 
   return (
-    <section>
+    <section className={c('mt-4')}>
       <DiscussionEmbed
         shortname={disqusId}
         config={{
@@ -132,7 +132,7 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
 
       <CoverSection post={post} />
 
-      <section className={c('my-4')}>
+      <section className={c('mt-4')}>
         <UkraineAlert />
       </section>
 
