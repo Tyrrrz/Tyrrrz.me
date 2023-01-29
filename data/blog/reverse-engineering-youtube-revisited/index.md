@@ -39,7 +39,7 @@ First thing you'll notice is that this endpoint requires an API key, which is do
 
 The request body itself is a JSON object with two top-level properties: `videoId` and `context`. The former is the 11-character ID of the video you want to retrieve the metadata for, while the latter contains various information that YouTube uses to tailor the response to the client's preferences and capabilities.
 
-In particular, depending on the client you choose to impersonate using the `clientName` and `clientVersion` properties, the response may contain slightly different data, or just fail to resolve altogether for certain videos. This, of course, can be leveraged to your advantage — which is why I specifically used the `ANDROID` client in the example above — but I'll explain that in more detail later on.
+In particular, depending on the client you choose to impersonate using the `clientName` and `clientVersion` properties, the response may contain slightly different data, or just fail to resolve altogether for certain videos. This, of course, can be leveraged to your advantage — which is why I specifically used the `ANDROID` client in the example above, as it's the easiest to work with.
 
 After you receive the response, you should find a JSON object that contains the video metadata, stream descriptors, closed captions, activity tracking URLs, ad placements, post-playback screen elements — basically everything that the client needs in order to show the video to the user. It's a massive blob of data, so to make things simpler I've outlined only the most interesting parts below:
 
@@ -298,7 +298,7 @@ var v = {
 };
 ```
 
-After that, update the original request to the `/youtubei/v1/player` endpoint to include the retrieved timestamp in the body. The final JSON payload should look like this:
+Finally, update the original request to the `/youtubei/v1/player` endpoint to include the retrieved value inside the JSON payload. Specifically, the timestamp should be passed as part of an additional top-level object called `playbackContext`:
 
 ```json
 // POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
@@ -321,4 +321,4 @@ After that, update the original request to the `/youtubei/v1/player` endpoint to
 }
 ```
 
-This time, the returned stream descriptors should contain compatible signature ciphers. You can now use the deciphering instructions extracted earlier to resolve the correct stream URLs and download them.
+With that, the returned stream descriptors should contain compatible signature ciphers, allowing you to correctly reconstruct the URLs using the deciphering instructions extracted earlier.
