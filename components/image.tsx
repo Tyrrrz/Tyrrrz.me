@@ -20,7 +20,7 @@ const Image: FC<ImageProps> = ({ src, alt, width, height, priority }) => {
     <>
       {priority && (
         <Head>
-          <link key={`preload_${src}`} rel="preload" as="image" href={src} />
+          <link key={`preload: ${src}`} rel="preload" as="image" href={src} />
         </Head>
       )}
 
