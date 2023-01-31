@@ -325,7 +325,7 @@ Finally, update the original request to the `/youtubei/v1/player` endpoint to in
 
 With that, the returned stream descriptors should contain compatible signature ciphers, allowing you to correctly reconstruct the URLs using the deciphering instructions extracted earlier.
 
-## Bypassing rate limits
+## Working around rate limiting
 
 One common issue that you'll likely encounter is that certain streams might take an abnormally long time to fully download. This is usually caused by YouTube's _rate limiting_ mechanism, which is designed to prevent excessive bandwidth usage by limiting the rate at which the streams are served to the client.
 
@@ -372,10 +372,8 @@ https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback
   &lsig=AG3C_xAwRgIhAP5rrAq5OoZ0e5bgNZpztkbKGgayb-tAfBbM3Z4VrpDfAiEAkcg66j1nSan1vbvg79sZJkJMMFv1jb2tDR_Z7kS2z9M%3D
 ```
 
-Unfortunately, the `ratebypass` parameter is not always present in the stream URL, and even when it is, it's not always set to `yes`. On top of that, as already mentioned before, you can't simply edit the URL to add the parameter manually, as that that would invalidate the signature and render the link unusable.
+Unfortunately, the `ratebypass` parameter is not always present in the stream URL, and even when it is, it's not guaranteed to be set to `yes`. On top of that, as already mentioned before, you can't simply edit the URL to add the parameter manually, as that would invalidate the signature and render the link unusable.
 
-However, YouTube's rate limiting has one interesting aspect — it only works if the requested stream exceeds a certain size threshold. This means that if you're fetching a small stream — or even a small _portion_ of a larger stream — the data will be served at full speed, without any rate limiting.
+However, YouTube's rate limiting has one interesting aspect: **it only works if the requested stream exceeds a certain size threshold**. This means that if you're fetching a small stream — or even a small _portion_ of a larger stream — the data will be served at full speed, regardless of whether the `ratebypass` parameter is set or not. In testing, I found that the cutoff point seems to be around `10 MB`, with anything larger than that causing the rate limiting to kick in.
 
-You can leverage this behavior to bypass rate limiting by download the stream in small chunks — using the [`range` HTTP header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Range) — and then combining the results into a single file. In my tests, I found that the largest chunk size that doesn't trigger rate limiting appears to be around `10 MB`.
-
-This approach can also be utilized
+Practically speaking, this behavior enables a simple workaround that allows you to bypass rate limits by dividing the stream into smaller chunks and downloading them separately. To do that, you can build up a chain of requests that incrementally target different segments of the stream using the [`Range` HTTP header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Range), and then combine the received content into a single file.
