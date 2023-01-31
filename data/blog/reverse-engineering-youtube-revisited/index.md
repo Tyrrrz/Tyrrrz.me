@@ -384,6 +384,24 @@ As I mentioned earlier, YouTube the highest quality options as video-only and au
 
 ## Summary
 
-Even though YouTube has changed quite a lot of things, downloading videos from the site is still possible and, in many aspects, even easier than before.
+Even though things have changed quite a lot, downloading videos from YouTube is still possible and, in many aspects, easier than before. Instead of `get_video_info` and other endpoints, the entirety of YouTube's inner API is now organized underneath the `/youtubei/` path — with more consistent request contracts and behavior.
 
-If you have any questions or just want to learn, feel free to go through [YoutubeExplode's source code](https://github.com/YoutubeExplode). It's fairly well documented and should be easy to follow.
+While many of the previous workarounds — such as rate bypassing — are still relevant, signature deciphering has become less important because there is now a way to avoid it. Besides that, YouTube has started providing fewer and fewer muxed streams over time, which might indicate their intention to move completely to adaptive formats.
+
+Overall, the required steps to download a YouTube video can be outlined as follows:
+
+1. Fetch the video metadata using the `/youtubei/v1/player` endpoint, impersonating the `ANDROID` client.
+2. If the video is playable:
+   1. Extract the stream descriptors from the response.
+   2. Identify the most optimal stream and download it.
+3. If the video is age-restricted:
+   1. Retrieve a valid player version from `/iframe_api`.
+   2. Download the player source code.
+   3. Reverse-engineer the signature deciphering algorithm.
+   4. Extract the signature timestamp from the source code.
+   5. Fetch the video metadata again, this time impersonating the `TVHTML5_SIMPLY_EMBEDDED_PLAYER` client.
+   6. Extract the stream descriptors from the response.
+   7. Use the deciphering algorithm to recover the signatures and stream URLs.
+   8. Identify the most optimal stream and download it.
+
+If you have any questions or just want a more in-depth look at how all the pieces fit together, feel free to go through [YoutubeExplode's source code](https://github.com/YoutubeExplode). It's fairly well documented and should be a decent reference point for anyone interested in building a similar library or tool.
