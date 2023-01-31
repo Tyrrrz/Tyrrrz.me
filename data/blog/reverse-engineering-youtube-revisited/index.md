@@ -376,6 +376,6 @@ Unfortunately, the `ratebypass` parameter is not always present in the stream UR
 
 However, YouTube's rate limiting has one interesting aspect — it only works if the requested stream exceeds a certain size threshold. This means that if you're fetching a small stream — or even a small _portion_ of a larger stream — the data will be served at full speed, without any rate limiting.
 
-You can leverage this behavior by dividing any given stream into many small chunks and downloading them incrementally.
+You can leverage this behavior to bypass rate limiting by download the stream in small chunks — using the [`range` HTTP header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Range) — and then combining the results into a single file. In my tests, I found that the largest chunk size that doesn't trigger rate limiting appears to be around `10 MB`.
 
-Luckily, YouTube's rate limiting has one interesting behavior, where using the [`range` HTTP header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Range) to fetch a very small chunk of the stream completely disables rate limiting for that fragment. This means that if you divide the stream into many small parts, you can send incremental requests to download the entire video in small segments, without incurring any slowdowns. In my tests, I found that largest chunk size that doesn't trigger rate limiting appears to be around `10 MB`.
+This approach can also be utilized
