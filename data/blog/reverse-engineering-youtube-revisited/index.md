@@ -377,3 +377,13 @@ Unfortunately, the `ratebypass` parameter is not always present in the stream UR
 However, YouTube's rate limiting has one interesting aspect: **it only works if the requested stream exceeds a certain size threshold**. This means that if you're fetching a small stream — or even a small _portion_ of a larger stream — the data will be served at full speed, regardless of whether the `ratebypass` parameter is set or not. In testing, I found that the cutoff point seems to be around `10 MB`, with anything larger than that causing the rate limiting to kick in.
 
 Practically speaking, this behavior enables a simple workaround that allows you to bypass rate limits by dividing the stream into smaller chunks and downloading them separately. To do that, you can build up a chain of requests that incrementally target different segments of the stream using the [`Range` HTTP header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Range), and then combine the received content into a single file.
+
+## Muxing streams locally
+
+As I mentioned earlier, YouTube the highest quality options as video-only and audio-only streams. And while that works out well for YouTube — as it's able to simply play both of them simultaneously — it's not ideal when the intent is to download the video to a single file.
+
+## Summary
+
+Even though YouTube has changed quite a lot of things, downloading videos from the site is still possible and, in many aspects, even easier than before.
+
+If you have any questions or just want to learn, feel free to go through [YoutubeExplode's source code](https://github.com/YoutubeExplode). It's fairly well documented and should be easy to follow.
