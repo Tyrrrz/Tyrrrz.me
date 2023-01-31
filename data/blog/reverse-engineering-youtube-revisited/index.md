@@ -293,7 +293,9 @@ var v = {
   playerHeightPixels: Math.trunc(c.P_H),
   playerWidthPixels: Math.trunc(c.P_W),
   vis: Math.trunc(c.VIS),
-  signatureTimestamp: 19369, // <--- the value you're looking for
+  // The value you're looking for:
+  signatureTimestamp: 19369,
+  // -----------------------------
   autonavState: MDa(a.player.V())
 };
 ```
@@ -325,12 +327,55 @@ With that, the returned stream descriptors should contain compatible signature c
 
 ## Bypassing rate limits
 
-One common issue that you'll likely encounter is that certain streams might take an abnormally long time to fully download. This is usually caused by YouTube's _rate limiting_ mechanism, which is designed to prevent excessive bandwidth usage by limiting the rate at which the stream is served to the client.
+One common issue that you'll likely encounter is that certain streams might take an abnormally long time to fully download. This is usually caused by YouTube's _rate limiting_ mechanism, which is designed to prevent excessive bandwidth usage by limiting the rate at which the streams are served to the client.
 
-It makes sense from a technical perspective — there is no reason for YouTube to transfer the video faster than it is being played, especially if the user decides not to watch it all the way through. However, when the goal is to download the content as quickly as possible, it can be a major obstacle.
+It makes sense from a logical perspective — there is no reason for YouTube to transfer the video faster than it is being played, especially if the user decides not to watch it all the way through. However, when the goal is to download the content as quickly as possible, it can become a major obstacle.
 
-In practice, rate limiting works
+All YouTube streams are rate-limited by default, but depending on thir type and the client you're using, you may find some that are not subject to this measure. In order to identify whether a particular stream is rate-limited, you can check for the `ratebypass` query parameter in the URL — if it's present and set to `yes`, then the rate limiting is disabled for that stream, and you should be able to fetch it at full speed:
 
-All YouTube streams are rate-limited by default, but depending on the stream type and the client you're using, you may find streams that are not subject to this measure. In order to identify whether a particular stream is rate-limited, you can check for the `ratebypass` query parameter in the URL — if it's present and set to `yes`, then the rate limiting is disabled for that stream, and you should be able to download it at full speed.
+```ini
+https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback
+  ?expire=1669027268
+  &ei=ZAF7Y8WaA4i3yQWsxLyYDw
+  &ip=111.111.111.111
+  &id=o-AC63-WVHdIW_Ueyvj6ZZ1eC3oHHyfY14KZOpHNncjXa4
+  &itag=18
+  &source=youtube
+  &requiressl=yes
+  &mh=Qv
+  &mm=31%2C26
+  &mn=sn-3c27sn7d%2Csn-f5f7lnld
+  &ms=au%2Conr
+  &mv=m
+  &mvi=12
+  &pl=24
+  &gcr=ua
+  &initcwndbps=1521250
+  &vprv=1
+  &svpuc=1
+  &xtags=heaudio%3Dtrue
+  &mime=video%2Fmp4
+  &cnr=14
+  # Rate limiting is disabled:
+  &ratebypass=yes
+  # --------------------------
+  &dur=183.994
+  &lmt=1665725827618480
+  &mt=1669005418
+  &fvip=1
+  &fexp=24001373%2C24007246
+  &c=ANDROID
+  &txp=5538434
+  &sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cgcr%2Cvprv%2Csvpuc%2Cxtags%2Cmime%2Ccnr%2Cratebypass%2Cdur%2Clmt
+  &sig=AOq0QJ8wRQIge8aU9csL5Od685kA1to0PB6ggVeuLJjfSfTpZVsgEToCIQDZEk4dQyXJViNJr9EyGUhecGCk2RCFzXIJAZuuId4Bug%3D%3D
+  &lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps
+  &lsig=AG3C_xAwRgIhAP5rrAq5OoZ0e5bgNZpztkbKGgayb-tAfBbM3Z4VrpDfAiEAkcg66j1nSan1vbvg79sZJkJMMFv1jb2tDR_Z7kS2z9M%3D
+```
 
-Unfortunately, the `ratebypass` parameter is not always present in the stream URLs, and even when it is, it's not always set to `yes`. Also, as mentioned before, you can't manually edit the URL to add the parameter, because that would invalidate the signature and render the link unusable.
+Unfortunately, the `ratebypass` parameter is not always present in the stream URL, and even when it is, it's not always set to `yes`. On top of that, as already mentioned before, you can't simply edit the URL to add the parameter manually, as that that would invalidate the signature and render the link unusable.
+
+However, YouTube's rate limiting has one interesting aspect — it only works if the requested stream exceeds a certain size threshold. This means that if you're fetching a small stream — or even a small _portion_ of a larger stream — the data will be served at full speed, without any rate limiting.
+
+You can leverage this behavior by dividing any given stream into many small chunks and downloading them incrementally.
+
+Luckily, YouTube's rate limiting has one interesting behavior, where using the [`range` HTTP header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Range) to fetch a very small chunk of the stream completely disables rate limiting for that fragment. This means that if you divide the stream into many small parts, you can send incremental requests to download the entire video in small segments, without incurring any slowdowns. In my tests, I found that largest chunk size that doesn't trigger rate limiting appears to be around `10 MB`.
