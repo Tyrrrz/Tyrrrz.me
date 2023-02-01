@@ -396,13 +396,7 @@ Muxing can be a computationally expensive task, but you can reduce the overhead 
 ffmpeg -i audio.mp4 -i video.mp4 -c copy output.mp4
 ```
 
-You can also use FFmpeg if you want to convert a stream from one format to another. For example, if you want to download a YouTube video as an `mp3` file, you can use the following command:
-
-```bash
-ffmpeg -i audio.mp4 output.mp3
-```
-
-FFmpeg is a command-line tool
+You can also use FFmpeg to embed subtitles, convert audio-only streams to `mp3` files to add to your music library, trim the video, and more. As a command-line tool, it also lends itself extremely well to automation, making it easy to integrate as part of a larger application.
 
 ## Summary
 
