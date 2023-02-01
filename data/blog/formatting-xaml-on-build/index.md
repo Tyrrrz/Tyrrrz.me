@@ -9,9 +9,9 @@ However, one of the things that made the jump really difficult was the absence o
 
 The problem is that .NET, historically, has been a rather closed ecosystem. If you wanted to extend the development experience, that typically meant installing a custom Visual Studio extension or writing your own. Everything revolved around the same IDE, same workflow, same stack, same set of tools, and there wasn't much of a choice.
 
-With the advent of .NET Core the situation started changing. We are now seeing a mentality shift where everything is evolving towards more modular and portable components, with even .NET SDK itself being shipped as a command line tool. Overall, .NET development experience is starting to resemble that of Node.js, which I personally think is a great thing.
+With the advent of .NET Core the situation started changing. We are now seeing a mentality shift where everything is evolving towards more modular and portable components, with even .NET SDK itself being shipped as a command-line tool. Overall, .NET development experience is starting to resemble that of Node.js, which I personally think is a great thing.
 
-Among other things, .NET Core also introduced the concept of [.NET Core Global Tools](https://aka.ms/global-tools). This feature enables any .NET developer to quickly download, install and run custom command line tools without leaving the terminal.
+Among other things, .NET Core also introduced the concept of [.NET Core Global Tools](https://aka.ms/global-tools). This feature enables any .NET developer to quickly download, install and run custom command-line tools without leaving the terminal.
 
 [Since recently](https://github.com/Xavalon/XamlStyler/issues/218), XAMLStyler is also available as a .NET custom tool, which means you can run it as a CLI instead of relying on the Visual Studio extension. In this article I will show you how I integrated it into my build process, ensuring all XAML files are always properly formatted, regardless of which IDE I'm using.
 
@@ -85,15 +85,15 @@ The release of .NET Core 2.1 introduced us with a feature that lets us use the s
 
 To use XAMLStyler as a global tool, we just need to install it with the following command:
 
-```c
+```bash
 > dotnet tool install XamlStyler.Console --global
 ```
 
 This downloads the [corresponding NuGet package](https://www.nuget.org/packages/XamlStyler.Console), extracts its contents to a shared directory, then puts the executable on the system PATH.
 
-Following that, we can now run `xstyler` from the command line. To process all XAML files in a directory, we can use:
+Following that, we can now run `xstyler` from the command-line. To process all XAML files in a directory, we can use:
 
-```c
+```bash
 > xstyler --directory f:\Projects\Softdev\LightBulb\ --recursive
 
 Processing: f:\Projects\Softdev\LightBulb\LightBulb\App.xaml
@@ -118,13 +118,13 @@ Having to take any additional steps after `git clone` makes the developer experi
 
 With the latest SDK, however, we can now install local tools simply by dropping the `--global` option:
 
-```c
+```bash
 > dotnet tool install XamlStyler.Console
 ```
 
 Note that if we try to run this in our project's repository we will get the following error:
 
-```c
+```bash
 Cannot find a manifest file.
 For a list of locations searched, specify the "-d" option before the tool name.
 If you intended to install a global tool, add `--global` to the command.
@@ -134,13 +134,13 @@ If you would like to create a manifest, use `dotnet new tool-manifest`,
 
 As the message states, in order to install local tools we will first need to create a manifest file in the root of the project repository. We can do this using the suggested command:
 
-```c
+```bash
 > dotnet new tool-manifest
 ```
 
 That creates an empty manifest at `/.config/dotnet-tools.json`. We can now run the original command again, which will add a tool entry to this manifest file:
 
-```c
+```bash
 > dotnet tool install XamlStyler.Console
 
 You can invoke the tool from this directory using the following commands:
@@ -152,7 +152,7 @@ Entry is added to the manifest file f:\Projects\Softdev\LightBulb\.config\dotnet
 
 As long as the manifest file is tracked by git, any developer who clones the repository can run a simple command to download and install all tools listed in the manifest file:
 
-```c
+```bash
 > dotnet tool restore
 ```
 
@@ -198,6 +198,6 @@ Now, when we run `dotnet build` on the project, it will also execute XAMLStyler 
 
 XAMLStyler is an awesome tool that will make you forget about formatting in your XAML files once and for all. By integrating it into the build process, we ensure that all XAML files will adhere to a consistent and clean format, no matter who's working on it and where.
 
-With .NET Core 3.0 we can now install locally scoped command line tools. This is better than the previously available global tool concept because it's more portable. By using local tools we can also easily integrate custom workflows into our project.
+With .NET Core 3.0 we can now install locally scoped command-line tools. This is better than the previously available global tool concept because it's more portable. By using local tools we can also easily integrate custom workflows into our project.
 
 If you're interested to learn more about .NET Core global and local tools, check out [this article by Andrew Lock](https://andrewlock.net/new-in-net-core-3-local-tools) and [another one by Stuart Lang](https://stu.dev/dotnet-core-3-local-tools). There's also a [curated list of .NET custom tools](https://github.com/natemcmaster/dotnet-tools) maintained by Nate McMaster.

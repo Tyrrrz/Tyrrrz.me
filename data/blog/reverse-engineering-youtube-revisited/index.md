@@ -380,9 +380,29 @@ Practically speaking, this behavior enables a simple workaround that allows you 
 
 ## Muxing streams locally
 
-YouTube provides a selection of different streams for each video, but you will find that the highest quality options are always served in the form of adaptive audio-only and video-only streams. And while that works out well for playback — as you can simply play both streams simultaneously — it's not ideal when the intent is to download the video as a single file.
+YouTube offers a selection of different streams for each video, but you will find that the highest quality options are typically only served as adaptive audio-only and video-only streams. And while that works out well for playback — as you can simply play both of them simultaneously — it's not ideal when the intent is to download the video as a single file.
 
-Muxed streams are limited to 720p, so if you want to download the video in the highest available quality, then the
+Ever since `get_video_info` was removed, YouTube has been providing fewer muxed streams for most videos, usually limiting them to one or two options at quality not higher than `360p`. That means if you want to retrieve content as close to the source material as possible, you will have to rely on adaptive streams and mux them yourself.
+
+Fortunately, this is fairly easy to do using [FFmpeg](https://ffmpeg.org), which is an open-source tool for processing multimedia files. For example, assuming you have downloaded the two streams as `audio.mp4` and `video.webm`, you can combine them together using the following command:
+
+```bash
+ffmpeg -i audio.mp4 -i video.webm output.mp4
+```
+
+Muxing can be a computationally expensive task, but you can reduce the overhead significantly by making sure that both the input and output files use the same format. Doing that allows you to skip the stream transcoding step, which is the most time-consuming part of the process. YouTube provides all its streams in `webm` and `mp4` containers, so you can stick to either one of them and use `-c copy` to instruct FFmpeg to simply combine the streams in the output container without any transcoding:
+
+```bash
+ffmpeg -i audio.mp4 -i video.mp4 -c copy output.mp4
+```
+
+You can also use FFmpeg if you want to convert a stream from one format to another. For example, if you want to download a YouTube video as an `mp3` file, you can use the following command:
+
+```bash
+ffmpeg -i audio.mp4 output.mp3
+```
+
+FFmpeg is a command-line tool
 
 ## Summary
 
@@ -395,7 +415,7 @@ Overall, the required steps to download a YouTube video can be outlined as follo
 1. Fetch the video metadata using the `/youtubei/v1/player` endpoint, impersonating the `ANDROID` client.
 2. If the video is playable:
    1. Extract the stream descriptors from the response.
-   2. Identify the most optimal stream and download it.
+   2. Identify the most optimal stream and retrieve its URL.
 3. If the video is age-restricted:
    1. Retrieve a valid player version from `/iframe_api`.
    2. Download the player source code.
@@ -404,6 +424,8 @@ Overall, the required steps to download a YouTube video can be outlined as follo
    5. Fetch the video metadata again, this time impersonating the `TVHTML5_SIMPLY_EMBEDDED_PLAYER` client.
    6. Extract the stream descriptors from the response.
    7. Use the deciphering algorithm to recover the signatures and stream URLs.
-   8. Identify the most optimal stream and download it.
+   8. Identify the most optimal stream and retrieve its URL.
+4. Download the stream in chunks using the `Range` HTTP header.
+5. If needed, use FFmpeg to mux multiple streams into a single file.
 
-If you have any questions or just want a more in-depth look at how all the pieces fit together, feel free to go through [YoutubeExplode's source code on GitHub](https://github.com/Tyrrrz/YoutubeExplode). It's fairly well documented and should be a decent reference point for anyone interested in building their own YouTube downloader.
+If you have any questions or just want a more in-depth look at how all the pieces fit together, feel free to go through [YoutubeExplode's source code on GitHub](https://github.com/Tyrrrz/YoutubeExplode). It's fairly well-documented and should be a decent reference point for anyone interested in building their own YouTube downloader.

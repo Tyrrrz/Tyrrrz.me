@@ -381,7 +381,7 @@ These tests make sure that the fake implementation we've built actually works li
 
 ## Summary
 
-Due to the popularity of mocking frameworks and the convenience they provide, many developers find that there is very little incentive to write test doubles by hand. However, relying on dynamically-generated mocks can be dangerous, as it typically leads to implementation-aware testing.
+Due to the popularity of mocking frameworks and the convenience they provide, many developers find that there is very little incentive to write test doubles by hand. However, relying on dynamically generated mocks can be dangerous, as it typically leads to implementation-aware testing.
 
 In many cases, it may be a better idea to use fakes instead. These are test doubles that represent complete but simplified implementations of their real-life counterparts, rather than just a set of prearranged responses.
 

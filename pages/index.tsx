@@ -47,7 +47,7 @@ const HomePage: NextPage = () => {
             I&apos;m also an active member of the developer community, a{' '}
             <Link href={microsoftMvpUrl}>Microsoft MVP</Link> and a{' '}
             <Link href={githubStarUrl}>GitHub Star</Link> — I spend most of my free time maintaining
-            a few popular <Link href="/projects">open source projects</Link>, speaking at various{' '}
+            a few popular <Link href="/projects">open-source projects</Link>, speaking at various{' '}
             <Link href="/speaking">technical conferences</Link>, or sharing knowledge and experience
             on <Link href="/blog">my blog</Link>.
           </Paragraph>

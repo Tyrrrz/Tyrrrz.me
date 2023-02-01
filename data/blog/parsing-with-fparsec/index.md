@@ -753,6 +753,6 @@ FParsec is an incredibly robust framework for building parsers with the combinat
 
 Should you ever get stuck, I recommend reading the [API reference](https://quanttec.com/fparsec/reference/parser-overview.html) and the [user guide](https://quanttec.com/fparsec/users-guide).
 
-In case you're curious to see some other examples of FParsec in action, check out [the official samples](https://github.com/stephan-tolksdorf/fparsec/tree/master/Samples). There are also some open source projects that depend on this library, like [GraphQL.NET](https://github.com/chkimes/graphql-net), [QSharp Compiler](https://github.com/microsoft/qsharp-compiler), and [LtGt](https://github.com/Tyrrrz/LtGt).
+In case you're curious to see some other examples of FParsec in action, check out [the official samples](https://github.com/stephan-tolksdorf/fparsec/tree/master/Samples). There are also some open-source projects that depend on this library, like [GraphQL.NET](https://github.com/chkimes/graphql-net), [QSharp Compiler](https://github.com/microsoft/qsharp-compiler), and [LtGt](https://github.com/Tyrrrz/LtGt).
 
 Other articles about FParsec: [by Jake Witcher](https://codefornerds.com/better-parsing-with-fsharp-and-fparsec-getting-started), [by Phillip Trelford](https://trelford.com/blog/post/FParsec.aspx), [by Tamizh Vendan](https://blog.tamizhvendan.in/blog/2015/01/18/step-5-advanced-search-dsl-using-fparsec).

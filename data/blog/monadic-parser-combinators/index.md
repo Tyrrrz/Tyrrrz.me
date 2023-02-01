@@ -66,7 +66,7 @@ A formal language itself builds mainly upon the concept of grammar, which is a s
 
 Based on the complexity of these rules, grammars are separated into different types according to the [Chomsky hierarchy](https://en.wikipedia.org/wiki/Chomsky_hierarchy). At the lowest level you will find the two most common grammar types, the _regular_ and _context-free_ grammars.
 
-```r
+```csharp
 +---------------------------------+
 |                                 |
 |      CONTEXT-FREE GRAMMARS      |

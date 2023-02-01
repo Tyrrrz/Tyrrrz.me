@@ -342,7 +342,7 @@ public partial class HtmlReportRenderer
 
 We don't always need a special case to decide to use partial classes. In fact, sometimes it just feels right to split parts of our code into some logical blocks.
 
-In this example we have a command line application that formats files. Both the options and the command behavior are defined as part of a single class, which may be a little confusing.
+In this example we have a command-line application that formats files. Both the options and the command behavior are defined as part of a single class, which may be a little confusing.
 
 By using partial classes, we can split and group different parts of the class like so:
 
