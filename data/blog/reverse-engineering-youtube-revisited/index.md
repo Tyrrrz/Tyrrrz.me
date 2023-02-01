@@ -331,7 +331,7 @@ One common issue that you'll likely encounter is that certain streams might take
 
 It makes sense from a logical perspective — there is no reason for YouTube to transfer the video faster than it is being played, especially if the user decides not to watch it all the way through. However, when the goal is to download the content as quickly as possible, it can become a major obstacle.
 
-All YouTube streams are rate-limited by default, but depending on thir type and the client you're using, you may find some that are not subject to this measure. In order to identify whether a particular stream is rate-limited, you can check for the `ratebypass` query parameter in the URL — if it's present and set to `yes`, then the rate limiting is disabled for that stream, and you should be able to fetch it at full speed:
+All YouTube streams are rate-limited by default, but depending on their type and the client you're impersonating, you may find some that are not subject to this measure. In order to identify whether a particular stream is rate-limited, you can check for the `ratebypass` query parameter in the URL — if it's present and set to `yes`, then the rate limiting is disabled for that stream, and you should be able to fetch it at full speed:
 
 ```ini
 https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback
@@ -380,13 +380,15 @@ Practically speaking, this behavior enables a simple workaround that allows you 
 
 ## Muxing streams locally
 
-As I mentioned earlier, YouTube the highest quality options as video-only and audio-only streams. And while that works out well for YouTube — as it's able to simply play both of them simultaneously — it's not ideal when the intent is to download the video to a single file.
+YouTube provides a selection of different streams for each video, but you will find that the highest quality options are always served in the form of adaptive audio-only and video-only streams. And while that works out well for playback — as you can simply play both streams simultaneously — it's not ideal when the intent is to download the video as a single file.
+
+Muxed streams are limited to 720p, so if you want to download the video in the highest available quality, then the
 
 ## Summary
 
 Even though things have changed quite a lot, downloading videos from YouTube is still possible and, in many aspects, easier than before. Instead of `get_video_info` and other endpoints, the entirety of YouTube's inner API is now organized underneath the `/youtubei/` path — with more consistent request contracts and behavior.
 
-While many of the previous workarounds — such as rate bypassing — are still relevant, signature deciphering has become less important because there is now a way to avoid it. Besides that, YouTube has started providing fewer and fewer muxed streams over time, which might indicate their intention to move completely to adaptive formats.
+While many of the previous workarounds — such as rate bypassing — are still relevant, signature deciphering has become less important as there is now a consistent way to avoid it. Besides that, YouTube has started providing fewer muxed streams for most videos, which might indicate their intention to move over completely to adaptive formats.
 
 Overall, the required steps to download a YouTube video can be outlined as follows:
 
@@ -404,4 +406,4 @@ Overall, the required steps to download a YouTube video can be outlined as follo
    7. Use the deciphering algorithm to recover the signatures and stream URLs.
    8. Identify the most optimal stream and download it.
 
-If you have any questions or just want a more in-depth look at how all the pieces fit together, feel free to go through [YoutubeExplode's source code](https://github.com/YoutubeExplode). It's fairly well documented and should be a decent reference point for anyone interested in building a similar library or tool.
+If you have any questions or just want a more in-depth look at how all the pieces fit together, feel free to go through [YoutubeExplode's source code on GitHub](https://github.com/Tyrrrz/YoutubeExplode). It's fairly well documented and should be a decent reference point for anyone interested in building their own YouTube downloader.
