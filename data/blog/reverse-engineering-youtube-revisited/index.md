@@ -380,29 +380,43 @@ Practically speaking, this behavior enables a simple workaround that allows you 
 
 ## Muxing streams locally
 
-YouTube offers a selection of different streams for each video, but you will find that the highest quality options are typically only served as adaptive audio-only and video-only streams. And while that works out well for playback — as you can simply play both of them simultaneously — it's not ideal when the intent is to download the video as a single file.
+YouTube offers a selection of different formats for each video, but you will find that the high-definition options are served exclusively through adaptive audio-only and video-only streams. And while that works out well for playback — as you can simply play both of them simultaneously — it's not ideal when the intent is to download the video as a single file.
 
-Ever since `get_video_info` was removed, YouTube has been providing fewer muxed streams for most videos, usually limiting them to one or two options at quality not higher than `360p`. That means if you want to retrieve content as close to the source material as possible, you will have to rely on adaptive streams and mux them yourself.
+Ever since `get_video_info` was removed, YouTube has been providing fewer muxed streams for most videos, usually limiting them to low-end options such as `360p` and `720p`. That means if you want to retrieve content as close to the original quality as possible, you will definitely have to rely on adaptive streams and mux them yourself.
 
-Fortunately, this is fairly easy to do using [FFmpeg](https://ffmpeg.org), which is an open-source tool for processing multimedia files. For example, assuming you have downloaded the two streams as `audio.mp4` and `video.webm`, you can combine them together using the following command:
+Fortunately, this is fairly easy to do using [FFmpeg](https://ffmpeg.org), which is an open-source tool for processing multimedia files. For example, assuming you have downloaded the two streams as `audio.mp4` and `video.webm`, you can combine them together in a file named `output.mov` using the following command:
 
 ```bash
-ffmpeg -i audio.mp4 -i video.webm output.mp4
+ffmpeg -i audio.mp4 -i video.webm output.mov
 ```
 
-Muxing can be a computationally expensive task, but you can reduce the overhead significantly by making sure that both the input and output files use the same format. Doing that allows you to skip the stream transcoding step, which is the most time-consuming part of the process. YouTube provides all its streams in `webm` and `mp4` containers, so you can stick to either one of them and use `-c copy` to instruct FFmpeg to simply combine the streams in the output container without any transcoding:
+Keep in mind that muxing can be a computationally expensive task, especially if it involves transcoding between different formats. Whenever possible, you should try to use an output format that is compatible with the provided input streams, as that will eliminate the need to convert data and make the process much faster.
+
+Most YouTube streams are stored in `webm` and `mp4` containers, so it's recommended to stick to one of those for the output file as well. In order to actually disable transcoding, you also need to add the `-c copy` flag to the command, which tells FFmpeg to simply copy the content from the input streams without any modifications:
 
 ```bash
 ffmpeg -i audio.mp4 -i video.mp4 -c copy output.mp4
 ```
 
-You can also use FFmpeg to embed subtitles, convert audio-only streams to `mp3` files to add to your music library, trim the video, and more. As a command-line tool, it also lends itself extremely well to automation, making it easy to integrate as part of a larger application.
+However, if you plan to download YouTube videos for archival purposes, you will probably want to prioritize reducing the output file size over the execution time. In that case, you can combine the streams in an `mp4` container using the [`H.265`](https://trac.ffmpeg.org/wiki/Encode/H.265) codec, which should result in much more efficient compression rate:
+
+```bash
+ffmpeg -i audio.mp4 -i video.mp4 -c:a aac -c:v libx265 output.mp4
+```
+
+Using the above command, I was able to download and mux a 4K video, while reducing the file size by more than 50% compared to the streams that YouTube provided. If you want to save even more space, you can try using a slower preset with the `-preset` flag to further improve the compression efficiency, at the cost of a much longer conversion process:
+
+```bash
+ffmpeg -i audio.mp4 -i video.mp4 -c:a aac -c:v libx265 -preset slow output.mp4
+```
+
+FFmpeg is also not limited to just muxing — it can be used to trim or resize videos, inject subtitles, and perform a variety of other operations that can be useful when working with YouTube content. As a command-line tool, it lends itself extremely well to automation, making it easy to integrate as part of a larger application.
 
 ## Summary
 
-Even though things have changed quite a lot, downloading videos from YouTube is still possible and, in many aspects, easier than before. Instead of `get_video_info` and other endpoints, the entirety of YouTube's inner API is now organized underneath the `/youtubei/` path — with more consistent request contracts and behavior.
+Even though lot of things have changed, downloading videos from YouTube is still possible and, in many ways, easier than before. Instead of `get_video_info` and other endpoints, the entirety of YouTube's inner API is now organized underneath the `/youtubei/` path — with more consistent request contracts and behavior.
 
-While many of the previous workarounds — such as rate bypassing — are still relevant, signature deciphering has become less important as there is now a consistent way to avoid it. Besides that, YouTube has started providing fewer muxed streams for most videos, which might indicate their intention to move over completely to adaptive formats.
+While many of the previous workarounds — such as rate bypassing — are still relevant, signature deciphering has become less of an important aspect as there is now a reliable way to avoid it. Besides that, YouTube has started providing fewer muxed streams for most videos, which might indicate their intention to move over completely to adaptive formats.
 
 Overall, the required steps to download a YouTube video can be outlined as follows:
 
@@ -423,3 +437,7 @@ Overall, the required steps to download a YouTube video can be outlined as follo
 5. If needed, use FFmpeg to mux multiple streams into a single file.
 
 If you have any questions or just want a more in-depth look at how all the pieces fit together, feel free to go through [YoutubeExplode's source code on GitHub](https://github.com/Tyrrrz/YoutubeExplode). It's fairly well-documented and should be a decent reference point for anyone interested in building their own YouTube downloader.
+
+```
+
+```
