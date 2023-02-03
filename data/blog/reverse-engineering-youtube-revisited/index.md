@@ -5,7 +5,7 @@ date: '2023-02-15'
 
 Back in 2017 I wrote [an article](/blog/reverse-engineering-youtube) in which I attempted to explain how YouTube works under the hood, how it serves streams to the client, and also how you can exploit that knowledge to download videos from the site. The primary goal of that write-up was to share some of the things I learned while working on [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) — an open-source library that provides a structured abstraction layer over YouTube's internal API.
 
-There is one thing that developers like more than building things — and that is breaking things built by other people. So, naturally, my article attracted quite a bit of attention and still remains one of the most popular posts on this blog. Either way, I had lots of fun doing the research, and I'm glad that it was also useful to other people.
+There is one thing that developers like more than building things — and that is breaking things built by other people. So, naturally, my article attracted quite a bit of attention and remains one of the most popular posts on this blog to this day. Either way, I had lots of fun doing the research, and I'm glad that it was also useful to other people.
 
 However, many things have changed in the five years since the article was published: YouTube has evolved as a platform, went through multiple UI redesigns, and completely overhauled its frontend codebase. Most of the internal endpoints that were reverse-engineered in the early days have been gradually getting removed altogether. In fact, nearly everything I wrote in the original post has become obsolete and now only serves as a historical reference.
 
@@ -15,7 +15,7 @@ In this article, I'll cover the current state of YouTube's internal API, highlig
 
 ## Retrieving video metadata and media streams
 
-If you've worked with YouTube in the past, you'll probably remember `get_video_info`. This internal API controller was used throughout YouTube's client code to retrieve video metadata, available streams, and everything else the player needed to render it. The origin of this endpoint traces back to the Flash Player days of YouTube, and it was still available as late as July 2021, before it was finally removed.
+If you've worked with YouTube in the past, you'll probably remember `get_video_info`. This internal API controller was used throughout YouTube's client code to retrieve video metadata, available streams, and everything else the player needed to render it. The origin of this endpoint traces back to the Flash Player days of YouTube, and it was still accessible until as late as July 2021, before it was finally removed.
 
 Besides `get_video_info`, YouTube has also dropped many other endpoints, such as `get_video_metadata` ([in November 2017](https://github.com/Tyrrrz/YoutubeExplode/issues/66)) and `list_ajax` ([in February 2021](https://github.com/Tyrrrz/YoutubeExplode/issues/501)), as part of a larger effort to establish a more organized API structure. Now, instead of having a bunch of randomly scattered endpoints with unpredictable formats and usage patterns, YouTube's internal API is comprised out of a coherent set of routes nested underneath the `/youtubei/` path.
 
@@ -183,7 +183,7 @@ While it is possible to simulate the same flow programmatically — by authentic
 
 The main difference from the `ANDROID` client is that `TVHTML5_SIMPLY_EMBEDDED_PLAYER` also supports a `thirdParty` object that contains the URL of the page where the video is supposedly embedded. While it's not strictly required to include this parameter, specifying `https://www.youtube.com` allows the request to succeed even on videos that prohibit embedding on third-party websites.
 
-One significant drawback of impersonating this client, however, is that it does not represent an installable app like `ANDROID`, but a JavaScript-based player that runs in the browser. This type of client is susceptible to an additional security measure used by YouTube, that results in the URLs inside the stream metadata being obfuscated. Here is how an individual stream descriptor looks in that case:
+One significant drawback of impersonating this client, however, is that it does not represent an installable app like `ANDROID`, but a JavaScript-based player that runs in the browser. This type of client is susceptible to an additional security measure used by YouTube that results in the URLs inside the stream metadata being obfuscated. Here is how an individual stream descriptor looks in that case:
 
 ```json
 {
@@ -390,7 +390,7 @@ Fortunately, this is fairly easy to do using [FFmpeg](https://ffmpeg.org), which
 ffmpeg -i audio.mp4 -i video.webm output.mov
 ```
 
-Keep in mind that muxing can be a computationally expensive task, especially if it involves transcoding between different formats. Whenever possible, you should try using an output container that is directly compatible with the specified input streams, as that will eliminate the need to convert data and make the process much faster.
+Keep in mind that muxing can be a computationally expensive task, especially if it involves transcoding between different formats. Whenever possible, you should try using an output container that is directly compatible with the specified input streams, as that will eliminate the need to convert data, making the process much faster.
 
 Most YouTube streams are provided in `webm` and `mp4` formats, so if you use either of them across all inputs and outputs, you should be able to mux the streams without transcoding. To do that, add the `-c copy` flag to the command, which tells FFmpeg to simply copy the content from the input streams to the output file:
 
@@ -414,7 +414,7 @@ Overall, FFmpeg is a very powerful tool, and it's not limited to just muxing —
 
 ## Summary
 
-Even though a lot of things have changed, downloading videos from YouTube is still possible and, in some ways, easier than before. Instead of `get_video_info`, you can now retrieve metadata and stream manifests using the `/youtubei/v1/player` endpoint, which is part of YouTube's new internal API.
+Even though many things have changed, downloading videos from YouTube is still possible and, in some ways, easier than before. Instead of `get_video_info`, you can now retrieve metadata and stream manifests using the `/youtubei/v1/player` endpoint, which is part of YouTube's new internal API.
 
 The process of identifying and resolving streams is mostly the same as before, and workarounds such as rate bypassing are still relevant. However, signature deciphering has become less of a concern, because the vast majority of videos are now playable without it.
 
