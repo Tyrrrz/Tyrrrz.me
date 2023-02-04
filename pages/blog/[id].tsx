@@ -1,5 +1,5 @@
+import Giscus from '@giscus/react';
 import c from 'classnames';
-import { DiscussionEmbed } from 'disqus-react';
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import { FC } from 'react';
 import { FiCalendar, FiClock } from 'react-icons/fi';
@@ -11,7 +11,6 @@ import Markdown from '~/components/markdown';
 import Meta from '~/components/meta';
 import UkraineAlert from '~/components/ukraineAlert';
 import { BlogPost, loadBlogPost, loadBlogPostRefs, publishBlogPostAssets } from '~/data/blog';
-import { getDisqusId, getSiteUrl } from '~/utils/env';
 import { deleteUndefined } from '~/utils/object';
 import { isAbsoluteUrl } from '~/utils/url';
 
@@ -77,21 +76,22 @@ const SubscribeSection: FC = () => {
 };
 
 const CommentSection: FC<BlogPostPageProps> = ({ post }) => {
-  const disqusId = getDisqusId();
-  if (!disqusId) {
-    return null;
-  }
-
   return (
     <section className={c('mt-4')}>
-      <DiscussionEmbed
-        shortname={disqusId}
-        config={{
-          identifier: `Blog/${post.id}`,
-          url: getSiteUrl(`/blog/${post.id}`),
-          title: post.title,
-          language: 'en'
-        }}
+      <Giscus
+        repo="Tyrrrz/Tyrrrzme"
+        repoId="MDEwOlJlcG9zaXRvcnkyMDY0MDIxMDc="
+        category="Blog"
+        categoryId="DIC_kwDODE1yO84CT-_a"
+        mapping="specific"
+        strict="1"
+        term={post.title}
+        reactionsEnabled="1"
+        emitMetadata="0"
+        inputPosition="top"
+        theme="light"
+        lang="en"
+        loading="lazy"
       />
     </section>
   );

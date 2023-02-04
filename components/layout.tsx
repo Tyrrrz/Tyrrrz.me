@@ -1,12 +1,11 @@
+import { Analytics } from '@vercel/analytics/react';
 import c from 'classnames';
 import { useRouter } from 'next/router';
 import { FC, PropsWithChildren, useEffect, useMemo, useState } from 'react';
 import FadeIn from 'react-fade-in';
 import { FiMenu } from 'react-icons/fi';
-import GoogleAnalytics from '~/components/googleAnalytics';
 import Link from '~/components/link';
 import Meta from '~/components/meta';
-import VercelAnalytics from '~/components/vercelAnalytics';
 import useDebounce from '~/hooks/useDebounce';
 import useRouterStatus from '~/hooks/useRouterStatus';
 
@@ -174,8 +173,7 @@ const Layout: FC<LayoutProps> = ({ children }) => {
   return (
     <>
       <Meta />
-      <GoogleAnalytics />
-      <VercelAnalytics />
+      <Analytics />
 
       <Loader />
 
