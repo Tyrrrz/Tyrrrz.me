@@ -34,7 +34,7 @@ var result = RunCommand(
 );
 ```
 
-In this snippet, we are calling the `RunCommand` method to spawn a child process and block until it completes. Relevant settings, such as command line arguments, working directory, and environment variables are specified through the input parameters.
+In this snippet, we are calling the `RunCommand` method to spawn a child process and block until it completes. Relevant settings, such as command-line arguments, working directory, and environment variables are specified through the input parameters.
 
 Although completely functional, the method invocation expression above is not very human-readable. At a glance, it's hard to even tell what each of the parameters does without relying on code comments.
 

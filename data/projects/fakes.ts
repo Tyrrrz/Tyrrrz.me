@@ -23,7 +23,7 @@ const fakes: Project[] = [
     name: 'CliWrap',
     url: 'https://github.com/Tyrrrz/CliWrap',
     archived: false,
-    description: 'Library for running command line processes',
+    description: 'Library for running command-line processes',
     stars: 2066,
     downloads: 2410396,
     language: 'C#'
@@ -50,7 +50,7 @@ const fakes: Project[] = [
     name: 'CliFx',
     url: 'https://github.com/Tyrrrz/CliFx',
     archived: false,
-    description: 'Declarative framework for building command line interfaces',
+    description: 'Declarative framework for building command-line interfaces',
     stars: 1181,
     downloads: 309069,
     language: 'C#'

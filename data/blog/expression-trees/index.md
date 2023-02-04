@@ -163,7 +163,7 @@ var greetingForJohn = getGreeting("John");
 
 However, if we try to run this, we will get an error:
 
-```ini
+```
 The binary operator Add is not defined for the types 'System.String' and 'System.String'.
 ```
 
@@ -457,13 +457,13 @@ public class Benchmarks
 }
 ```
 
-```r
-|                Method |       Mean |     Error |    StdDev | Ratio |
-|---------------------- |-----------:|----------:|----------:|------:|
-|            Reflection | 192.975 ns | 1.6802 ns | 1.4895 ns |  1.00 |
-|   Reflection (cached) | 123.762 ns | 1.1063 ns | 1.0349 ns |  0.64 |
+```md
+| Method                |       Mean |     Error |    StdDev | Ratio |
+| --------------------- | ---------: | --------: | --------: | ----: |
+| Reflection            | 192.975 ns | 1.6802 ns | 1.4895 ns |  1.00 |
+| Reflection (cached)   | 123.762 ns | 1.1063 ns | 1.0349 ns |  0.64 |
 | Reflection (delegate) |   6.419 ns | 0.0646 ns | 0.0605 ns |  0.03 |
-|           Expressions |   5.383 ns | 0.0433 ns | 0.0383 ns |  0.03 |
+| Expressions           |   5.383 ns | 0.0433 ns | 0.0383 ns |  0.03 |
 ```
 
 As you can see, compiled expressions outperform reflection across the board, even though the approach with `CreateDelegate` comes really close. Note however that while the execution times are similar, `CreateDelegate` is more limited than compiled expressions — for example, it cannot be used to call constructor methods.
@@ -603,11 +603,11 @@ public class Benchmarks
 }
 ```
 
-```r
-|      Method |     x |       Mean |     Error |    StdDev | Ratio | RatioSD |
-|------------ |------ |-----------:|----------:|----------:|------:|--------:|
-|      Static | 13.37 |  0.6077 ns | 0.0176 ns | 0.0147 ns |  1.00 |    0.00 |
-|     Dynamic | 13.37 | 19.3267 ns | 0.1512 ns | 0.1340 ns | 31.82 |    0.78 |
+```md
+| Method      | x     |       Mean |     Error |    StdDev | Ratio | RatioSD |
+| ----------- | ----- | ---------: | --------: | --------: | ----: | ------: |
+| Static      | 13.37 |  0.6077 ns | 0.0176 ns | 0.0147 ns |  1.00 |    0.00 |
+| Dynamic     | 13.37 | 19.3267 ns | 0.1512 ns | 0.1340 ns | 31.82 |    0.78 |
 | Expressions | 13.37 |  1.9510 ns | 0.0163 ns | 0.0145 ns |  3.21 |    0.08 |
 ```
 
@@ -784,14 +784,14 @@ public class Benchmarks
 }
 ```
 
-```r
-|              Method | Count |      Mean |     Error |    StdDev | Ratio |
-|-------------------- |------ |----------:|----------:|----------:|------:|
-| Standard dictionary |    10 | 24.995 ns | 0.1821 ns | 0.1704 ns |  1.00 |
-| Compiled dictionary |    10 |  9.366 ns | 0.0511 ns | 0.0478 ns |  0.37 |
+```md
+| Method              | Count |      Mean |     Error |    StdDev | Ratio |
+| ------------------- | ----- | --------: | --------: | --------: | ----: |
+| Standard dictionary | 10    | 24.995 ns | 0.1821 ns | 0.1704 ns |  1.00 |
+| Compiled dictionary | 10    |  9.366 ns | 0.0511 ns | 0.0478 ns |  0.37 |
 |                     |       |           |           |           |       |
-| Standard dictionary |  1000 | 25.105 ns | 0.0665 ns | 0.0622 ns |  1.00 |
-| Compiled dictionary |  1000 | 14.819 ns | 0.1138 ns | 0.1065 ns |  0.59 |
+| Standard dictionary | 1000  | 25.105 ns | 0.0665 ns | 0.0622 ns |  1.00 |
+| Compiled dictionary | 1000  | 14.819 ns | 0.1138 ns | 0.1065 ns |  0.59 |
 |                     |       |           |           |           |       |
 | Standard dictionary | 10000 | 29.047 ns | 0.1201 ns | 0.1123 ns |  1.00 |
 | Compiled dictionary | 10000 | 17.903 ns | 0.0635 ns | 0.0530 ns |  0.62 |
@@ -872,10 +872,10 @@ public class Benchmarks
 }
 ```
 
-```r
-|         Method |      Mean |     Error |    StdDev | Ratio | Allocated |
-|--------------- |----------:|----------:|----------:|------:|----------:|
-|        Compile | 38.435 us | 0.2131 us | 0.1889 us |  1.00 |   3.53 KB |
+```md
+| Method         |      Mean |     Error |    StdDev | Ratio | Allocated |
+| -------------- | --------: | --------: | --------: | ----: | --------: |
+| Compile        | 38.435 us | 0.2131 us | 0.1889 us |  1.00 |   3.53 KB |
 | Compile (fast) |  4.497 us | 0.0662 us | 0.0619 us |  0.12 |   1.21 KB |
 ```
 
@@ -1109,7 +1109,7 @@ public void IntTryParse_Test()
 
 By doing that, the errors produced by failed assertions become more descriptive. This makes it easier to understand what went wrong without having to look inside the test implementation:
 
-```ini
+```yml
 X IntTryParse_Test [60ms]
   Error Message:
     Parsed value is incorrect
@@ -1166,7 +1166,7 @@ public void IntTryParse_Test()
 
 Now, when this test fails we will instead get the following error message:
 
-```ini
+```yml
 X IntTryParse_Test [99ms]
   Error Message:
     Assert.That(value, Is.EqualTo(124))

@@ -23,7 +23,7 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
         <Heading>Projects</Heading>
 
         <Paragraph>
-          These are the open source projects that I&apos;ve built. Most of these started out of
+          These are the open-source projects that I&apos;ve built. Most of these started out of
           personal necessity, but over time evolved into popular tools used by thousands of people
           around the world. If you want to support the development of my projects, please consider{' '}
           <Link href="/donate">donating</Link>.

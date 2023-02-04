@@ -3,7 +3,7 @@ title: 'Parsing in F# with FParsec'
 date: '2020-01-04'
 ---
 
-Two months ago I wrote an article about [monadic parser combinators in C#](/blog/monadic-parser-combinators) and how you can use this approach to express complex recursive grammar. To extend this topic a bit, I also wanted to show how the same approach can be applied in a functional-first language such as F#.
+Two months ago I wrote an article about [Monadic Parser Combinators in C#](/blog/monadic-parser-combinators) and how you can use this approach to express complex recursive grammar. To extend this topic a bit, I also wanted to show how the same approach can be applied in a functional-first language such as F#.
 
 FParsec may not be the only, but is definitely the most popular F# framework for building parsers. Designed as a clone to Haskell's [Parsec](https://github.com/haskell/parsec), with which it shares a very similar API, this library is focused on high throughput and human-readable error messages.
 
@@ -753,6 +753,6 @@ FParsec is an incredibly robust framework for building parsers with the combinat
 
 Should you ever get stuck, I recommend reading the [API reference](https://quanttec.com/fparsec/reference/parser-overview.html) and the [user guide](https://quanttec.com/fparsec/users-guide).
 
-In case you're curious to see some other examples of FParsec in action, check out [the official samples](https://github.com/stephan-tolksdorf/fparsec/tree/master/Samples). There are also some open source projects that depend on this library, like [GraphQL.NET](https://github.com/chkimes/graphql-net), [QSharp Compiler](https://github.com/microsoft/qsharp-compiler), and [LtGt](https://github.com/Tyrrrz/LtGt).
+In case you're curious to see some other examples of FParsec in action, check out [the official samples](https://github.com/stephan-tolksdorf/fparsec/tree/master/Samples). There are also some open-source projects that depend on this library, like [GraphQL.NET](https://github.com/chkimes/graphql-net), [QSharp Compiler](https://github.com/microsoft/qsharp-compiler), and [LtGt](https://github.com/Tyrrrz/LtGt).
 
 Other articles about FParsec: [by Jake Witcher](https://codefornerds.com/better-parsing-with-fsharp-and-fparsec-getting-started), [by Phillip Trelford](https://trelford.com/blog/post/FParsec.aspx), [by Tamizh Vendan](https://blog.tamizhvendan.in/blog/2015/01/18/step-5-advanced-search-dsl-using-fparsec).

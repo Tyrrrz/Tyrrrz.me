@@ -19,7 +19,7 @@ It was only later, as I've experimented more and built more projects, that I sta
 
 Aggressively popularized "best practices" often have a tendency of manifesting cargo cults around them, enticing developers to apply design patterns or use specific approaches without giving them a much-needed second thought. In the context of automated testing, I find this prevalent when it comes to our industry's unhealthy obsession with unit testing.
 
-In this article I will share my observations about this testing technique and go over why I believe it to be inefficient. I'll also explain which approaches I'm currently using instead to test my code, both in open source projects and day-to-day work.
+In this article I will share my observations about this testing technique and go over why I believe it to be inefficient. I'll also explain which approaches I'm currently using instead to test my code, both in open-source projects and day-to-day work.
 
 _Note: this article contains code examples which are written in C#, but the language itself is not (too) important to the points I'm making._
 
@@ -312,7 +312,7 @@ By adhering to this structure, our test suite will effectively take form of a li
 
 As long as a piece of software does something at least remotely useful, it will always have functional requirements. Those can be either _formal_ (specification documents, user stories, etc.) or _informal_ (verbally agreed upon, assumed, JIRA tickets, written on toilet paper, etc.)
 
-Turning informal specifications into functional tests can often be difficult because it requires us to take a step away from code and challenge ourselves to think from a user's perspective. What helps me with my open source projects is that I start by creating a readme file where I list a bunch of relevant usage examples, and then encode those into tests.
+Turning informal specifications into functional tests can often be difficult because it requires us to take a step away from code and challenge ourselves to think from a user's perspective. What helps me with my open-source projects is that I start by creating a readme file where I list a bunch of relevant usage examples, and then encode those into tests.
 
 To summarize, we can conclude that it's a good idea to **partition tests based on threads of behavior, rather than the code's internal structure**.
 

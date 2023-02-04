@@ -11,7 +11,7 @@ Cognitive biases impact our perception of reality, driving us into making incorr
 
 When it comes to software development, this cognitive bias mainly applies to the tendency to subconsciously analyze user satisfaction based on naturally skewed feedback. There is an unspoken notion that good software is expected to work, while great software should work so well it's practically unnoticeable. Following this notion, users tend to contact developers only when something, in fact, doesn't work.
 
-If you have no other means of assessing user feedback besides bug reports, it might seem that everyone who has ever used your software has experienced issues with it. This is especially common, for example, in open source development, where using proper telemetry is frowned upon, and the only user interaction is typically done through issue tickets.
+If you have no other means of assessing user feedback besides bug reports, it might seem that everyone who has ever used your software has experienced issues with it. This is especially common, for example, in open-source development, where using proper telemetry is frowned upon, and the only user interaction is typically done through issue tickets.
 
 Needless to say, the effects of this bias can negatively impact motivation. Similar to [bombers that make it home](https://en.wikipedia.org/wiki/Survivorship_bias#In_the_military), bug reports don't tell the full story. In order to avoid being the victim of lost motivation, it is important to keep in mind that the happiest users are also usually the quietest.
 

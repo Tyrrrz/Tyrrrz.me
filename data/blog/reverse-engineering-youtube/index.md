@@ -9,7 +9,7 @@ Since this is a relatively popular discussion topic among many beginner develope
 
 _Note: even though the base principles explained here are unlikely to change, some information in this post may become outdated. This post is still relevant, as of YoutubeExplode v4.1 (16-Feb-2018)._
 
-_Note 2: as of YoutubeExplode v6.0.7 (10-Dec-2021), practically all the information in this post has become outdated and the approaches highlighted here are no longer in use by the library. If you want me to write an updated article on the current inner workings of YouTube, tag me on [Twitter](https://twitter.com/Tyrrrz) and let me know!_
+_Note 2: as of YoutubeExplode v6.0.7 (10-Dec-2021), practically everything in this post has become outdated, and the highlighted approaches are no longer used by my library. Instead of trying to continue updating the information here, I decided to write a completely new article altogether — [Reverse-Engineering YouTube: Revisited](/blog/reverse-engineering-youtube-revisited)_
 
 ## Getting video metadata
 
@@ -193,7 +193,11 @@ You may notice that some videos, mostly the ones uploaded by verified channels, 
 
 For muxed and adaptive streams, the signatures are part of the extracted metadata. DASH streams themselves are never protected, but the actual manifest may be — the signature is stored as part of the URL.
 
-A signature is a string made out of two sequences of uppercase letters and numbers, separated by period. Here's an example: `537513BBC517D8643EBF25887256DAACD7521090.AE6A48F177E7B0E8CD85D077E5170BFD83BEDE6BE6C6C`.
+A signature is a string made out of two sequences of uppercase letters and numbers, separated by period. Here's an example:
+
+```
+537513BBC517D8643EBF25887256DAACD7521090.AE6A48F177E7B0E8CD85D077E5170BFD83BEDE6BE6C6C
+```
 
 When your browser opens a YouTube video, it transforms these signatures using a set of operations defined in the player source code, putting the result as an additional parameter inside URLs. To repeat the same process from code, you need to locate the JavaScript source of the player used by the video and parse it.
 
@@ -301,15 +305,23 @@ Output of this method is a collection of `ICipherOperation`s. At this point in t
 - Slice — truncates leading characters in signature which come before given position.
 - Reverse — reverses the entire signature.
 
-Once you successfully extract the type and order of the used operations, you need to store them somewhere so that you can execute them on a signature.
+Once you successfully extract the types and order of the used operations, you need to store them somewhere so that you can execute them on a signature.
 
 ### Deciphering signatures and updating URLs
 
 After parsing the player source code, you can get the deciphered signatures and update the URL accordingly.
 
-For muxed and adaptive streams, transform the signature extracted from metadata and add it as a _query_ parameter called `signature` — `...&signature=212CD2793C2E9224A40014A56BB8189AF3D591E3.523508F8A49EC4A3425C6E4484EF9F59FBEF9066`
+For muxed and adaptive streams, transform the signature extracted from metadata and add it as a _query_ parameter called `signature`:
 
-For DASH manifest, transform the signature extracted from URL and add it as a _route_ parameter called `signature` — `.../signature/212CD2793C2E9224A40014A56BB8189AF3D591E3.523508F8A49EC4A3425C6E4484EF9F59FBEF9066/`
+```
+...&signature=212CD2793C2E9224A40014A56BB8189AF3D591E3.523508F8A49EC4A3425C6E4484EF9F59FBEF9066
+```
+
+For DASH manifest, transform the signature extracted from URL and add it as a _route_ parameter called `signature`:
+
+```
+.../signature/212CD2793C2E9224A40014A56BB8189AF3D591E3.523508F8A49EC4A3425C6E4484EF9F59FBEF9066/
+```
 
 ## Identifying media stream's content properties
 
