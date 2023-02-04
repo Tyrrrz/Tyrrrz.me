@@ -5,7 +5,7 @@ date: '2023-02-15'
 
 Back in 2017 I wrote [an article](/blog/reverse-engineering-youtube) in which I attempted to explain how YouTube works under the hood, how it serves streams to the client, and also how you can exploit that knowledge to download videos from the site. The primary goal of that write-up was to share some of the things I learned while working on [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) — an open-source library that provides a structured abstraction layer over YouTube's internal API.
 
-There is one thing that developers like more than building things — and that is breaking things built by other people. So, naturally, my article attracted quite a bit of attention and remains one of the most popular posts on this blog to this day. Either way, I had lots of fun doing the research, and I'm glad that it was also useful to other people.
+There is one thing that developers like more than building things — and that is breaking things built by other people. So, naturally, my article attracted quite a bit of attention and still remains one of the most popular posts on this blog. Either way, I had lots of fun doing the research, and I'm glad that it was also useful to other people.
 
 However, many things have changed in the five years since the article was published: YouTube has evolved as a platform, went through multiple UI redesigns, and completely overhauled its frontend codebase. Most of the internal endpoints that were reverse-engineered in the early days have been gradually getting removed altogether. In fact, nearly everything I wrote in the original post has become obsolete and now only serves as a historical reference.
 
@@ -15,11 +15,11 @@ In this article, I'll cover the current state of YouTube's internal API, highlig
 
 ## Retrieving video metadata and media streams
 
-If you've worked with YouTube in the past, you'll probably remember `get_video_info`. This internal API controller was used throughout YouTube's client code to retrieve video metadata, available streams, and everything else the player needed to render it. The origin of this endpoint traces back to the Flash Player days of YouTube, and it was still accessible until as late as July 2021, before it was finally removed.
+If you've worked with YouTube in the past, you'll probably remember `/get_video_info`. This internal API controller was used throughout YouTube's client code to retrieve video metadata, available streams, and everything else the player needed to render it. The origin of this endpoint traces back to the Flash Player days of YouTube, and it was still accessible until as late as July 2021, before it was finally removed.
 
-Besides `get_video_info`, YouTube has also dropped many other endpoints, such as `get_video_metadata` ([in November 2017](https://github.com/Tyrrrz/YoutubeExplode/issues/66)) and `list_ajax` ([in February 2021](https://github.com/Tyrrrz/YoutubeExplode/issues/501)), as part of a larger effort to establish a more organized API structure. Now, instead of having a bunch of randomly scattered endpoints with unpredictable formats and usage patterns, YouTube's internal API is comprised out of a coherent set of routes nested underneath the `/youtubei/` path.
+Besides `/get_video_info`, YouTube has also dropped many other endpoints, such as `/get_video_metadata` ([in November 2017](https://github.com/Tyrrrz/YoutubeExplode/issues/66)) and `/list_ajax` ([in February 2021](https://github.com/Tyrrrz/YoutubeExplode/issues/501)), as part of a larger effort to establish a more organized API structure. Now, instead of having a bunch of randomly scattered endpoints with unpredictable formats and usage patterns, YouTube's internal API is comprised out of a coherent set of routes nested underneath the `/youtubei/` path.
 
-In particular, much of the data previously available from `get_video_info` can now be pulled using the `/youtubei/v1/player` route. Unlike its predecessor, this endpoint expects a `POST` request and a payload that looks like this:
+In particular, much of the data previously obtainable from `/get_video_info` can now be pulled using the `/youtubei/v1/player` route. Unlike its predecessor, this endpoint expects a `POST` request and a payload that looks like this:
 
 ```json
 // POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
@@ -39,7 +39,7 @@ First thing you'll notice is that this endpoint requires an API key, which is do
 
 The request body itself is a JSON object with two top-level properties: `videoId` and `context`. The former is the 11-character ID of the video you want to retrieve the metadata for, while the latter contains various information that YouTube uses to tailor the response to the client's preferences and capabilities.
 
-In particular, depending on the client you choose to impersonate using the `clientName` and `clientVersion` properties, the response may contain slightly different data, or just fail to resolve altogether for certain videos. This, of course, can be leveraged to your advantage — which is why I specifically used the `ANDROID` client in the example above, as it's the easiest to work with.
+In particular, depending on the client you choose to impersonate using the `clientName` and `clientVersion` properties, the response may contain slightly different data, or just fail to resolve altogether for certain videos. While there are many available clients, only a few of them provide a measurable advantage over the others — which is why I used `ANDROID` in the example above, as it's the easiest to work with.
 
 After you receive the response, you should find a JSON object that contains the video metadata, stream descriptors, closed captions, activity tracking URLs, ad placements, post-playback screen elements — basically everything that the client needs in order to show the video to the user. It's a massive blob of data, so to make things simpler I've outlined only the most interesting parts below:
 
@@ -104,7 +104,7 @@ After you receive the response, you should find a JSON object that contains the 
 
 As you can immediately see, the response contains a range of useful information. From `videoDetails`, you can extract the video title, duration, author, view count, thumbnails, and other relevant metadata. This includes most of the stuff you will find on the video page, with the exception of likes, dislikes, channel subscribers, and other bits that are not rendered directly by the player. If you want to get that data as well, you will have to scrape the `/watch` page separately.
 
-Next, the `playabilityStatus` object indicates whether the video is playable within the context of the client that made the request. In case it's not, a `reason` property will be included with a human-readable message explaining why — for example, because the video is intended for mature audiences, or because it's not available in the current region. When dealing with unplayable videos, you'll still be able to access their metadata, but you won't be able to retrieve any streams.
+Next, the `playabilityStatus` object indicates whether the video is playable within the context of the client that made the request. In case it's not, a `reason` property will be included with a human-readable message explaining why — for example, because the video is intended for mature audiences, or because it's not accessible in the current region. When dealing with unplayable videos, you'll still be able to obtain their metadata, but you won't be able to retrieve any streams.
 
 Finally, assuming the video is marked as playable, `streamingData` should contain the list of streams that YouTube provided for the playback. These are divided into `formats` and `adaptiveFormats` arrays inside the response, and correspond to the various quality options available in the player.
 
@@ -163,7 +163,7 @@ For age-based restrictions, on the other hand, YouTube does not infer any inform
 
 While it is possible to simulate the same flow programmatically — by authenticating on the user's behalf and then passing cookies to the `/youtubei/v1/player` endpoint — the process is very cumbersome and error-prone. Luckily, there is a way to bypass this restriction altogether.
 
-[As it turns out](https://github.com/TeamNewPipe/NewPipe/issues/8102#issuecomment-1081085801), there is one obscure YouTube client that lets you access age-gated videos completely unauthenticated, and that's the **embedded player used for Smart TV browsers**. This means that if you impersonate this client in the initial request, **you can get working stream manifests for age-restricted videos**, without worrying about cookies or user credentials. To do that, update the request body as follows:
+[As it turns out](https://github.com/TeamNewPipe/NewPipe/issues/8102#issuecomment-1081085801), there is one obscure YouTube client that lets you access age-gated videos completely unauthenticated, and that's the embedded player used for Smart TV browsers. This means that if you impersonate this client in the initial request, you can get working stream manifests for age-restricted videos, without worrying about cookies or user credentials. To do that, update the request body as follows:
 
 ```json
 // POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
@@ -214,11 +214,11 @@ sp=sig
 url=https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?expire=1674722398&ei=_ufRY5XOJsnoyQWFno_IBg&ip=111.111.111.111&id=o-AGdzTbHeYCSShTUoAvdKXasA0mPM9YKXx5XP2lYQDkgI&itag=18&source=youtube&requiressl=yes&mh=Qv&mm=31%2C26&mn=sn-3c27sn7d%2Csn-f5f7lnld&ms=au%2Conr&mv=m&mvi=12&pl=24&gcr=ua&initcwndbps=2188750&vprv=1&xtags=heaudio%3Dtrue&mime=video%2Fmp4&ns=iTmK1jXtWdMktMzKoaHSpR4L&cnr=14&ratebypass=yes&dur=183.994&lmt=1665725827618480&mt=1674700623&fvip=1&fexp=24007246&c=TVHTML5_SIMPLY_EMBEDDED_PLAYER&txp=5538434&n=MzirMb1rQM4r8h6gw&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cgcr%2Cvprv%2Cxtags%2Cmime%2Cns%2Ccnr%2Cratebypass%2Cdur%2Clmt&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AG3C_xAwRQIgXGtBJv7BPshy6oDP4ghnH1Fhq_AFSAZAcwYs93fbYVMCIQDC-RKyYocOttpdf9_X_98thhRLy2TaKDvjgrg8fQtw7w%3D%3D
 ```
 
-Here, the provided `url` value is the base part of the stream URL, but it's missing an important element — the signature string. In order to obtain the correct link, you need to recover the signature from the `s` value and append it back to the base URL as a query parameter identified by `sp`. The challenge, however, is that the signature is stored in an enciphered form, meaning that you need to decipher it before you can use it.
+Here, the provided `url` value is the base part of the stream URL, but it's missing an important element — the signature string. In order to obtain the correct link, you need to recover the signature from the `s` value and append it back to the base URL as a query parameter identified by `sp`. The challenge, however, is that the signature is encoded with a special cipher, meaning that you need to decipher it before you can use it.
 
 Normally, when running in the browser, the deciphering process is performed by the player itself, using the instructions stored within it. The exact set of operations and their order changes with each version, so the only way to reproduce this programmatically is by downloading the player source code and extracting the implementation from there.
 
-To do that, you need to first identify the latest version of the player, which can be done by querying the `https://www.youtube.com/iframe_api` endpoint. It's the same endpoint that YouTube uses for embedding videos on third-party websites, and it returns a script file that looks like this:
+To do that, you need to first identify the latest version of the player, which can be done by querying the `/iframe_api` endpoint. It's the same endpoint that YouTube uses for embedding videos on third-party websites, and it returns a script file that looks like this:
 
 ```js
 var scriptUrl = 'https://www.youtube.com/s/player/4248d311/www-widgetapi.vflset/www-widgetapi.js';
@@ -327,7 +327,7 @@ With that, the returned stream descriptors should contain compatible signature c
 
 ## Working around rate limiting
 
-One common issue that you'll likely encounter is that certain streams might take an abnormally long time to fully download. This is usually caused by YouTube's _rate limiting_ mechanism, which is designed to prevent excessive bandwidth usage by limiting the rate at which the streams are served to the client.
+One common issue that you'll likely encounter is that certain streams might take an abnormally long time to fully download. This is usually caused by YouTube's rate limiting mechanism, which is designed to prevent excessive bandwidth usage by limiting the rate at which the streams are served to the client.
 
 It makes sense from a logical perspective — there is no reason for YouTube to transfer the video faster than it is being played, especially if the user decides not to watch it all the way through. However, when the goal is to download the content as quickly as possible, it can become a major obstacle.
 
@@ -374,15 +374,21 @@ https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback
 
 Unfortunately, the `ratebypass` parameter is not always present in the stream URL, and even when it is, it's not guaranteed to be set to `yes`. On top of that, as already mentioned before, you can't simply edit the URL to add the parameter manually, as that would invalidate the signature and render the link unusable.
 
-However, YouTube's rate limiting has one interesting aspect: **it only works if the requested stream exceeds a certain size threshold**. This means that if you're fetching a small stream — or even a small _portion_ of a larger stream — the data will be served at full speed, regardless of whether the `ratebypass` parameter is set or not. In testing, I found that the cutoff point seems to be around `10 MB`, with anything larger than that causing the rate limiting to kick in.
+However, YouTube's rate limiting has one interesting aspect: it only works if the requested stream exceeds a certain size threshold. This means that if you're fetching a small stream — or even a small _portion_ of a larger stream — the data will be served at full speed, regardless of whether the `ratebypass` parameter is set or not. In testing, I found that the cutoff point seems to be around `10 MB`, with anything larger than that causing the rate limiting to kick in.
 
-In practice, this behavior enables a simple workaround that allows you to bypass rate limits by dividing the stream into smaller chunks and downloading them separately. To do that, you can build up a chain of requests that incrementally target different segments of the stream using the [`Range` HTTP header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Range), and then combine the received content into a single file.
+This behavior enables a simple workaround for the throttling mechanism — you can divide the stream into chunks smaller than `10 MB`, download them at maximum rate, and then combine the received content into a single file. To do that, use the [`Range` HTTP header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Range) to request a specific portion of the content by specifying the range of bytes that you want to retrieve. For example, the following cURL command can be used to download the first `10 MB` of the stream:
+
+```bash
+curl 'https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?...' -H 'Range: bytes=0-10000000'
+```
+
+In order to determine the number of chunks you need to download, you can use the `contentLength` property inside the metadata to extract the stream's total size.
 
 ## Muxing streams locally
 
-YouTube offers a selection of different formats for each video, but you will find that high-definition options are served exclusively through adaptive audio-only and video-only streams. And while that works out well for playback — as you can simply play both of them simultaneously — it's not ideal when the intent is to download the video as a single file.
+YouTube offers a selection of different formats for each video, but you will find that the high-definition options are served exclusively through adaptive audio-only and video-only streams. And while that works out well for playback — as you can simply play both of them simultaneously — it's not ideal when the intent is to download the video as a single file.
 
-Ever since `get_video_info` was removed, YouTube has been providing fewer muxed streams for most videos, usually limiting them to low-end options such as `144p` and `360p`. That means if you want to retrieve content as close to the original quality as possible, you will definitely have to rely on adaptive streams and mux them yourself.
+Ever since `/get_video_info` was removed, YouTube has been providing fewer muxed streams for most videos, usually limiting them to low-end options such as `144p` and `360p`. That means if you want to retrieve content as close to the original quality as possible, you will definitely have to rely on adaptive streams and mux them yourself.
 
 Fortunately, this is fairly easy to do using [FFmpeg](https://ffmpeg.org), which is an open-source tool for processing multimedia files. For example, assuming you have downloaded the two streams as `audio.mp4` and `video.webm`, you can combine them together in a file named `output.mov` with the following command:
 
@@ -390,21 +396,21 @@ Fortunately, this is fairly easy to do using [FFmpeg](https://ffmpeg.org), which
 ffmpeg -i audio.mp4 -i video.webm output.mov
 ```
 
-Keep in mind that muxing can be a computationally expensive task, especially if it involves transcoding between different formats. Whenever possible, you should try using an output container that is directly compatible with the specified input streams, as that will eliminate the need to convert data, making the process much faster.
+Keep in mind that muxing can be a computationally expensive task, especially if it involves transcoding between different formats. Whenever possible, it's recommended to use an output container that is compatible with the specified input streams, as that will eliminate the need to convert data, making the process much faster.
 
-Most YouTube streams are provided in `webm` and `mp4` formats, so if you use either of them across all inputs and outputs, you should be able to mux the streams without transcoding. To do that, add the `-c copy` flag to the command, which tells FFmpeg to simply copy the content from the input streams to the output file:
+Most YouTube streams are provided in `webm` and `mp4` formats, so if you stick to either of those containers for all inputs and outputs, you should be able to perform muxing without transcoding. To do that, add the `-c copy` flag to the command, instructing FFmpeg to copy the input streams directly to the output file:
 
 ```bash
 ffmpeg -i audio.mp4 -i video.mp4 -c copy output.mp4
 ```
 
-However, if you plan to download YouTube videos for archival purposes, you will probably want to prioritize reducing the output size over the execution time. In that case, you can combine the streams in an `mp4` container using the [`H.265`](https://trac.ffmpeg.org/wiki/Encode/H.265) codec, which should result in a much more efficient compression rate:
+However, if you plan to download YouTube videos for archival purposes, you will probably want to prioritize reducing the output size over the execution time. In that case, you can re-encode the data using the [`H.265`](https://trac.ffmpeg.org/wiki/Encode/H.265) codec, which should result in a much more efficient compression rate:
 
 ```bash
 ffmpeg -i audio.mp4 -i video.mp4 -c:a aac -c:v libx265 output.mp4
 ```
 
-Using the above command, I was able to download and mux a 4K video, while cutting the file size by more than 50% compared to the streams that YouTube provided. If you want to improve the compression even further, you can also specify a slower encoding preset with the `-preset` option, but note that it will make the conversion process significantly longer:
+Using the above command, I was able to download and mux a 4K video, while cutting the file size by more than 50% compared to the streams that YouTube provided. If you want to improve the compression even further, you can also specify a slower encoding preset with the `-preset` option, but note that it will make the conversion process take significantly longer:
 
 ```bash
 ffmpeg -i audio.mp4 -i video.mp4 -c:a aac -c:v libx265 -preset slow output.mp4
@@ -414,7 +420,7 @@ Overall, FFmpeg is a very powerful tool, and it's not limited to just muxing —
 
 ## Summary
 
-Even though many things have changed, downloading videos from YouTube is still possible and, in some ways, easier than before. Instead of `get_video_info`, you can now retrieve metadata and stream manifests using the `/youtubei/v1/player` endpoint, which is part of YouTube's new internal API.
+Even though many things have changed, downloading videos from YouTube is still possible and, in some ways, easier than before. Instead of `/get_video_info`, you can now retrieve metadata and stream manifests using the `/youtubei/v1/player` endpoint, which is part of YouTube's new internal API.
 
 The process of identifying and resolving streams is mostly the same as before, and workarounds such as rate bypassing are still relevant. However, signature deciphering has become less of a concern, because the vast majority of videos are now playable without it.
 
