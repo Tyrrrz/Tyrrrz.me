@@ -3,7 +3,7 @@ title: 'Reverse-Engineering YouTube: Revisited'
 date: '2023-02-04'
 ---
 
-Back in 2017 I wrote [an article](/blog/reverse-engineering-youtube) in which I attempted to explain how YouTube works under the hood, how it serves streams to the client, and also how you can exploit that knowledge to download videos from the site. The primary goal of that write-up was to share some of the things I learned while working on [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) — an open-source library that provides a structured abstraction layer over YouTube's internal API.
+Back in 2017 I wrote [an article](/blog/reverse-engineering-youtube) in which I attempted to explain how YouTube works under the hood, how it serves streams to the client, and also how you can exploit that knowledge to download videos from the site. The primary goal of that write-up was to share some of the things I learned while working on [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) — a .NET library that provides a structured abstraction layer over YouTube's internal API.
 
 There is one thing that developers like more than building things — and that is breaking things built by other people. So, naturally, my article attracted quite a bit of attention and still remains one of the most popular posts on this blog. Either way, I had lots of fun doing the research, and I'm glad that it was also useful to other people.
 
