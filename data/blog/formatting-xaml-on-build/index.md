@@ -86,7 +86,7 @@ The release of .NET Core 2.1 introduced us with a feature that lets us use the s
 To use XAMLStyler as a global tool, we just need to install it with the following command:
 
 ```bash
-> dotnet tool install XamlStyler.Console --global
+$ dotnet tool install XamlStyler.Console --global
 ```
 
 This downloads the [corresponding NuGet package](https://www.nuget.org/packages/XamlStyler.Console), extracts its contents to a shared directory, then puts the executable on the system PATH.
@@ -94,7 +94,7 @@ This downloads the [corresponding NuGet package](https://www.nuget.org/packages/
 Following that, we can now run `xstyler` from the command-line. To process all XAML files in a directory, we can use:
 
 ```bash
-> xstyler --directory f:\Projects\Softdev\LightBulb\ --recursive
+$ xstyler --directory f:\Projects\Softdev\LightBulb\ --recursive
 
 Processing: f:\Projects\Softdev\LightBulb\LightBulb\App.xaml
 Processing: f:\Projects\Softdev\LightBulb\LightBulb\Views\RootView.xaml
@@ -119,12 +119,12 @@ Having to take any additional steps after `git clone` makes the developer experi
 With the latest SDK, however, we can now install local tools simply by dropping the `--global` option:
 
 ```bash
-> dotnet tool install XamlStyler.Console
+$ dotnet tool install XamlStyler.Console
 ```
 
 Note that if we try to run this in our project's repository we will get the following error:
 
-```bash
+```
 Cannot find a manifest file.
 For a list of locations searched, specify the "-d" option before the tool name.
 If you intended to install a global tool, add `--global` to the command.
@@ -135,13 +135,13 @@ If you would like to create a manifest, use `dotnet new tool-manifest`,
 As the message states, in order to install local tools we will first need to create a manifest file in the root of the project repository. We can do this using the suggested command:
 
 ```bash
-> dotnet new tool-manifest
+$ dotnet new tool-manifest
 ```
 
 That creates an empty manifest at `/.config/dotnet-tools.json`. We can now run the original command again, which will add a tool entry to this manifest file:
 
 ```bash
-> dotnet tool install XamlStyler.Console
+$ dotnet tool install XamlStyler.Console
 
 You can invoke the tool from this directory using the following commands:
   'dotnet tool run xstyler' or 'dotnet xstyler'.
@@ -153,7 +153,7 @@ Entry is added to the manifest file f:\Projects\Softdev\LightBulb\.config\dotnet
 As long as the manifest file is tracked by git, any developer who clones the repository can run a simple command to download and install all tools listed in the manifest file:
 
 ```bash
-> dotnet tool restore
+$ dotnet tool restore
 ```
 
 Note that by installing XAMLStyler as a local tool, it is no longer added on the PATH, so we have to run it as `dotnet xstyler` instead of just `xstyler`. The name will be resolved anywhere in the repository or in any of its descendant directories.

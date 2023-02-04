@@ -1,6 +1,6 @@
 ---
 title: 'Reverse-Engineering YouTube: Revisited'
-date: '2023-02-15'
+date: '2023-02-04'
 ---
 
 Back in 2017 I wrote [an article](/blog/reverse-engineering-youtube) in which I attempted to explain how YouTube works under the hood, how it serves streams to the client, and also how you can exploit that knowledge to download videos from the site. The primary goal of that write-up was to share some of the things I learned while working on [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) — an open-source library that provides a structured abstraction layer over YouTube's internal API.
@@ -329,7 +329,7 @@ With that, the returned stream descriptors should contain compatible signature c
 
 One common issue that you'll likely encounter is that certain streams might take an abnormally long time to fully download. This is usually caused by YouTube's rate limiting mechanism, which is designed to prevent excessive bandwidth usage by limiting the rate at which the streams are served to the client.
 
-It makes sense from a logical perspective — there is no reason for YouTube to transfer the video faster than it is being played, especially if the user decides not to watch it all the way through. However, when the goal is to download the content as quickly as possible, it can become a major obstacle.
+It makes sense from a logical perspective — there is no reason for YouTube to transfer the video faster than it is being played, especially if the user may decide not to watch it all the way through. However, when the goal is to download the content as quickly as possible, it can become a major obstacle.
 
 All YouTube streams are rate-limited by default, but depending on their type and the client you're impersonating, you may find some that are not subject to this measure. In order to identify whether a particular stream is rate-limited, you can check for the `ratebypass` query parameter in the URL — if it's present and set to `yes`, then the rate limiting is disabled for that stream, and you should be able to fetch it at full speed:
 
@@ -374,15 +374,27 @@ https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback
 
 Unfortunately, the `ratebypass` parameter is not always present in the stream URL, and even when it is, it's not guaranteed to be set to `yes`. On top of that, as already mentioned before, you can't simply edit the URL to add the parameter manually, as that would invalidate the signature and render the link unusable.
 
-However, YouTube's rate limiting has one interesting aspect: it only works if the requested stream exceeds a certain size threshold. This means that if you're fetching a small stream — or even a small _portion_ of a larger stream — the data will be served at full speed, regardless of whether the `ratebypass` parameter is set or not. In testing, I found that the cutoff point seems to be around `10 MB`, with anything larger than that causing the rate limiting to kick in.
+However, YouTube's rate limiting has one interesting aspect — it only affects streams whose content length exceeds a certain threshold. This means that if the stream is small enough, the data will be served at maximum speed, regardless of whether the `ratebypass` parameter is set or not. In my tests, I found that the exact cut-off point seems to be around `10 MB`, with anything larger than that causing the throttling to kick in.
 
-This behavior enables a simple workaround for the throttling mechanism — you can divide the stream into chunks smaller than `10 MB`, download them at maximum rate, and then combine the received content into a single file. To do that, use the [`Range` HTTP header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Range) to request a specific portion of the content by specifying the range of bytes that you want to retrieve. For example, the following cURL command can be used to download the first `10 MB` of the stream:
+What makes this behavior more useful is that it also applies to requests made with the [`Range` HTTP header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Range), which allows you to retrieve only a portion of the overall content. In other words, if you try fetching a byte range that is smaller than `10 MB`, YouTube will serve the corresponding data at full speed, even if the stream itself is rate-limited.
+
+As a result, you can use this approach to bypass the rate limiting mechanism by dividing the stream into multiple chunks, downloading them separately, and then combining them together into a single file. To do that, you will need to know the total size of the stream, which can be extracted either from the `contentLength` property in the metadata (if available), or by sending a `HEAD` request to the URL and parsing the `Content-Length` header.
+
+Once you have the total size, you can download the stream by chaining a sequence of incremental `Range` requests, each targeting an individual part of the content and appending it to the output file. For example, using the [curl](https://curl.se) command-line utility, this logic can be implemented as follows:
 
 ```bash
-curl 'https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?...' -H 'Range: bytes=0-10000000'
-```
+# URL of the stream
+URL='https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?...'
 
-In order to determine the number of chunks you need to download, you can use the `contentLength` property inside the metadata to extract the stream's total size.
+# Get the total size of the stream
+SIZE=$(curl -sI $URL | grep -i Content-Length | awk '{print $2}')
+
+# Download the stream in 10 MB chunks and pipe them to the output file
+for ((i = 0; i < $SIZE; i += 10000000))
+do
+  curl -s -r "$i-$((i + 9999999))" $URL >> 'output.mp4'
+done
+```
 
 ## Muxing streams locally
 
@@ -393,7 +405,7 @@ Ever since `/get_video_info` was removed, YouTube has been providing fewer muxed
 Fortunately, this is fairly easy to do using [FFmpeg](https://ffmpeg.org), which is an open-source tool for processing multimedia files. For example, assuming you have downloaded the two streams as `audio.mp4` and `video.webm`, you can combine them together in a file named `output.mov` with the following command:
 
 ```bash
-ffmpeg -i audio.mp4 -i video.webm output.mov
+$ ffmpeg -i 'audio.mp4' -i 'video.webm' 'output.mov'
 ```
 
 Keep in mind that muxing can be a computationally expensive task, especially if it involves transcoding between different formats. Whenever possible, it's recommended to use an output container that is compatible with the specified input streams, as that will eliminate the need to convert data, making the process much faster.
@@ -401,19 +413,19 @@ Keep in mind that muxing can be a computationally expensive task, especially if 
 Most YouTube streams are provided in `webm` and `mp4` formats, so if you stick to either of those containers for all inputs and outputs, you should be able to perform muxing without transcoding. To do that, add the `-c copy` flag to the command, instructing FFmpeg to copy the input streams directly to the output file:
 
 ```bash
-ffmpeg -i audio.mp4 -i video.mp4 -c copy output.mp4
+$ ffmpeg -i 'audio.mp4' -i 'video.mp4' -c copy 'output.mp4'
 ```
 
 However, if you plan to download YouTube videos for archival purposes, you will probably want to prioritize reducing the output size over the execution time. In that case, you can re-encode the data using the [`H.265`](https://trac.ffmpeg.org/wiki/Encode/H.265) codec, which should result in a much more efficient compression rate:
 
 ```bash
-ffmpeg -i audio.mp4 -i video.mp4 -c:a aac -c:v libx265 output.mp4
+$ ffmpeg -i 'audio.mp4' -i 'video.mp4' -c:a aac -c:v libx265 'output.mp4'
 ```
 
 Using the above command, I was able to download and mux a 4K video, while cutting the file size by more than 50% compared to the streams that YouTube provided. If you want to improve the compression even further, you can also specify a slower encoding preset with the `-preset` option, but note that it will make the conversion process take significantly longer:
 
 ```bash
-ffmpeg -i audio.mp4 -i video.mp4 -c:a aac -c:v libx265 -preset slow output.mp4
+$ ffmpeg -i 'audio.mp4' -i 'video.mp4' -c:a aac -c:v libx265 -preset slow 'output.mp4'
 ```
 
 Overall, FFmpeg is a very powerful tool, and it's not limited to just muxing — you can use it to trim or resize videos, inject subtitles, and perform a variety of other operations that can be useful when working with YouTube content. As a command-line application, it also lends itself extremely well to automation, making it easy to integrate as part of a larger workflow.
