@@ -89,7 +89,7 @@ const Header: FC = () => {
     { href: '/donate', label: 'donate' }
   ];
 
-  const [menuVisible, setMenuVisible] = useState(false);
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
 
   return (
     <header>
@@ -123,8 +123,8 @@ const Header: FC = () => {
 
         {/* Mobile nav button */}
         <button
-          className={c('sm:hidden', 'text-2xl', { 'text-purple-500': menuVisible })}
-          onClick={() => setMenuVisible((v) => !v)}
+          className={c('sm:hidden', 'text-2xl', { 'text-purple-500': isMenuVisible })}
+          onClick={() => setIsMenuVisible((v) => !v)}
         >
           <FiMenu />
         </button>
@@ -134,7 +134,7 @@ const Header: FC = () => {
       <div className={c('sm:hidden', 'overflow-hidden')}>
         <nav
           className={c(
-            { '-mt-[100%]': !menuVisible },
+            { '-mt-[100%]': !isMenuVisible },
             'p-2',
             'border-b-2',
             'border-neutral-100',
