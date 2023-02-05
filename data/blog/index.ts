@@ -106,7 +106,6 @@ export const publishBlogPostAssets = async (id: string) => {
 
 export const publishBlogFeed = async () => {
   const filePath = path.resolve(process.cwd(), 'public', 'blog', 'rss.xml');
-
   const date = new Date();
 
   const feed = new Feed({
@@ -116,7 +115,7 @@ export const publishBlogFeed = async () => {
       'Oleksii Holub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker',
     link: getSiteUrl('/blog'),
     image: getSiteUrl('/logo.png'),
-    copyright: `Copyright (c) 2019-${date.getFullYear()} Oleksii Holub`,
+    copyright: `Copyright (c) 2015-${date.getFullYear()} Oleksii Holub`,
     updated: date
   });
 
