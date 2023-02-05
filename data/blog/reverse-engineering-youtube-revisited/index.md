@@ -163,7 +163,7 @@ For age-based restrictions, on the other hand, YouTube does not infer any inform
 
 While it is possible to simulate the same flow programmatically — by authenticating on the user's behalf and then passing cookies to the `/youtubei/v1/player` endpoint — the process is very cumbersome and error-prone. Luckily, there is a way to bypass this restriction altogether.
 
-[As it turns out](https://github.com/TeamNewPipe/NewPipe/issues/8102#issuecomment-1081085801), there is one obscure YouTube client that lets you access age-gated videos completely unauthenticated, and that's the embedded player used for Smart TV browsers. This means that if you impersonate this client in the initial request, you can get working stream manifests for age-restricted videos, without worrying about cookies or user credentials. To do that, update the request body as follows:
+[As it turns out](https://github.com/TeamNewPipe/NewPipe/issues/8102#issuecomment-1081085801), there is **one obscure YouTube client that lets you access age-gated videos completely unauthenticated**, and that's the **embedded player used for Smart TV browsers**. This means that if you impersonate this client in the initial request, you can get working stream manifests for age-restricted videos, without worrying about cookies or user credentials. To do that, update the request body as follows:
 
 ```json
 // POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
@@ -181,7 +181,7 @@ While it is possible to simulate the same flow programmatically — by authentic
 }
 ```
 
-The main difference from the `ANDROID` client is that `TVHTML5_SIMPLY_EMBEDDED_PLAYER` also supports a `thirdParty` object that contains the URL of the page where the video is supposedly embedded. While it's not strictly required to include this parameter, specifying `https://www.youtube.com` allows the request to succeed even on videos that prohibit embedding on third-party websites.
+The main difference from the `ANDROID` client is that `TVHTML5_SIMPLY_EMBEDDED_PLAYER` also supports a `thirdParty` object that contains the URL of the page where the video is supposedly embedded. While it's not strictly required to include this parameter, specifying `https://www.youtube.com` **allows the request to succeed even for videos that prohibit embedding on third-party websites**.
 
 One significant drawback of impersonating this client, however, is that it does not represent an installable app like `ANDROID`, but a JavaScript-based player that runs in the browser. This type of client is susceptible to an additional security measure used by YouTube that results in the URLs inside the stream metadata being obfuscated. Here is how an individual stream descriptor looks in that case:
 
@@ -214,7 +214,7 @@ sp=sig
 url=https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?expire=1674722398&ei=_ufRY5XOJsnoyQWFno_IBg&ip=111.111.111.111&id=o-AGdzTbHeYCSShTUoAvdKXasA0mPM9YKXx5XP2lYQDkgI&itag=18&source=youtube&requiressl=yes&mh=Qv&mm=31%2C26&mn=sn-3c27sn7d%2Csn-f5f7lnld&ms=au%2Conr&mv=m&mvi=12&pl=24&gcr=ua&initcwndbps=2188750&vprv=1&xtags=heaudio%3Dtrue&mime=video%2Fmp4&ns=iTmK1jXtWdMktMzKoaHSpR4L&cnr=14&ratebypass=yes&dur=183.994&lmt=1665725827618480&mt=1674700623&fvip=1&fexp=24007246&c=TVHTML5_SIMPLY_EMBEDDED_PLAYER&txp=5538434&n=MzirMb1rQM4r8h6gw&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cgcr%2Cvprv%2Cxtags%2Cmime%2Cns%2Ccnr%2Cratebypass%2Cdur%2Clmt&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AG3C_xAwRQIgXGtBJv7BPshy6oDP4ghnH1Fhq_AFSAZAcwYs93fbYVMCIQDC-RKyYocOttpdf9_X_98thhRLy2TaKDvjgrg8fQtw7w%3D%3D
 ```
 
-Here, the provided `url` value is the base part of the stream URL, but it's missing an important element — the signature string. In order to obtain the correct link, you need to recover the signature from the `s` value and append it back to the base URL as a query parameter identified by `sp`. The challenge, however, is that the signature is encoded with a special cipher, meaning that you need to decipher it before you can use it.
+Here, the provided `url` value is the base part of the stream URL, but it's missing an important element — the signature string. In order to obtain the correct link, you need to recover the signature from the `s` value and append it back to the base URL as a query parameter identified by `sp`. The challenge, however, is that the signature is encoded with a special cipher, meaning that **you need to decipher it before you can use it**.
 
 Normally, when running in the browser, the deciphering process is performed by the player itself, using the instructions stored within it. The exact set of operations and their order changes with each version, so the only way to reproduce this programmatically is by downloading the player source code and extracting the implementation from there.
 
@@ -327,7 +327,7 @@ With that, the returned stream descriptors should contain compatible signature c
 
 ## Working around rate limiting
 
-One common issue that you'll likely encounter is that certain streams might take an abnormally long time to fully download. This is usually caused by YouTube's rate limiting mechanism, which is designed to prevent excessive bandwidth usage by limiting the rate at which the streams are served to the client.
+One common issue that you'll likely encounter is that certain streams might take an abnormally long time to fully download. This is usually caused by YouTube's _rate limiting_ mechanism, which is designed to prevent excessive bandwidth usage by capping the rate at which the streams are served to the client.
 
 It makes sense from a logical perspective — there is no reason for YouTube to transfer the video faster than it is being played, especially if the user may decide not to watch it all the way through. However, when the goal is to download the content as quickly as possible, it can become a major obstacle.
 
@@ -374,25 +374,24 @@ https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback
 
 Unfortunately, the `ratebypass` parameter is not always present in the stream URL, and even when it is, it's not guaranteed to be set to `yes`. On top of that, as already mentioned before, you can't simply edit the URL to add the parameter manually, as that would invalidate the signature and render the link unusable.
 
-However, YouTube's rate limiting has one interesting aspect — it only affects streams whose content length exceeds a certain threshold. This means that if the stream is small enough, the data will be served at maximum speed, regardless of whether the `ratebypass` parameter is set or not. In my tests, I found that the exact cut-off point seems to be around `10 MB`, with anything larger than that causing the throttling to kick in.
+However, YouTube's rate limiting has one interesting aspect — it only affects streams whose content length exceeds a certain threshold. This means that if the stream is small enough, the data will be served at maximum speed, regardless of whether the `ratebypass` parameter is set or not. In my tests, I found that the exact cut-off point seems to be around 10 megabytes, with anything larger than that causing the throttling to kick in.
 
-What makes this behavior more useful is that it also applies to requests made with the [`Range` HTTP header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Range), which allows you to retrieve only a portion of the overall content. In other words, if you try fetching a byte range that is smaller than `10 MB`, YouTube will serve the corresponding data at full speed, even if the stream itself is rate-limited.
+What makes this behavior more useful is that it also applies to requests made with the [`Range` HTTP header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Range), which allows you to retrieve only a portion of the overall content. In other words, if you try fetching a byte range smaller than 10 megabytes, **YouTube will serve the corresponding data at full speed, even if the stream itself is rate-limited**.
 
-As a result, you can use this approach to bypass the rate limiting mechanism by dividing the stream into multiple chunks, downloading them separately, and then combining them together into a single file. To do that, you will need to know the total size of the stream, which can be extracted either from the `contentLength` property in the metadata (if available), or by sending a `HEAD` request to the URL and parsing the `Content-Length` header.
+As a result, you can use this approach to bypass the rate limiting mechanism by dividing the stream into multiple chunks, downloading them separately, and then combining them together into a single file. To do that, you will need to know the total size of the stream, which can be extracted either from the `contentLength` property in the metadata (if available), or from the `Content-Length` header in the initial response.
 
-Once you have the total size, you can download the stream by chaining a sequence of incremental `Range` requests, each targeting an individual part of the content and appending it to the output file. For example, using the [curl](https://curl.se) command-line utility, this logic can be implemented as follows:
+Below is an example of how that entire logic can be implemented using the [curl](https://curl.se) command-line utility in a simple Bash script:
 
 ```bash
-# URL of the stream
+# Set the URL of the stream
 URL='https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?...'
 
 # Get the total size of the stream
-SIZE=$(curl -sI $URL | grep -i Content-Length | awk '{print $2}')
+SIZE=$(curl -I $URL | grep -i Content-Length | awk '{print $2}')
 
-# Download the stream in 10 MB chunks and pipe them to the output file
-for ((i = 0; i < $SIZE; i += 10000000))
-do
-  curl -s -r "$i-$((i + 9999999))" $URL >> 'output.mp4'
+# Fetch the stream in 10 MB chunks and append the data to the output
+for ((i = 0; i < $SIZE; i += 10000000)); do
+  curl -r $i-$((i + 9999999)) $URL >> 'output.mp4'
 done
 ```
 
@@ -408,7 +407,7 @@ Fortunately, this is fairly easy to do using [FFmpeg](https://ffmpeg.org), which
 $ ffmpeg -i 'audio.mp4' -i 'video.webm' 'output.mov'
 ```
 
-Keep in mind that muxing can be a computationally expensive task, especially if it involves transcoding between different formats. Whenever possible, it's recommended to use an output container that is compatible with the specified input streams, as that will eliminate the need to convert data, making the process much faster.
+Keep in mind that muxing can be a computationally expensive task, especially if it involves transcoding between different formats. Whenever possible, **it's recommended to use an output container that is compatible with the specified input streams**, as that will eliminate the need to convert data, making the process much faster.
 
 Most YouTube streams are provided in `webm` and `mp4` formats, so if you stick to either of those containers for all inputs and outputs, you should be able to perform muxing without transcoding. To do that, add the `-c copy` flag to the command, instructing FFmpeg to copy the input streams directly to the output file:
 

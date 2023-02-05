@@ -21,10 +21,6 @@ Aggressively popularized "best practices" often have a tendency of manifesting c
 
 In this article I will share my observations about this testing technique and go over why I believe it to be inefficient. I'll also explain which approaches I'm currently using instead to test my code, both in open-source projects and day-to-day work.
 
-_Note: this article contains code examples which are written in C#, but the language itself is not (too) important to the points I'm making._
-
-_Note 2: I've come to realize that programming terms are completely useless at conveying meanings because everyone seems to understand them differently. In this article I will be relying on the "standard" definitions, where unit testing targets the smallest separable parts of code, end-to-end testing targets software's outermost entry points, while integration testing is for everything in-between._
-
 ## Fallacies of unit testing
 
 Unit tests, as evident by the name, revolve around the concept of a "unit", which denotes a very small isolated part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a module (or method of an object).

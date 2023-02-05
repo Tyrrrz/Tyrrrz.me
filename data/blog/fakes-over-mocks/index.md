@@ -31,7 +31,7 @@ Generally speaking, a **mock object is a substitute, that pretends to function l
 
 In fact, **a mock object is not intended to have valid functionality at all**. Its purpose is rather to mimic the outcomes of various operations, so that the system under test exercises the behavior required by a given scenario.
 
-Besides that, **mocks can also be used to verify side effects** that take place within the system. This is achieved by recording method calls and checking if the number of times they appear and their parameters match the expectations.
+Besides that, mocks can also be used to verify side effects that take place within the system. This is achieved by recording method calls and checking if the number of times they appear and their parameters match the expectations.
 
 Let's take a look at how all of this works in practice. As an example, imagine that we're building a system that relies on some binary file storage represented by the following interface:
 
@@ -183,7 +183,7 @@ As you can probably see, this change increased the complexity of the test rather
 
 Even despite all that effort, this test is still not as resilient as we would've wanted. For example, adding another method to `IBlobStorage` and calling it from `DocumentManager` will cause the test to break as the mock wasn't previously taught how to deal with it. You can see how all of these issues and complexity can only exacerbate in real projects with large test suites.
 
-One way or another, **tests that rely on mocks are inherently coupled to the implementation of the system, which makes them fragile as a result**. This does not only impose additional maintenance cost as such tests need to be constantly updated, but also makes them considerably less valuable due to poor signal-to-noise ratio.
+One way or another, **tests that rely on mocks are inherently coupled to the implementation of the system**, which makes them fragile as a result. This does not only impose additional maintenance cost as such tests need to be constantly updated, but also makes them considerably less valuable due to poor signal-to-noise ratio.
 
 Instead of providing us with a safety net in the face of potential regressions, they **lock us into the existing implementation and discourage evolution**. Because of that, introducing substantial changes and refactoring code becomes a much more difficult and ultimately discouraging experience.
 

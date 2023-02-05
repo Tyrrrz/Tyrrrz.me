@@ -7,9 +7,7 @@ Almost a year ago, I started developing [YoutubeExplode](https://github.com/Tyrr
 
 Since this is a relatively popular discussion topic among many beginner developers, I thought that I could help out by sharing the knowledge I found by spending dozens of hours staring at Chrome Developer Tools.
 
-_Note: even though the base principles explained here are unlikely to change, some information in this post may become outdated. This post is still relevant, as of YoutubeExplode v4.1 (16-Feb-2018)._
-
-_Note 2: as of YoutubeExplode v6.0.7 (10-Dec-2021), practically everything in this post has become outdated, and the highlighted approaches are no longer used by my library. Instead of trying to continue updating the information here, I decided to write a completely new article altogether — [Reverse-Engineering YouTube: Revisited](/blog/reverse-engineering-youtube-revisited)_
+> As of YoutubeExplode v6.0.7 (10-Dec-2021), practically everything in this post has become outdated, and the highlighted approaches are no longer used by my library. Instead of trying to continue updating the information here, I decided to write a completely new article altogether — [Reverse-Engineering YouTube: Revisited](/blog/reverse-engineering-youtube-revisited)
 
 ## Getting video metadata
 
@@ -301,9 +299,9 @@ private async Task<IReadOnlyList<ICipherOperation>> GetCipherOperationsAsync(str
 
 Output of this method is a collection of `ICipherOperation`s. At this point in time, there can be up to 3 kinds of cipher operations:
 
-- Swap — swaps the first character in the signature with given, identified by position.
-- Slice — truncates leading characters in signature which come before given position.
-- Reverse — reverses the entire signature.
+- **Swap** — swaps the first character in the signature with given, identified by position.
+- **Slice** — truncates leading characters in signature which come before given position.
+- **Reverse** — reverses the entire signature.
 
 Once you successfully extract the types and order of the used operations, you need to store them somewhere so that you can execute them on a signature.
 
