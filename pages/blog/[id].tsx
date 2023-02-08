@@ -79,7 +79,7 @@ const CommentSection: FC<BlogPostPageProps> = ({ post }) => {
   return (
     <section className={c('mt-4')}>
       <Giscus
-        repo="Tyrrrz/Tyrrrzme"
+        repo="Tyrrrz/Tyrrrz.me"
         repoId="MDEwOlJlcG9zaXRvcnkyMDY0MDIxMDc="
         category="Blog"
         categoryId="DIC_kwDODE1yO84CT-_a"
