@@ -32,7 +32,7 @@ const CoverSection: FC<BlogPostPageProps> = ({ post }) => {
       className={c('mt-4', 'p-4', 'bg-purple-100', 'rounded', 'border', 'border-purple-500')}
     >
       <div className={c('w-fit', 'mx-auto')}>
-        <Image src={post.coverUrl} alt="Cover image" priority />
+        <Image src={post.coverUrl} width={800} height={450} alt="Cover image" priority />
       </div>
     </section>
   );
