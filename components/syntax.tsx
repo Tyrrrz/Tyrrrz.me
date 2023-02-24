@@ -1,6 +1,6 @@
 import { FC } from 'react';
-import { Prism } from 'react-syntax-highlighter';
-import { tomorrow } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import { PrismAsyncLight as SyntaxHighlighter } from 'react-syntax-highlighter';
+import tomorrow from 'react-syntax-highlighter/dist/cjs/styles/prism/tomorrow';
 
 type SyntaxProps = {
   source: string;
@@ -9,7 +9,7 @@ type SyntaxProps = {
 
 const Syntax: FC<SyntaxProps> = ({ source, language }) => {
   return (
-    <Prism
+    <SyntaxHighlighter
       style={tomorrow}
       customStyle={{
         fontSize: '0.875rem',
@@ -18,7 +18,7 @@ const Syntax: FC<SyntaxProps> = ({ source, language }) => {
       language={language}
     >
       {source}
-    </Prism>
+    </SyntaxHighlighter>
   );
 };
 

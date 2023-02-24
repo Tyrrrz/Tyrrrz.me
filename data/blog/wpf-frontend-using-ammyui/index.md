@@ -19,7 +19,7 @@ Although technically not required, you will definitely want to also install the 
 
 AmmyUI works by letting you define your views in its custom language, and then converting them to XAML at build time. The syntax looks a lot like JSON but with some nuances and shortcuts, as you can see here:
 
-```js
+```javascript
 Window "MainWindow" {
   Width: 200
   Height: 100
@@ -45,7 +45,7 @@ Although on its own this already looks a bit cleaner, Ammy's true power lies in 
 
 Names and keys are first-class citizens and can be defined really quickly using shortcuts:
 
-```js
+```javascript
 // Grid with a name
 Grid "MyGrid" {
 }
@@ -63,7 +63,7 @@ This means you can import an entire CLR namespace and stop worrying about prefix
 
 For example, if you are using [MaterialDesignInXamlToolkit](https://github.com/ButchersBoy/MaterialDesignInXamlToolkit) and want to use a `Card` control in your layout, you can simply do this:
 
-```js
+```javascript
 using MaterialDesignThemes.Wpf
 
 Window "DiscordChatExporter.Views.MainWindow" {
@@ -87,7 +87,7 @@ Window "DiscordChatExporter.Views.MainWindow" {
 
 Ammy also provides lots of shortcuts for declaring bindings. A very basic binding can be set up like this:
 
-```js
+```javascript
 TextBlock {
   Text: bind Text
 }
@@ -95,7 +95,7 @@ TextBlock {
 
 You can also specify binding source using a special `from` keyword. Here's how you can easily bind to a property of a different control:
 
-```js
+```javascript
 TextBlock "OtherTextBlock" {
   Text: "Hello, World!"
 }
@@ -111,7 +111,7 @@ There are many other things you can use with `from`, namely `$this`, `$template`
 
 Similar to bindings, Ammy has a few shortcuts for referencing resources as well:
 
-```js
+```javascript
 TextBlock {
   Foreground: resource "ForegroundBrush"     // static
   Foreground: dyn resource "ForegroundBrush" // dynamic
@@ -124,7 +124,7 @@ This is easily my most favorite feature, something that lets you forget about `B
 
 In Ammy you can specify a converter right inside your binding declaration:
 
-```js
+```javascript
 TextBlock {
   Visibility: bind IsTextAvailable
               convert (bool b) => b ? Visibility.Visible : Visibility.Collapsed
@@ -137,7 +137,7 @@ You can write most C# code inside a converter, invoke your own methods, use your
 
 This framework also offers some features to help you keep your code DRY. For example, you can declare variables and use them in different ways:
 
-```js
+```javascript
 $primaryColor = "#343838"
 $propertyName = "Text"
 
@@ -151,7 +151,7 @@ TextBlock {
 
 You can also define mixins, which are reusable sets of properties that can be included in your controls:
 
-```js
+```javascript
 mixin Centered() for TextBlock {
   TextAlignment: Center
 }
@@ -163,7 +163,7 @@ TextBlock {
 
 Mixins can also take any number of parameters, some of which can be optional:
 
-```js
+```javascript
 mixin Cell (row = none, column = none, rowSpan = none, columnSpan = none) for FrameworkElement {
   Grid.Row: $row
   Grid.Column: $column
@@ -183,7 +183,7 @@ The AmmyUI NuGet package also comes with quite a few pre-defined mixins that can
 
 Alias is sort of similar to a mixin, except that it's used to essentially create templates for your UI elements.
 
-```js
+```javascript
 alias BigCenteredTextBlock(text) {
   TextBlock {
     HorizontalAlignment: Center

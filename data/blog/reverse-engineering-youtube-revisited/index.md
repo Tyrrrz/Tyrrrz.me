@@ -220,7 +220,7 @@ Normally, when running in the browser, the deciphering process is performed by t
 
 To do that, you need to first identify the latest version of the player, which can be done by querying the `/iframe_api` endpoint. It's the same endpoint that YouTube uses for embedding videos on third-party websites, and it returns a script file that looks like this:
 
-```js
+```javascript
 var scriptUrl = 'https://www.youtube.com/s/player/4248d311/www-widgetapi.vflset/www-widgetapi.js';
 
 /* ... omitted ~40 lines of irrelevant code ... */
@@ -234,7 +234,7 @@ https://www.youtube.com/s/player/{version}/player_ias.vflset/en_US/base.js
 
 Even though the source file is a massive blob of minified, unreadable JavaScript code, locating the deciphering instructions is fairly simple. All you need to do is search for `a=a.split("");`, which should bring you to the entry step of the deciphering process. In my case, this lead me to the following block:
 
-```js
+```javascript
 // Prettified for readability
 fta = function (a) {
   a = a.split('');
@@ -248,7 +248,7 @@ fta = function (a) {
 
 As you can see, the deciphering algorithm is implemented as the `fta` function that takes a single argument (the `s` value from earlier) and passes it through a series of filters. The filters themselves are defined as methods on the `hD` object located in the same scope:
 
-```js
+```javascript
 // Prettified for readability
 var hD = {
   // Swap filter
@@ -285,7 +285,7 @@ Before you can apply these steps on the stream signature, however, you need to r
 
 To identify a particular implementation of the cipher, YouTube does not rely on the version of the player, but rather on a special value called `signatureTimestamp`. This value is used as a random seed to generate the cipher algorithm, and to keep it consistent between the client and the server. You can extract it from the player source code by searching for `signatureTimestamp`:
 
-```js
+```javascript
 // Prettified for readability
 var v = {
   splay: !1,

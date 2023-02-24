@@ -154,7 +154,7 @@ let letterOrDigitOrSpecial =
 
 Not only is the parser above going to work on a bunch of different inputs, it will also produce informative error messages if the parser fails. For example, if we try to use it to parse `"!"`, it will say:
 
-```js
+```javascript
 Failure:
 Error in Ln: 1 Col: 1
 !

@@ -83,7 +83,7 @@ By setting `start` to `0` and `count` to `1` we are limiting the response to one
 
 Finally, the fully formed URL should look something like this:
 
-```text
+```
 http://steamcommunity.com/market/listings/730/AK-47%20%7C%20Redline%20%28Field-Tested%29/render?start=0&count=1&currency=1&format=json
 ```
 

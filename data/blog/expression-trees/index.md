@@ -457,7 +457,7 @@ public class Benchmarks
 }
 ```
 
-```md
+```markdown
 | Method                |       Mean |     Error |    StdDev | Ratio |
 | --------------------- | ---------: | --------: | --------: | ----: |
 | Reflection            | 192.975 ns | 1.6802 ns | 1.4895 ns |  1.00 |
@@ -603,7 +603,7 @@ public class Benchmarks
 }
 ```
 
-```md
+```markdown
 | Method      | x     |       Mean |     Error |    StdDev | Ratio | RatioSD |
 | ----------- | ----- | ---------: | --------: | --------: | ----: | ------: |
 | Static      | 13.37 |  0.6077 ns | 0.0176 ns | 0.0147 ns |  1.00 |    0.00 |
@@ -784,7 +784,7 @@ public class Benchmarks
 }
 ```
 
-```md
+```markdown
 | Method              | Count |      Mean |     Error |    StdDev | Ratio |
 | ------------------- | ----- | --------: | --------: | --------: | ----: |
 | Standard dictionary | 10    | 24.995 ns | 0.1821 ns | 0.1704 ns |  1.00 |
@@ -872,7 +872,7 @@ public class Benchmarks
 }
 ```
 
-```md
+```markdown
 | Method         |      Mean |     Error |    StdDev | Ratio | Allocated |
 | -------------- | --------: | --------: | --------: | ----: | --------: |
 | Compile        | 38.435 us | 0.2131 us | 0.1889 us |  1.00 |   3.53 KB |
@@ -1109,7 +1109,7 @@ public void IntTryParse_Test()
 
 By doing that, the errors produced by failed assertions become more descriptive. This makes it easier to understand what went wrong without having to look inside the test implementation:
 
-```yml
+```yaml
 X IntTryParse_Test [60ms]
   Error Message:
     Parsed value is incorrect
@@ -1166,7 +1166,7 @@ public void IntTryParse_Test()
 
 Now, when this test fails we will instead get the following error message:
 
-```yml
+```yaml
 X IntTryParse_Test [99ms]
   Error Message:
     Assert.That(value, Is.EqualTo(124))

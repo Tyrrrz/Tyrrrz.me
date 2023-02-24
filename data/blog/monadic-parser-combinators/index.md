@@ -105,13 +105,13 @@ There are many approaches for writing parsers for context-free languages. Most l
 
 Parser combinators, as a concept, revolves around representing each parser as a modular function that takes on some input and produces either a successful result or an error:
 
-```js
+```javascript
 f(input) -> (result, inputRemainder) | (error)
 ```
 
 These parsers can be transformed or combined to form more complex parsers by wrapping the function in another function. Generally speaking, combinators are just another class of functions that take other parser functions and produce more intricate ones.
 
-```js
+```javascript
 F(f(input)) -> g(input)
 ```
 
@@ -303,7 +303,7 @@ The `Or` combinator is an extension method that takes two parsers of the same ty
 
 One of the coolest things about using parser combinators is how expressive your code is. It can be read quite literally, in fact:
 
-```js
+```javascript
 JsonBoolean is either TrueJsonBoolean or FalseJsonBoolean.
 TrueJsonBoolean is a string "true" which produces a `JsonBoolean` whose value is `true`.
 FalseJsonBoolean is a string "false" which produces a `JsonBoolean` whose value is `false`.

@@ -1,5 +1,5 @@
 const { spawnSync } = require('child_process');
-const withPWA = require('next-pwa');
+const PWA = require('next-pwa');
 const runtimeCaching = require('next-pwa/cache');
 
 /** @type {import('next').NextConfig} */
@@ -29,7 +29,7 @@ const config = {
 };
 
 const plugins = [
-  withPWA({
+  PWA({
     dest: 'public',
     disable: process.env.NODE_ENV === 'development',
     runtimeCaching
