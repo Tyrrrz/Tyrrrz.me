@@ -32,7 +32,7 @@ const CoverSection: FC<BlogPostPageProps> = ({ post }) => {
       className={c('mt-4', 'p-4', 'bg-purple-100', 'rounded', 'border', 'border-purple-500')}
     >
       <div className={c('w-fit', 'mx-auto')}>
-        <Image src={post.coverUrl} width={800} height={450} alt="Cover image" priority />
+        <Image src={post.coverUrl} width={800} height={450} alt="Cover image" />
       </div>
     </section>
   );
@@ -69,7 +69,9 @@ const SubscribeSection: FC = () => {
       <div>
         Want to know when I post a new article? Follow me on{' '}
         <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or subscribe to the{' '}
-        <Link href="/blog/rss.xml" external>RSS Feed</Link>
+        <Link href="/blog/rss.xml" external>
+          RSS Feed
+        </Link>
       </div>
     </section>
   );
