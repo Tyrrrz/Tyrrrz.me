@@ -32,8 +32,11 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
         <Paragraph>
           I write about software design, architecture, programming languages, and other technical
           topics. Follow me on <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or subscribe
-          to the <Link href="/blog/rss.xml">RSS Feed</Link> to get notified when I post a new
-          article.
+          to the{' '}
+          <Link href="/blog/rss.xml" external>
+            RSS Feed
+          </Link>{' '}
+          to get notified when I post a new article.
         </Paragraph>
       </section>
 
