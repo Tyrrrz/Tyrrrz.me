@@ -3,6 +3,9 @@ import type { Donation } from '~/data/donate';
 import { bufferIterable } from '~/utils/async';
 import { getGitHubToken } from '~/utils/env';
 
+// Test out here:
+// https://docs.github.com/en/graphql/overview/explorer
+
 const createClient = () => {
   return graphql.defaults({
     headers: {
@@ -124,7 +127,9 @@ export const getGitHubSponsorsDonations = async function* () {
         const periodEndActivity = activities.find(
           (otherActivity) =>
             new Date(otherActivity.timestamp) > periodStart &&
+            !otherActivity.sponsorsTier.isOneTime &&
             (otherActivity.action === 'CANCELLED_SPONSORSHIP' ||
+              otherActivity.action === 'NEW_SPONSORSHIP' ||
               otherActivity.action === 'TIER_CHANGE')
         );
 
@@ -142,6 +147,7 @@ export const getGitHubSponsorsDonations = async function* () {
     const isPrivate = activities
       .filter((activity) => activity.sponsor.login === sponsor)
       .filter((activity) => activity.action === 'NEW_SPONSORSHIP')
+      .filter((activity) => !!activity.sponsor.sponsorshipForViewerAsSponsorable?.privacyLevel)
       .map(
         (activity) => activity.sponsor.sponsorshipForViewerAsSponsorable?.privacyLevel === 'PRIVATE'
       )
