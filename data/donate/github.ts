@@ -153,7 +153,9 @@ export const getGitHubSponsorsDonations = async function* () {
     const isPrivate = !!activities
       .filter((activity) => activity.action === 'NEW_SPONSORSHIP')
       .filter((activity) => activity.sponsor.login === sponsor.login)
-      .filter((activity) => !!activity.sponsor.sponsorshipForViewerAsSponsorable?.privacyLevel)
+      .filter(
+        (activity) => activity.sponsor.sponsorshipForViewerAsSponsorable?.privacyLevel != null
+      )
       .map(
         (activity) => activity.sponsor.sponsorshipForViewerAsSponsorable?.privacyLevel === 'PRIVATE'
       )
