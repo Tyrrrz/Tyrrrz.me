@@ -1,5 +1,5 @@
 import type { Donation } from '~/data/donate';
-import { getPatreonToken } from '~/utils/env';
+import { getPatreonToken, getPrivateDonors } from '~/utils/env';
 import { formatUrlWithQuery } from '~/utils/url';
 
 const getCampaigns = async function* () {
@@ -105,14 +105,18 @@ const getPledges = async function* (campaignId: string) {
 export const getPatreonDonations = async function* () {
   for await (const campaign of getCampaigns()) {
     for await (const pledge of getPledges(campaign.id)) {
+      const name = pledge.attributes.full_name;
+      const amount = pledge.attributes.lifetime_support_cents / 100;
+      const isPrivate = getPrivateDonors().includes(pledge.attributes.full_name);
+
       // Some pledges could have been cancelled before the first payment was made
-      if (pledge.attributes.lifetime_support_cents <= 0) {
+      if (amount <= 0) {
         continue;
       }
 
       const donation: Donation = {
-        name: pledge.attributes.full_name,
-        amount: pledge.attributes.lifetime_support_cents / 100,
+        name: !isPrivate ? name : undefined,
+        amount,
         platform: 'Patreon'
       };
 

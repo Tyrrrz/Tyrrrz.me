@@ -54,3 +54,12 @@ export const getBuyMeACoffeeToken = () => {
 
   return value;
 };
+
+export const getPrivateDonors = () => {
+  const value = process.env.PRIVATE_DONORS;
+  if (!value) {
+    return [];
+  }
+
+  return value.split('\n');
+};

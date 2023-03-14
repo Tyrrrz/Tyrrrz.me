@@ -2,7 +2,7 @@ import { graphql } from '@octokit/graphql';
 import type { Donation } from '~/data/donate';
 import { distinctBy } from '~/utils/array';
 import { bufferIterable } from '~/utils/async';
-import { getGitHubToken } from '~/utils/env';
+import { getGitHubToken, getPrivateDonors } from '~/utils/env';
 
 // Test out here:
 // https://docs.github.com/en/graphql/overview/explorer
@@ -150,20 +150,24 @@ export const getGitHubSponsorsDonations = async function* () {
       })
       .reduce((acc, amount) => acc + amount, 0);
 
-    const isPrivate = !!activities
-      .filter((activity) => activity.action === 'NEW_SPONSORSHIP')
-      .filter((activity) => activity.sponsor.login === sponsor.login)
-      .filter(
-        (activity) => activity.sponsor.sponsorshipForViewerAsSponsorable?.privacyLevel != null
-      )
-      .map(
-        (activity) => activity.sponsor.sponsorshipForViewerAsSponsorable?.privacyLevel === 'PRIVATE'
-      )
-      .at(-1);
+    const isPrivate =
+      getPrivateDonors().includes(sponsor.login) ||
+      getPrivateDonors().includes(sponsor.name) ||
+      !!activities
+        .filter((activity) => activity.action === 'NEW_SPONSORSHIP')
+        .filter((activity) => activity.sponsor.login === sponsor.login)
+        .map(
+          (activity) =>
+            activity.sponsor.sponsorshipForViewerAsSponsorable?.privacyLevel === 'PRIVATE'
+        )
+        .at(-1);
+
+    const name = sponsor.name || sponsor.login;
+    const amount = oneTimeTotal + monthlyTotal;
 
     const donation: Donation = {
-      name: !isPrivate ? sponsor.name || sponsor.login : undefined,
-      amount: oneTimeTotal + monthlyTotal,
+      name: !isPrivate ? name : undefined,
+      amount,
       platform: 'GitHub Sponsors'
     };
 

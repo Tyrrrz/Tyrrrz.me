@@ -1,7 +1,7 @@
 import type { Donation } from '~/data/donate';
 import { groupBy } from '~/utils/array';
 import { bufferIterable } from '~/utils/async';
-import { getBuyMeACoffeeToken } from '~/utils/env';
+import { getBuyMeACoffeeToken, getPrivateDonors } from '~/utils/env';
 import { formatUrlWithQuery } from '~/utils/url';
 
 const getSupporters = async function* () {
@@ -57,16 +57,20 @@ export const getBuyMeACoffeeDonations = async function* () {
   const pledges = (await bufferIterable(getSupporters()))
     .filter((supporter) => !supporter.is_refunded)
     .map((supporter) => {
-      const isPrivate = supporter.support_visibility === 0;
       const email = supporter.payer_email;
       const name = supporter.supporter_name || supporter.payer_name;
       const amount = Number(supporter.support_coffee_price) * supporter.support_coffees;
 
+      const isPrivate =
+        getPrivateDonors().includes(email) ||
+        getPrivateDonors().includes(name || '') ||
+        supporter.support_visibility === 0;
+
       return {
-        isPrivate,
         email,
         name,
-        amount
+        amount,
+        isPrivate
       };
     });
 
