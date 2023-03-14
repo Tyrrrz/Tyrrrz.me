@@ -1,5 +1,6 @@
 import { graphql } from '@octokit/graphql';
 import type { Donation } from '~/data/donate';
+import { distinctBy } from '~/utils/array';
 import { bufferIterable } from '~/utils/async';
 import { getGitHubToken } from '~/utils/env';
 
@@ -100,7 +101,11 @@ const getSponsorActivities = async function* () {
 
 export const getGitHubSponsorsDonations = async function* () {
   const activities = await bufferIterable(getSponsorActivities());
-  const sponsors = [...new Set(activities.map((activity) => activity.sponsor.login))];
+
+  const sponsors = distinctBy(
+    activities.map((activity) => activity.sponsor),
+    (sponsor) => sponsor.login
+  );
 
   for (const sponsor of sponsors) {
     // Sum up all one-time donations
@@ -108,7 +113,7 @@ export const getGitHubSponsorsDonations = async function* () {
       .filter(
         (activity) =>
           activity.action === 'NEW_SPONSORSHIP' &&
-          activity.sponsor.login === sponsor &&
+          activity.sponsor.login === sponsor.login &&
           activity.sponsorsTier.isOneTime
       )
       .reduce((acc, activity) => acc + activity.sponsorsTier.monthlyPriceInCents / 100, 0);
@@ -118,7 +123,7 @@ export const getGitHubSponsorsDonations = async function* () {
       .filter(
         (activity) =>
           (activity.action === 'NEW_SPONSORSHIP' || activity.action === 'TIER_CHANGE') &&
-          activity.sponsor.login === sponsor &&
+          activity.sponsor.login === sponsor.login &&
           !activity.sponsorsTier.isOneTime
       )
       .map((activity) => {
@@ -126,11 +131,12 @@ export const getGitHubSponsorsDonations = async function* () {
 
         const periodEndActivity = activities.find(
           (otherActivity) =>
-            new Date(otherActivity.timestamp) > periodStart &&
-            !otherActivity.sponsorsTier.isOneTime &&
             (otherActivity.action === 'CANCELLED_SPONSORSHIP' ||
               otherActivity.action === 'NEW_SPONSORSHIP' ||
-              otherActivity.action === 'TIER_CHANGE')
+              otherActivity.action === 'TIER_CHANGE') &&
+            otherActivity.sponsor.login === sponsor.login &&
+            !otherActivity.sponsorsTier.isOneTime &&
+            new Date(otherActivity.timestamp) > periodStart
         );
 
         const periodEnd = periodEndActivity ? new Date(periodEndActivity.timestamp) : new Date();
@@ -144,9 +150,9 @@ export const getGitHubSponsorsDonations = async function* () {
       })
       .reduce((acc, amount) => acc + amount, 0);
 
-    const isPrivate = activities
-      .filter((activity) => activity.sponsor.login === sponsor)
+    const isPrivate = !!activities
       .filter((activity) => activity.action === 'NEW_SPONSORSHIP')
+      .filter((activity) => activity.sponsor.login === sponsor.login)
       .filter((activity) => !!activity.sponsor.sponsorshipForViewerAsSponsorable?.privacyLevel)
       .map(
         (activity) => activity.sponsor.sponsorshipForViewerAsSponsorable?.privacyLevel === 'PRIVATE'
@@ -154,7 +160,7 @@ export const getGitHubSponsorsDonations = async function* () {
       .at(-1);
 
     const donation: Donation = {
-      name: !isPrivate ? sponsor : undefined,
+      name: !isPrivate ? sponsor.name || sponsor.login : undefined,
       amount: oneTimeTotal + monthlyTotal,
       platform: 'GitHub Sponsors'
     };
