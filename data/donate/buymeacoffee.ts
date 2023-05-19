@@ -8,15 +8,15 @@ const getSupporters = async function* () {
   let page = 1;
 
   while (true) {
-    // BMAC's rate limits are absolutely absurd, so we'll use a caching layer that I made.
-    // https://github.com/Tyrrrz/BMAC-API-Cache
-    const url = formatUrlWithQuery('https://bmac-api-cache-server.onrender.com/api/v1/supporters', {
+    const url = formatUrlWithQuery('https://developers.buymeacoffee.com/api/v1/supporters', {
       page: page.toString()
     });
 
     const response = await fetch(url, {
       headers: {
-        authorization: `Bearer ${getBuyMeACoffeeToken()}`
+        'authorization': `Bearer ${getBuyMeACoffeeToken()}`,
+        // BMAC's Cloudflare sometimes blocks requests with no user agent
+        'user-agent': 'tyrrrz.me'
       }
     });
 
