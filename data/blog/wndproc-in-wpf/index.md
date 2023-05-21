@@ -5,9 +5,9 @@ date: '2017-02-02'
 
 WndProc is a callback function that takes care of system messages sent from the operating system.
 
-Unlike WinForms, in WPF, it's not directly exposed to you as it's hidden by the framework's layer of abstraction. There are times, however, when you need to process these messages manually, for example when dealing with WinAPI.
+Unlike WinForms, in WPF, it's not directly exposed to you as it's hidden beneath the framework's layer of abstraction. There are times, however, when you need to process these messages manually, for example when dealing with Windows API.
 
-Let's look at some ways how we can do it.
+Let's look at some ways that we can do it.
 
 ## Non-MVVM way
 
@@ -26,7 +26,7 @@ private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref b
 }
 ```
 
-In the example above we use the application's main window as the host, as it typically stays open for as long as the application is running. You can specify a different window as a parameter to `FromVisual(...)` method, but then make sure to call `source.RemoveHook(...)` and `source.Dispose()` after you're done.
+In the example above we use the application's main window as the host, as it typically stays open for as long as the application is running. You can specify a different window through a parameter in the `FromVisual(...)` method, but then make sure to call `source.RemoveHook(...)` and `source.Dispose()` after you're done.
 
 The above approach suffers from not being MVVM-friendly — the `WndProc` method, which will most likely be defined in the model layer, is actually coupled to a window. As a result, it can introduce a circular dependency between the view and the model, where one will wait on the other to initialize.
 
@@ -34,7 +34,7 @@ The above approach suffers from not being MVVM-friendly — the `WndProc` method
 
 As an alternative, we can decouple message processing from the view layer by creating a specialized invisible "sponge" window.
 
-Conveniently, `System.Windows.Forms.NativeWindow` fits exactly this purpose — it's a low level window class that does nothing else but listen to system messages. We can use it be adding a reference to `System.Windows.Forms`.
+Conveniently, `System.Windows.Forms.NativeWindow` fits exactly this purpose — it's a low level window class that does nothing else but listen to system messages. We can use it by adding a reference to the `System.Windows.Forms` assembly.
 
 Here is how I defined my sponge window:
 
@@ -91,7 +91,7 @@ public class WndProcService : IDisposable
 }
 ```
 
-By handling the `WndProcCalled` event you can listen to incoming messages. Typically, you would want to call some WinAPI method that subscribes a window to additional WndProc messages using its handle, e.g. [RegisterPowerSettingNotification](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerpowersettingnotification) or [RegisterHotKey](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey).
+By handling the `WndProcCalled` event, you can listen to incoming messages. Typically, you would want to call some Windows API method that subscribes a window to additional WndProc messages using its handle, e.g. [RegisterPowerSettingNotification](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerpowersettingnotification) or [RegisterHotKey](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey).
 
 For example, if we were interested in registering a global hotkey and listening to its events, we could do it in such way:
 

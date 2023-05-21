@@ -112,7 +112,7 @@ export const publishBlogFeed = async () => {
     id: getSiteUrl(),
     title: "Oleksii Holub's Blog",
     description:
-      'Oleksii Holub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker',
+      'Oleksii Holub (@tyrrrz) is a software developer, open-source maintainer, tech blogger and conference speaker',
     link: getSiteUrl('/blog'),
     image: getSiteUrl('/logo.png'),
     copyright: `Copyright (c) 2015-${date.getFullYear()} Oleksii Holub`,

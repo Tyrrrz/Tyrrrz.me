@@ -11,11 +11,11 @@ However, there is one aspect of the query syntax that makes it particularly intr
 
 This presents a very interesting opportunity where we can use this feature to enhance other types (including our own) with a special comprehension syntax that helps express certain operations in a more concise and clear way. In practice, it allows us to achieve something similar to [F#'s computation expressions](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions) or [Haskell's `do` notation](https://en.wikibooks.org/wiki/Haskell/do_notation).
 
-In this article we will see how the LINQ query syntax works under the hood, how to make it work with custom types, and look at some practical scenarios where that can actually be useful.
+In this article we will see how the LINQ query syntax works under the hood, how to integrate it with custom types, and look at some practical scenarios where that can actually be useful.
 
 ## Query syntax internals
 
-To understand how to repurpose LINQ query syntax for other types, let's start by taking a look at how it already works with regular collections. For example, imagine we have a sequence of numbers that we want to filter, reorder, and transform. Using LINQ we can do it like this:
+To understand how to repurpose the query syntax for other types, let's start by taking a look at how it already works with regular collections. For example, imagine we have a sequence of numbers that we want to filter, reorder, and transform. Using LINQ we can do it like this:
 
 ```csharp
 var source = new[] {1, 2, 3, 4, 5};
@@ -42,7 +42,7 @@ var results = source
 
 Now, if we were to compare the two approaches, there's not much that can be said in favor of the query syntax. It looks rather foreign amidst the rest of C# code and doesn't really accomplish anything beyond what extension methods can already do.
 
-However, there are also some cases where writing LINQ operations using query syntax may actually lead to more appealing code. As an example, consider a scenario where we need to get a list of subdirectories inside a specific directory, and then enumerate the files within them in a single sequence:
+However, there are also some cases where writing LINQ operations using the query syntax may actually lead to more appealing code. As an example, consider a scenario where we need to get a list of subdirectories inside a specific directory, and then enumerate the files within them in a single sequence:
 
 ```csharp
 var files =
@@ -53,7 +53,7 @@ var files =
 
 Note how the query notation allows us to express derived sequences (which are essentially nested iterations) in a naturally comprehensible serial form. This is possible to do by simply combining multiple `from` operators together.
 
-For comparison, an equivalent code relying on method syntax lends to a somewhat less legible structure:
+For comparison, an equivalent code relying on the method syntax lends to a somewhat less legible structure:
 
 ```csharp
 var files = Directory.EnumerateDirectories("/some/dir/")
@@ -62,7 +62,7 @@ var files = Directory.EnumerateDirectories("/some/dir/")
 
 In this case, the query notation form doesn't just present another way of writing the same thing, but **offers an alternative mental model for approaching the problem**. Interestingly enough, such mental model can be useful in many different domains, not just when dealing with collections.
 
-Fundamentally, all query operators function based on simple mapping rules which decide how they get translated to their equivalent extension methods. Nested `from` clauses, in particular, are evaluated by calling a specific overload of `SelectMany(...)` that accepts a collection selector and a result selector. For `IEnumerable<T>`, this method is defined in the standard library as follows:
+Fundamentally, all query operators function based on simple mapping rules which decide how they get translated to their equivalent extension methods. Nested `from` clauses, in particular, are evaluated by calling a specific overload of `SelectMany(...)` that accepts a collection selector and a result selector. For `IEnumerable<T>`, this method is defined in the framework as follows:
 
 ```csharp
 // https://source.dot.net/#System.Linq/System/Linq/SelectMany.cs,bc79a642e00b8681
@@ -103,7 +103,7 @@ public static Container<TResult> SelectMany<TFirst, TSecond, TResult>(
 }
 ```
 
-In academic terms, this method signature actually represents a slightly more elaborate version of the [_monadic bind function_](<https://en.wikipedia.org/wiki/Monad_(functional_programming)#Overview>), which is used to sequence monadic operations together. Knowing that is not very important, but it helps us understand that LINQ query syntax (specifically the part involving multiple `from` clauses) is effectively a general-purpose monadic comprehension notation.
+In academic terms, this method signature actually represents a slightly more elaborate version of the [_monadic bind function_](<https://en.wikipedia.org/wiki/Monad_(functional_programming)#Overview>), which is used to sequence monadic operations together. Knowing that is not very important, but it helps us understand that the query syntax (specifically when it involves multiple `from` clauses) is effectively a general-purpose monadic comprehension notation.
 
 Consequentially, any container type for which an appropriate `SelectMany(...)` may be reasonably defined, can benefit from the alternative mental model provided by LINQ. Moving on, let's explore some potential candidates.
 
@@ -111,7 +111,7 @@ Consequentially, any container type for which an appropriate `SelectMany(...)` m
 
 When it comes to container types, `Task<T>` is probably the most ubiquitous example that can be found in C# code. Conceptually, this type represents an operation that executes asynchronously and encapsulates its current state along with its eventual result. Additionally, it also provides a way to queue up continuation callbacks that will trigger once the task has completed.
 
-An implementation of `SelectMany(...)`, in this case, can leverage the callback API to enable comprehension syntax for chaining tasks into pipelines of asynchronous operations. Following the shape we've established previously, here is how that method would look like:
+An implementation of `SelectMany(...)`, in this case, can leverage the callback API to enable comprehension syntax for chaining tasks into pipelines of asynchronous operations. Following the shape we've established previously, here is how that method would look in practice:
 
 ```csharp
 public static Task<TResult> SelectMany<TFirst, TSecond, TResult>(
@@ -177,13 +177,13 @@ Nevertheless, this example should hopefully highlight the primary use case for i
 
 Different programming paradigms utilize different ways of representing and handling failures. Object-oriented languages, traditionally, employ exceptions and `try`/`catch` blocks for this purpose — a very convenient approach that helps keep the code focused on the happy path, while implicitly routing potential errors towards dedicated handlers at the top of the call stack.
 
-When writing in a functional style, on the other hand, failures are typically encoded directly within function signatures using container types such as `Option<T>` and `Result<TValue, TError>`. This makes the representation of error states explicit and forces the caller to properly account for each of them before proceeding further with the execution.
+When writing in a functional style, on the other hand, failures are typically encoded directly within the function signatures using container types such as `Option<T>` and `Result<TValue, TError>`. This makes the representation of error states explicit and forces the caller to properly account for each of them before proceeding further with the execution.
 
-Even in primarily object-oriented environments, such as C#, optional types are still commonly used to communicate expected, predictable, or otherwise non-fatal errors, for which exceptions may often be impractical. For example, when building a web service, we can choose to express domain-level failures this way to ensure that they are correctly handled and mapped to corresponding HTTP status codes upon reaching the system boundary.
+Even in primarily object-oriented environments, such as C#, optional types are still commonly used to communicate expected, predictable, or otherwise non-fatal errors, for which exceptions may often be impractical. For example, when building a web service, we can choose to express domain-level failures this way to ensure that they are correctly handled and mapped to the corresponding HTTP status codes upon reaching the system boundary.
 
-One downside of the functional approach, however, is that it doesn't allow us to easily defer the responsibility of dealing with an error to upstream callers, which is something that exceptions provide in the form of their bubbling behavior. Being explicit means we have to always handle both the optimistic and pessimistic outcomes simultaneously, but that can be a bit cumbersome. After all, no one would want to write code where you need to [deal with errors every single step of the way](https://golang.org).
+One downside of the functional approach, however, is that it doesn't allow us to easily defer the responsibility of dealing with the error to upstream callers, which is something that exceptions provide in the form of their bubbling behavior. Being explicit means we have to always handle both the optimistic and pessimistic outcomes simultaneously, but that can be a bit cumbersome. After all, no one would want to write code where you're forced to [check and propagate errors every single step of the way](https://golang.org).
 
-Luckily, this is the exact kind of problem that we can solve by introducing custom LINQ query syntax. To illustrate, let's first imagine that we have an `Option<T>` type already implemented as shown below:
+Luckily, this is the exact kind of problem that we can solve by introducing a custom query syntax. To illustrate, let's first imagine that we have an `Option<T>` type already implemented as shown below:
 
 ```csharp
 // Encapsulates a single value or lack thereof
@@ -257,7 +257,7 @@ noneResult.Match(
 );
 ```
 
-Overall, the `Match(...)` API works fairly well when we're dealing with isolated results, but becomes noticeably more convoluted when there are multiple dependent operations involved. For example, let's imagine we also have a method called `GetEnvironmentVariable(...)` that returns an `Option<string>`:
+Overall, the `Match(...)` API works fairly well when we're dealing with isolated values, but becomes noticeably more convoluted when there are multiple dependent operations involved. For example, let's imagine we also have a method called `GetEnvironmentVariable(...)` that returns an `Option<string>`:
 
 ```csharp
 // Resolves an environment variable, or returns 'none' if it's not set
@@ -271,7 +271,7 @@ public static Option<string> GetEnvironmentVariable(string name)
 }
 ```
 
-Now if we wanted to combine it with our existing `ParseInt(...)` method to convert the value of an environment variable to a number, we'd have to write code like this:
+Now if we wanted to combine it with our existing `ParseInt(...)` method to convert the value of an environment variable into a number, we'd have to write code like this:
 
 ```csharp
 var maxInstances = GetEnvironmentVariable("MYAPP_MAXALLOWEDINSTANCES").Match(
@@ -296,7 +296,7 @@ maxInstances.Match(
 );
 ```
 
-It is clear that the chain of nested `Match(...)` calls above is not particularly readable. Instead of dealing with an optional container on each step, it would be more preferable if we could focus on only the transformations to the actual value, while propagating all the _none_ states implicitly.
+It is clear that the chain of nested `Match(...)` calls above is not particularly readable. Instead of dealing with an optional container on each step, it would be more preferable if we could focus only on the transformations to the actual value, while propagating all the _none_ states implicitly.
 
 There are a few different ways to achieve this, but as already mentioned before, this is an ideal use case for LINQ. Just like `Task<T>` in the earlier example, `Option<T>` represents a type with chainable semantics, meaning that it's a perfect candidate for a custom `SelectMany(...)` implementation:
 
@@ -352,7 +352,7 @@ Graphically, the above implementation can also be illustrated with the following
                     [ Return result as 'some' ]
 ```
 
-Now that we have the corresponding `SelectMany(...)` defined, we can rewrite our original example to use LINQ query syntax like this:
+Now that we have the corresponding `SelectMany(...)` method defined, we can rewrite our original example to use the LINQ query syntax like this:
 
 ```csharp
 var maxInstances =
@@ -377,7 +377,7 @@ public Option<int> GetMaxInstances() =>
 
 In this syntax, the range variable in the `from` clause refers to the underlying value within the optional container. The corresponding expression is only evaluated in case the value actually exists — if a _none_ result is returned at any stage of the pipeline, the execution short-circuits without proceeding further. Conceptually, this works very similarly to collections, seeing as `Option<T>` is really just a special case of `IEnumerable<T>` that can only have one or zero elements.
 
-On the surface using LINQ resulted in more succinct and readable code, but most importantly it provided us with a convenient comprehension model that allows us to express operations on optional values by treating them as if they are already materialized. This lets us more easily create execution chains while implicitly pushing the concern of unwrapping the container towards upstream callers.
+On the surface, using LINQ resulted in more succinct and readable code, but most importantly it provided us with a convenient comprehension model that allows us to express operations on optional values by treating them as if they are already materialized. This lets us more easily create execution chains while implicitly pushing the concern of unwrapping the container towards upstream callers.
 
 ## Extrapolating and combining
 
@@ -408,9 +408,9 @@ public static async Task<Option<TResult>> SelectMany<TFirst, TSecond, TResult>(
 }
 ```
 
-Because `Option<T>.Match(...)` has an overload that takes `Func<...>` delegates, we can simply mark the handler as `async` to have it return a task. Essentially, this implementation of `SelectMany(...)` looks the same as the one we wrote for regular `Option<T>`, with an addition of a few `await` operators.
+Because `Option<T>.Match(...)` has an overload that takes `Func<...>` delegates, we can simply mark the handler as `async` to have it return a task. Essentially, this implementation of `SelectMany(...)` looks the same as the one we wrote for the regular `Option<T>`, with an addition of a few `await` operators.
 
-To illustrate a practical use case for this syntax, let's imagine we have a class named `PaymentProcessor` which can be used to resolve user's payment information and send money between accounts:
+To illustrate a practical use case for this syntax, let's imagine we have a class named `PaymentProcessor` which can be used to resolve user payment information and send money between accounts:
 
 ```csharp
 public class PaymentProcessor

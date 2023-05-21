@@ -5,7 +5,7 @@ date: '2019-01-26'
 
 I'm sure everyone with at least some background in C# is aware of extension methods — a nice feature that lets developers extend existing types with new methods.
 
-This is extremely convenient in cases where you want to add functionality to types you don't have control over. In fact, I think everyone at some point authored extensions for the base class library just to make some things more accessible.
+This is extremely convenient in case you want to add functionality to types that you don't have control over. In fact, I think everyone at some point authored extensions for the base class library just to make some things more accessible.
 
 But besides the more obvious use cases, there are a few other interesting patterns that directly rely on extension methods, showing how they can be used in a slightly less conventional way.
 
@@ -13,7 +13,7 @@ But besides the more obvious use cases, there are a few other interesting patter
 
 An enum is simply a set of constant numeric values with names uniquely assigned to them. Even though all enums in C# inherit from the `Enum` abstract class, they are not really treated as classes. This limitation, among other things, prevents them from having methods.
 
-There are some cases where having logic on an enum may be helpful. One of those cases is where a value of an enum can have multiple different representations and you want to be able to easily convert to one of them.
+There are some cases where having logic on an enum may be helpful. One of those cases is where a value of an enum can have multiple different representations, and you want to be able to easily convert between them.
 
 For example, imagine the following type in a generic application that can save files in various formats:
 
@@ -45,7 +45,7 @@ public static class FileFormatExtensions
             return "md";
 
         // This will be thrown if we add a new file format
-        // but forget to add corresponding file extension
+        // but forget to add the corresponding file extension.
         throw new ArgumentOutOfRangeException(nameof(self));
     }
 }
@@ -61,9 +61,9 @@ var fileName = $"output.{fileExt}"; // "output.md"
 
 ## Refactoring model classes
 
-There are cases where you may not want to add a method directly to a class, for example when it's an [anemic model](https://en.wikipedia.org/wiki/Anemic_domain_model).
+There are cases where you may not want to add a method directly to a class, for example when it's an [_anemic model_](https://en.wikipedia.org/wiki/Anemic_domain_model).
 
-Anemic models are typically represented by a set of public get-only immutable properties, so adding methods to a model class may make it look impure or may give off a suspicion that the methods are accessing some private state. Extension methods don't have that problem because they can't access model's private members and, by nature, aren't part of the model itself.
+Anemic models are typically represented by a set of public get-only immutable properties, so adding methods to a model class may make it look impure, or may give off an impression that the methods are accessing some private state. Extension methods don't have that problem because they can't access model's private members and, by nature, aren't part of the model itself.
 
 So consider this example of two models — one represents a closed caption track for a video and another represents an individual caption:
 
@@ -73,7 +73,7 @@ public class ClosedCaption
     // Text that gets displayed
     public string Text { get; }
 
-    // When it gets displayed relative to beginning of the track
+    // When it gets displayed relative to the beginning of the track
     public TimeSpan Offset { get; }
 
     // How long it stays on the screen
@@ -124,11 +124,11 @@ public static class ClosedCaptionTrackExtensions
 
 An extension method here achieves the same thing as a normal method, but it provides a few subtle benefits:
 
-1. It's clear that this method only works with public members of the class and doesn't mutate its private state in some obscure way.
-2. It's obvious that this method simply provides a shortcut and exists only for convenience.
-3. The method is part of an entirely separate class (or even assembly) which helps us separate data from logic.
+1. It's clear that this method only works with public members of the class and doesn't mutate its private state in some obscure way
+2. It's obvious that this method simply provides a shortcut and exists only for convenience
+3. The method is part of an entirely separate class (or even assembly) which helps us separate data from logic
 
-Overall, using an extension method approach here helps draw a line between what's _necessary_ and what's _helpful_.
+Overall, using an extension method approach here helps draw the line between what's _necessary_ and what's _helpful_.
 
 ## Making interfaces more versatile
 
@@ -169,7 +169,7 @@ public interface IExportService
 
 This way, the interface enforces writing to the most generic destination, a `Stream`. Now we are no longer limited to files and can target a variety of different outputs as well.
 
-The only downside to this approach is that the more basic operations are not as straightforward as they used to be — now you need to set up a concrete instance of a `Stream`, wrap it in a `using` statement, and pass it as a parameter.
+The only downside to this approach is that the more basic operations are not as straightforward as they used to be — now you need to set up a concrete instance of a `Stream`, wrap it in a `using` statement, and pass it as an argument.
 
 Fortunately, this downside can be completely negated with the use of extension methods:
 

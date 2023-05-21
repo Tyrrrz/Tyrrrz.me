@@ -5,7 +5,7 @@ date: '2017-11-18'
 
 Quite a long time ago I've stumbled upon a very interesting open-source project called [AmmyUI](https://github.com/AmmyUI/AmmyUI). Its main goal is to make designing XAML apps a lot better by... removing XAML from the equation.
 
-Ammy is a JSON-like layout language which compiles to XAML and also has some cool extra features.
+AmmyUI is a JSON-like layout language which compiles to XAML and also has some cool extra features.
 
 I've never been a big fan of XAML, so it got me interested and I decided to use it when starting one of my projects, [DiscordChatExporter](https://github.com/Tyrrrz/DiscordChatExporter).
 
@@ -13,7 +13,7 @@ I've never been a big fan of XAML, so it got me interested and I decided to use 
 
 To use AmmyUI, you will need to add its NuGet package to your project — either `Ammy.WPF`, `Ammy.UWP`, or `Ammy.XamarinForms`, depending on your platform.
 
-Although technically not required, you will definitely want to also install the [Visual Studio extension](https://marketplace.visualstudio.com/items?itemName=ionoy.Ammy) as it provides syntax highlighting and Intellisense support.
+Although technically not required, you will also definitely want to install the [Visual Studio extension](https://marketplace.visualstudio.com/items?itemName=ionoy.Ammy) as it provides syntax highlighting and IntelliSense support.
 
 ## Syntax
 
@@ -39,7 +39,7 @@ Compare this to an equivalent in XAML:
 </Window>
 ```
 
-Although on its own this already looks a bit cleaner, Ammy's true power lies in its extensive set of features.
+Although on its own this already looks a bit cleaner, AmmyUI's true power lies in its extensive set of features.
 
 ### Names and resource keys
 
@@ -57,7 +57,7 @@ Grid Key="MyGrid" {
 
 ### Using statements
 
-Instead of defining aliases for XML namespaces, Ammy is using an approach identical to C# — `using` directives.
+Instead of defining aliases for XML namespaces, AmmyUI is using an approach identical to C# — `using` directives.
 
 This means you can import an entire CLR namespace and stop worrying about prefixing nodes with namespace aliases.
 
@@ -85,7 +85,7 @@ Window "DiscordChatExporter.Views.MainWindow" {
 
 ### Binding shortcuts
 
-Ammy also provides lots of shortcuts for declaring bindings. A very basic binding can be set up like this:
+AmmyUI also provides lots of shortcuts for declaring bindings. A very basic binding can be set up like this:
 
 ```javascript
 TextBlock {
@@ -93,7 +93,7 @@ TextBlock {
 }
 ```
 
-You can also specify binding source using a special `from` keyword. Here's how you can easily bind to a property of a different control:
+You can also specify the binding source using a special `from` keyword. Here's how you can easily bind to a property of a different control:
 
 ```javascript
 TextBlock "OtherTextBlock" {
@@ -109,7 +109,7 @@ There are many other things you can use with `from`, namely `$this`, `$template`
 
 ### Resource shortcuts
 
-Similar to bindings, Ammy has a few shortcuts for referencing resources as well:
+Similar to bindings, AmmyUI has a few shortcuts for referencing resources as well:
 
 ```javascript
 TextBlock {
@@ -120,9 +120,9 @@ TextBlock {
 
 ### Inline binding converters
 
-This is easily my most favorite feature, something that lets you forget about `BoolToVisibilityConverter`, `InvertBoolToVisibilityConverter` and the likes.
+This is easily my most favorite feature, as it lets you entirely forget about `BoolToVisibilityConverter`, `InvertBoolToVisibilityConverter`, and other similar boilerplate classes.
 
-In Ammy you can specify a converter right inside your binding declaration:
+In AmmyUI you can specify a converter right inside your binding declaration:
 
 ```javascript
 TextBlock {
@@ -135,7 +135,7 @@ You can write most C# code inside a converter, invoke your own methods, use your
 
 ### Variables
 
-This framework also offers some features to help you keep your code DRY. For example, you can declare variables and use them in different ways:
+This framework also offers some features to help keep your code DRY. For example, you can declare constants and use them in different ways:
 
 ```javascript
 $primaryColor = "#343838"
@@ -201,6 +201,4 @@ Grid {
 
 ## My experience
 
-I think AmmyUI is a very interesting project and highlights how much better WPF could've been if it didn't involve XAML.
-
-Ultimately, I don't think Ammy is production ready yet, but I recommend trying it out in one of your side projects.
+I think AmmyUI is a very interesting project and highlights how much better WPF could've been if it didn't involve XAML. Ultimately, I don't think AmmyUI is production ready just yet, but I still recommend trying it out in one of your projects.

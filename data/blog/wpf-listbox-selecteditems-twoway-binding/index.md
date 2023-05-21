@@ -3,7 +3,7 @@ title: 'WPF ListBox SelectedItems TwoWay Binding'
 date: '2016-11-01'
 ---
 
-For some unclear reasons, WPF's `ListBox` control does not allow two-way binding on `SelectedItems` property the way it does with `SelectedItem`. This could have been very useful when using multi-select to bind the whole list of selected items to the view model.
+For some unclear reasons, WPF's `ListBox` control does not allow two-way binding on the `SelectedItems` property the way it does with `SelectedItem`. This could have been very useful when using multi-select to bind the whole list of selected items to the view model.
 
 Interestingly, you can still call `Add()`, `Remove()`, `Clear()` methods on `ListBox.SelectedItems` which updates the selection correctly, so it just comes down to implementing a behavior that makes the property bindable.
 
@@ -107,7 +107,7 @@ When the property is changed from the view model, the `OnSelectedItemsChanged(..
 
 When the change is triggered by the view, we call the `OnListBoxSelectionChanged(...)` method. To update the selected items on the view model, we copy the items from `ListBox.SelectedItems` to our own `SelectedItems` collection.
 
-Note, however, that this behavior is generic because we expect to work with a collection like `IReadOnlyList<T>` on the view model side. WPF doesn't support generic behaviors, so we have to subtype this class for each specific data type:
+Note, however, that this behavior is generic because we expect to bind to a generic collection like `IReadOnlyList<T>` on the view model's side. WPF doesn't support generic behaviors, so we have to subtype this class for each specific data type:
 
 ```csharp
 public class MyObjectListBoxSelectionBehavior : ListBoxSelectionBehavior<MyObject>
@@ -317,11 +317,11 @@ public class ListBoxSelectionBehavior<T> : Behavior<ListBox>
 
 I added another dependency property for `SelectedValues` and a few new methods.
 
-`SelectedValuesToItems()` and `SelectedItemsToValues()` convert between `SelectedItems` and `SelectedValues`, depending on which property was updated. `GetDeepPropertyValue(...)` is used to extract value of a property using an object and member path — it's used to establish conformity between items and values.
+`SelectedValuesToItems()` and `SelectedItemsToValues()` convert between `SelectedItems` and `SelectedValues`, depending on which property was updated. `GetDeepPropertyValue(...)` is used to extract the value of the property using an object and member path — it's used to establish conformity between items and values.
 
 ## Usage with SelectedValuePath
 
-Now we can specify `SelectedValuePath` in `ListBox` and our behavior will allow us to bind the `SelectedValues` property to model and vice versa.
+Now we can specify `SelectedValuePath` in `ListBox` and our behavior will allow us to bind the `SelectedValues` property to the model and vice versa.
 
 ```xml
 <ListBox ItemsSource="{Binding Items}" SelectedValuePath="ID" SelectionMode="Multiple">

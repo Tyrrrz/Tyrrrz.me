@@ -50,9 +50,9 @@ This is what parsers do. They take an input, usually in the form of text, and fo
     [Domain objects]  [Error message]
 ```
 
-Of course, it's a fairly basic example, there are much more complicated languages and inputs out there. But generally speaking, we can say that a parser is a piece of code that can help build syntactic structure of input text, effectively helping the computer "understand" it.
+Of course, it's a fairly basic example, there are much more complicated languages and inputs out there. But generally speaking, we can say that a parser is a piece of code that builds a syntactic structure of the input text, effectively helping the computer "understand" it.
 
-Whether an input is considered valid or not is decided by a set of grammar rules that effectively define the structure of the language.
+Whether an input is considered valid or not is decided by a set of grammar rules that define the structure of the language.
 
 ## Formal grammar
 
@@ -60,7 +60,7 @@ Parsing numbers isn't rocket science, and you wouldn't be reading this article i
 
 Speaking of regular expressions, do you know why is it that they are called _regular_?
 
-There's an area in computer science called _the formal language theory_ that specifically deals with languages. Essentially, it's a set of abstractions that help us understand languages from a more formal standpoint.
+There's an area in computer science called the _formal language theory_ that specifically deals with languages. Essentially, it's a set of abstractions that help us understand languages from a more formal standpoint.
 
 A formal language itself builds mainly upon the concept of grammar, which is a set of rules that dictate how to produce valid symbols in a given language. When we talk about valid and invalid inputs, we refer to grammar.
 
@@ -80,7 +80,7 @@ Based on the complexity of these rules, grammars are separated into different ty
 +---------------------------------+
 ```
 
-The main difference between the two is that rules in regular grammar, unlike context-free, can't be recursive. A recursive grammar rule is one that produces a symbol that can be further evaluated by the same rule.
+The main difference between the two is that the rules in regular grammar, unlike context-free, can't be recursive. A recursive grammar rule is one that produces a symbol that can be further evaluated by the same rule.
 
 HTML is a good example of a context-free language, because an element in HTML can contain other elements, which in turn can contain other elements, and so on. This is also why it inherently [can't be parsed using regular expressions](https://stackoverflow.com/a/1732454/2205454).
 
@@ -103,7 +103,7 @@ So if we can't use regular expressions to build these syntax trees, what should 
 
 There are many approaches for writing parsers for context-free languages. Most language tools you know are built using manual recursive-descent parsers, parser generator frameworks, or parser combinators.
 
-Parser combinators, as a concept, revolves around representing each parser as a modular function that takes on some input and produces either a successful result or an error:
+The concept of parser combinators revolves around representing each parser as a modular function that takes on some input and produces either a successful result or an error:
 
 ```javascript
 f(input) -> (result, inputRemainder) | (error)
@@ -123,7 +123,7 @@ That might be too abstract to understand so how about we look at a practical exa
 
 To better understand this approach, let's write a functional JSON parser using C# and a library called [Sprache](https://github.com/sprache/Sprache). This library provides a set of base low-level parsers and methods to combine them, which are essentially building blocks that we can use to make our own complex parsers.
 
-To start off, I created a project and defined classes that represent different entities in JSON grammar, 6 of them in total:
+To start off, I created a project and defined classes that represent different entities in the JSON grammar, 6 of them in total:
 
 - `JsonObject`
 - `JsonArray`
@@ -226,15 +226,15 @@ public class JsonNull : JsonLiteral<object>
 }
 ```
 
-You can see that all of our JSON types inherit from `JsonEntity` class which defines a few virtual methods. These methods throw an exception by default, but they are overridden with proper implementation on types that support them.
+You can see that all of our JSON types inherit from the `JsonEntity` class which defines a few virtual methods. These methods throw an exception by default, but they are overridden with proper implementation on types that support them.
 
-Using `JsonEntity.Parse` we should be able to convert a piece of JSON text into our domain objects and traverse the whole hierarchy using indexers:
+Using `JsonEntity.Parse(...)` we should be able to convert a piece of JSON text into our domain objects and traverse the whole hierarchy using indexers:
 
 ```csharp
 var price = JsonEntity.Parse(json)["order"]["items"][0]["price"].GetValue<double>();
 ```
 
-Now, of course that won't work just yet because our `Parse` method isn't implemented. Let's fix that.
+Now, of course that won't work just yet because our `Parse(...)` method isn't implemented. Let's fix that.
 
 Start by downloading the Sprache library from NuGet, then create a new internal static class named `JsonGrammar`. This is where we will define the grammar for our language:
 
@@ -256,9 +256,9 @@ internal static class JsonGrammar
 
 Let's quickly look into what we've just wrote here.
 
-On the right-hand side of the equals sign, we are calling `Parse.String` to create a basic parser that will look for a sequence of characters that make up the string "null". This method produces a delegate of type `Parser<IEnumerable<char>>`, but since we're not particularly interested in the sequence of characters itself, we chain it with `Return` extension method that lets us specify a concrete object to return instead. Doing this also changes the delegate type to `Parser<JsonNull>`.
+On the right-hand side of the equals sign, we are calling `Parse.String(...)` to create a basic parser that will look for a sequence of characters that make up the string "null". This method produces a delegate of type `Parser<IEnumerable<char>>`, but since we're not particularly interested in the sequence of characters itself, we chain it with the `Return(...)` extension method that lets us specify a concrete object to return instead. Doing this also changes the delegate type to `Parser<JsonNull>`.
 
-It's worth noting that as we write this, no parsing actually happens just yet. We are only building a delegate that can be later invoked to parse a particular input.
+It's worth noting that, as we write this, no parsing actually happens just yet. We are only building a delegate that can be later invoked to parse a particular input.
 
 If we call `JsonNull.Parse("null")` it will return an object of type `JsonNull`. If we try to call it on any other input, it will throw an exception with a detailed error.
 
@@ -281,7 +281,7 @@ internal static class JsonGrammar
 
 This works very similarly to the previous parser we wrote, except now we have two different parsers for one entity.
 
-As you've probably guessed, that's where combinators come into play. We can merge these two parsers into one using an `Or` combinator like this:
+As you've probably guessed, that's where combinators come into play. We can merge these two parsers into one using an `Or(...)` combinator like this:
 
 ```csharp
 internal static class JsonGrammar
@@ -299,7 +299,7 @@ internal static class JsonGrammar
 }
 ```
 
-The `Or` combinator is an extension method that takes two parsers of the same type and produces a new parser that succeeds if either one of them succeeds. That means if we try to call `JsonBoolean.Parse("true")` we will get `JsonBoolean` which has `Value` equal to `true`. Similarly, if we call `JsonBoolean.Parse("false")` we will get a `JsonBoolean` whose `Value` is `false`. And, of course, any unexpected input will result in an error.
+The `Or(...)` combinator is an extension method that takes two parsers of the same type and produces a new parser that succeeds if either one of them succeeds. That means if we try to call `JsonBoolean.Parse("true")` we will get `JsonBoolean` which has `Value` equal to `true`. Similarly, if we call `JsonBoolean.Parse("false")` we will get a `JsonBoolean` whose `Value` is `false`. And, of course, any unexpected input will result in an error.
 
 One of the coolest things about using parser combinators is how expressive your code is. It can be read quite literally, in fact:
 
@@ -325,11 +325,11 @@ internal static class JsonGrammar
 }
 ```
 
-As you can see, Sprache already provides `Parse.DecimalInvariant` out of the box, which we can use to match a number. Since that returns `Parser<string>` as it parses the text that represents the number, we need to transform it to `double` first and then to our `JsonNumber` object.
+As you can see, Sprache already provides `Parse.DecimalInvariant` out of the box, which we can use to match a number. Since that returns `Parser<string>` as it parses the text that represents the number, we need to transform it to a `double` first and then to our `JsonNumber` object.
 
-The `Select` method here works quite similarly to LINQ's `Select` — it lazily transforms the underlying value of the container into a different shape. This lets us map raw character sequences into more complex higher-level domain objects.
+The `Select(...)` method here works quite similarly to LINQ's `Select(...)` — it lazily transforms the underlying value of the container into a different shape. This lets us map raw character sequences into more complex higher-level domain objects.
 
-By the way, types that have a `Select` operation (or more colloquially known, "map" operation) are called "functors". As you can see, they are not limited to collections (i.e. `IEnumerable<T>`) but can also be containers with a single value, just like our `Parser<T>` here.
+By the way, types that have a `Select(...)` operation (or more colloquially known, a "map" operation) are called "functors". As you can see, they are not limited to collections (i.e. `IEnumerable<T>`) but can also be containers with a single value, just like our `Parser<T>` here.
 
 With that out of the way, let's proceed to `JsonString`:
 
@@ -346,13 +346,13 @@ internal static class JsonGrammar
 }
 ```
 
-Here you can see how we combined three consecutive parsers into one with the use of LINQ comprehension syntax. You are probably familiar with this syntax from working with collections, but it's a bit different here.
+Here you can see how we combined three consecutive parsers into one with the use of the LINQ query syntax. You are probably familiar with this syntax from working with collections, but it's a bit different here.
 
-Each line beginning with `from` represents a separate parser that produces a value. We specify the name for the value on the left and define the actual parser on the right. To reduce the parameters to a single result, we terminate with a `select` statement that constructs the object we want.
+Each line beginning with `from` represents a separate parser that produces a value. We specify the name for the value on the left and define the actual parser on the right. To reduce the parsed values to a single result, we terminate with a `select` statement that constructs the object we want.
 
-This works because chaining `from` statements internally calls `SelectMany` extension method, which the author of this library defined to work with `Parser<T>`.
+This works because chaining `from` statements internally calls the `SelectMany(...)` extension method, which the author of this library defined to work with `Parser<T>`.
 
-Oh, and the types that let you do that with `SelectMany` (also known as "flat map") are what we call "monads".
+Oh, and the types that let you do that with `SelectMany(...)` (also known as "flat map") are what we call "monads".
 
 The parser we just wrote will try to match a double quote, followed by a (possibly empty) sequence of characters that doesn't contain a double quote, terminated by another double quote, ultimately returning a `JsonString` object with the text inside.
 
@@ -371,7 +371,7 @@ internal static class JsonGrammar
 }
 ```
 
-Structurally, a JSON array is just a sequence of entities separated by commas, contained within a pair of square brackets. We can define that using the `DelimitedBy` combinator which tries to match the first parser repeatedly separated by the second one.
+Structurally, a JSON array is just a sequence of entities separated by commas, contained within a pair of square brackets. We can define that using the `DelimitedBy(...)` combinator which tries to match the first parser repeatedly separated by the second one.
 
 If you've followed the steps here closely, you probably noticed that the code above doesn't actually compile. We're referencing `JsonEntity` which is a parser that we haven't defined yet. This is because this grammar rule is recursive — an array can contain any entity, which can be, among other things, an array as well, which can contain any entity, which can be an array, which... you get the point.
 
@@ -419,7 +419,7 @@ internal static class JsonGrammar
 
 Since our model implements `JsonObject` using a dictionary, an individual property can be expressed using `KeyValuePair<string, JsonEntity>` — the name of the property (`string`) and its value (`JsonEntity`).
 
-As you can see, we used LINQ comprehension syntax again to combine sequential parsers. A `JsonProperty` is made out of a `JsonString` for the name, a colon, and a `JsonEntity` which denotes its value. We use `Select()` on `JsonString` to lazily extract only the raw `string` value, as we're not interested in the object itself.
+As you can see, we used the LINQ query syntax again to combine sequential parsers. A `JsonProperty` is made out of a `JsonString` for the name, a colon, and a `JsonEntity` which denotes its value. We use `Select(...)` on `JsonString` to lazily extract only the raw `string` value, as we're not interested in the object itself.
 
 For the `JsonObject` parser, we pretty much wrote the same code as we did for `JsonArray`, replacing square brackets with curly braces and `JsonEntity` with `JsonProperty`.
 
@@ -451,7 +451,7 @@ public abstract class JsonEntity
 }
 ```
 
-That's it, we have a working JSON processor! We can now call `JsonEntity.Parse` on any valid JSON text and transform it into our domain, i.e. a tree of `JsonEntity` objects.
+That's it, we have a working JSON processor! We can now call `JsonEntity.Parse(...)` on any valid JSON text and transform it into our domain, i.e. a tree of `JsonEntity` objects.
 
 ## Wrapping up
 
@@ -459,8 +459,8 @@ Parsing doesn't have to be a daunting and unapproachable task. Functional progra
 
 If you're still thirsty for knowledge and want to see a slightly more complex example, check out [LtGt](https://github.com/Tyrrrz/LtGt/tree/csharp-sprache), an HTML processor (with CSS selectors!) that I've originally written using Sprache.
 
-Should you wish to learn more about parsing in general, I recommend reading ["Parsing in C#"](https://tomassetti.me/parsing-in-csharp), an article by Gabriele Tomassetti.
+Should you wish to learn more about parsing in general, I recommend reading [Parsing in C#](https://tomassetti.me/parsing-in-csharp), an article by Gabriele Tomassetti.
 
 There are also other monadic parser combinator libraries in .NET that you can check out, most notably [Superpower](https://github.com/datalust/superpower), [Pidgin](https://github.com/benjamin-hodgson/Pidgin), [Parsley](https://github.com/plioi/parsley), and [FParsec (F#)](https://github.com/stephan-tolksdorf/fparsec).
 
-This article is largely based on my talk from .NET Fest 2019, "Monadic parser combinators in C#". You can find the original presentation and full source code for the JSON parser [here](https://github.com/Tyrrrz/DotNetFest2019).
+This article is largely based on my talk from .NET Fest 2019, Monadic parser combinators in C#. You can find the original presentation and full source code for the JSON parser [here](https://github.com/Tyrrrz/DotNetFest2019).

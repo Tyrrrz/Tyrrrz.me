@@ -15,7 +15,7 @@ Here's the request that Steam's frontend uses to get the latest pricing info:
 
 ```php
 $url =
-    'http://steamcommunity.com/market/priceoverview/'.
+    'https://steamcommunity.com/market/priceoverview/'.
     '?market_hash_name='.rawurlencode($name).
     '&appid='.$game.
     '&currency='.$currency;
@@ -23,9 +23,9 @@ $url =
 
 It has 3 required parameters:
 
-- `market_hash_name` — full name of the item as it appears on the market (URL-encoded).
-- `appid` — ID of the app (game) where this item can be found.
-- `currency` — ID of the currency in which we want our prices to be shown.
+- `market_hash_name` — full name of the item as it appears on the market (URL-encoded)
+- `appid` — ID of the app (game) where this item can be found
+- `currency` — ID of the currency in which we want our prices to be shown
 
 You can get the values for the first two parameters straight from the item's URL. For example, if we were interested in [AK-47 | Redline](https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Redline%20%28Field-Tested%29), we'd be able to inspect the URL and see that the value of `appid` is `730` while `market_hash_name` is equal to `AK-47%20%7C%20Redline%20%28Field-Tested%29`.
 
@@ -36,7 +36,7 @@ We still need to set the value for the third required parameter, `currency`. I'm
 Our final URL with all the parameters set should look like this:
 
 ```
-http://steamcommunity.com/market/priceoverview/?market_hash_name=AK-47%20%7C%20Redline%20%28Field-Tested%29&appid=730&currency=1
+https://steamcommunity.com/market/priceoverview/?market_hash_name=AK-47%20%7C%20Redline%20%28Field-Tested%29&appid=730&currency=1
 ```
 
 If we send a `GET` request with this URL we will get a response such as this one:
@@ -50,7 +50,7 @@ If we send a `GET` request with this URL we will get a response such as this one
 }
 ```
 
-As you can see, it doesn't provide a lot of data, but it contains aggregated pricing information, which is exactly what we need.
+As you can see, it doesn't provide a lot of data, but it does contain the aggregated pricing information, which is exactly what we need.
 
 It's also worth noting that sometimes the response may not contain `median_price` and `volume`. I'm not sure why it happens but make sure to handle such cases too.
 
@@ -58,7 +58,7 @@ Besides that, I've found that Steam may start throttling you if you send too man
 
 ## Getting the image
 
-So far we were able to get the price of an item but not its image. Unfortunately, it seems that there's no obvious correlation between `market_hash_name` and image URL, so we won't be able to guess it.
+So far we were able to get the price of an item but not its image. Unfortunately, it seems that there's no obvious correlation between `market_hash_name` and the corresponding image URL, so we won't be able to infer it.
 
 To make matters worse, a big portion of the page, including the image, is rendered server-side, making it impossible to reverse-engineer.
 
@@ -70,7 +70,7 @@ The aforementioned request looks like this:
 
 ```php
 $url =
-    'http://steamcommunity.com/market/listings/'.$game.'/'.rawurlencode($name).'/render'.
+    'https://steamcommunity.com/market/listings/'.$game.'/'.rawurlencode($name).'/render'.
     '?start=0'.
     '&count=1'.
     '&currency='.$currency.
@@ -79,12 +79,12 @@ $url =
 
 It's a bit different from the previous one but takes the same parameters. In fact, the base of this request is the item's listing URL we've inspected earlier.
 
-By setting `start` to `0` and `count` to `1` we are limiting the response to one listing since we are only interested in the image which is the same for all listings anyway.
+By setting `start` to `0` and `count` to `1` we are limiting the response to a single listing since we are only interested in the image, which is the same for all the listings anyway.
 
 Finally, the fully formed URL should look something like this:
 
 ```
-http://steamcommunity.com/market/listings/730/AK-47%20%7C%20Redline%20%28Field-Tested%29/render?start=0&count=1&currency=1&format=json
+https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Redline%20%28Field-Tested%29/render?start=0&count=1&currency=1&format=json
 ```
 
 A `GET` request with this URL will return a rather large JSON response that contains raw HTML inside (I truncated most of it for brevity):
@@ -99,18 +99,18 @@ A `GET` request with this URL will return a rather large JSON response that cont
 }
 ```
 
-To get the image, we need to parse the HTML inside `results_html` and find an `<img>` element with `class="market_listing_item_img"`. We can do that by querying the DOM with a CSS selector `img.market_listing_item_img`. The URL, which is the value of `src` attribute, should look like this:
+To get the image, we need to parse the HTML inside of `results_html` and find an `<img>` element of class `market_listing_item_img`. We can do that by querying the DOM with a CSS selector. The URL, which is the value of the corresponding `src` attribute, should look like this:
 
 ```
-http://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpKKqPrxN7LEmyVQ7MEpiLuSrYmnjQO3-UdsZGHyd4_Bd1RvNQ7T_FDrw-_ng5Pu75iY1zI97bhLsvQz/62fx62f/
+https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpKKqPrxN7LEmyVQ7MEpiLuSrYmnjQO3-UdsZGHyd4_Bd1RvNQ7T_FDrw-_ng5Pu75iY1zI97bhLsvQz/62fx62f/
 ```
 
 ![AK-47 | Redline](image.png)
 
-If you take a look at the end of the URL, you can see the portion where it specifies desired image dimensions, which is set to `62fx62f` in this case. We can change these to anything we want and the server will return an image of that size. However, if you specify a size which is too big, the image will be centered and remain at its maximum size while the rest of the canvas will be transparent.
+If you take a look at the end of the URL, you can see the portion where it specifies desired image dimensions, which is set to `62fx62f` in this case. We can change these to anything we want, and the server will return an image of that size. However, if you specify a size which is too big, the image will be centered and remain at its maximum size while the rest of the canvas will be transparent.
 
 ## Source code
 
-The WordPress plugin I wrote is open-sourced, you can [check it out here](https://github.com/Tyrrrz/WPSteamMarketExcerpt). Here's how it looks in action:
+The code for the WordPress plugin that I wrote is open source, you can [check it out here](https://github.com/Tyrrrz/WPSteamMarketExcerpt). Here's how it looks in action:
 
 ![WPSteamMarketExcerpt](plugin.png)

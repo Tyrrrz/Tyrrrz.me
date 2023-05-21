@@ -5,23 +5,23 @@ date: '2020-01-09'
 
 Recently, I've decided to switch from Visual Studio to Rider as my default .NET development environment. The main problem with Visual Studio was that it was too slow when paired with ReSharper and, unfortunately, too useless when not. Rider offered me the best of both worlds.
 
-However, one of the things that made the jump really difficult was the absence of [XAMLStyler extension](https://marketplace.visualstudio.com/items?itemName=TeamXavalon.XAMLStyler) in Rider. It's an incredibly useful plugin that automatically formats your XAML files on save, letting you completely forget about sorting attributes, maintaining indentation, and other mundane things like that. After using it for three years, the idea of writing XAML without it was unbearable.
+However, one of the things that made the jump really difficult was the absence of the [XAMLStyler](https://marketplace.visualstudio.com/items?itemName=TeamXavalon.XAMLStyler) extension in Rider. It's an incredibly useful plugin that automatically formats your XAML files on save, letting you completely forget about sorting attributes, maintaining indentation, and other mundane things like that. After using it for three years, the idea of writing XAML without it was unbearable.
 
 The problem is that .NET, historically, has been a rather closed ecosystem. If you wanted to extend the development experience, that typically meant installing a custom Visual Studio extension or writing your own. Everything revolved around the same IDE, same workflow, same stack, same set of tools, and there wasn't much of a choice.
 
-With the advent of .NET Core the situation started changing. We are now seeing a mentality shift where everything is evolving towards more modular and portable components, with even .NET SDK itself being shipped as a command-line tool. Overall, .NET development experience is starting to resemble that of Node.js, which I personally think is a great thing.
+With the advent of .NET Core the situation started changing. We are now seeing a mentality shift where everything is evolving towards more modular and portable components, with even the .NET SDK itself being shipped as a command-line tool. Overall, .NET development experience is starting to resemble that of Node.js, which I personally think is a great thing.
 
-Among other things, .NET Core also introduced the concept of [.NET Core Global Tools](https://aka.ms/global-tools). This feature enables any .NET developer to quickly download, install and run custom command-line tools without leaving the terminal.
+Among other things, .NET Core also introduced the concept of [.NET Core Global Tools](https://aka.ms/global-tools). This feature enables any .NET developer to quickly download, install, and run custom command-line tools without leaving the terminal.
 
 [Since recently](https://github.com/Xavalon/XamlStyler/issues/218), XAMLStyler is also available as a .NET custom tool, which means you can run it as a CLI instead of relying on the Visual Studio extension. In this article I will show you how I integrated it into my build process, ensuring all XAML files are always properly formatted, regardless of which IDE I'm using.
 
-Although I will be talking about XAMLStyler in particular, the approach described here can easily be extrapolated to any other tool.
+Although I will be talking about XAMLStyler in particular, the approach described here can easily be extrapolated to any other tool as well.
 
 ## What is XAMLStyler?
 
 Given that I've praised it so much, it makes sense to say a few words about what is it that XAMLStyler actually does.
 
-If you've worked with either WPF, UWP or Xamarin, chances are you already know how annoying it is to maintain good formatting in your XAML files. As developers, we like when everything is symmetrical, tidy and consistent. As developers, we also like when everything is automated.
+If you've worked with either WPF, UWP or Xamarin, chances are you already know how annoying it is to maintain good formatting in your XAML files. As developers, we like when everything is symmetrical, tidy, and consistent. As developers, we also like when everything is automated.
 
 Let's say we have the following piece of XAML that renders some UI:
 
@@ -71,17 +71,17 @@ Luckily, I can just run XAMLStyler on the code above and get something that look
 </Grid>
 ```
 
-This is way better. Individual elements are now arranged vertically, long attribute declarations broken into separate lines, redundant code gone, even the comments are formatted as well.
+This is way better. Individual elements are now arranged vertically, long attribute declarations are broken into separate lines, redundant code is gone, and even the comments are formatted as well.
 
-Note how it didn't touch the two consecutive `Run` elements in my code. That's because splitting them into multiple lines would result in a different layout being rendered. XAMLStyler is aware of these nuances and doesn't make changes that could introduce unwanted side effects.
+Note how it didn't touch the two consecutive `<Run>` elements in my code. That's because splitting them into multiple lines would result in a different layout being rendered. XAMLStyler is aware of these nuances and doesn't make changes that could introduce unwanted side effects.
 
-Another thing I really like about it, is how it sorts attributes. They are not merely sorted alphabetically, but also in accordance with the categories to which they belong. For example, properties like `Margin` and `VerticalAlignment` are placed above most other attributes, which makes them easier to find.
+Another thing I really like about it, is how it sorts attributes. They are not merely sorted alphabetically, but also in accordance to the categories that they belong to. For example, properties like `Margin` and `VerticalAlignment` are placed before most other attributes, which makes them easier to find.
 
 This and all other aspects of the formatting behavior are [fully configurable](https://github.com/Xavalon/XamlStyler/wiki/External-Configurations) in settings or via an external configuration file.
 
 ## Using it as a .NET Core global tool
 
-The release of .NET Core 2.1 introduced us with a feature that lets us use the so-called global tools. These are essentially console applications published as NuGet packages, that you can easily download and run.
+The release of .NET Core 2.1 introduced a new feature called _.NET Core global tools_. These are essentially console applications published as NuGet packages, that you can easily download and run.
 
 To use XAMLStyler as a global tool, we just need to install it with the following command:
 
@@ -89,7 +89,7 @@ To use XAMLStyler as a global tool, we just need to install it with the followin
 $ dotnet tool install XamlStyler.Console --global
 ```
 
-This downloads the [corresponding NuGet package](https://www.nuget.org/packages/XamlStyler.Console), extracts its contents to a shared directory, then puts the executable on the system PATH.
+This downloads the [corresponding NuGet package](https://www.nuget.org/packages/XamlStyler.Console), extracts its contents to a shared directory, then puts the executable on the system's PATH.
 
 Following that, we can now run `xstyler` from the command-line. To process all XAML files in a directory, we can use:
 
@@ -108,7 +108,7 @@ Processing: f:\Projects\Softdev\LightBulb\LightBulb\Views\Dialogs\SettingsView.x
 Processed 9 of 9 files.
 ```
 
-This is nice, but not ideal. As evident by the name, global tools are installed system-wide, which is convenient for some one-off utilities but doesn't work so well with tools that your project relies on. That's because the project repository is no longer self-contained — other developers (or future you) will now have to also manually install this tool on their machines, which adds an extra unnecessary step.
+This is nice, but not ideal. As evident by the name, global tools are installed system-wide, which is convenient for some one-off utilities but doesn't work so well with tools that your project relies on. That's because the project's repository is no longer self-contained — other developers (or future you) will now have to also manually install this tool on their machines, which adds an extra unnecessary step.
 
 Having to take any additional steps after `git clone` makes the developer experience worse and introduces non-determinism, so we want to avoid that. After all, it's always nice to keep the repository as a single source of truth.
 
@@ -132,7 +132,7 @@ If you would like to create a manifest, use `dotnet new tool-manifest`,
   usually in the repo root directory.
 ```
 
-As the message states, in order to install local tools we will first need to create a manifest file in the root of the project repository. We can do this using the suggested command:
+As the message states, in order to install local tools we will first need to create a manifest file in the root of the repository. We can do this using the suggested command:
 
 ```bash
 $ dotnet new tool-manifest
@@ -190,14 +190,14 @@ Let's update our project file accordingly:
 
 As you can see, this target will trigger automatically on each build, execute `dotnet tool restore` and then run XAMLStyler recursively on the project's directory.
 
-By executing the restore first, we ensure that the tool is always available. Once it's downloaded and installed, running the restore again will just complete instantly, so we don't have to worry about any performance issues. I've found this to be the most reliable approach after experimenting with a few different ones.
+By executing the restore first, we ensure that the tool is always available. Once it's downloaded and installed, running the restore again will just complete instantly, so we don't have to worry about any performance issues. I've found this to be the most reliable approach after some experimentation.
 
-Now, when we run `dotnet build` on the project, it will also execute XAMLStyler to format all XAML files inside it. The same will happen if we build the project in Visual Studio, Rider, VS Code, or anywhere else. Also, since the tool is installed locally and restored as part of the build, any developer who clones the repository won't have to take any additional steps to get up and running.
+Now, when we run `dotnet build` on the project, it will also execute XAMLStyler to format all XAML files inside it. The same will happen if we build the project in Visual Studio, Rider, VS Code, or anywhere else. Also, since the tool is installed locally and restored as part of the build, any developer who clones the repository won't have to take any additional steps to get the project up and running.
 
 ## Summary
 
-XAMLStyler is an awesome tool that will make you forget about formatting in your XAML files once and for all. By integrating it into the build process, we ensure that all XAML files will adhere to a consistent and clean format, no matter who's working on it and where.
+XAMLStyler is an awesome tool that will make you forget about manually formatting your XAML files once and for all. By integrating it into the build process, we ensure that all XAML files adhere to a consistent and clean format, no matter who's working on it and where.
 
-With .NET Core 3.0 we can now install locally scoped command-line tools. This is better than the previously available global tool concept because it's more portable. By using local tools we can also easily integrate custom workflows into our project.
+With .NET Core 3.0 we can now install locally scoped command-line tools. For project-specific dependencies, this is better than the previously available global tool concept because it's more portable.
 
 If you're interested to learn more about .NET Core global and local tools, check out [this article by Andrew Lock](https://andrewlock.net/new-in-net-core-3-local-tools) and [another one by Stuart Lang](https://stu.dev/dotnet-core-3-local-tools). There's also a [curated list of .NET custom tools](https://github.com/natemcmaster/dotnet-tools) maintained by Nate McMaster.
