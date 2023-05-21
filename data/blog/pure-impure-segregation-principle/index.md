@@ -3,7 +3,7 @@ title: 'Pure-Impure Segregation Principle'
 date: '2020-08-24'
 ---
 
-Two months ago I posted an article detailing why I think that [Unit Testing is Overrated](/blog/unit-testing-is-overrated), which seemed to resonate quite a lot with the readers, prompting very involved and interesting discussions. And although most commentators mainly shared their personal experiences, a few have also voiced criticism of the way some arguments were presented.
+Two months ago I posted an article detailing why I think that [Unit Testing is Overrated](/blog/unit-testing-is-overrated), which seemed to resonate quite a lot with readers, prompting very involved and interesting discussions. And although most commentators mainly shared their personal experiences, a few have also voiced criticism of the way some arguments were presented.
 
 In particular, one person mentioned that the drawbacks I've described, especially those pertaining to abstractions and mocking, are really just a byproduct of object-oriented programming and its inherent flaws. Had my example been designed with functional principles in mind, many of the outlined problems would never have surfaced.
 
@@ -13,7 +13,7 @@ This exact approach was actually mentioned in later parts of the post as well, a
 
 That said, I also think that the underlying principle of code separation based on purity is very important and often overlooked. When used correctly, it can guide software design, providing benefits in terms of readability, portability and, as mentioned, unit testing.
 
-Depending on whom you ask, this principle may have different names, such as [functional core, imperative shell](https://destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell), [impure-pure-impure sandwich](https://blog.ploeh.dk/2017/02/02/dependency-rejection), and some others. And while most developers seem to agree on its value, there's still some misunderstanding remaining as to how it's applied beyond simple academic examples.
+Depending on whom you ask, this principle may have different names, such as [functional core & imperative shell](https://destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell), [impure-pure-impure sandwich](https://blog.ploeh.dk/2017/02/02/dependency-rejection), and some others. And while most developers seem to agree on its value, there's still some misunderstanding remaining as to how it's applied beyond simple academic examples.
 
 At the end of the day, just like with any other software development pattern, its usefulness is entirely situational. However, it offers a good mental model for reasoning about non-determinism in code, which is relevant regardless of context.
 
@@ -21,11 +21,11 @@ In this article we will look at what actually makes something pure or impure, wh
 
 ## Pure vs impure
 
-The idea of purity is not novel in programming, so I have no doubt that most readers are already familiar with this concept. Nevertheless, let's go over it one more time to make sure we are on the same page.
+The concept of purity is not novel in programming, so I have no doubt that most readers are already familiar with it. Nevertheless, let's go over it one more time to make sure we are on the same page.
 
-In essence, _pure code_ is code encapsulated within a function, whose **evaluation is influenced only by its parameters** and whose **evaluation influences only its returned value**. In other words, a pure function doesn't have any implicit arguments, doesn't depend on or interact with external state, and doesn't generate any observable _side effects_.
+In essence, _pure code_ is code encapsulated within a function, whose **evaluation is influenced only by its parameters** and whose **evaluation influences only its returned value**. In other words, a pure function doesn't have any implicit inputs, doesn't depend on or interact with external state, and doesn't generate any observable side effects.
 
-Conversely, a function which breaks at least one of those two rules is called _impure_. To illustrate this, let's look at a very simple example:
+Conversely, a function that breaks at least one of those two rules is called _impure_. To illustrate this, let's look at a very simple example:
 
 ```csharp
 public static bool IsFoodEdible(DateTimeOffset expiration) =>
@@ -35,9 +35,9 @@ public static bool IsFoodEdible(DateTimeOffset expiration, DateTimeOffset instan
     instant < expiration;
 ```
 
-While both versions of the `IsFoodEdible` function are similar, only one of them is pure. The first overload gets the current time from the system clock, creating an implicit dependency on some external state. In practice, this means that evaluating the function multiple times may very well produce different results even for the same input parameters, which violates the first rule of purity.
+While both versions of the `IsFoodEdible(...)` function are similar, only one of them is pure. The first overload gets the current time from the system clock, creating an implicit dependency on non-deterministic external state. In practice, this means that evaluating the function multiple times may very well produce different results even for the same arguments, which violates the first rule of purity.
 
-The other version takes the current time as an explicit parameter instead and thus does not exhibit that problem. Regardless of whether we call that function now or ten years into the future, the result is guaranteed to always be the same for the same input. In other words, the behavior of the function depends only on the parameters that were passed to it and nothing else.
+The other version takes the current time as an explicit parameter instead and thus does not exhibit that problem. Regardless of whether we call that function now or ten years into the future, the result is guaranteed to always be the same for the same input. In other words, the behavior of the function depends only on the arguments that were passed to it and nothing else.
 
 Because of that, the second function shown in the above example is pure, while the first one isn't. Additionally, the following variant would be impure as well:
 
@@ -51,7 +51,7 @@ public static void IsFoodEdible(DateTimeOffset expiration, DateTimeOffset instan
 }
 ```
 
-In this case, the impurity comes from the fact that this function generates side effects by interacting with the standard output stream. Since its evaluation influences something other than its returned value, it breaks the second rule we outlined earlier.
+In this case, the impurity comes from the fact that this function generates side effects by interacting with the standard output stream. Since its evaluation influences something other than its returned value, it breaks the second rule we've outlined earlier.
 
 As a general rule, **any function that doesn't return anything** (or whose return value may be ignored) **is guaranteed to be impure**, because a pure function without a return value is inherently useless. Furthermore, if a function executes asynchronously, it's also a reliable giveaway that a function is impure, since asynchrony naturally comes from I/O operations.
 
@@ -70,7 +70,7 @@ public static bool AllFoodEdible(IReadOnlyList<DateTimeOffset> expirations, Date
 }
 ```
 
-Seeing as `AllFoodEdible` mutates the value of `i` during the course of its execution, one could think that such a function is not pure either. However, because the variable `i` is encapsulated within a local scope and cannot be accessed from outside, this mutation is not externally observable and, as such, does not make the function impure.
+Seeing as `AllFoodEdible(...)` mutates the value of `i` during the course of its execution, one could think that such a function is not pure either. However, because the variable `i` is encapsulated within a local scope and cannot be accessed from outside, this mutation is not externally observable and, as such, does not make the function impure.
 
 Now, of course it wouldn't make much sense to classify code based on these seemingly arbitrary traits if purity didn't provide us with some useful benefits. Indeed, since pure functions are deterministic and have no side effects, they possess the following intrinsic qualities:
 
@@ -104,7 +104,7 @@ public static string GetFilePath(string dirPath, string name, string id) =>
 
 Depending on how the code is structured and how it interacts with non-deterministic and effectful operations, impurities may make up a larger or smaller portion of the whole. That, in turn, is something we can actually control.
 
-In order to reap the most benefit out of pure functions, we need to design software in a way that **limits impure interactions and delays them as much as possible**. Ideally, we should strive to push them as far out as we can, towards the _boundaries of the system_.
+In order to reap the most benefit out of pure functions, we need to design software in a way that **limits and delays impure interactions as much as possible**, ideally pushing them towards the _boundaries of the system_.
 
 ## Flattening the dependency tree
 
@@ -209,7 +209,7 @@ This is a very typical scenario for "classically" designed object-oriented softw
 
 If we consider this relationship from a standpoint of purity, we'll also notice that the entire call chain is impure. And while for `LocationProvider` it makes sense because it performs non-deterministic I/O, the `SolarCalculator` is impure only due to its dependency on the former.
 
-That design is not ideal, because we lose out on the benefits of pure functions without really getting anything in return. Now if we wanted to, for example, test `SolarCalculator.GetSolarTimesAsync` in isolation, we would only be able to do that with the help of an autotelic abstraction and a test double, which is not desirable.
+That design is not ideal, because we lose out on the benefits of pure functions without really getting anything in return. Now if we wanted to, for example, test `SolarCalculator.GetSolarTimesAsync(...)` in isolation, we would only be able to do so with the help of an autotelic abstraction and a test double, which is not desirable.
 
 This issue could've been avoided if we architected our code with the pure-impure segregation principle in mind. Let's see how we can refactor our classes to push the impurities out of `SolarCalculator`:
 
@@ -276,7 +276,7 @@ The benefit of this design is that our pure business logic is no longer contamin
 
 ## Interleaved impurities
 
-Although very useful, the type of "lossless" refactoring shown earlier only works if the data required by the function can be easily encapsulated within input parameters. Unfortunately, this is not always the case.
+Although very useful, the type of "lossless" refactoring shown earlier only works if the data required by the function can be easily encapsulated within its input parameters. Unfortunately, this is not always the case.
 
 Often a function may need to dynamically resolve data from an external API or a database, with no way of knowing about it beforehand. This typically results in an implementation where pure and impure concerns are interleaved with each other, creating a tightly coupled cohesive structure.
 
@@ -353,7 +353,7 @@ The above algorithm works by retrieving the user's most listened songs, finding 
 
 It's quite clear that this function would benefit greatly from being pure, seeing how much business logic is encapsulated within it. Unfortunately, the technique we relied upon earlier won't work here.
 
-In order to fully isolate `GetRecommendationsAsync` from its impure dependencies, we would have to somehow supply the function with an entire list of songs, users, and their scrobbles upfront. If we assume that we're dealing with data on millions of users, it's obvious that this would be completely impractical and likely even impossible.
+In order to fully isolate `GetRecommendationsAsync(...)` from its impure dependencies, we would have to somehow supply the function with an entire list of songs, users, and their scrobbles upfront. If we assume that we're dealing with data on millions of users, it's obvious that this would be completely impractical and likely even impossible.
 
 A seemingly simple way we could try to work around this problem is to split the function into smaller pieces, each handling one of the four stages of the algorithm separately:
 
@@ -432,7 +432,7 @@ public class RecommendationsProvider
 }
 ```
 
-By extracting all the pure code out of `GetRecommendationsAsync`, we can now write unit tests that verify that the intermediate stages of the algorithm work as intended. On the surface, it looks as though we managed to achieve exactly what we wanted.
+By extracting all the pure code out of `GetRecommendationsAsync(...)`, we can now write unit tests that verify that the intermediate stages of the algorithm work as intended. On the surface, it looks as though we managed to achieve exactly what we wanted.
 
 However, instead of having one cohesive element to reason about, we ended up with multiple fragments, each having no meaning or value of their own. While unit testing of individual parts may have become easier, the benefit is very questionable, as it provides no confidence in the correctness of the algorithm as a whole.
 
@@ -477,9 +477,9 @@ public static int Wrap(int value, int period) => value % period;
 
 Seeing as the above code literally just represents a mathematical expression, it seems logical that it must be pure. However, this function shares the exact same problem as the one in the previous snippet.
 
-The modulus operator has an exceptional outcome, which occurs when the supplied divisor is equal to _zero_. If we were to try and invoke `Wrap(123, 0)`, it would throw an exception, indicating that the function is actually impure as well.
+The modulus operator has an exceptional outcome, which occurs when the supplied divisor is equal to zero. If we were to try and invoke `Wrap(123, 0)`, it would throw an exception, indicating that the function is actually impure as well.
 
-Notably, this problem could be avoided if we used something like `Option<int>` as return type instead. This approach eliminates the need for an exception (and this is how e.g. [Darklang does it](https://docs.darklang.com/languagedetails#floats)), but comes at an expense of making basic arithmetic operations appear more cumbersome.
+Notably, this problem could be avoided if we used something like `Option<int>` as the return type instead. This approach eliminates the need for an exception, but comes at an expense of making basic arithmetic operations appear more cumbersome.
 
 In any case, even though the code we wrote originally doesn't satisfy the theoretical definition of purity, it might be _pure enough_ for our usage scenario.
 
@@ -498,13 +498,13 @@ public static string GetOutputPath(Report report, string outputDir)
 }
 ```
 
-The code above assembles a file path for the provided report by combining the output directory with the generated file name. It calls the [`Path.Combine`](https://docs.microsoft.com/en-us/dotnet/api/system.io.path.combine?view=netcore-3.1#System_IO_Path_Combine_System_String_System_String_) method, whose behavior relies on the value of the `Path.DirectorySeparatorChar` constant, as it indicates which directory separator is used by the operating system.
+The code above assembles a file path for the provided report by combining the output directory with the generated file name. It calls the [`Path.Combine(...)`](https://docs.microsoft.com/en-us/dotnet/api/system.io.path.combine?view=netcore-3.1#System_IO_Path_Combine_System_String_System_String_) method, whose behavior relies on the value of the `Path.DirectorySeparatorChar` constant, as it indicates which directory separator is used by the operating system.
 
 Since it is a constant and its value is guaranteed to always be the same for the duration of the program's lifetime, our function is pure (as long as we also disregard possible exceptions). However, it's pure only within the current session.
 
 If we imagine that we're building a cross-platform solution, it's logical that we treat specifics of each platform as environmental parameters. In other words, for code that is expected to run seamlessly on Windows and Linux, the path separator constant essentially acts as a global variable.
 
-Assuming our goal is to test `GetOutputPath` in isolation, simply relying on the parameters of the function is not enough. We would also need to execute tests on each of the supported operating systems, to make sure it actually works with all possible path separators.
+Assuming our goal is to test `GetOutputPath(...)` in isolation, simply relying on the parameters of the function is not enough. We would also need to execute tests on each of the supported operating systems, to make sure it actually works with all the possible path separators.
 
 In this case, the fact that the function is pure does not provide us with sufficient guarantees. While it's pure by definition, it's not _pure enough_ for what we need.
 
@@ -518,7 +518,7 @@ At the end of the day, the entire notion of purity is just a mathematical model,
 
 Overall, purity is a pretty useful concept, as it helps us understand how some operations may make our code non-deterministic, difficult to reason about, and cumbersome to test in isolation. Impure interactions are not bad on their own, but the constraints they impose are contagious in nature and may spread to other parts of the application.
 
-The pure-impure segregation principle aims to limit impurities to an essential minimum, by decoupling them from the rest of the code. Ultimately, the goal is to push all non-pure operations towards the outermost layers of the system, while keeping the domain layer composed entirely of pure functions.
+The pure-impure segregation principle aims to limit impurities to an essential minimum, by decoupling them from the rest of the code. Ultimately, the goal is to push all non-pure operations towards the outermost layers of the system, while keeping the domain layer comprised entirely out of pure functions.
 
 Designing software in such way leads to an architecture that resembles a pipeline rather than a hierarchy, which favors functional style of programming. Depending on the project, this may aid in expressing the flow of data more clearly, among other useful benefits.
 

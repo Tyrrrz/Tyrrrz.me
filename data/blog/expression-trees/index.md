@@ -23,13 +23,13 @@ Of course, expressions vary in complexity and can contain different combinations
 
 Looking at the above expression, we can also consider two of its aspects: **what it does** and **how it does it**.
 
-When it comes to the former, the answer is pretty simple — it generates a greeting based on the person's name, or produces a `null`. If this expression was returned by a function, that would be the extent of information we could derive from its signature:
+When it comes to the former, the answer is pretty simple — it generates a greeting based on the person's name, or produces a `null`. If this expression were returned by a function, that would be the extent of the information that we could derive from its signature:
 
 ```csharp
 string? GetGreeting(string personName) { /* ... */ }
 ```
 
-As for how it does it, however, the answer is a bit more detailed. This expression consists of a ternary conditional operator, whose condition is evaluated by negating the result of a call to method `string.IsNullOrWhiteSpace` with parameter `personName`, whose positive clause is made up of a "plus" binary operator that works with a constant string expression `"Greetings, "` and the parameter expression, and whose negative clause consist of a sole `null` expression.
+As for how it does it, however, the answer is a bit more detailed. This expression consists of a ternary conditional operator, whose condition is evaluated by negating the result of calling the `string.IsNullOrWhiteSpace(...)` method with the `personName` parameter, whose positive clause is made up of a "plus" binary operator that works with a constant string expression `"Greetings, "` and the parameter expression, and whose negative clause consists of a sole `null` expression.
 
 The description above may seem like a mouthful, but it outlines the exact syntactic structure of the expression. It is by this higher-order representation that we're able to tell how exactly it's evaluated.
 
@@ -67,14 +67,14 @@ The framework offers us with an API to construct expression trees through the [`
 
 Some of these methods are:
 
-- `Expression.Constant(...)` — creates an expression that represents a value.
-- `Expression.Variable(...)` — creates an expression that represents a variable.
-- `Expression.New(...)` — creates an expression that represents an initialization of a new instance.
-- `Expression.Assign(...)` — creates an expression that represents an assignment operation.
-- `Expression.Equal(...)` — creates an expression that represents an equality comparison.
-- `Expression.Call(...)` — creates an expression that represents a specific method call.
-- `Expression.Condition(...)` — creates an expression that represents branching logic.
-- `Expression.Loop(...)` — creates an expression that represents repeating logic.
+- `Expression.Constant(...)` — creates an expression that represents a value
+- `Expression.Variable(...)` — creates an expression that represents a variable
+- `Expression.New(...)` — creates an expression that represents an initialization of a new instance
+- `Expression.Assign(...)` — creates an expression that represents an assignment operation
+- `Expression.Equal(...)` — creates an expression that represents an equality comparison
+- `Expression.Call(...)` — creates an expression that represents a specific method call
+- `Expression.Condition(...)` — creates an expression that represents branching logic
+- `Expression.Loop(...)` — creates an expression that represents repeating logic
 
 As a simple exercise, let's recreate the expression we've looked into in the previous part of the article:
 
@@ -105,19 +105,19 @@ public Expression ConstructGreetingExpression()
 
 Let's digest what just happened here.
 
-First, we're calling `Expression.Parameter` in order to construct a parameter expression. We will be able to use it to resolve the value of a particular parameter.
+First, we're calling `Expression.Parameter(...)` in order to construct a parameter expression. We will be able to use it to resolve the value passed to a particular parameter.
 
-Following that, we are relying on reflection to resolve a reference to the `string.IsNullOrWhiteSpace` method. We use `Expression.Call` to create a method invocation expression that represents a call to `string.IsNullOrWhiteSpace` with the parameter resolved by the expression we created earlier. To perform a logical "not" operation on the result, we're calling `Expression.Not` to wrap the method call. Incidentally, this expression constitutes the condition part of the ternary expression we're building.
+Following that, we are relying on reflection to resolve a reference to the `string.IsNullOrWhiteSpace(...)` method. We use `Expression.Call(...)` to create a method invocation expression that represents a call to `string.IsNullOrWhiteSpace(...)` with the parameter resolved by the expression we created earlier. To perform a logical "not" operation on the result, we're calling `Expression.Not(...)` to wrap the method call. Incidentally, this expression constitutes the condition part of the ternary expression we're building.
 
-To compose the positive clause, we're constructing an "add" operation with the help of `Expression.Add`. As the operands, we're providing a constant expression for string `"Greetings, "` and the parameter expression from earlier.
+To compose the positive clause, we're constructing an "add" operation with the help of `Expression.Add(...)`. As the operands, we're providing a constant expression for string `"Greetings, "` and the parameter expression from earlier.
 
-Then, for the negative clause, we're using `Expression.Constant` to create a `null` constant expression. To ensure that the `null` value is typed correctly, we explicitly specify the type as the second parameter.
+Then, for the negative clause, we're using `Expression.Constant(...)` to create a `null` constant expression. To ensure that the `null` value is typed correctly, we explicitly specify the type as the second parameter.
 
-Finally, we're combining all the above parts together to create our ternary conditional operator. If you take a moment to trace what goes into `Expression.Condition`, you will realize that we have essentially replicated the tree diagram we've seen earlier.
+Finally, we're combining all the above parts together to create our ternary conditional operator. If you take a moment to trace what goes into `Expression.Condition(...)`, you will realize that we have essentially replicated the tree diagram we've seen earlier.
 
 However, this expression isn't particularly useful on its own. Since we've created it ourselves, we're not really interested in its structure — we want to be able to evaluate it instead.
 
-In order to do that, we have to create an entry point by wrapping everything in a lambda expression. To turn it into an actual lambda, we can call `Compile` which will produce a delegate that we can invoke.
+In order to do that, we have to create an entry point by wrapping everything in a lambda expression. To turn it into an actual lambda, we can call `Compile(...)` which will produce a delegate that we can invoke.
 
 Let's update the method accordingly:
 
@@ -171,7 +171,7 @@ Hmm, that's weird. I'm pretty sure the `+` operator is defined for strings, othe
 
 Well, actually the error message is correct, this operator is indeed not defined for `System.String`. Instead, what happens is that the C# compiler automatically converts expressions like `"foo" + "bar"` into `string.Concat("foo", "bar")`. In cases with more than two strings this provides better performance because it avoids unnecessary allocations.
 
-When dealing with expression trees, we're essentially writing the "final" version of the code. So instead of `Expression.Add` we need to call `string.Concat` directly.
+When dealing with expression trees, we're essentially writing the "final" version of the code. So instead of `Expression.Add(...)` we need to call `string.Concat(...)` directly.
 
 Let's change our code to accommodate for that:
 
@@ -240,7 +240,7 @@ There's no way for us to compose these into one expression, like we could have w
 new StringBuilder().Append("Hello ").AppendLine("world!");
 ```
 
-Fortunately, the expression tree model allows us to represent statements as well. To do that, we need to put them inside a `Block` expression.
+Fortunately, the expression tree model allows us to represent statements as well. To do that, we need to put them inside a `Block(...)` expression.
 
 Here is how it works:
 
@@ -327,7 +327,7 @@ So despite the fact that we are building _expression_ trees, we are not actually
 
 We know how to compile our expressions into run-time instructions, but what about readable C# code? It could be useful if we wanted to display it or just to have some visual aid while testing.
 
-The good news is that all types that derive from `Expression` override the `ToString` method with a more specific implementation. That means we can do the following:
+The good news is that all types that derive from `Expression` override the `ToString()` method with a more specific implementation. That means we can do the following:
 
 ```csharp
 var s1 = Expression.Constant(42).ToString(); // 42
@@ -338,7 +338,7 @@ var s2 = Expression.Multiply(
 ).ToString(); // (5 * 11)
 ```
 
-The bad news, however, is that it only works nicely with simple expressions like the ones above. For example, if we try to call `ToString` on the ternary expression we compiled earlier, we will get:
+The bad news, however, is that it only works nicely with simple expressions like the ones above. For example, if we try to call `ToString()` on the ternary expression we compiled earlier, we will get:
 
 ```csharp
 var s = lambda.ToString();
@@ -348,7 +348,7 @@ var s = lambda.ToString();
 
 While fairly descriptive, this is probably not the text representation one would hope to see.
 
-Luckily, we can use the [ReadableExpressions](https://github.com/agileobjects/ReadableExpressions) NuGet package to get us what we want. By installing it, we should be able to call `ToReadableString` to get the actual C# code that represents the expression:
+Luckily, we can use the [ReadableExpressions](https://github.com/agileobjects/ReadableExpressions) NuGet package to get us what we want. By installing it, we should be able to call `ToReadableString()` to get the actual C# code that represents the expression:
 
 ```csharp
 var code = lambda.ToReadableString();
@@ -356,9 +356,9 @@ var code = lambda.ToReadableString();
 // personName => !string.IsNullOrWhiteSpace(personName) ? "Greetings, " + personName : null
 ```
 
-As you can see, it even replaced the `string.Concat` call with the plus operator to make it closer to code that a developer would typically write.
+As you can see, it even replaced the `string.Concat(...)` call with the plus operator to bring it closer to the code that a developer would typically write.
 
-Additionally, if you are using Visual Studio and want to inspect expressions by rendering them as code, you can install the [ReadableExpressions.Visualizers extension](https://marketplace.visualstudio.com/items?itemName=vs-publisher-1232914.ReadableExpressionsVisualizers). It's very helpful when debugging large or really complex expressions.
+Additionally, if you are using Visual Studio and want to inspect expressions by rendering them as code, you can install the [ReadableExpressions.Visualizers](https://marketplace.visualstudio.com/items?itemName=vs-publisher-1232914.ReadableExpressionsVisualizers) extension. It's very helpful when debugging large or complicated expressions.
 
 ## Optimizing reflection calls
 
@@ -384,7 +384,7 @@ public static int CallExecute(Command command) =>
 
 Of course, invoking the method like that can cause significant performance issues if we put it in a tight loop. Let's see if we can optimize it a bit.
 
-Before we jump into expressions, we can first optimize the above code by separating the part that resolves `MethodInfo` from the part that invokes it. If we're going to call this method more than once, we don't have to use `GetMethod` every time:
+Before we jump into expressions, we can first optimize the above code by separating the part that resolves `MethodInfo` from the part that invokes it. If we're going to call this method more than once, we don't have to use `GetMethod(...)` every time:
 
 ```csharp
 public static class ReflectionCached
@@ -396,7 +396,7 @@ public static class ReflectionCached
 }
 ```
 
-That should make things better, but we can push it even further by using `Delegate.CreateDelegate`. This way we can create a re-usable delegate and avoid the overhead that comes with `MethodInfo.Invoke`. Let's do that as well:
+That should make things better, but we can push it even further by using `Delegate.CreateDelegate(...)`. This way we can create a re-usable delegate and avoid the overhead that comes with `MethodInfo.Invoke(...)`. Let's do that as well:
 
 ```csharp
 public static class ReflectionDelegate
@@ -466,7 +466,7 @@ public class Benchmarks
 | Expressions           |   5.383 ns | 0.0433 ns | 0.0383 ns |  0.03 |
 ```
 
-As you can see, compiled expressions outperform reflection across the board, even though the approach with `CreateDelegate` comes really close. Note however that while the execution times are similar, `CreateDelegate` is more limited than compiled expressions — for example, it cannot be used to call constructor methods.
+As you can see, compiled expressions outperform reflection across the board, even though the approach with `CreateDelegate(...)` comes really close. Note, however, that while the execution times are similar, `CreateDelegate(...)` is more limited than compiled expressions — for example, it cannot be used to call constructor methods.
 
 This approach of using expression trees for dynamic method invocation is commonplace in various frameworks and libraries. For example:
 
@@ -478,7 +478,7 @@ This approach of using expression trees for dynamic method invocation is commonp
 
 Something else we can do with compiled expressions is implement generic operators. These can be pretty useful if you're writing a lot of mathematical code and want to avoid duplication.
 
-As you know, operators in C# are not generic. This means that every numeric type, among other things, defines its own version of the multiply and divide operators. This means that the code that uses these operators can't be generic either.
+As you know, operators in C# cannot be generic. Every numeric type, among other things, has to define its own version of the multiply and divide operators. This also means that the code that uses these operators can't be generic either.
 
 Imagine that you had a function that calculates three-fourths of a number:
 
@@ -580,7 +580,7 @@ public static class ThreeFourths
 // ThreeFourths.Of(18) -> 13
 ```
 
-Due to the fact that the compiler generates a version of the `Impl` class for each argument of `T`, we end up with an implementation of three-fourths for each type encapsulated in a separate class. This approach gives us a thread-safe lazy-evaluated generic dynamic function.
+Due to the fact that the compiler generates a version of the `Impl` class for each argument of `T`, we end up with an implementation of three-fourths for each type encapsulated in a separate class.
 
 Now, with the optimizations out of the way, let's again use Benchmark.NET to compare the different ways we can calculate three-fourths of a value:
 
@@ -615,7 +615,7 @@ As you can see, the expression-based approach performs about nine times faster t
 
 ## Compiling dictionary into a switch expression
 
-Another fun way we can use expression trees is to create a dictionary with a compiled lookup. Even though the standard .NET `System.Collections.Generic.Dictionary` is insanely fast on its own, it's possible to make its read operations even faster.
+Another fun way we can use expression trees is to create a dictionary with a compiled lookup. Even though the standard `System.Collections.Generic.Dictionary` is insanely fast on its own, it's possible to make its read operations even faster.
 
 While a typical dictionary implementation may be pretty complicated, a lookup can be represented in a form of a simple switch expression:
 
@@ -645,7 +645,7 @@ The function above attempts to match the hash code of the specified key with the
 
 Even though hash codes are designed to be unique, inevitably there will be collisions. In such cases, when the same hash code matches with multiple different values, there is an inner switch expression that compares the actual key and determines which value to return.
 
-Finally, if none of the cases matched, it throws an exception signifying that the dictionary doesn't contain the specified key.
+Finally, if none of the cases match, it throws an exception signifying that the dictionary doesn't contain the specified key.
 
 The idea is that, since a switch is faster than a hash table, dynamically compiling all key-value pairs into a switch expression like the one above should result in a faster dictionary lookup.
 
@@ -737,7 +737,7 @@ public class CompiledDictionary<TKey, TValue> : IDictionary<TKey, TValue>
 }
 ```
 
-The method `UpdateLookup` takes all the key-value pairs contained within the inner dictionary and groups them by the hash codes of their keys, which are then transformed into switch cases. If there is no collision for a particular hash code, then the switch case is made up of a single constant expression that produces the corresponding value. Otherwise, it contains an inner switch expression that further evaluates the key to determine which value to return.
+The method `UpdateLookup()` takes all the key-value pairs contained within the inner dictionary and groups them by the hash codes of their keys, which are then transformed into switch cases. If there is no collision for a particular hash code, then the switch case is made up of a single constant expression that produces the corresponding value. Otherwise, it contains an inner switch expression that further evaluates the key to determine which value to return.
 
 Let's see how well this dictionary performs when benchmarked against the standard implementation:
 
@@ -838,7 +838,7 @@ public static class SimpleCalculator
 
 As you can see, the parsers defined above (`Constant`, `Operator`, `Operation`, `FullExpression`) all yield objects of type `Expression` and `ExpressionType`, which are both defined in `System.Linq.Expressions`. The expression tree is essentially our syntax tree, so once we parse the input we have all the required information to compile the run-time instructions represented by it.
 
-You can try it out by calling `Run`:
+You can try it out by calling `Run(...)`:
 
 ```csharp
 var a = SimpleCalculator.Run("2 + 2");        // 4
@@ -852,7 +852,7 @@ Note that this simple calculator is just an example of what you can do, it doesn
 
 While compiled expressions execute really fast, compiling them can be relatively expensive.
 
-In most cases that's completely fine, but you may want to take the performance even further by using [FastExpressionCompiler](https://github.com/dadhi/FastExpressionCompiler). This library provides a drop-in replacement for the `Compile` method called `CompileFast`, which executes much faster.
+In most cases that's completely fine, but you may want to take the performance even further by using [FastExpressionCompiler](https://github.com/dadhi/FastExpressionCompiler). This library provides a drop-in replacement for the `Compile()` method called `CompileFast()`, which executes much faster.
 
 For example, here's a simple benchmark that shows the difference:
 
@@ -879,7 +879,7 @@ public class Benchmarks
 | Compile (fast) |  4.497 us | 0.0662 us | 0.0619 us |  0.12 |   1.21 KB |
 ```
 
-As you can see, the performance improvement is pretty noticeable. The reason it runs so fast is that the `CompileFast` version skips all the verifications that normal `Compile` does to ensure that the expression tree is valid.
+As you can see, the performance improvement is pretty noticeable. The reason it runs so fast is that the `CompileFast()` version skips all the verifications that normal `Compile()` does to ensure that the expression tree is valid.
 
 This library (as part of `FastExpressionCompiler.LightExpression`) also offers a drop-in replacement for `Expression` and all of its static factory methods. These alternative implementations construct expressions which may, in some cases, perform much faster than their regular counterparts. However, I still recommend benchmarking it on your particular use cases to ensure that it actually provides an improvement.
 
@@ -997,7 +997,7 @@ public class Dto
 }
 ```
 
-If we wanted to get the `PropertyInfo` that represents its `Id` property, we could use reflection to do it like this:
+If we wanted to get the `PropertyInfo` that represents the `Id` property, we could use reflection to do it like this:
 
 ```csharp
 var idProperty = typeof(Dto).GetProperty(nameof(Dto.Id));
@@ -1042,7 +1042,7 @@ validator.AddValidation<string>(nameof(Dto.Name), name => !string.IsNullOrWhiteS
 var isValid = validator.Validate(new Dto { Id = Guid.NewGuid() }); // false
 ```
 
-However, the problem here is that all of our validators are effectively untyped. We have to specify the generic argument in `AddValidation` so that our predicates are aware of what they're working with, but this setup is very volatile.
+However, the problem here is that all of our validators are effectively untyped. We have to specify the generic argument in `AddValidation(...)` so that our predicates are aware of what they're working with, but this setup is very brittle.
 
 If we were to, for example, change the type of `Dto.Id` from `Guid` to `int`, everything would still compile, but the code will no longer work correctly because our predicate expects the type to be `Guid`. Also, we'd be lucky if our users were to provide the property names using `nameof`, in reality there will probably be magic strings instead. All in all, this code is not refactor-safe.
 
@@ -1243,9 +1243,9 @@ new Visitor().Visit(expr);
 
 As you can see by the order of the logs, the visitor first encounters the binary expression that makes up the lambda body, then digs inside, revealing a call to `Math.Sin(...)` whose parameter is also expressed as a call to `GetHashCode()` on the result of `NewGuid()`.
 
-You may have noticed that the visitor methods on `ExpressionVisitor` all return `Expression`s. That means that besides merely inspecting them, the visitor can choose to rewrite or completely replace expressions with different ones.
+You may have noticed that the visitor methods on `ExpressionVisitor` all return `Expression`s. That means that besides merely inspecting the expressions, the visitor can choose to rewrite them or completely replace them with different ones.
 
-Let's change our visitor so that it catches all calls to method `Math.Sin` and rewrites them into `Math.Cos`:
+Let's change our visitor so that it catches all calls to method `Math.Sin(...)` and rewrites them into `Math.Cos(...)`:
 
 ```csharp
 public class Visitor : ExpressionVisitor
@@ -1280,7 +1280,7 @@ Console.WriteLine($"New result value: {newResult}");
 // New result value: 0.07306426748550407
 ```
 
-As you can see, the new expression is structurally identical but with `Math.Sin` replaced by `Math.Cos`. Both expressions are completely independent and can be compiled to produce their respective delegates.
+As you can see, the new expression is structurally identical but with `Math.Sin(...)` replaced by `Math.Cos(...)`. Both expressions are completely independent and can be compiled to produce their respective delegates.
 
 Using this approach we can arbitrarily rewrite supplied expressions, generating derivatives that behave differently. It can be very helpful when creating dynamic proxies. For example, a popular mocking library [Moq](https://github.com/moq/moq4) uses this technique to build stubs at run-time.
 
@@ -1406,7 +1406,7 @@ a + b = 8
 val it : unit = ()
 ```
 
-Translating code from one language to another is definitely not a simple task, but it can be incredibly useful in certain scenarios. One example could be sharing validation rules between backend and frontend by converting C# predicate expressions into JavaScript code.
+Translating code from one language to another is definitely not a simple task, but it can be incredibly useful in certain scenarios. One example could be sharing validation rules between the backend and the frontend by converting C# predicate expressions into JavaScript code.
 
 ## Summary
 
@@ -1420,4 +1420,4 @@ Some other interesting articles on the topic:
 - [How we did (and did not) improve performance and efficiency in Marten 2.0 (Jeremy D. Miller)](https://jeremydmiller.com/2017/08/01/how-we-did-and-did-not-improve-performance-and-efficiency-in-marten-2-0)
 - [Optimizing Just in Time with Expression Trees (Craig Gidney)](http://twistedoakstudios.com/blog/Post2540_optimizing-just-in-time-with-expression-trees)
 
-I also recommend reading about [code quotations in F#](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/code-quotations) which is a similar feature to expression trees but with more powerful language support.
+I also recommend reading about [code quotations in F#](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/code-quotations), which is a feature similar to expression trees but with more powerful language support.

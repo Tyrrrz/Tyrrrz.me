@@ -9,11 +9,11 @@ The easiest and the most obvious way to achieve this is to bind the `Visibility`
 
 ## Downsides of switching visibility
 
-Changing the value of `Visibility` property tends to get the job done, but it has some noticeable drawbacks:
+Changing the value of the `Visibility` property tends to get the job done, but it has some noticeable drawbacks:
 
-- You have to use a converter to turn the bound value into `Visibility`.
-- It gets complicated when there are more than two presentations to switch between or when there is more than one condition.
-- Even when collapsed or hidden, all the UI elements still remain in the visual tree.
+- You have to use a converter to turn the bound value into `Visibility`
+- It gets complicated when there are more than two presentations to switch between or when there is more than one condition
+- Even when collapsed or hidden, all the UI elements still remain in the visual tree
 
 The last point is something that tends to get overlooked and may lead to problems. When you make an element invisible, be it by setting the `Visibility` to `Hidden` or `Collapsed`, it doesn't actually disappear from the visual tree. This means it still takes part in most interactions, including bindings. Additionally, if a hidden element has a binding that fails, an exception will be raised and silently suppressed by the framework, potentially causing performance issues.
 
@@ -59,4 +59,4 @@ The `ContentPresenter.Resources` lists data templates used for each separate pre
 
 Note how using triggers gives us more flexibility — we don't need to use converters in order to turn `IsMultiselect` into an instance of `Visibility`, we just bind to it directly.
 
-Using this approach we're also not leaving any unnecessary mess in the visual tree because we're changing the actual content instead of just hiding it.
+Using this approach, we're also not leaving any unnecessary mess in the visual tree because we're changing the actual content instead of just hiding it.

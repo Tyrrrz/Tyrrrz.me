@@ -13,7 +13,7 @@ However, despite there being many different approaches, modern "best practices" 
 
 The benefit of this approach is often supported by the argument that unit tests provide the most value during development because they're able to catch errors quickly and help enforce design patterns that facilitate modularity. This idea has become so widely accepted that the term "unit testing" is now somewhat conflated with automated testing in general, losing part of its meaning and contributing to confusion.
 
-When I was a less experienced developer, I believed in following these "best practices" to the letter, as I thought that would make my code better. I didn't particularly enjoy writing unit tests because of all the ceremony involved with abstractions and mocking, but it was the recommended approach after all, so who am I to know better.
+When I was a less experienced developer, I believed in following these "best practices" to the letter, as I thought that would help improve the quality of my code. I didn't particularly enjoy writing unit tests because of all the ceremony involved with abstractions and mocking, but it was the recommended approach after all, so who am I to know better.
 
 It was only later, as I've experimented more and built more projects, that I started to realize that there are much better ways to approach testing and that **focusing on unit tests is**, in most cases, **a complete waste of time**.
 
@@ -23,15 +23,15 @@ In this article I will share my observations about this testing technique and go
 
 ## Fallacies of unit testing
 
-Unit tests, as evident by the name, revolve around the concept of a "unit", which denotes a very small isolated part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a module (or method of an object).
+Unit tests, as evident by the name, revolve around the concept of a "unit", which denotes a very small isolated part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a module (or a method of an object).
 
 Normally, when the code isn't written with unit tests in mind, it may be impossible to test some functions in complete isolation because they can have external dependencies. In order to _work around_ this issue, we can apply the dependency inversion principle and replace concrete dependencies with abstractions. These abstractions can then be substituted with real or fake implementations, depending on whether the code is executing normally or as part of a test.
 
-Besides that, unit tests are expected to be pure. For example, if a function contains code that writes data to the file system, that part needs to be abstracted away as well, otherwise the test that verifies such behavior will be considered an integration test instead, since its coverage extends to the unit's integration with the file system.
+Besides that, unit tests are expected to be pure. For example, if a function contains code that writes data to the file system, that part needs to be abstracted away as well. Otherwise, the test that verifies such behavior will be considered an integration test instead, since its coverage extends to the unit's integration with the file system.
 
 Considering the factors mentioned above, we can reason that **unit tests are only useful to verify pure business logic inside a given function**. Their scope does not extend to testing side effects or other integrations because that belongs to the domain of integration testing.
 
-To illustrate how these nuances affect design, let's take a look at an example of a simple system that we want to test. Imagine we're working on an application that calculates local sunrise and sunset times, which it does through the help of the following two classes:
+To illustrate how these nuances affect design, let's take a look at an example of a simple system that we may want to test. Imagine we're working on an application that calculates local sunrise and sunset times, which it does through the help of the following two classes:
 
 ```csharp
 public class LocationProvider : IDisposable
@@ -58,7 +58,7 @@ public class SolarCalculator : IDisposable
 }
 ```
 
-Although the design above is perfectly valid in terms of OOP, neither of these classes are actually unit-testable. Because `LocationProvider` depends on its own instance of `HttpClient` and `SolarCalculator` in turn depends on `LocationProvider`, it's impossible to isolate the business logic that may be contained within methods of these classes.
+Although the design above is perfectly valid in terms of OOP, neither of these classes are actually unit-testable. Because `LocationProvider` depends on its own instance of `HttpClient` and `SolarCalculator` in turn depends on `LocationProvider`, it's impossible to isolate the business logic that may be contained within the methods of these classes.
 
 Let's iterate on that code and replace concrete implementations with abstractions:
 
@@ -102,7 +102,7 @@ By doing so we were able to decouple `LocationProvider` from `SolarCalculator`, 
 
 While these changes may seem as an improvement to some, it's important to point out that the interfaces we've defined serve **no practical purpose other than making unit testing possible**. There's no need for actual polymorphism in our design, so, as far as our code is concerned, these abstractions are _autotelic_ (i.e. abstractions for the sake of abstractions).
 
-Let's try to reap the benefits of all that work and write a unit test for `SolarCalculator.GetSolarTimesAsync`:
+Let's try to reap the benefits of all that work and write a unit test for `SolarCalculator.GetSolarTimesAsync(...)`:
 
 ```csharp
 public class SolarCalculatorTests
@@ -134,13 +134,13 @@ public class SolarCalculatorTests
 }
 ```
 
-Here we have a basic test that verifies that `SolarCalculator` works correctly for a known location. Since unit tests and their units are tightly coupled, we're following the recommended naming convention, where the test class is named after the class under test, and the name of the test method follows the `Method_Precondition_Result` pattern.
+Here we have a basic test that verifies that `SolarCalculator` works correctly for a known location. Since unit tests and their units are inherently coupled, we're following an established convention where the test class is named after the type that is being tested, and the name of the test method follows the `Method_Precondition_Result` pattern.
 
-In order to simulate the desired precondition in the arrange phase, we have to inject corresponding behavior into the unit's dependency, `ILocationProvider`. In this case we do that by substituting the return value of `GetLocationAsync()` with a location for which the correct solar times are already known ahead of time.
+In order to simulate the desired precondition in the arrange phase, we have to inject the corresponding behavior into the unit's dependency, `ILocationProvider`. In this case we do that by substituting the return value of `GetLocationAsync()` with a location for which the correct solar times are already known ahead of time.
 
 Note that although `ILocationProvider` exposes two different methods, from the contract perspective **we have no way of knowing which one actually gets called**. This means that by choosing to mock a specific one of these methods, we are making an **assumption about the underlying implementation** of the method we're testing (which was deliberately hidden in the previous snippets).
 
-All in all, the test does correctly verify that the business logic inside `GetSolarTimesAsync` works as expected. However, let's expand on some of the observations we've made in the process.
+All in all, the test does correctly verify that the business logic inside `GetSolarTimesAsync(...)` works as expected. However, let's expand on some of the observations we've made in the process.
 
 ---
 
@@ -148,23 +148,21 @@ All in all, the test does correctly verify that the business logic inside `GetSo
 
 It's important to understand that the purpose of any unit test is very simple: verify business logic in an isolated scope. Depending on which interactions you intend to test, unit testing may or may not be the right tool for the job.
 
-For example, does it make sense to unit test a method that calculates solar times using a long and complicated mathematical algorithm? Most likely, _yes_.
+For example, does it make sense to unit test a method that calculates solar times using a long and complicated mathematical algorithm? Most likely, yes.
 
-Does it make sense to unit test a method that sends a request to a REST API to get geographical coordinates? Most likely, _not_.
+Does it make sense to unit test a method that sends a request to a REST API to get geographical coordinates? Most likely, not.
 
-If you treat unit testing as a goal in itself, you will quickly find that, despite putting a lot of effort, most tests will not be able to provide you with the confidence you need, simply because they're testing the wrong thing. In many cases it's much more beneficial to test wider interactions with integration tests, rather than focusing specifically on unit tests.
-
-Interestingly, some developers do end up writing integration tests in such scenarios, but still refer to them as unit tests, mostly due to confusion surrounding the concept. Although it could be argued that a unit size can be chosen arbitrarily and can span multiple components, this makes the definition very fuzzy, ultimately just turning overall usage of the term completely useless.
+If you treat unit testing as a goal in and of itself, you will quickly find that, despite putting a lot of effort, most tests will not be able to provide you with the confidence you need, simply because they're testing the wrong thing. In many cases it's much more beneficial to test wider interactions with integration tests, rather than to focus specifically on unit tests.
 
 2. Unit tests **lead to more complicated design**
 
-One of the most popular arguments in favor of unit testing is that it enforces you to design software in a highly modular way. This builds on an assumption that it's easier to reason about code when it's split into many smaller components rather than a few larger ones.
+One of the most popular arguments in favor of unit testing is that it forces you to design software in a highly modular fashion. This builds on an assumption that it's easier to reason about code when it's split into many smaller components rather than a few larger ones.
 
-However, it often leads to the opposite problem, where the functionality may end up becoming unnecessarily fragmented. This makes it much harder to assess the code because a developer needs to scan through multiple components that make up what should have been a single cohesive element.
+However, it often leads to the opposite problem, where the functionality may end up becoming unnecessarily fragmented. This makes it much harder to assess the code because the developer needs to scan through multiple components that make up what should have been a single cohesive element.
 
 Additionally, the abundant usage of abstraction, which is required to achieve component isolation, creates a lot of unneeded indirection. Although an incredibly powerful and useful technique in itself, abstraction inevitably increases cognitive complexity, making it further more difficult to reason about the code.
 
-Through that indirection we also end up losing some degree of encapsulation that we were able to maintain otherwise. For example, the responsibility of managing lifetimes of individual dependencies shifts from components that contain them to some other unrelated service (usually the dependency container).
+Through that indirection we also end up losing some degree of encapsulation that we were able to maintain otherwise. For example, the responsibility of managing lifetimes of individual dependencies shifts from components that contain them to some other unrelated service.
 
 Some of that infrastructural complexity can be also delegated to a dependency injection framework, making it easier to configure, manage, and activate dependencies. However, that reduces portability, which may be undesirable in some cases, for example when writing a library.
 
@@ -174,17 +172,17 @@ At the end of the day, while it's clear that unit testing does influence softwar
 
 Logically, it would make sense to assume that, since they are small and isolated, unit tests should be really easy and quick to write. Unfortunately, this is just another fallacy that seems to be rather popular, especially among managers.
 
-Even though the previously mentioned modular architecture lures us into thinking that individual components can be considered separately from each other, unit tests don't actually benefit from that. In fact, the complexity of a unit test only grows proportionally to the number of external interactions the unit has, due to all the work that you must do to achieve isolation while still exercising required behavior.
+Even though the previously mentioned modular architecture lures us into thinking that individual components can be considered separately from each other, unit tests don't actually benefit from that. In fact, the complexity of a unit test only grows proportionally to the number of external interactions that unit has, due to all the work that you must do to achieve isolation while still exercising required behavior.
 
-The example illustrated previously in this article is very simple, but in a real project it's not unusual to see the arrange phase spanning many long lines, just to set preconditions for a single test. In some cases, the mocked behavior can be so complex, it's almost impossible to unravel it back to figure out what it was supposed to do.
+The example illustrated previously in this article is very simple, but in a real project it's not unusual to see the arrange phase spanning many long lines, just to set preconditions for a single test. In some cases, the mocked behavior can be so complex, that it becomes almost impossible to figure out what it does without thorough analysis.
 
-Besides that, unit tests are by design very tightly coupled to the code they're testing, which means that any effort to make a change is effectively doubled as the test suite needs to be updated as well. What makes this worse is that very few developers seem to find doing that an enticing task, often just pawning it off to more junior members on the team.
+Besides that, unit tests are, by design, tightly coupled to the code they're testing, which means that any effort to implement a change is effectively doubled as the test suite needs to be updated in tandem with the main codebase. What makes this worse is that very few developers seem to find doing that an enticing task, often just pawning it off to more junior members on the team.
 
 4. Unit tests **rely on implementation details**
 
-The unfortunate implication of mock-based unit testing is that any test written with this approach is inherently implementation-aware. By mocking a specific dependency, your test becomes reliant on how the code under test consumes that dependency, which is not regulated by the public interface.
+The unfortunate implication of mock-based unit testing is that any test written with this approach is inherently implementation-aware. By mocking a specific dependency, your test becomes reliant on how the code under test consumes that dependency, which is not governed by the public interface.
 
-This additional coupling often leads to unexpected issues, where seemingly non-breaking changes can cause tests to start failing as mocks become out of date. It can be very frustrating and ultimately discourages developers from trying to refactor code, because it's never clear whether the error in test comes from an actual regression or due to being reliant on some implementation detail.
+This additional coupling often leads to unexpected issues, where seemingly non-breaking changes can cause tests to start failing as mocks become out of date. It can be very frustrating and ultimately discourages developers from trying to refactor code, since it's never clear whether the error in the test comes from an actual regression or due to being reliant on some implementation detail.
 
 Unit testing stateful code can be even more tricky because it may not be possible to observe mutations through the publicly exposed interface. To work around this, you would normally inject spies, which is a type of mocked behavior that records when a function is called, helping you ensure that the unit uses its dependencies correctly.
 
@@ -196,9 +194,9 @@ Relying too much on implementation details also makes the tests themselves very 
 
 No matter what type of software you're developing, its goal is to provide value for the end user. In fact, the primary reason why we're writing automated tests in the first place is to ensure that there are no unintended defects that would diminish that value.
 
-In most cases, the user works with the software through some top-level interface such as a UI, CLI, or API. While the code itself might involve numerous layers of abstractions, the only one that matters to the user is the one they get to actually see and interact with.
+In most cases, the user works with the software through some top-level interface such as a GUI, CLI, or API. While the code itself might involve numerous layers of abstractions, the only one that matters to the user is the one they actually get to see and interact with.
 
-It doesn't even matter if a few layers deep there's a bug in some part of the system, as long as it never surfaces to the user and doesn't affect the provided functionality. Conversely, it makes no difference that we may have full coverage on all the lower-level pieces, if there's a defect in the user interface that renders our system effectively useless.
+It doesn't even matter if a few layers deep there's a bug in some part of the system, as long as it never surfaces to the user and doesn't affect the provided functionality. Conversely, having full test coverage of all the lower-level pieces doesn't help if there's a defect in the user interface that prevents us from exposing those pieces to the consumer.
 
 Of course, if you want to ensure that something works correctly, you have to check that exact thing and see if it does. In our case, the best way to gain confidence in the system is to simulate how a real user would interact with the top-level interface and see if it works properly according to expectations.
 
@@ -212,17 +210,17 @@ Doing mock-based testing puts the value of such tests under an even bigger quest
 
 So why would we, as an industry, decide that unit testing should be the primary method of testing software, given all of its existing flaws? For the most part, it's because testing at higher levels has always been considered too hard, slow, and unreliable.
 
-If you refer to the traditional test pyramid, you will find that it suggests that the most significant part of testing should be performed at the unit level. The idea is that, since coarse-grained tests are assumed to be slower and more complicated, you will want to concentrate efforts towards the bottom of the integration spectrum to end up with an efficient and maintainable test suite:
+If you refer to the traditional testing pyramid, you will find that it suggests that the most significant part of testing should be performed at the unit level. The idea is that, since higher-level tests are assumed to be slower and more complicated, you will want to concentrate efforts towards the bottom of the integration spectrum to end up with an efficient and maintainable test suite:
 
 ![Test pyramid. Shows unit tests at the bottom, integration tests on top, and end-to-end tests at the peak.](test-pyramid.png)
 
-The metaphorical model offered by the pyramid is meant to convey that a good testing approach should involve many different layers, because focusing on the extremes can lead to issues where the tests are either too slow and unwieldy, or are useless at providing any confidence. That said, the lower levels are emphasized as that's where the return on investment for development testing is believed to be the highest.
+The metaphorical model offered by the pyramid is meant to convey that a good testing approach should involve many different layers, because focusing on the extremes can lead to issues where the tests become either too slow and unwieldy, or useless at providing any confidence. That said, the lower levels are emphasized as that's where the return on investment for development testing is believed to be the highest.
 
-Top-level tests, despite providing the most confidence, often end up being slow, hard to maintain, or too broad to be included as part of typically fast-paced development flow. That's why, in most cases, such tests are instead maintained separately by dedicated QA specialists, as it's usually not considered to be the developer's job to write them.
+Top-level tests, despite providing the most confidence, often end up being slow, hard to maintain, or too broad to be included as part of a typically fast-paced development flow. That's why, in most cases, such tests are instead maintained separately by dedicated QA specialists, as it's usually not considered to be the developer's job to write them.
 
 Integration testing, which is an abstract part of the spectrum that lies somewhere between unit testing and complete end-to-end testing, is quite often just disregarded entirely. Because it's not really clear what exact level of integration is preferable, how to structure and organize such tests, or for the fear that they might get out of hand, many developers prefer to avoid them in favor of a more clear-cut extreme which is unit testing.
 
-For these reasons, all testing done during development typically resides at the very bottom of the pyramid. In fact, over time this has become so commonplace that development testing and unit testing are now practically synonymous with each other, leading to confusion that is only further perpetuated by conference talks, blog posts, books, and even some IDEs (all tests are unit tests, as far as JetBrains Rider is concerned).
+For these reasons, all testing done during development typically resides at the very bottom of the pyramid. In fact, over time this has become so commonplace that development testing and unit testing are now practically synonymous with each other, leading to confusion that is only further perpetuated by conference talks, blog posts, and books.
 
 In the eyes of most developers, the test pyramid looks somewhat like this instead:
 
@@ -238,13 +236,13 @@ If we look back, it's clear that high-level testing was tough in 2000, it probab
 
 Most modern application frameworks nowadays provide some sort of separate API layer used for testing, where you can run your application in a simulated in-memory environment that is very close to the real one. Virtualization tools like Docker also make it possible to execute tests that rely on actual infrastructural dependencies, while still remaining deterministic and fast.
 
-We have solutions like [Mountebank](http://mbtest.org), [WireMock](http://wiremock.org), [GreenMail](https://greenmail-mail-test.github.io/greenmail), [Appium](http://appium.io), [Selenium](https://selenium.dev), [Cypress](https://cypress.io), and countless others that simplify different aspects of high-level testing that were once considered unapproachable. Unless you're developing desktop applications for Windows and are stuck with [UIAutomation framework](https://docs.microsoft.com/en-us/windows/win32/winauto/entry-uiauto-win32), you will likely have many options available.
+We have solutions like [Mountebank](http://mbtest.org), [WireMock](http://wiremock.org), [GreenMail](https://greenmail-mail-test.github.io/greenmail), [Appium](http://appium.io), [Selenium](https://selenium.dev), [Cypress](https://cypress.io), and countless others that simplify different aspects of high-level testing that were once considered unapproachable. Unless you're developing desktop applications for Windows and are stuck with the [UIAutomation framework](https://docs.microsoft.com/en-us/windows/win32/winauto/entry-uiauto-win32), you will likely have many options available.
 
-On one of my previous projects, we had a web service which was tested at the system boundary using close to a hundred behavioral tests that took just under 10 seconds to run in parallel. Sure, it's possible to get much faster execution time than that with unit tests but given the confidence they provide this was a no-brainer.
+On one of my previous projects, we had a web service that was tested at the system boundary using close to a hundred behavioral tests that took just under 10 seconds to run in parallel. Sure, it's possible to get much faster execution time with unit tests, but considering the confidence they provide, this decision was a no-brainer.
 
 The slow test fallacy is, however, not the only false assumption that the pyramid is based on. The idea of having the majority of testing concentrated at the unit level only works out if those tests actually provide value, which of course depends on how much business logic is contained within the code under test.
 
-Some applications may have a lot of business logic (e.g. payroll systems), some may have close to none (e.g. CRUD apps), most are somewhere in between. Majority of the projects I've personally worked on didn't have nearly enough of it to warrant extensive coverage with unit tests but had plenty of infrastructural complexity on the other hand, which would benefit from integration testing.
+Some applications may have a lot of business logic (e.g. payroll systems), some may have close to none (e.g. CRUD apps), most are somewhere in between. Majority of the projects I've personally worked on didn't have nearly enough of it to warrant extensive coverage with unit tests, but had plenty of infrastructural complexity which could benefit from integration testing.
 
 Of course, in an ideal world one would evaluate the context of the project and come up with a testing approach that is most suitable for the problem at hand. In reality, however, most developers don't even begin to think about it at all, instead just blindly stacking mountains of unit tests following what the best practices seemingly advise you to do.
 
@@ -274,15 +272,15 @@ For that reason, I find it best to **write tests that are as highly integrated a
 
 Does this mean that every test we write should be an end-to-end test? No, but we should be trying to get as far as we can in that direction, while keeping the downsides at an acceptable level.
 
-What's acceptable or not is subjective and depends on the context. At the end of the day, it's important that those tests are written by developers and are used during development, which means they shouldn't feel like a burden to maintain and it should be possible to run them for local builds and on CI.
+What's acceptable or not is subjective and depends on the context. At the end of the day, it's important that those tests don't feel like a burden to maintain, and that it's possible to run them regularly as part of the development flow.
 
-Doing this also means that you will likely end up with tests that are scattered across different levels of the integration scale, with seemingly no clear sense of structure. This isn't an issue we would have had with unit testing, because there each test is coupled to a specific method or a function, so the structure usually ends up mirroring that of the code itself.
+Doing this also means that you will likely end up with tests that are scattered across different levels of the integration scale, with seemingly no clear sense of structure. This isn't an issue we would have had with unit testing, because each test there is coupled to a specific method or a function, so the structure usually ends up mirroring that of the application itself.
 
 Fortunately, this doesn't matter because organizing tests by individual classes or modules is not important in itself but is rather a side effect of unit testing. Instead, the tests should be partitioned by the actual user-facing functionality that they are meant to verify.
 
 Such tests are often called _functional_ because they are based on the software's functional requirements that describe what features it has and how they work. Functional testing is not another layer on the pyramid, but instead a completely orthogonal concept.
 
-Contrary to the popular belief, writing functional tests does not require you to use [Gherkin](<https://en.wikipedia.org/wiki/Cucumber_(software)#Gherkin_language>) or a BDD framework, but can be done with the very same tools that are typically used for unit testing. For example, consider how we can rewrite the example from the beginning of the article so that the tests are structured around supported user behavior rather than units of code:
+Contrary to the popular belief, writing functional tests does not require you to use [Gherkin](<https://en.wikipedia.org/wiki/Cucumber_(software)#Gherkin_language>) or a BDD framework, but can be done with the very same tools that are typically used for unit testing. For example, consider how we can rewrite the example from the beginning of the article so that the tests are structured around supported user interactions rather than units of code:
 
 ```csharp
 public class SolarTimesSpecs
@@ -302,23 +300,23 @@ Note that the actual implementation of the tests is hidden because it's not rele
 
 Naming tests in accordance to specifications rather than classes has an additional advantage of removing that unnecessary coupling. Now, if we decide to rename `SolarCalculator` to something else or move it to a different directory, the test names won't need to be updated to reflect that.
 
-By adhering to this structure, our test suite will effectively take form of a living documentation. For example, this is how the test suite is organized in [CliWrap](https://github.com/Tyrrrz/CliWrap) (the underscores are replaced with spaces by [xUnit](https://xunit.net/docs/configuration-files#methodDisplayOptions)):
+By adhering to this structure, our test suite will effectively take form of a living documentation. For example, this is how the tests are organized in one of my projects, [CliWrap](https://github.com/Tyrrrz/CliWrap):
 
 ![Functional tests used for CliWrap](cliwrap-functional-tests.png)
 
-As long as a piece of software does something at least remotely useful, it will always have functional requirements. Those can be either _formal_ (specification documents, user stories, etc.) or _informal_ (verbally agreed upon, assumed, JIRA tickets, written on toilet paper, etc.)
+As long as a piece of software does something at least remotely useful, it will always have functional requirements. Those can be either _formal_ (specification documents, user stories, etc.) or _informal_ (verbally agreed upon, assumed, JIRA tickets, etc.)
 
-Turning informal specifications into functional tests can often be difficult because it requires us to take a step away from code and challenge ourselves to think from a user's perspective. What helps me with my open-source projects is that I start by creating a readme file where I list a bunch of relevant usage examples, and then encode those into tests.
+Turning informal specifications into functional tests can often be difficult because it requires us to take a step away from code and challenge ourselves to think from a user's perspective. What helps me with my open-source projects is that I start by creating a readme file where I list a bunch of relevant usage examples, and then encode them as tests.
 
-To summarize, we can conclude that it's a good idea to **partition tests based on threads of behavior, rather than the code's internal structure**.
+To summarize, we can conclude that it is a good idea to **partition tests based on threads of behavior, rather than the code's internal structure**.
 
-Both of the aforementioned guidelines, when combined, form a mental framework that provides us with a clear goal for writing tests and a good sense of organization, while not relying on any assumptions. We can use it to establish a test suite for our project that focuses on value, and then scale it according to priorities and limitations relevant to the current context.
+Both of the aforementioned guidelines, when combined, form a mental framework that provides us with a clear goal for writing tests and a good sense of organization, while not relying on any assumptions. We can use it to establish a test suite for our project that focuses on value, and then scale it according to the priorities and limitations relevant to the current context.
 
 The idea is that, instead of focusing on a specific scope or distribution of scopes, we build our test suite based on the user-facing functionality, while attempting to cover that functionality as accurately as we can.
 
 ## Functional testing for web services (via ASP.NET Core)
 
-There might still be some confusion as to what constitutes functional testing or how exactly it's supposed to look especially if you've never done it before, so it makes sense to show a simple but complete example. For this, we will turn the solar calculator from earlier into a web service and cover it with tests according to the rules we've outlined in the previous part of the article. This app will be based on ASP.NET Core, which is a web framework I'm most familiar with, but the same idea should also equally apply to any other platform.
+There might still be some confusion as to what constitutes functional testing or how exactly it's supposed to look, especially if you've never done it before, so it makes sense to show a simple but complete example. For this, we will turn the solar calculator from earlier into a web service and cover it with tests according to the rules we've outlined in the previous part of the article. This app will be based on ASP.NET Core, which is a web framework I'm most familiar with, but the same idea should also equally apply to any other platform.
 
 Our web service is going to expose endpoints to calculate sunrise and sunset times based on the user's IP address or provided location. To make things a bit more interesting, we'll also add a Redis caching layer to store previous calculations for faster responses.
 
@@ -326,7 +324,7 @@ The tests will work by launching the app in a simulated environment where it can
 
 Let us first go over the implementation of the web app to understand what we're dealing with. Note, some parts in the code snippets below are omitted for brevity, but you can also check out the full project on [GitHub](https://github.com/Tyrrrz/FuncTestingInAspNetCoreExample).
 
-First off, we will need a way to get the user's location by IP address, which is done by the `LocationProvider` class we've seen in earlier examples. It works simply by wrapping an external GeoIP lookup service called [IP-API](https://ip-api.com/):
+First off, we will need a way to get the user's location by IP address, which is done by the `LocationProvider` class we've seen in earlier examples. It works simply by wrapping an external GeoIP lookup service called [IP-API](https://ip-api.com):
 
 ```csharp
 public class LocationProvider
@@ -355,7 +353,7 @@ public class LocationProvider
 }
 ```
 
-In order to turn location into solar times, we're going to rely on the [sunrise/sunset algorithm published by US Naval Observatory](https://edwilliams.org/sunrise_sunset_algorithm.htm). The algorithm itself is too long to include here, but the rest of the implementation for `SolarCalculator` is as follows:
+In order to turn the location into solar times, we're going to rely on [this sunrise/sunset algorithm](https://edwilliams.org/sunrise_sunset_algorithm.htm) published by the US Naval Observatory. The algorithm itself is too long to include here, but the rest of the implementation for `SolarCalculator` is as follows:
 
 ```csharp
 public class SolarCalculator
@@ -432,14 +430,14 @@ public class SolarTimeController : ControllerBase
     }
 
     [HttpGet("by_location")]
-    public async Task<IActionResult> GetByLocation(double lat, double lon, DateTimeOffset? date)
+    public async Task<IActionResult> GetByLocation(double lat, double lng, DateTimeOffset? date)
     {
         /* ... */
     }
 }
 ```
 
-As seen above, the `/solartimes/by_ip` endpoint mostly just delegates execution to `SolarCalculator`, but also has very simple caching logic to avoid redundant requests to 3rd party services. The caching is done by the `CachingLayer` class which encapsulates a Redis client used to store and retrieve JSON content:
+As seen above, the `/solartimes/by_ip` endpoint mostly just delegates the execution to `SolarCalculator`, but also has very simple caching logic to avoid redundant requests to third-party services. The caching is done by the `CachingLayer` class which encapsulates a Redis client used to store and retrieve JSON content:
 
 ```csharp
 public class CachingLayer
@@ -464,7 +462,7 @@ public class CachingLayer
 }
 ```
 
-Finally, all the above parts are wired together in the `Startup` class by configuring request pipeline and registering required services:
+Finally, all the above parts are wired together in the `Startup` class by configuring the request pipeline and registering the required services:
 
 ```csharp
 public class Startup
@@ -501,13 +499,11 @@ public class Startup
 }
 ```
 
-Note that we didn't have our classes implement any autotelic interfaces because we're not planning to use mocks. It may happen that we will need to substitute one of the services in tests, but it's not yet clear now, so we avoid unnecessary work (and design damage) until we're sure we need it.
+Note that we didn't have our classes implement any autotelic interfaces because we're not planning to use mocks. It may happen that we will need to substitute one of the services in tests, but it's not needed now, so we avoid unnecessary work (and design damage) until we're sure it's warranted.
 
-Although it's a rather simple project, this app already incorporates a decent amount of infrastructural complexity by relying on a 3rd party web service (GeoIP provider) as well as a persistence layer (Redis). This is a rather common setup which a lot of real-life projects can relate to.
+Although it's a rather simple project, this app already incorporates a decent amount of infrastructural complexity by relying on a third-party web service (GeoIP provider) as well as a persistence layer (Redis). With a classical approach focused on unit testing, we would find ourselves targeting the service layer and possibly the controller layer of our app, writing isolated tests that ensure that every code branch executes correctly. Doing that would be useful to an extent but could never give us confidence that the actual endpoints, with all the middleware and peripheral components, work as intended.
 
-With a classical approach focused on unit testing, we would find ourselves targeting the service layer and possibly the controller layer of our app, writing isolated tests that ensure that every branch of code executes correctly. Doing that would be useful to an extent but could never give us confidence that the actual endpoints, with all the middleware and peripheral components, work as intended.
-
-Instead, we will write tests that target the endpoints directly. To do that, we will need to create a separate testing project and add a few infrastructural components that will support our tests. One of them is `FakeApp` which is going to be used to encapsulate a virtual instance of our app:
+Instead, we will write tests that target the endpoints directly. To do that, we will need to create a separate testing project and add a few infrastructural components that will support our tests. One of them is the `FakeApp` class, which is going to be used to encapsulate a virtual instance of our application:
 
 ```csharp
 public class FakeApp : IDisposable
@@ -565,7 +561,7 @@ public class RedisFixture : IAsyncLifetime
 
 The above code works by implementing the `IAsyncLifetime` interface that lets us define methods which are going to be executed before and after the tests run. We are using these methods to start a Redis container in Docker and then kill it once the testing has finished.
 
-Besides that, the `RedisFixture` class also exposes `ResetAsync` method which can be used to execute the `FLUSHALL` command to delete all keys from the database. We will be calling this method to reset Redis to a clean slate before each test. As an alternative, we could also just restart the container instead, which takes a bit longer but is probably more reliable.
+Besides that, the `RedisFixture` class also exposes `ResetAsync()` method which can be used to execute the `FLUSHALL` command to delete all keys from the database. We will be calling this method to reset Redis to a clean slate before each test. As an alternative, we could also just restart the container instead, which takes a bit longer but is probably more reliable.
 
 Now that the infrastructure is set up, we can move on to writing our first test:
 
@@ -606,11 +602,11 @@ This specific test works by querying the `/solartimes/by_ip` route, which determ
 
 Although those assertions will be able to catch a multitude of potential bugs, it doesn't give us full confidence that the result is fully correct. There are a couple of different ways we can improve on this, however.
 
-An obvious option would be to replace the real GeoIP provider with a fake instance that will always return the same location, allowing us to hard-code the expected solar times. The downside of doing that is that we will be effectively reducing the integration scope, which means we won't be able to verify that our app talks to the 3rd party service correctly.
+An obvious option would be to replace the real GeoIP provider with a fake instance that will always return the same location, allowing us to hard-code the expected solar times. The downside of doing that is that we will be effectively reducing the integration scope, which means we won't be able to verify that our app talks to the third-party service correctly.
 
 As an alternative approach, we can instead substitute the IP address that the test server receives from the client. This way we can make the test more strict, while maintaining the same integration scope.
 
-To accomplish this, we will need to create a startup filter that lets us inject a custom IP address into request context using middleware:
+To accomplish this, we will need to create a startup filter that lets us inject a custom IP address into the request context using a middleware:
 
 ```csharp
 public class FakeIpStartupFilter : IStartupFilter
@@ -633,7 +629,7 @@ public class FakeIpStartupFilter : IStartupFilter
 }
 ```
 
-We can then wire it into `FakeApp` by registering it as a service:
+We can then integrate it with `FakeApp` by registering it as a service:
 
 ```csharp
 public class FakeApp : IDisposable
@@ -697,11 +693,11 @@ public async Task User_can_get_solar_times_for_their_location_by_ip()
 }
 ```
 
-Some developers might still feel uneasy about relying on a real 3rd party web service in tests, because it may lead to non-deterministic results. Conversely, one can argue that we do actually want our tests to incorporate that dependency, because we want to be aware if it breaks or changes in unexpected ways, as it can lead to bugs in our own software.
+Some developers might still feel uneasy about relying on a real third-party web service in tests, because it may lead to non-deterministic results. Conversely, one can argue that we do actually want our tests to incorporate that dependency, because we want to be aware if it breaks or changes in unexpected ways, as it can lead to bugs in our own software.
 
 Of course, using real dependencies is not always possible, for example if the service has usage quotas, costs money, or is simply slow or unreliable. In such cases we would want to replace it with a fake (preferably not mocked) implementation to be used in tests instead. This, however, is not one of those cases.
 
-Similarly to how we did with the first one, we can also write a test that covers the second endpoint. This one is simpler because all input parameters are passed directly as part of URL query:
+Similarly, we can also write a test that covers the second endpoint. This one is simpler because all the input parameters are passed directly as part of the URL query:
 
 ```csharp
 [Fact]
@@ -718,7 +714,7 @@ public async Task User_can_get_solar_times_for_a_specific_location_and_date()
     var query = new QueryBuilder
     {
         {"lat", "50.45"},
-        {"lon", "30.52"},
+        {"lng", "30.52"},
         {"date", date.ToString("O", CultureInfo.InvariantCulture)}
     };
 
@@ -731,7 +727,7 @@ public async Task User_can_get_solar_times_for_a_specific_location_and_date()
 }
 ```
 
-We can keep adding tests like this one to ensure that the app supports all possible locations, dates, and handles potential edge cases such as the [midnight sun phenomenon](https://en.wikipedia.org/wiki/Midnight_sun). However, it's possible that doing so will scale poorly as we may not want to execute the entire pipeline each time just to verify that the business logic that calculates solar times works correctly.
+We can keep adding tests like this one to ensure that the app supports all possible locations, dates, and handles potential edge cases such as the [midnight sun phenomenon](https://en.wikipedia.org/wiki/Midnight_sun). However, we may not want to execute the entire pipeline each time, just to verify that the business logic that calculates solar times works correctly.
 
 It's important to note that, although we want to avoid it if possible, we can still reduce the integration scope if there's a real reason for it. In this case, we can choose to cover additional cases with unit tests instead.
 
@@ -765,7 +761,7 @@ public class SolarCalculator
 }
 ```
 
-What changed is now, instead of relying on `LocationProvider` to provide it, the `GetSolarTimes` method takes location as an explicit parameter. Doing that means that we also no longer require dependency inversion, as there are no dependencies to invert.
+What changed is now, instead of relying on `LocationProvider` to provide it, the `GetSolarTimes(...)` method takes the location as an explicit parameter. Doing that means that we also no longer require dependency inversion, as there are no dependencies to invert.
 
 To wire everything back together, all we need to do is update the controller:
 
@@ -859,9 +855,9 @@ public void User_can_get_solar_times_for_Tromso_in_January()
 }
 ```
 
-Although these tests no longer exercise the full integration scope, they are still driven by functional requirements of the app. Because we already have another high-level test that covers the entire endpoint, we can keep these more narrow without sacrificing overall confidence.
+Although these tests no longer exercise the full integration scope, they are still driven by functional requirements of the app. Because we already have another high-level test that covers the entire endpoint, we can keep these more narrow without sacrificing the overall confidence.
 
-This trade-off makes sense if we're trying to improve execution speed, but I would recommend to stick to high-level tests as much as possible, at least until it becomes a problem.
+This trade-off makes sense if we're trying to improve the execution speed, but I would recommend to stick to high-level tests as much as possible, at least until it becomes a problem.
 
 Finally, we may also want to do something to ensure that our Redis caching layer works correctly as well. Even though we're using it in our tests, it never actually returns a cached response because the database gets reset between tests.
 
@@ -921,15 +917,15 @@ Another common concern is that high-level tests often suffer from a lack of loca
 
 Although there are ways to mitigate this issue, ultimately it's always going to be a trade-off: isolated tests are better at indicating the cause of an error, while integrated tests are better at highlighting the impact. Both are equally useful, so it comes down to what you consider to be more important.
 
-At the end of the day, I still think functional testing is worth it even despite these shortcomings, as I find that it leads to a better developer experience overall. It's been a while since I've done classic unit testing and I'm not looking forward to starting again.
+At the end of the day, I still think functional testing is worth it even despite these shortcomings, as I find that it leads to a better developer experience overall. It's been a while since I've done classic unit testing, and I'm not looking forward to starting again.
 
 ## Summary
 
 Unit testing is a popular approach for testing software, but mostly for the wrong reasons. It's often touted as an effective way for developers to test their code while also enforcing best design practices, however many find it encumbering and superficial.
 
-It's important to understand that development testing does not equate to unit testing. The primary goal is not to write tests which are as isolated as possible, but rather to gain confidence that the code works according to its functional requirements. And there are better ways to achieve that.
+It's important to understand that development testing does not equate unit testing. The primary goal is not to write tests with the highest degree of isolation, but rather to gain confidence that the code works according to its functional requirements. And there are better ways to achieve that.
 
-Writing high-level tests that are driven by user behavior will provide you with much higher return on investment in the long run, and it isn't as hard as it seems. Find an approach that makes the most sense for your project and stick to it.
+Writing high-level tests that are driven by user behavior will provide you with much higher return on investment in the long run, and it isn't as hard as it seems. Find an approach that makes the most sense for your project and stick with it.
 
 Here are the main takeaways:
 

@@ -5,13 +5,13 @@ date: '2020-03-10'
 
 Above everything else in software development, I really enjoy building frameworks that enable other developers to create something cool. Sometimes, when chasing that perfect design I have in mind, I find myself coming up with weird hacks that really push the C# language to the limit.
 
-One such case happened not so long ago, when my coworker and I were looking at how to avoid specifying generic arguments, in places where the compiler should seemingly be able to guess it based on the return type. He said it was impossible, seeing as C# can only infer generic arguments from method parameters, however I was able to come up with a way to prove him wrong.
+One such case happened not so long ago, when my coworker and I were looking at how to avoid specifying generic arguments in places where the compiler should seemingly be able to guess it based on the return type. He said it was impossible, seeing as C# can only infer generic arguments from method parameters, however I was able to come up with a way to make it work.
 
 In this article I will show a little trick I came up with to simulate return type inference, as well as some examples where that can be useful.
 
 ## Type inference
 
-Type inference, in general, is the ability of a compiler to automatically detect the type of a particular expression, without having the programmer explicitly specify it. This feature works by analyzing the context in which the expression is evaluated, as well as the constraints imposed by the flow of data in the program.
+Type inference, in general, is the ability of the compiler to automatically detect the type of a particular expression, without having the programmer explicitly specify it. This feature works by analyzing the context in which the expression is evaluated, as well as the constraints imposed by the flow of data in the program.
 
 By being able to detect the type automatically, languages that support type inference allow writing more succinct code, while still maintaining the full benefits of a static type system. This is why most mainstream statically typed languages have type inference, in one form or another.
 
@@ -24,7 +24,7 @@ var z = 2 + 1.0;        // double
 var g = Guid.NewGuid(); // Guid
 ```
 
-When doing a combined declaration and assignment operation with the `var` keyword, you don't need to specify the type of the variable. The compiler is able to detect it on its own based on the expression on the right side.
+When doing a combined declaration and assignment operation with the `var` keyword, you don't need to specify the type of the variable. The compiler is able to figure it out based on the expression on the right side.
 
 In a similar vein, C# also allows initializing an array without having to manually specify its type:
 
@@ -32,7 +32,7 @@ In a similar vein, C# also allows initializing an array without having to manual
 var array = new[] {"Hello", "world"}; // string[]
 ```
 
-Here, the compiler can see that we're initializing the array with two string elements, so it can safely conclude that the resulting array is of type `string[]`. In some (very rare) cases, it can even infer the type of the array based on the most specific common type among the individual elements:
+Here, the compiler can see that we're initializing the array with two string elements, so it can safely conclude that the resulting array is of type `string[]`. In some (very rare) cases, it can even infer the type of an array based on the most specific common type among the individual elements:
 
 ```csharp
 var array = new[] {1, 2, 3.0}; // double[]
@@ -40,7 +40,7 @@ var array = new[] {1, 2, 3.0}; // double[]
 
 However, the most interesting aspect of type inference in C# is, of course, generic methods. When calling a method with a generic signature, we can omit type arguments as long as they can be deduced from the values passed to the method parameters.
 
-For example, we can define a generic method `List.Create<T>` that creates a list from a sequence of elements:
+For example, we can define a generic method `List.Create<T>(...)` that creates a list from a sequence of elements:
 
 ```csharp
 public static class List
@@ -55,11 +55,11 @@ Which in turn can be used like this:
 var list = List.Create(1, 3, 5); // List<int>
 ```
 
-In the above scenario we could've specified the type explicitly by writing `List.Create<int>(...)`, but we didn't have to. The compiler was able to detect it automatically based on the arguments we passed into the method, which are constrained by the same type as the returned list itself.
+In the above scenario we could've specified the type explicitly by writing `List.Create<int>(...)`, but we didn't have to. The compiler was able to detect it automatically based on the arguments we passed to the method, which are constrained by the same type as the returned list itself.
 
-Interestingly enough, all the examples shown above are in fact based on the same form of type inference, which works by analyzing the constraints imposed by other expressions, whose type is already known. In other words, it examines the flow of data that _goes in_ and draws conclusions about the data that _goes out_.
+Interestingly enough, all the examples shown above are in fact based on the same form of type inference, which works by analyzing the constraints imposed by other expressions, whose type is already known. In other words, it examines the flow of data that _goes in_ and draws conclusions about the data that _comes out_.
 
-There are scenarios, however, where we may want the type inference to work in the opposite direction. Let's see where that could be useful.
+There are scenarios, however, where we may want type inference to work in the opposite direction. Let's see where that could be useful.
 
 ## Option type
 
@@ -107,7 +107,7 @@ This API design is fairly basic. The implementation above hides the actual value
 
 Also, in this example, `Option<T>` is defined as a `readonly struct`. Seeing as it's mainly returned from methods and used in local scopes, this decision makes sense from a performance point of view.
 
-Just to make things convenient, we may also want to provide factory methods that help construct new instances of `Option<T>` in a more fluent manner:
+Just to make things convenient, we may also want to provide factory methods that help construct new instances of `Option<T>` more naturally:
 
 ```csharp
 public static class Option
@@ -135,9 +135,9 @@ Even though the type argument for `Option.None<T>(...)` seems to be inherently o
 
 Of course, ideally, we would want the compiler to figure out the type of `T` in `Option.None<T>(...)` based on the _return type_ this expression is _expected_ to have, as dictated by the signature of the containing method. If not, we would want it to at least get the `T` from the first branch of the conditional expression, where it was already inferred from `value`.
 
-Unfortunately, neither of these is possible with C#'s type system because it would need to work out the type in reverse, which it cannot do. That said, we can help it a little.
+Unfortunately, neither of these is possible with C#'s type system because it would need to work out the type in reverse, which is something it can't do. That said, we can help it a little.
 
-We can simulate _return type inference_ by having `Option.None` return a special non-generic type, representing an option with deferred initialization that can be coerced into `Option<T>`. Here's how that would look:
+We can simulate _return type inference_ by having `Option.None()` return a special non-generic type, representing an option with deferred initialization that can be coerced into `Option<T>`. Here's how that would look:
 
 ```csharp
 public readonly struct Option<T>
@@ -297,7 +297,7 @@ public static class Result
 }
 ```
 
-Here we similarly defined `DelayedResult<T>` that represents the initialized part of `Result<TOk, TError>`. Again, we're using implicit conversion operators to coerce the delayed instance into the destination type.
+Here we've similarly defined `DelayedResult<T>` that represents the initialized part of `Result<TOk, TError>`. Again, we're using implicit conversion operators to coerce the delayed instance into the destination type.
 
 Doing all that enables us to rewrite our code like this:
 
@@ -310,7 +310,7 @@ public static Result<int, string> Parse(string input)
 }
 ```
 
-This is a bit better but not ideal. The problem here is that the conditional expression in C# doesn't coerce its branches directly to the expected type, but instead tries to convert the type of the negative branch into the type of the positive branch. Because of that, we need to explicitly cast the positive branch into `Result<int, string>` to specify the common denominator.
+This is a bit better but not ideal. The problem here is that the conditional expression in C# doesn't coerce its branches directly to the expected type, but instead tries to first convert the type of the negative branch into the type of the positive branch. Because of that, we need to explicitly cast the positive branch into `Result<int, string>` to specify the common denominator.
 
 However, this issue can be completely avoided if we just use a conditional statement instead:
 

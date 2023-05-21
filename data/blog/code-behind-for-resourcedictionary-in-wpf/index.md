@@ -3,17 +3,17 @@ title: 'Code-Behind for ResourceDictionary in WPF'
 date: '2016-10-29'
 ---
 
-As any WPF developer knows, XAML can get messy due to all the nested elements and indentation. One common problematic area is data templates — they are naturally decoupled from the surrounding layout but are still nested quite deep in the hierarchy.
+As any WPF developer knows, XAML can get messy due to all the nested elements and indentation. One common problematic area is data templates — they are naturally decoupled from the surrounding layout but are still nested quite deeply in the hierarchy.
 
-To deal with it, you can refactor some of the commonly used objects as resources into a `ResourceDictionary`, which can also be self-contained in its own separate XAML file. Dictionaries can later be referenced using the `Source` property or by including them in a `MergedDictionary`.
+To deal with it, you can refactor some of the commonly used objects as resources into a `ResourceDictionary`, which can be self-contained in its own separate XAML file. Dictionaries can later be referenced using the `Source` property or by including them in a `MergedDictionary`.
 
-Sometimes the XAML you want to refactor can also contain some logic in code-behind, such as event handlers. By default, when you create a new resource dictionary, it comes without a code-behind class, but it's possible to add it. Let's see how we can do it.
+Sometimes the XAML you want to refactor may also contain some logic in code-behind, such as event handlers. By default, when you create a new resource dictionary, it comes without a code-behind class, but it's possible to add it. Let's see how we can do it.
 
 ## Linking a resource dictionary to a class
 
 Let's assume we already have a resource dictionary created and it's in a file called `MyResourceDictionary.xaml`.
 
-To add some code-behind to it, we just need to create a new _partial_ class. Conventionally, the code-behind file should be in the same namespace as the dictionary and have the same file name. For that reason we will name this class `MyResourceDictionary` and save it as `MyResourceDictionary.xaml.cs`.
+To add some code-behind to it, we just need to create a new _partial_ class. Conventionally, the code-behind file should be in the same directory as the dictionary and have the same file name. For that reason we will name this class `MyResourceDictionary` and save it as `MyResourceDictionary.xaml.cs`.
 
 ```csharp
 namespace MyProject

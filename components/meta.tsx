@@ -20,7 +20,7 @@ const Meta: FC<MetaProps> = ({ title, description, keywords, imageUrl, imageLayo
 
   const actualDescription =
     description ||
-    'Oleksii Holub (@tyrrrz) is a software developer, open source maintainer, tech blogger and conference speaker';
+    'Oleksii Holub (@tyrrrz) is a software developer, open-source maintainer, tech blogger and conference speaker';
 
   const actualKeywords = keywords?.join(',') || '';
 

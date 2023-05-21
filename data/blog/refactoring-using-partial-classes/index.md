@@ -7,7 +7,7 @@ As our code grows, we regularly find ourselves seeking new ways to keep it well-
 
 One of the challenges we often face is deciding how to group different parts of a bigger class together. Even with a good degree of separation, sometimes we end up with classes that might be a bit too much to reason about.
 
-From the earliest versions of the language, C# provided a construct called [regions](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/preprocessor-directives/preprocessor-region). Although it can be helpful when trying to organize code, most seem to agree that using regions is [generally an antipattern](https://softwareengineering.stackexchange.com/questions/53086/are-regions-an-antipattern-or-code-smell). Even if their usage can be justified, their benefits often come at a rather steep cost in terms of readability.
+From the earliest versions of the language, C# provided a construct called [regions](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/preprocessor-directives/preprocessor-region). Although it can be helpful when trying to organize code, most seem to agree that using regions is [generally an anti-pattern](https://softwareengineering.stackexchange.com/questions/53086/are-regions-an-antipattern-or-code-smell). Even if their usage can be justified, their benefits often come at a rather steep cost in terms of readability.
 
 I do believe that being able to group code to form logical blocks is useful, however I agree that regions cause more problems than they solve. For that reason, I've been actively using _partial classes_ instead, which in many ways can be used for a similar purpose without suffering from the same drawbacks.
 
@@ -21,7 +21,7 @@ One thing that I like to do nearly all the time is separate static properties an
 
 Let's have a look at an example. Imagine we're working on an abstraction called `PartitionedTextWriter` that implements the _rolling file_ concept — it acts as a streaming text writer that automatically switches to a new file after reaching a certain character threshold in the previous one.
 
-The class is initialized with a base path, which it needs to use that to generate file names for each partition. Because that's pure business logic without side effects, it makes perfect sense to put it into a static helper method.
+The class is initialized with a base path, which it uses to generate the file path for each partition. Because that's pure business logic without side effects, it makes perfect sense to put it into a static helper method.
 
 Usually, mixing static and non-static members can be quite confusing. Let's see how that looks when we use partial classes instead:
 
@@ -105,17 +105,17 @@ public partial class PartitionedTextWriter
 }
 ```
 
-As a developer reading this code for the first time, you will most likely appreciate this separation. When we're dealing with the notions of creating new files, we don't really care as much about how `GetPartitionFilePath` is implemented. Similarly, if we wanted to know how `GetPartitionFilePath` works, the rest of the code would likely act as unrelated noise.
+As a developer reading this code for the first time, you will most likely appreciate this separation. When we're dealing with the notions of creating new files, we don't really care as much about how `GetPartitionFilePath(...)` is implemented. Similarly, if we wanted to know how `GetPartitionFilePath(...)` works, the rest of the code would likely act as unrelated noise.
 
 One could argue that we could've instead moved our helper method to a different static class. That could work in some cases, especially if that method is going to be reused in other places as well. However, that would also make the method less discoverable, and I generally prefer to keep dependencies as close to the source as possible in order to reduce cognitive overhead.
 
-Note that in this example both partial definitions of the class are placed in the same file. Since our primary goal is to group code rather than shred it to pieces, keeping things close makes more sense. I would consider moving the partitions to separate files only if they get too big to keep in one place.
+Note that in this example both partial definitions of the class are placed in the same file. Since our primary goal is to group code rather than spread it around, keeping things close makes more sense. I would consider moving the partitions to separate files only if they get too big to keep in one place.
 
 ---
 
-This idea works especially well when combining with the ["Resource acquisition is initialization"](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization) pattern. Using partial classes we can group methods responsible for initialization and separate them from the rest of the class.
+This idea works especially well when combining with the [_resource acquisition is initialization_](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization) pattern. Using partial classes we can group methods responsible for initialization and separate them from the rest of the class.
 
-In the following example we have a class called `NativeDeviceContext` which is a wrapper for a device context resource in the Windows operating system. The class can be constructed by providing a handle to the native resource, but the consumers will not be doing this manually. Instead, they will be calling one of the available static methods such as `FromDeviceName(...)` that will take care of the initialization for them.
+In the following example we have a class called `NativeDeviceContext` which is a wrapper for a device context resource in the Windows operating system. The class can be constructed by providing a native resource handle, but the consumers will not be doing this manually. Instead, they will be calling one of the available static methods such as `FromDeviceName(...)` that will take care of the initialization for them.
 
 Again, let's see how it looks when we split out the static methods:
 
@@ -222,7 +222,7 @@ Putting interface implementations in partial classes can help us reduce the "rou
 
 This approach is also very useful when combined with conditional compilation. Occasionally, we may want to introduce API that depends on features available in a specific version of the framework. To do that, we have to use the `#if` directive which acts similarly to regions, making our code less readable.
 
-Partial classes can help us make things tidier. Let's take a look at an example where we override `DisposeAsync` but only if we're building the assembly against .NET Standard 2.1:
+Partial classes can help us make things tidier. Let's take a look at an example where we override `DisposeAsync()` but only if we're building the assembly against .NET Standard 2.1:
 
 ```csharp
 public partial class SegmentedHttpStream : Stream
@@ -273,7 +273,7 @@ It's not all that uncommon to have private classes. These are convenient when we
 
 As an example, imagine we're generating an HTML-formatted sales report using [Scriban](https://github.com/lunet-io/scriban). In this particular scenario, we need to configure the library so that templates can be resolved from the resources embedded in the assembly rather than from the file system. In order to do that, we are expected to provide a custom implementation of `ITemplateLoader`.
 
-Seeing as our custom loader is going to be used only within this class, it makes perfect sense to define it as private class. However, with C# being as verbose as it is, private classes may introduce unwanted noise into our code.
+Seeing how our custom loader is going to be used only within this class, it makes perfect sense to define it as private class. However, with C# being as verbose as it is, private classes may introduce unwanted noise into our code.
 
 Using partial classes, though, we can clean it up like this:
 

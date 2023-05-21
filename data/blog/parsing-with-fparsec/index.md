@@ -13,18 +13,18 @@ In this article I'll guide you through the basics of this library and show how y
 
 ## Parser primitives
 
-Every parser in FParsec is an instance of `Parser<'Result, 'State>` which is a type of function that takes a `CharStream<'State>` and returns `Reply<'Result>`. Yes, parsers in FParsec can have state which means you can express context-sensitive grammar, but I'm not going to talk about it here. All we need to know is that a parser is a function that takes an input and produces a result or a failure.
+Every parser in FParsec is an instance of `Parser<'Result, 'State>` which is a type of function that takes a `CharStream<'State>` and returns a `Reply<'Result>`. Yes, parsers in FParsec can have state which means you can express context-sensitive grammar, but I'm not going to talk about it here. All we need to know is that a parser is a function that takes an input and produces a result or a failure.
 
 Similarly to Sprache and other parser combinator libraries, FParsec builds upon a set of powerful primitives. These are accessible as top-level functions and provide starting points for even the most complicated parsers.
 
 Among these are:
 
-- `anyChar` — parses any single character.
-- `pchar` — parses a specific character.
-- `anyOf` — parses any of the specified characters.
-- `satisfy` — parses any character that satisfies a predicate.
-- `letter`, `digit`, `upper`, `lower` — parses a character that belongs to a specific category.
-- `pstring` — parses a specified string.
+- `anyChar` — parses any single character
+- `pchar` — parses a specific character
+- `anyOf` — parses any of the specified characters
+- `satisfy` — parses any character that satisfies a predicate
+- `letter`, `digit`, `upper`, `lower` — parses a character that belongs to a specific category
+- `pstring` — parses a specified string
 
 These can be used to parse basic inputs but, being primitives, they are obviously not very useful on their own. In order to compose these simple parsers into more sophisticated ones, we need to use combinators.
 
@@ -40,7 +40,7 @@ Let's take a look at some of them.
 
 At the base of all chaining combinators in FParsec stands the _bind_ operator (`>>=`). It constructs a new parser based on the result of the previous one.
 
-We can use the bind operator to chain multiple sequential parsers and combine them into a higher-order parser. As a simple example, here's how we can express two consecutive characters that appear in opposite case:
+We can use the bind operator to chain multiple sequential parsers and combine them into a higher-order parser. As a simple example, here's how we can express two consecutive characters that appear in opposite cases:
 
 ```fsharp
 open FParsec
@@ -51,7 +51,7 @@ let sawtooth = anyChar >>= fun a -> satisfy <| isOppositeCase a >>= fun b -> pre
 //             ~~~~~~~              ~~~~~~~    ~~~~~~~~~~~~~~~~              ~~~~~~~~~~~~~~
 // parse any char --^                  ^         ^                              ^
 //                                     |         |                              |
-// then any char satisfying predicate —         — partially applied function  |
+// then any char satisfying predicate —           — partially applied function  |
 //                                                                              |
 //             then combine the results in a tuple ------------------------------
 ```
@@ -62,9 +62,9 @@ Although it is quite flexible, the bind operator isn't very convenient to use. I
 
 This is why FParsec also offers a few high level chaining operators:
 
-- `.>>` — chains two sequential parsers and retains the result of the one on the left.
-- `>>.` — chains two sequential parsers and retains the result of the one on the right.
-- `.>>.` — chains two sequential parsers and combines both of their results in a tuple.
+- `.>>` — chains two sequential parsers and retains the result of the one on the left
+- `>>.` — chains two sequential parsers and retains the result of the one on the right
+- `.>>.` — chains two sequential parsers and combines both of their results in a tuple
 
 For example, here's how we can compose a parser that will consume `"5,9"` and turn it into an F# tuple consisting of characters `'5'` and `'9'`, discarding the comma in the middle:
 
@@ -78,10 +78,10 @@ Individual parsers in the expression are chained pairwise left to right. Here's 
 let commaSeparatedDigits = ((digit .>> pchar ',') .>>. digit)
 //                           ~~~~~ ^              ^  ^ ~~~~~
 //                                 |              |  |
-//   take result of the left side —              ---- take both
+//   take result of the left side —                ---- take both
 ```
 
-We can further improve this by using `skipChar` instead of `pchar` to avoid unnecessary allocations for the result we're not interested in:
+We can further improve this by using `skipChar` instead of `pchar` to avoid unnecessary allocation of the result that we're not interested in:
 
 ```fsharp
 let commaSeparatedDigits = digit .>> skipChar ',' .>>. digit
@@ -89,10 +89,10 @@ let commaSeparatedDigits = digit .>> skipChar ',' .>>. digit
 
 This kind of parser chaining can be useful to express grammar rules with a fixed structure. Sometimes, however, we also need to express repetition, which is when a certain symbol may appear more than once. To do that, we can use one of the sequence combinators that FParsec offers:
 
-- `many` — chains the same parser until it fails.
-- `sepBy` — chains the same parser separated by another parser.
-- `manyTill` — chains the same parser until another parser succeeds.
-- `manyChars`, `manyCharsTill` — same as `many` and `manyTill` but optimized for strings.
+- `many` — chains the same parser until it fails
+- `sepBy` — chains the same parser separated by another parser
+- `manyTill` — chains the same parser until another parser succeeds
+- `manyChars`, `manyCharsTill` — same as `many` and `manyTill` but optimized for strings
 
 For example, we can use `manyChars` to enhance the original `commaSeparatedDigits` parser so that it can handle multiple consecutive digits around the comma:
 
@@ -217,7 +217,7 @@ let fooBarOrFooXyz =
 // 3. produce result: ("foo", "xyz")
 ```
 
-This will work as expected. Of course, you should use `attempt` sparingly to avoid unnecessary backtracking. Alternatively, it's also possible to selectively avoid changing parser state by using a variant of chaining combinators:
+This will work as expected. Of course, you should use `attempt` sparingly to avoid unnecessary backtracking. Alternatively, it's also possible to selectively avoid changing the parser state by using the following variant of the chaining combinator:
 
 ```fsharp
 let fooBar = pstring "foo" .>>.? pstring "bar"
@@ -234,10 +234,10 @@ let fooBarOrFooXyz =
 
 These variants of chaining combinators are just like the regular ones, except that the constructed parser is treated as a single whole instead of two separate parsers:
 
-- `>>=?` — same as `>>=` but doesn't change state.
-- `>>?` — same as `>>.` but doesn't change state.
-- `.>>?` — same as `.>>` but doesn't change state.
-- `.>>.?` — same as `.>>.` but doesn't change state.
+- `>>=?` — same as `>>=` but doesn't change state
+- `>>?` — same as `>>.` but doesn't change state
+- `.>>?` — same as `.>>` but doesn't change state
+- `.>>.?` — same as `.>>.` but doesn't change state
 
 ## Mapping results
 
@@ -245,8 +245,8 @@ Let's not forget that the main purpose of a parser is to extract semantics from 
 
 There are two main operators associated with that:
 
-- Return operator (`>>%`) — sets the result of a parser to the specified value.
-- Map operator (`|>>`) — applies a function to the result of a parser.
+- Return operator (`>>%`) — sets the result of a parser to the specified value
+- Map operator (`|>>`) — applies a function to the result of a parser
 
 We can use the return operator to construct a parser that will simply produce a constant if it succeeds:
 
@@ -307,7 +307,7 @@ There are still a lot of other primitives and combinators in FParsec. In fact, w
 
 Instead, let's take a look at how it all fits together by writing our own JSON parser.
 
-I know that the official documentation has a tutorial on exactly this topic and on top of that I've already shown how to write a JSON processor in C# using Sprache in my previous article. That being said, I think JSON grammar has a perfect mixture of small and non-trivial rules that makes it a pretty good "hello world" of parser frameworks.
+I know that the official documentation has a tutorial on exactly this topic and on top of that I've already shown how to write a JSON processor in C# using Sprache in my previous article. That being said, I think JSON grammar has the perfect mixture of small and non-trivial rules that make it a pretty good "hello world" exercise for parser frameworks.
 
 Before we can begin, however, we have to establish what is it that we want our parsers to produce. Since we're dealing with JSON, being a typical context-free language, its structure can be expressed using a syntax tree.
 
@@ -349,13 +349,13 @@ module JsonGrammar =
     //                match this —        — produce this
 ```
 
-We are using `stringReturn` to consume a string `"null"` and return the corresponding value — union case `JsonNull`.
+We are using `stringReturn` to consume a string `"null"` and return the corresponding value — the union case `JsonNull`.
 
 Since whitespace is ignored in JSON, we have to also account for it in our parsers or else they will fail when they encounter any whitespace character. We can do that by chaining our parser with `spaces` which will consume and discard any trailing spaces. As long as we do that at the end of every parser, we will be fine.
 
 The traditional way of dealing with insignificant whitespace involves writing a separate _lexer_ component, which parses raw characters into so-called _tokens_. It can be done with FParsec as well, and it provides many benefits, but for the sake of simplicity we'll be writing a scanner-less parser this time.
 
-If you're following along and your IDE is complaining that the type of a parser can't be inferred — help it by explicitly specifying it as `let jsonNull : Parser<_, unit> = ...`. We're not going to be using state, so we can set it to `unit`. By the end of this exercise we will have an entry point function that will help the F#'s compiler correctly determine the generic types, but for now we can write them out manually.
+If you're following along and your IDE is complaining that the type of parser can't be inferred — help it by explicitly specifying it as `let jsonNull : Parser<_, unit> = ...`. We're not going to be using state, so we can set it to `unit`. By the end of this exercise we will have an entry point function that will help the F#'s compiler correctly determine the generic types, but for now we can write them out manually.
 
 With `JsonNull` out of the way, let's proceed on to our next data type, `JsonBool`:
 
@@ -374,7 +374,7 @@ module JsonGrammar =
     let jsonBool = jsonBoolTrue <|> jsonBoolFalse
 ```
 
-Since a boolean can be in either of two states, we can handle them separately and combine them using the choice operator. This is an advantage of combinatory parsing — we can split a complex grammar rule into many simpler ones.
+Since a boolean can be in either of two states, we can handle them separately and combine them using the choice operator. This is an advantage of combinatory parsing — we can split complex grammar rules into many simpler ones.
 
 When it comes to `jsonNumber`, FParsec already does most of the work by providing us with `pfloat`, a parser that matches text that represents a floating point number and converts it to `float` (which is an alias for `System.Double` in F#). That means we can just write our parser like this:
 
@@ -404,7 +404,7 @@ module JsonGrammar =
     // ...
 
     // Applies popen, then pchar repeatedly until pclose succeeds,
-    // returns the string in the middle
+    // returns the string in the middle.
     let manyCharsBetween popen pclose pchar = popen >>? manyCharsTill pchar pclose
 
     // Parses any string between popen and pclose
@@ -412,12 +412,12 @@ module JsonGrammar =
 
     // Parses any string between double quotes
     let quotedString = skipChar '"' |> anyStringBetween <| skipChar '"'
-    // is equivalent to: anyStringBetween (skipChar '"') (skipChar '"')
+    // ^ this is also equivalent to: anyStringBetween (skipChar '"') (skipChar '"')
 ```
 
 The combinator `manyCharsBetween` applies `popen`, then repeatedly applies `pchar` until it encounters `pclose`. We build upon it and define a higher-level combinator `anyStringBetween` which will parse a string between two parsers consisting of any characters. It's effectively the same as the `.*?` regular expression.
 
-Finally, we also define `quotedString` which is `anyStringBetween` with double quotes already applied. Note how the use of forward and backward pipes makes the code fluent — the order of tokens in this expression actually matches the order in which the parser consumes them!
+Finally, we also define `quotedString` which is `anyStringBetween` with double quotes already applied. Note how the use of the forward and backward pipes makes the code fluent — the order of tokens in this expression actually matches the order in which the parser consumes them!
 
 Now, defining `jsonString` becomes really trivial:
 
@@ -690,9 +690,9 @@ Once we run this piece of code, we should see `Value: Golden State Warriors`. Aw
 
 ## Wait, but where are the monads?
 
-If you've come here after my previous article or were otherwise expecting to see monads here, you might be a bit surprised that there were none so far. This is because the combinators FParsec provides out of the box are so powerful you very rarely need to resort to it.
+If you've come here after my previous article or were otherwise expecting to see monads here, you might be a bit surprised that there were none so far. This is because the combinators FParsec provides out of the box are so powerful you very rarely need to resort to monadic syntax.
 
-We could have, for example, defined our JSON array parser from earlier like this instead:
+However, we could have, for example, defined our JSON array parser from earlier like this instead:
 
 ```fsharp
 let jsonArray = parse {
@@ -711,9 +711,9 @@ let jsonArray = parse {
 }
 ```
 
-The `parse` computation expression allows us to chain sequential parsers in a more imperative way. Under the hood it also uses the bind operator (`>>=`) but provides a slightly cleaner syntax when dealing with a lot of parsers. If you've used monads in C#, this is similar to LINQ comprehension syntax but way more powerful.
+The `parse` computation expression allows us to chain sequential parsers in a more imperative way. Under the hood it also uses the bind operator (`>>=`) but provides a slightly cleaner syntax when dealing with a large number of parsers. If you've used monads in C#, this is similar to the LINQ query syntax but way more powerful.
 
-Stephan Tolksdorf, author of FParsec, discourages the use of this syntax [in the documentation](https://quanttec.com/fparsec/users-guide/where-is-the-monad.html) because it's rarely called for and may negatively impact performance.
+Stephan Tolksdorf, the author of FParsec, discourages the use of this syntax [in the documentation](https://quanttec.com/fparsec/users-guide/where-is-the-monad.html) because it's rarely necessary and may negatively impact performance.
 
 That said, some grammar rules are easier to express using this syntax. For example, let's say we were parsing an HTML element and needed to match a closing tag that has the same name as the opening tag:
 

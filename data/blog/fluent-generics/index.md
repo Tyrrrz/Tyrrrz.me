@@ -5,7 +5,7 @@ date: '2020-11-17'
 
 Generic programming is a powerful feature available in many statically typed languages. It offers a way to write code that seamlessly operates against many different types, by targeting the features they share rather than the types themselves. This provides the means for building flexible and reusable components without having to sacrifice type safety or introduce unnecessary duplication.
 
-Even though generics have been around in C# for a while, I still sometimes manage to find new and interesting ways to use them. For example, in one of my [previous articles](/blog/return-type-inference) I wrote about a trick I came up with that helps achieve return type inference, providing an easier way to work with container union types.
+Even though generics have been around in C# for a while, I still sometimes manage to find new and interesting ways to use them. For example, in one of my [previous articles](/blog/return-type-inference) I wrote about a trick I came up with that helps achieve return type inference, providing an easier way to work with certain container types.
 
 Recently, I was also working on some code involving generics and had an unusual challenge: I needed to define a signature where all type arguments were optional, but usable in arbitrary combinations with each other. Initially I attempted to do it by introducing type overloads, but that led to an impractical design that I wasn't very fond of.
 
@@ -15,7 +15,7 @@ In this article I will explain what this approach is about and how you can use i
 
 ## Fluent interfaces
 
-In object-oriented programming, _fluent interface_ design is a popular pattern for building flexible and convenient interfaces. Its core idea revolves around using method chaining to express interactions through a continuous flow of human-readable instructions.
+In object-oriented programming, the _fluent interface_ design is a popular pattern for building flexible and convenient interfaces. Its core idea revolves around using method chaining to express interactions through a continuous flow of human-readable instructions.
 
 Among other things, this pattern is commonly used to simplify operations that rely on large sets of (potentially optional) input parameters. Instead of expecting all the inputs upfront, interfaces designed in a fluent manner provide a way to configure each of the relevant aspects separately from each other.
 
@@ -34,9 +34,9 @@ var result = RunCommand(
 );
 ```
 
-In this snippet, we are calling the `RunCommand` method to spawn a child process and block until it completes. Relevant settings, such as command-line arguments, working directory, and environment variables are specified through the input parameters.
+In this snippet, we are calling the `RunCommand(...)` method to spawn a child process and block execution until it completes. Relevant settings, such as command-line arguments, working directory, and environment variables are specified through the input parameters.
 
-Although completely functional, the method invocation expression above is not very human-readable. At a glance, it's hard to even tell what each of the parameters does without relying on code comments.
+Although completely functional, the method invocation expression above is not very human-readable. At a glance, it's hard to even tell what each of the parameters does without relying on the comments.
 
 Additionally, since most of the parameters are optional, the method definition has to account for it too. There are different ways to achieve that, including overloads, named parameters with default values, etc., but they are all rather clunky and offer suboptimal experience.
 
@@ -74,7 +74,7 @@ public abstract class Endpoint<TReq, TRes> : EndpointBase
 }
 ```
 
-Here we have a basic generic class that takes a type argument corresponding to the request it's meant to receive and another type argument that specifies the response format it's expected to provide. This class also defines the `ExecuteAsync` method which the user will need to override to implement the logic relevant to a particular endpoint.
+Here we have a basic generic class that takes a type argument corresponding to the request it's meant to receive and another type argument that specifies the response format it's expected to provide. This class also defines the `ExecuteAsync(...)` method which the user will need to override to implement the logic relevant to a particular endpoint.
 
 We can use this as foundation to build our route handlers like so:
 
@@ -114,7 +114,7 @@ public class SignInEndpoint : Endpoint<SignInRequest, SignInResponse>
 
 By inheriting from `Endpoint<SignInRequest, SignInResponse>`, the compiler automatically enforces the correct signature on the entry point method. This is very convenient as it helps avoid potential mistakes and also makes the structure of the application more consistent.
 
-However, even though the `SignInEndpoint` fits perfectly in this design, not all endpoints are necessarily going to have both request and response models. For example, an analogous `SignUpEndpoint` will likely just return a status code without any response body, while `SignOutEndpoint` won't expect any request data either.
+However, even though the `SignInEndpoint` fits perfectly in this design, not all endpoints are necessarily going to have both the request and response models. For example, an analogous `SignUpEndpoint` will likely just return a status code without any response body, while `SignOutEndpoint` may not even need a request model.
 
 In order to properly accommodate endpoints like that, we could try to extend our model by adding a few additional generic type overloads:
 
@@ -156,7 +156,7 @@ public abstract class Endpoint : EndpointBase
 
 At a glance, this may appear to have solved this problem, however the code above does not actually compile. The reason for that is the fact that the `Endpoint<TReq>` and `Endpoint<TRes>` are ambiguous, since there is no way to determine whether a single unconstrained type argument is meant to specify a request or a response.
 
-Just like with the `RunCommand` method earlier in the article, there are a couple of straightforward ways to work around this, but they are not particularly elegant. For example, the simplest solution would be to rename the types so that their capabilities are reflected in their names, avoiding collisions in the process:
+Just like with the `RunCommand(...)` method earlier in the article, there are a couple of straightforward ways to work around this, but they are not particularly elegant. For example, the simplest solution would be to rename the types so that their capabilities are reflected in their names, avoiding collisions in the process:
 
 ```csharp
 public abstract class Endpoint<TReq, TRes> : EndpointBase
@@ -239,9 +239,9 @@ public static class Endpoint
 
 The above design retains the original four types from earlier, but organizes them in a hierarchical structure rather than a flat one. This is possible to achieve because C# allows type definitions to be nested within each other, even if they are generic.
 
-In fact, **types contained within generics are special because they also gain access to the type arguments specified on their parent**. It allows us to put `WithResponse<TRes>` inside `WithRequest<TReq>` and use both `TReq` and `TRes` to define the inner `ExecuteAsync` method.
+In fact, **types contained within generics are special because they also gain access to the type arguments specified on their parent**. It lets us put `WithResponse<TRes>` inside `WithRequest<TReq>` and use both `TReq` and `TRes` to define the inner `ExecuteAsync(...)` method.
 
-Functionally, the approach shown above and the one from earlier are identical. However, the unconventional structure employed here completely eliminates the discoverability issues, while still offering the same level of flexibility.
+Functionally, the approach shown above and the one from earlier are identical. However, the unconventional structure employed here completely eliminates all discoverability issues, while still offering the same level of flexibility.
 
 Now, if the user wanted to implement an endpoint, they would be able to do it like this:
 

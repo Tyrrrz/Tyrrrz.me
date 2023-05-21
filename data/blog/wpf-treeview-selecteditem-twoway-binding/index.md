@@ -5,13 +5,13 @@ date: '2016-10-30'
 
 The longer I work with WPF, the more I notice how many things it's missing. Recently I realized that `TreeView.SelectedItem` property is read-only and unbindable. I think there's no point explaining why binding `SelectedItem` would be useful, so there should be no surprise in my disappointment.
 
-I googled the problem and every resource I've found was guiding me into either handling it in code-behind or adding `IsSelected` property to my model class. Both of these approaches suffer from the same problem — an item won't get selected if its parents are not yet expanded. This was a deal-breaker for me because I wanted the tree view to navigate to the newly selected item, even if it wasn't immediately visible.
+I googled the problem and every resource I've found was guiding me into either handling it in code-behind or adding an `IsSelected` property to my model class. Both of these approaches suffer from the same problem — an item won't get selected if its parents are not yet expanded. This was a deal-breaker for me because I wanted the tree view to navigate to the newly selected item, even if it wasn't immediately visible.
 
 I solved this problem by writing a small behavior that takes care of this for me.
 
 ## Custom behavior
 
-I realized that to solve this I would have to traverse the entire hierarchy of tree nodes, but that wasn't the only problem. To access `IsSelected` and `IsExpanded` properties I needed to resolve a reference to an instance of `TreeViewItem`, which is a container that wraps around the data template.
+I realized that to solve this I would have to traverse the entire hierarchy of tree nodes, but that wasn't the only problem. To access the `IsSelected` and `IsExpanded` properties I needed to resolve a reference to an instance of `TreeViewItem`, which is a container that wraps around the data template.
 
 This in itself can be accomplished by using the `TreeViewItem.ItemContainerGenerator.ContainerFromItem(...)` method. However, if the node is not visible yet, then the container is also not initialized, making the method return `null`.
 
@@ -19,11 +19,11 @@ In order to make our target node visible, we need to expand all of its ancestor 
 
 Generally, the approach looks like this:
 
-- Subscribe to `Loaded` events of all data items using a style.
-- When `SelectedItem` changes, go through all loaded tree nodes and try to locate the target node.
-- If we manage to find it, select it and exit early.
-- If we instead find its parent, expand it so that we can continue the search once it's loaded.
-- When one of the nodes we expanded is loaded, it triggers an event, and we start again from the top.
+- Subscribe to the `Loaded` event of all data items using a style
+- When `SelectedItem` changes, go through all loaded tree nodes and try to locate the target node
+- If we manage to find it, select it and exit early
+- If we instead find its parent, expand it so that we can continue the search once it's loaded
+- When one of the nodes we expanded is loaded, it triggers an event, and we start again from the top
 
 Here's the behavior I've implemented:
 
@@ -215,7 +215,7 @@ public class TreeViewSelectionBehavior : Behavior<TreeView>
 
 To make it easier to check if a node is a child of another node, I defined a property called `HierarchyPredicate`. If it's not set, the behavior will just blindly expand all nodes until it finds the item we're looking for. The predicate can help optimize this process.
 
-Once this behavior is attached, it calls `UpdateTreeViewItemStyle()` to inject an event handler for `Loaded` event of `ItemContainerStyle`. We need to listen to this event to handle nodes that were expanded. To ensure maximum compatibility, it extends an existing style if it can find one or creates a new one otherwise.
+Once this behavior is attached, it calls `UpdateTreeViewItemStyle()` to inject a handler for the `Loaded` event inside `ItemContainerStyle`. We need to listen to this event to handle nodes that were expanded. To ensure maximum compatibility, it extends an existing style if it can find one or creates a new one otherwise.
 
 It also calls `UpdateAllTreeViewItems()` after attaching. This goes through all of the tree view's children and in turn calls `UpdateTreeViewItem(...)` on them.
 
@@ -236,6 +236,6 @@ You can attach this behavior to a tree view like this:
 </TreeView>
 ```
 
-When `SelectedItem` is changed from the view model, the behavior traverses the hierarchy while utilizing `HierarchyPredicate` to find the correct node, ultimately selecting it. An optional parameter `ExpandSelected` dictates whether the selected item should be expanded as well.
+When `SelectedItem` is changed from the view model, the behavior traverses the hierarchy while utilizing `HierarchyPredicate` to find the correct node, ultimately selecting it. An optional `ExpandSelected` parameter dictates whether the selected item should be expanded as well.
 
 If the user changes `SelectedItem` from the UI, it works like you would expect and propagates the new value to the view model.
