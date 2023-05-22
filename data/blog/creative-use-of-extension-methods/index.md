@@ -63,7 +63,7 @@ var fileName = $"output.{fileExt}"; // "output.md"
 
 There are cases where you may not want to add a method directly to a class, for example when it's an [_anemic model_](https://en.wikipedia.org/wiki/Anemic_domain_model).
 
-Anemic models are typically represented by a set of public get-only immutable properties, so adding methods to a model class may make it look impure, or may give off an impression that the methods are accessing some private state. Extension methods don't have that problem because they can't access model's private members and, by nature, aren't part of the model itself.
+Anemic models are typically represented by a set of public get-only immutable properties, so adding methods to a model class may make it look impure, or may give off an impression that the methods are accessing some private state. Extension methods don't have that problem because they can't access the model's private members and, by nature, aren't part of the model itself.
 
 So consider this example of two models — one represents a closed caption track for a video and another represents an individual caption:
 
@@ -169,7 +169,7 @@ public interface IExportService
 
 This way, the interface enforces writing to the most generic destination, a `Stream`. Now we are no longer limited to files and can target a variety of different outputs as well.
 
-The only downside to this approach is that the more basic operations are not as straightforward as they used to be — now you need to set up a concrete instance of a `Stream`, wrap it in a `using` statement, and pass it as an argument.
+The only downside to this approach is that the more basic operations are not as straightforward as they used to be — now you need to set up a concrete instance of a `Stream`, wrap it in a `using` statement, and then pass it as an argument.
 
 Fortunately, this downside can be completely negated with the use of extension methods:
 

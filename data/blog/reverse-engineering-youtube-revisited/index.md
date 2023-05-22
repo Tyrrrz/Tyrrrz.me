@@ -13,7 +13,7 @@ I know that there's still a lot of interest around this topic, so I've been mean
 
 In this article, I'll cover the current state of YouTube's internal API, highlight the most important changes, and explain how everything works today. Just like before, I will focus on the video playback aspect of the platform, outlining everything you need to do in order to resolve video streams and download them.
 
-## Retrieving video metadata and media streams
+## Retrieving the metadata
 
 If you've worked with YouTube in the past, you'll probably remember `/get_video_info`. This internal API controller was used throughout YouTube's client code to retrieve video metadata, available streams, and everything else the player needed to render it. The origin of this endpoint traces back to the Flash Player days of YouTube, and it was still accessible until as late as July 2021, before it was finally removed.
 

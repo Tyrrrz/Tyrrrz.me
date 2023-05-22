@@ -107,7 +107,7 @@ When the property is changed from the view model, the `OnSelectedItemsChanged(..
 
 When the change is triggered by the view, we call the `OnListBoxSelectionChanged(...)` method. To update the selected items on the view model, we copy the items from `ListBox.SelectedItems` to our own `SelectedItems` collection.
 
-Note, however, that this behavior is generic because we expect to bind to a generic collection like `IReadOnlyList<T>` on the view model's side. WPF doesn't support generic behaviors, so we have to subtype this class for each specific data type:
+Note that this behavior is generic because we expect to be able to bind to a collection of an arbitrary type on the view model's side. WPF doesn't support generic behaviors, however, so we have to subtype this class for each specific data type:
 
 ```csharp
 public class MyObjectListBoxSelectionBehavior : ListBoxSelectionBehavior<MyObject>
@@ -317,7 +317,7 @@ public class ListBoxSelectionBehavior<T> : Behavior<ListBox>
 
 I added another dependency property for `SelectedValues` and a few new methods.
 
-`SelectedValuesToItems()` and `SelectedItemsToValues()` convert between `SelectedItems` and `SelectedValues`, depending on which property was updated. `GetDeepPropertyValue(...)` is used to extract the value of the property using an object and member path — it's used to establish conformity between items and values.
+`SelectedValuesToItems()` and `SelectedItemsToValues()` convert between `SelectedItems` and `SelectedValues`, depending on which property was updated. `GetDeepPropertyValue(...)` is used to extract the value of the property using an object and a member path, to establish conformity between selected items and their values.
 
 ## Usage with SelectedValuePath
 

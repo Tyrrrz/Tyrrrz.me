@@ -9,7 +9,7 @@ I was initially hoping that there would be some sort of API for this, but unfort
 
 Having spent some time inspecting the listing pages with Chrome Developer Tools, I’ve discovered that all the pricing information is pulled using a single AJAX request which can be easily reverse-engineered. Let’s take a look at how it works.
 
-## Getting pricing info
+## Getting the pricing info
 
 Here's the request that Steam's frontend uses to get the latest pricing info:
 
