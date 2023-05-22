@@ -3,11 +3,9 @@ title: 'Custom WndProc Handlers in WPF'
 date: '2017-02-02'
 ---
 
-WndProc is a callback function that takes care of system messages sent from the operating system.
+WndProc is a callback function that takes care of system messages sent from the operating system. Unlike WinForms, in WPF, it's not directly exposed to you as it's hidden beneath the framework's layer of abstraction.
 
-Unlike WinForms, in WPF, it's not directly exposed to you as it's hidden beneath the framework's layer of abstraction. There are times, however, when you need to process these messages manually, for example when dealing with Windows API.
-
-Let's look at some ways that we can do it.
+There are times, however, when you need to process these messages manually, for example when dealing with Windows API. Let's look at some ways that we can do it.
 
 ## Non-MVVM way
 
@@ -91,7 +89,7 @@ public class WndProcService : IDisposable
 }
 ```
 
-By handling the `WndProcCalled` event, you can listen to incoming messages. Typically, you would want to call some Windows API method that subscribes a window to additional WndProc messages using its handle, e.g. [RegisterPowerSettingNotification(...)](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerpowersettingnotification) or [RegisterHotKey(...)](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey).
+By handling the `WndProcCalled` event, you can listen to incoming messages. Typically, you would want to call some Windows API method that subscribes a window to additional WndProc messages using its handle, e.g. [`RegisterPowerSettingNotification(...)`](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerpowersettingnotification) or [`RegisterHotKey(...)`](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey).
 
 For example, if we were interested in registering a global hotkey and listening to its events, we could do it in such way:
 

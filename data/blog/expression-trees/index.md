@@ -1410,7 +1410,7 @@ Translating code from one language to another is definitely not a simple task, b
 
 ## Summary
 
-Expression trees provide us with a formal structure of code that lets us analyze existing expressions or compile entirely new ones directly at run-time. This feature makes it possible to do a bunch of cool things, including writing transpilers, interpreters, code generators, optimize reflection calls, provide contextual assertions, and more. I think it's a really powerful tool that deserves a lot more attention.
+Expression trees provide us with a formal structure that lets us analyze existing expressions or compile entirely new ones directly at run-time. This feature makes it possible to do a bunch of cool things, including writing transpilers, interpreters, code generators, optimize reflection calls, provide contextual assertions, and more. I think it's a really powerful tool that deserves a lot more attention.
 
 Some other interesting articles on the topic:
 
