@@ -9,7 +9,7 @@ Since this is a relatively popular discussion topic among many beginner develope
 
 > As of YoutubeExplode v6.0.7 (10-Dec-2021), practically everything in this post has become outdated, and the highlighted approaches are no longer used by my library. Instead of trying to continue updating the information here, I decided to write a completely new article altogether — [Reverse-Engineering YouTube: Revisited](/blog/reverse-engineering-youtube-revisited)
 
-## Getting video metadata
+## Getting the video metadata
 
 In order to find and resolve the video's media streams, you need to first get its metadata. There are a few ways to do it, but the most reliable one is by querying an AJAX endpoint used internally by YouTube's iframe embed API. The format is as follows: <https://www.youtube.com/get_video_info?video_id={videoId}>.
 
@@ -187,7 +187,7 @@ Note: don't be tempted to extract content length from the `contentLength` attrib
 
 ## Protected videos and cipher signatures
 
-You may notice that some videos, mostly the ones uploaded by verified channels, are protected. This means that their media streams and DASH manifests cannot be directly accessed by URL — a 403 error code will be returned instead. To be able to access them, you need to decipher their signatures and then modify the URL appropriately.
+You may notice that some videos, mostly the ones uploaded by verified channels, are protected. This means that their media streams and DASH manifests cannot be directly accessed by URL — a 403 error code will be returned instead. To be able to access them, you need to decipher their signatures and then modify the URL accordingly.
 
 For muxed and adaptive streams, the signatures are part of the extracted metadata. DASH streams themselves are never protected, but the actual manifest may be — the signature is stored as part of the URL.
 
@@ -197,9 +197,9 @@ A signature is a string made out of two sequences of uppercase letters and numbe
 537513BBC517D8643EBF25887256DAACD7521090.AE6A48F177E7B0E8CD85D077E5170BFD83BEDE6BE6C6C
 ```
 
-When your browser opens a YouTube video, it transforms these signatures using a set of operations defined in the player's source code, appending the result as an additional parameter inside the URLs. To repeat the same process from code, you need to locate the JavaScript source of the player used by the video and parse it.
+When your browser opens a YouTube video, it transforms the signature using a set of operations defined in the player's source code, appending the result as an additional parameter inside the URL of each media stream. To repeat the same process from code, you need to locate the JavaScript source of the player used by the video and parse it.
 
-### Downloading and parsing player source code
+### Reverse-engineering the player
 
 Every video uses a slightly different version of the player, which means that you need to figure out which one to download. If you get the HTML of the [video's embed page](https://www.youtube.com/embed/e_S9VvJM1PI), you can search for `"js":` to find a JSON property that contains the player's relative source code URL. Once you prepend YouTube's host to it, you'll end up with a URL like this one:
 
@@ -325,7 +325,7 @@ For DASH manifests, transform the signature extracted from the URL and add it as
 .../signature/212CD2793C2E9224A40014A56BB8189AF3D591E3.523508F8A49EC4A3425C6E4484EF9F59FBEF9066/
 ```
 
-## Identifying media stream's content properties
+## Identifying stream properties
 
 Each media stream has an `itag` that uniquely identifies its properties, such as container type, codecs, video quality, etc. YoutubeExplode resolves these properties using a predefined map of known tags:
 
@@ -436,7 +436,7 @@ private static readonly Dictionary<int, ItagDescriptor> ItagMap = new Dictionary
 
 Things like bit rate, resolution and frame rate are not strictly regulated by `itag`, so you still need to extract them from metadata.
 
-## Bypassing rate limit
+## Bypassing rate limits
 
 By default, adaptive streams are served at a limited rate — just enough to fetch the next part as the video plays. This is not optimal if the goal is to download the video as fast as possible.
 

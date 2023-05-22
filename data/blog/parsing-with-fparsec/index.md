@@ -301,7 +301,7 @@ let nameValuePair =
 //      deconstructed tuple
 ```
 
-## JSON processor using FParsec
+## Parsing JSON
 
 There are still a lot of other primitives and combinators in FParsec. In fact, with around [200 of them in total](https://quanttec.com/fparsec/reference/parser-overview.html), covering them all here would be both ambitious and unnecessary.
 
@@ -688,9 +688,9 @@ let main _ =
 
 Once we run this piece of code, we should see `Value: Golden State Warriors`. Awesome, we've verified that our parser works and made a pretty simple but useful API around it.
 
-## Wait, but where are the monads?
+## Monadic syntax
 
-If you've come here after my previous article or were otherwise expecting to see monads here, you might be a bit surprised that there were none so far. This is because the combinators FParsec provides out of the box are so powerful you very rarely need to resort to monadic syntax.
+If you've come here after my previous article or were otherwise expecting to see monads here, you might be a bit surprised that there was no use of the monadic syntax. This is because the combinators FParsec provides out of the box are so powerful you very rarely need to resort to it.
 
 However, we could have, for example, defined our JSON array parser from earlier like this instead:
 

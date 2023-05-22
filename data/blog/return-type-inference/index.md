@@ -5,7 +5,7 @@ date: '2020-03-10'
 
 Above everything else in software development, I really enjoy building frameworks that enable other developers to create something cool. Sometimes, when chasing that perfect design I have in mind, I find myself coming up with weird hacks that really push the C# language to the limit.
 
-One such case happened not so long ago, when my coworker and I were looking at how to avoid specifying generic arguments in places where the compiler should seemingly be able to guess it based on the return type. He said it was impossible, seeing as C# can only infer generic arguments from method parameters, however I was able to come up with a way to make it work.
+One such case happened not so long ago, when my coworker and I were looking at how to avoid specifying generic arguments in places, where the compiler should seemingly be able to make a guess based on the return type. He said it was impossible, seeing as C# can only infer generic arguments from method parameters, however I was able to come up with a way to make it work.
 
 In this article I will show a little trick I came up with to simulate return type inference, as well as some examples where that can be useful.
 
@@ -61,7 +61,7 @@ Interestingly enough, all the examples shown above are in fact based on the same
 
 There are scenarios, however, where we may want type inference to work in the opposite direction. Let's see where that could be useful.
 
-## Option type
+## Type inference for option containers
 
 If you have been writing code in a functional style before, it's very likely that you're intimately familiar with the `Option<T>` type. It's a container that encapsulates a single value (or absence thereof) and allows us to perform various operations on the content without actually observing its state.
 
@@ -188,7 +188,7 @@ public static Option<int> Parse(string number)
 }
 ```
 
-## Result type
+## Type inference for result containers
 
 Just like we did with `Option<T>`, we may want to apply the same treatment to `Result<TOk, TError>`. This type fulfills a similar purpose, except that it also has a fully fledged value representing the negative case, instead of just being empty.
 

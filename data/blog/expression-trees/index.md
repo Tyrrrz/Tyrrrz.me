@@ -29,7 +29,7 @@ When it comes to the former, the answer is pretty simple — it generates a gree
 string? GetGreeting(string personName) { /* ... */ }
 ```
 
-As for how it does it, however, the answer is a bit more detailed. This expression consists of a ternary conditional operator, whose condition is evaluated by negating the result of calling the `string.IsNullOrWhiteSpace(...)` method with the `personName` parameter, whose positive clause is made up of a "plus" binary operator that works with a constant string expression `"Greetings, "` and the parameter expression, and whose negative clause consists of a sole `null` expression.
+As for how it does it, however, the answer is a bit more detailed. This expression consists of a ternary conditional operator, whose condition is evaluated by negating the result of a call to the `string.IsNullOrWhiteSpace(...)` method with the `personName` parameter, and whose positive clause is made up of a "plus" binary operator that works with a constant string expression `"Greetings, "` and the parameter expression, and whose negative clause consists of a sole `null` expression.
 
 The description above may seem like a mouthful, but it outlines the exact syntactic structure of the expression. It is by this higher-order representation that we're able to tell how exactly it's evaluated.
 
@@ -613,9 +613,9 @@ public class Benchmarks
 
 As you can see, the expression-based approach performs about nine times faster than when using `dynamic`. Considering that these are the only two options we can use to implement generic operators, this is a pretty good case for compiled expression trees.
 
-## Compiling dictionary into a switch expression
+## Compiling a dictionary into a switch expression
 
-Another fun way we can use expression trees is to create a dictionary with a compiled lookup. Even though the standard `System.Collections.Generic.Dictionary` is insanely fast on its own, it's possible to make its read operations even faster.
+Another fun way we can use expression trees is to create a dictionary with a compiled lookup. Even though the standard `Dictionary<...>` is insanely fast on its own, it's possible to make its read operations even faster.
 
 While a typical dictionary implementation may be pretty complicated, a lookup can be represented in a form of a simple switch expression:
 

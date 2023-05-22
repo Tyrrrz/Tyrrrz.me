@@ -23,7 +23,7 @@ In this article I will share my observations about this testing technique and go
 
 ## Fallacies of unit testing
 
-Unit tests, as evident by the name, revolve around the concept of a "unit", which denotes a very small isolated part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a module (or a method of an object).
+Unit tests, as evident by the name, revolve around the concept of a _unit_, which denotes a very small isolated part of a larger system. There is no formal definition of what a unit is or how small it should be, but it's mostly accepted that it corresponds to an individual function of a module (or a method of an object).
 
 Normally, when the code isn't written with unit tests in mind, it may be impossible to test some functions in complete isolation because they can have external dependencies. In order to _work around_ this issue, we can apply the dependency inversion principle and replace concrete dependencies with abstractions. These abstractions can then be substituted with real or fake implementations, depending on whether the code is executing normally or as part of a test.
 
@@ -727,7 +727,7 @@ public async Task User_can_get_solar_times_for_a_specific_location_and_date()
 }
 ```
 
-We can keep adding tests like this one to ensure that the app supports all possible locations, dates, and handles potential edge cases such as the [midnight sun phenomenon](https://en.wikipedia.org/wiki/Midnight_sun). However, we may not want to execute the entire pipeline each time, just to verify that the business logic that calculates solar times works correctly.
+We can keep adding tests like this one to ensure that the app supports all possible locations and dates, and handles potential edge cases such as the [midnight sun phenomenon](https://en.wikipedia.org/wiki/Midnight_sun). However, we may not want to execute the entire pipeline each time, just to verify that the business logic that calculates solar times works correctly.
 
 It's important to note that, although we want to avoid it if possible, we can still reduce the integration scope if there's a real reason for it. In this case, we can choose to cover additional cases with unit tests instead.
 
@@ -907,7 +907,7 @@ One of the biggest challenges I've found when doing high-level functional testin
 
 The wide scope of tests also implies the need for a deeper understanding of the project's dependencies and technologies it relies upon. It's important to know how they're used, whether they can be easily containerized, which options are available and what are the trade-offs.
 
-In the context of integration testing, the "testability" aspect is not defined by how well the code can be isolated, but instead by how well the actual infrastructure accommodates and facilitates testing. This puts a certain prerequisite on the responsible person and the team in general in terms of technical expertise.
+In the context of integration testing, the testability aspect is not defined by how well the code can be isolated, but instead by how well the actual infrastructure accommodates and facilitates testing. This puts a certain prerequisite on the responsible person and the team in general in terms of technical expertise.
 
 It may also take some time to set up and configure the testing environment, as it includes creating fixtures, wiring fake implementations, adding custom initialization and cleanup behavior, and so on. All these things need to be maintained as the project scales and becomes more complicated.
 
@@ -917,7 +917,7 @@ Another common concern is that high-level tests often suffer from a lack of loca
 
 Although there are ways to mitigate this issue, ultimately it's always going to be a trade-off: isolated tests are better at indicating the cause of an error, while integrated tests are better at highlighting the impact. Both are equally useful, so it comes down to what you consider to be more important.
 
-At the end of the day, I still think functional testing is worth it even despite these shortcomings, as I find that it leads to a better developer experience overall. It's been a while since I've done classic unit testing, and I'm not looking forward to starting again.
+At the end of the day, I still think functional testing is worth it even despite these shortcomings, as I find that it leads to a better developer experience overall. It's been a while since I've done traditional unit-focused testing and I have no plans to go back.
 
 ## Summary
 

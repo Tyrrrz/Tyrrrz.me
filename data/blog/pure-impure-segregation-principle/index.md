@@ -205,7 +205,7 @@ Note how these three classes represent a vertical slice from a potentially much 
 [ SolarTimesController ]
 ```
 
-This is a very typical scenario for "classically" designed object-oriented software. You'll probably find it extremely familiar if you have experience working on code that follows the [n-tier architecture](https://en.wikipedia.org/wiki/Multitier_architecture) or any other similar pattern.
+This is a very typical scenario for traditionally designed object-oriented software. You'll probably find it extremely familiar if you have experience working on code that follows the [n-tier architecture](https://en.wikipedia.org/wiki/Multitier_architecture) or any other similar pattern.
 
 If we consider this relationship from a standpoint of purity, we'll also notice that the entire call chain is impure. And while for `LocationProvider` it makes sense because it performs non-deterministic I/O, the `SolarCalculator` is impure only due to its dependency on the former.
 
@@ -506,7 +506,7 @@ If we imagine that we're building a cross-platform solution, it's logical that w
 
 Assuming our goal is to test `GetOutputPath(...)` in isolation, simply relying on the parameters of the function is not enough. We would also need to execute tests on each of the supported operating systems, to make sure it actually works with all the possible path separators.
 
-In this case, the fact that the function is pure does not provide us with sufficient guarantees. While it's pure by definition, it's not _pure enough_ for what we need.
+In this case, the fact that the function is pure does not provide us with sufficient guarantees. While it's pure by definition, it's _not pure enough_ for what we need.
 
 As you can see, the concept of purity gets a bit hazy once you start digging into specifics. In reality, everything around us is inherently impure, so what we accept as pure really depends on what level of abstraction we choose to operate at.
 

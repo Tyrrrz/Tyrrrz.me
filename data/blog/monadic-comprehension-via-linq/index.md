@@ -107,7 +107,7 @@ In academic terms, this method signature actually represents a slightly more ela
 
 Consequentially, any container type for which an appropriate `SelectMany(...)` may be reasonably defined, can benefit from the alternative mental model provided by LINQ. Moving on, let's explore some potential candidates.
 
-## Composing tasks
+## Chaining tasks
 
 When it comes to container types, `Task<T>` is probably the most ubiquitous example that can be found in C# code. Conceptually, this type represents an operation that executes asynchronously and encapsulates its current state along with its eventual result. Additionally, it also provides a way to queue up continuation callbacks that will trigger once the task has completed.
 
@@ -173,7 +173,7 @@ Console.WriteLine(result);
 
 Nevertheless, this example should hopefully highlight the primary use case for introducing custom LINQ notations: **expressing pipelines with types that have chainable semantics**. Going further, let's take a look at a few more complicated but also more practical scenarios.
 
-## Chaining operations with optional return values
+## Chaining option containers
 
 Different programming paradigms utilize different ways of representing and handling failures. Object-oriented languages, traditionally, employ exceptions and `try`/`catch` blocks for this purpose — a very convenient approach that helps keep the code focused on the happy path, while implicitly routing potential errors towards dedicated handlers at the top of the call stack.
 
