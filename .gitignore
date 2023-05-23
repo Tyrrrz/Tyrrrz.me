@@ -15,6 +15,7 @@ lerna-debug.log*
 # next.js
 /.next/
 /build/
+/next-env.d.ts
 
 # next-pwa
 /public/fallback-*.js*
