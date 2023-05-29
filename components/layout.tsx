@@ -10,8 +10,8 @@ import useDebounce from '~/hooks/useDebounce';
 import useRouterStatus from '~/hooks/useRouterStatus';
 
 const Loader: FC = () => {
-  // Only show loading indicator if the navigation takes a while.
-  // This prevents indicator from flashing during faster navigation.
+  // Only show the loading indicator if the navigation takes a while.
+  // This prevents the indicator from flashing during faster navigation.
   const isVisible = useDebounce(useRouterStatus() === 'loading', 300);
   const [progress, setProgress] = useState(0);
 
@@ -25,7 +25,7 @@ const Loader: FC = () => {
       // Progress is not representative of anything, it's just used
       // to give a sense that something is happening.
       // The value is increased inverse-hyperbolically, so that it
-      // slows down and never actually reaches 100%.
+      // gradually slows down and never actually reaches 100%.
       setProgress((progress) => progress + 0.1 * (0.95 - progress) ** 2);
     }, 100);
 
@@ -177,11 +177,9 @@ const Layout: FC<LayoutProps> = ({ children }) => {
 
       <Loader />
 
-      <div className={c('max-w-4xl', 'mx-auto')}>
-        <div className={c('container', 'mx-auto')}>
-          <Header />
-          <Main>{children}</Main>
-        </div>
+      <div className={c('container', 'max-w-4xl', 'mx-auto')}>
+        <Header />
+        <Main>{children}</Main>
       </div>
     </>
   );
