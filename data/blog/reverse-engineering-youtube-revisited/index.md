@@ -246,22 +246,22 @@ fta = function (a) {
 };
 ```
 
-As you can see, the deciphering algorithm is implemented as the `fta` function that takes a single argument (the `s` value from earlier) and passes it through a series of filters. The filters themselves are defined as methods on the `hD` object located in the same scope:
+As you can see, the deciphering algorithm is implemented as the `fta` function that takes a single argument (the `s` value from earlier) and passes it through a series of transforms. The transforms themselves are defined as methods on the `hD` object located in the same scope:
 
 ```javascript
 // Prettified for readability
 var hD = {
-  // Swap filter
+  // Swap transform
   i1: function (a, b) {
     var c = a[0];
     a[0] = a[b % a.length];
     a[b % a.length] = c;
   },
-  // Splice filter
+  // Splice transform
   L5: function (a, b) {
     a.splice(0, b);
   },
-  // Reverse filter
+  // Reverse transform
   mL: function (a) {
     a.reverse();
   }
