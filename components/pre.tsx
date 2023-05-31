@@ -5,7 +5,18 @@ type PreProps = PropsWithChildren;
 
 const Pre: FC<PreProps> = ({ children }) => {
   return (
-    <pre className={c('p-4', 'border', 'rounded', 'bg-neutral-50', 'overflow-auto')}>
+    <pre
+      className={c(
+        'p-4',
+        'border',
+        'border-purple-500',
+        'rounded',
+        'bg-purple-100',
+        'overflow-auto',
+        '[&>code]:p-0',
+        '[&>code]:border-none'
+      )}
+    >
       {children}
     </pre>
   );

@@ -1,10 +1,10 @@
 import { graphql } from '@octokit/graphql';
-import type { Donation } from '~/data/donate';
+import { Donation } from '~/data/donate';
 import { distinctBy } from '~/utils/array';
 import { bufferIterable } from '~/utils/async';
 import { getGitHubToken, getPrivateDonors } from '~/utils/env';
 
-// Test out here:
+// Test here:
 // https://docs.github.com/en/graphql/overview/explorer
 
 const createClient = () => {

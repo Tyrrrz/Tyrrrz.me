@@ -34,6 +34,7 @@ const UkrainePage: NextPage = () => {
           act of aggression can only be described as{' '}
           <span className={c('font-semibold')}>genocide</span>.
         </Paragraph>
+
         <Paragraph>
           Russian soldiers spare no thought when bombing residential areas, hospitals, schools,
           museums, cultural heritages, and civilian infrastructure. The{' '}
@@ -43,6 +44,7 @@ const UkrainePage: NextPage = () => {
           grows by the minute, while the Russian war machine still enjoys both active and tacit
           public support back home.
         </Paragraph>
+
         <Paragraph>
           In Ukraine, everyone&apos;s life has been irrecoverably affected. Some of us lost our
           homes, friends, loved ones, while the rest are struggling to maintain a sense of normalcy
@@ -50,6 +52,7 @@ const UkrainePage: NextPage = () => {
           comprehend, but unfortunately it&apos;s real and it&apos;s here —{' '}
           <span className={c('font-semibold')}>all we can do is fight back</span>.
         </Paragraph>
+
         <Paragraph>
           Luckily, we don&apos;t have to endure this fight in solitude and I&apos;m immensely
           thankful to everyone who supports us! Every bit of help, no matter how big or small,
@@ -76,39 +79,46 @@ const UkrainePage: NextPage = () => {
             </Link>{' '}
             (defensive & humanitarian aid)
           </ListItem>
+
           <ListItem>
             <Link href="https://savelife.in.ua/en/donate-en/?source=tyrrrz">
               <span className={c('font-semibold')}>Come Back Alive</span> Foundation
             </Link>{' '}
             (defensive aid)
           </ListItem>
+
           <ListItem>
             <Link href="https://prytulafoundation.org/en/home/support_page?source=tyrrrz">
               <span className={c('font-semibold')}>Serhiy Prytula</span> Foundation
             </Link>{' '}
             (defensive & humanitarian aid)
           </ListItem>
+
           <ListItem>
             <Link href="https://koloua.com/en/donate?source=tyrrrz">
               <span className={c('font-semibold')}>Kolo</span> Foundation
             </Link>{' '}
             (defensive aid)
           </ListItem>
+
           <ListItem>
             <Link href="https://hospitallers.life/needs-hospitallers?source=tyrrrz">
               <span className={c('font-semibold')}>Hospitallers Battalion</span>
             </Link>{' '}
             (medical aid)
           </ListItem>
+
           <ListItem>
             <Link href="https://voices.org.ua/en/donat?source=tyrrrz">
               <span className={c('font-semibold')}>Voices of Children</span> Foundation
             </Link>{' '}
             (humanitarian aid)
           </ListItem>
+
           <ListItem>
             <Link href="https://u24.gov.ua">Government donation portal</Link> (humanitarian aid)
           </ListItem>
+
           <ListItem>
             <Link href="/donate">Personal donations to me</Link> are also directed to local
             charities at my own discretion
@@ -129,41 +139,52 @@ const UkrainePage: NextPage = () => {
             Donate unused clothes, medical supplies, tools & equipment to refugee centers or
             Ukrainian charities
           </ListItem>
+
           <ListItem>Reach out to Ukrainian friends or colleagues, offer them help</ListItem>
+
           <ListItem>
             <Link href="https://www.ethicalconsumer.org/ethicalcampaigns/boycotts/should-we-boycott-russia">
               Avoid physical products made in Russia
             </Link>{' '}
             (bar codes starting with <Code>460</Code>-<Code>469</Code>)
           </ListItem>
+
           <ListItem>
             <Link href="https://stand-with-ukraine.pp.ua/Boycott.html">
               Avoid software products made in Russia
             </Link>
           </ListItem>
+
           <ListItem>
             <Link href="https://boycottrussia.info/list-of-shame">
               Boycott international companies that continue operating in Russia
             </Link>
           </ListItem>
+
           <ListItem>
             Ask your employer to implement sanctions against Russia, or help in other ways
           </ListItem>
+
           <ListItem>
             Ask your politicians to provide stronger support to Ukraine, including heavy weapons
           </ListItem>
+
           <ListItem>Join your local protests to empower Ukrainian voices</ListItem>
+
           <ListItem>Spread the word about the war in your local networks</ListItem>
+
           <ListItem>
             <Link href="https://spellingukraine.com">
               Use the correct transliteration when referring to Ukrainian toponyms
             </Link>
           </ListItem>
+
           <ListItem>
             <Link href="https://volunteeringukraine.com">
               Explore volunteering opportunities in Ukraine
             </Link>
           </ListItem>
+
           <ListItem>
             <Link href="https://fightforua.org">
               Enlist in the Ukrainian military as a foreign fighter
@@ -173,7 +194,7 @@ const UkrainePage: NextPage = () => {
       </section>
 
       <div className={c('my-6', 'text-xl', 'text-center', 'font-light')}>
-        <span>Glory to Ukraine! Glory to Heroes!</span>
+        Glory to Ukraine! Glory to Heroes!
       </div>
     </>
   );

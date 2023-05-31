@@ -8,7 +8,7 @@ import Meta from '~/components/meta';
 import Paragraph from '~/components/paragraph';
 import Timeline from '~/components/timeline';
 import TimelineItem from '~/components/timelineItem';
-import { loadSpeakingEngagements, SpeakingEngagement } from '~/data/speaking';
+import { SpeakingEngagement, loadSpeakingEngagements } from '~/data/speaking';
 import { groupBy } from '~/utils/array';
 import { bufferIterable } from '~/utils/async';
 import { deleteUndefined } from '~/utils/object';
@@ -46,6 +46,7 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
               <Timeline>
                 {items.map((engagement, i) => (
                   <TimelineItem key={i}>
+                    {/* Title */}
                     <div className={c('text-lg')}>
                       <Link
                         href={
@@ -59,16 +60,17 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
                       </Link>
                     </div>
 
+                    {/* Misc info */}
                     <div className={c('flex', 'flex-wrap', 'gap-x-3', 'font-light')}>
                       <Inline>
                         <FiCalendar strokeWidth={1} />
-                        <span>
+                        <div>
                           {new Date(engagement.date).toLocaleDateString('en-US', {
                             day: 'numeric',
                             month: 'long',
                             year: 'numeric'
                           })}
-                        </span>
+                        </div>
                       </Inline>
 
                       <Inline>
@@ -77,19 +79,19 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
                           workshop: <FiTool strokeWidth={1} />,
                           podcast: <FiRadio strokeWidth={1} />
                         }[engagement.kind] || <FiMic strokeWidth={1} />}
-                        <span className={c('capitalize')}>{engagement.kind}</span>
+                        <div className={c('capitalize')}>{engagement.kind}</div>
                       </Inline>
 
                       <Inline>
                         <FiMapPin strokeWidth={1} />
-                        <span>
+                        <div>
                           <Link href={engagement.eventUrl || '#'}>{engagement.event}</Link>
-                        </span>
+                        </div>
                       </Inline>
 
                       <Inline>
                         <FiMessageCircle strokeWidth={1} />
-                        <span className={c('capitalize')}>{engagement.language}</span>
+                        <div className={c('capitalize')}>{engagement.language}</div>
                       </Inline>
                     </div>
                   </TimelineItem>
@@ -107,9 +109,7 @@ export const getStaticProps: GetStaticProps<SpeakingPageProps> = async () => {
   const engagements = await bufferIterable(loadSpeakingEngagements());
 
   // Remove undefined values because they cannot be serialized
-  for (const engagement of engagements) {
-    deleteUndefined(engagement);
-  }
+  deleteUndefined(engagements);
 
   engagements.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
 

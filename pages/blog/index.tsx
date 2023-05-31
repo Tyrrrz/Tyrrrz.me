@@ -49,25 +49,27 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
               <Timeline>
                 {items.map((post, i) => (
                   <TimelineItem key={i}>
+                    {/* Title */}
                     <div className={c('text-lg')}>
                       <Link href={`/blog/${post.id}`}>{post.title}</Link>
                     </div>
 
+                    {/* Misc info */}
                     <div className={c('flex', 'flex-wrap', 'gap-x-3', 'font-light')}>
                       <Inline>
                         <FiCalendar strokeWidth={1} />
-                        <span>
+                        <div>
                           {new Date(post.date).toLocaleDateString('en-US', {
                             day: 'numeric',
                             month: 'long',
                             year: 'numeric'
                           })}
-                        </span>
+                        </div>
                       </Inline>
 
                       <Inline>
                         <FiClock strokeWidth={1} />
-                        <span>{Math.round(post.readingTimeMins)} min read</span>
+                        <div>{Math.round(post.readingTimeMins)} min read</div>
                       </Inline>
                     </div>
                   </TimelineItem>
@@ -87,9 +89,7 @@ export const getStaticProps: GetStaticProps<BlogPageProps> = async () => {
   const posts = await bufferIterable(loadBlogPostRefs());
 
   // Remove undefined values because they cannot be serialized
-  for (const post of posts) {
-    deleteUndefined(post);
-  }
+  deleteUndefined(posts);
 
   posts.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
 

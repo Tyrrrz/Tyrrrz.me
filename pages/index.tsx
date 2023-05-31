@@ -1,5 +1,5 @@
 import c from 'classnames';
-import type { NextPage } from 'next';
+import { NextPage } from 'next';
 import { FiGithub, FiTwitter, FiYoutube } from 'react-icons/fi';
 import Heading from '~/components/heading';
 import Image from '~/components/image';
@@ -22,7 +22,7 @@ const HomePage: NextPage = () => {
           'md:flex-row-reverse',
           'items-center',
           'md:items-start',
-          'gap-x-6'
+          'gap-6'
         )}
       >
         <div className={c('flex-none', 'w-48', 'md:w-56', 'md:mt-12')}>
@@ -60,7 +60,7 @@ const HomePage: NextPage = () => {
 
       <div className={c('my-8', 'h-1', 'rounded', 'bg-purple-500')} />
 
-      <section className={c('flex', 'justify-center', 'gap-x-3', 'text-2xl', 'font-light')}>
+      <section className={c('flex', 'justify-center', 'gap-3', 'text-2xl', 'font-light')}>
         <Link variant="discreet" href="https://github.com/Tyrrrz">
           <div className={c('px-2')}>
             <FiGithub strokeWidth={1} />

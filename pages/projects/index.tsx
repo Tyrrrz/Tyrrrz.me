@@ -6,7 +6,7 @@ import Inline from '~/components/inline';
 import Link from '~/components/link';
 import Meta from '~/components/meta';
 import Paragraph from '~/components/paragraph';
-import { loadProjects, Project } from '~/data/projects';
+import { Project, loadProjects } from '~/data/projects';
 import { bufferIterable } from '~/utils/async';
 import { deleteUndefined } from '~/utils/object';
 
@@ -43,56 +43,62 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
               'border',
               {
                 'border-purple-500': i <= 5,
-                'border-purple-300': i > 5 && i <= 11
+                'border-purple-300': i > 5 && i <= 11,
+                'border-purple-100': i > 11
               },
               'rounded'
             )}
           >
-            <div className={c('text-lg', 'break-all')}>
+            {/* Name */}
+            <div className={c('text-lg', 'text-ellipsis', 'overflow-hidden')} title={project.name}>
               <Link href={project.url}>{project.name}</Link>
             </div>
 
+            {/* Maintenance status */}
             <div className={c('grow', 'my-1', 'space-y-1')}>
               {project.archived && (
                 <div className={c('font-light')}>
                   <Inline>
                     <FiArchive strokeWidth={1} />
-                    <span>Not maintained</span>
+                    <div>Not maintained</div>
                   </Inline>
                 </div>
               )}
 
+              {/* Description */}
               <div>{project.description}</div>
 
+              {/* Homepage */}
               {project.homepageUrl && (
                 <div className={c('overflow-hidden')}>
                   <Inline>
                     <FiExternalLink strokeWidth={1} />
-                    <span>
+                    <div>
                       <Link href={project.homepageUrl}>{project.homepageUrl}</Link>
-                    </span>
+                    </div>
                   </Inline>
                 </div>
               )}
             </div>
 
+            {/* Misc info */}
             <div className={c('flex', 'flex-wrap', 'mt-1', 'gap-x-3', 'font-light')}>
               <Inline>
                 <FiStar className={c('fill-yellow-400')} strokeWidth={1} />
-                <span>{project.stars.toLocaleString('en-US')}</span>
+                <div>{project.stars.toLocaleString('en-US')}</div>
               </Inline>
 
               {project.language && (
                 <Inline>
                   <FiCode strokeWidth={1} />
-                  <span>{project.language}</span>
+                  <div>{project.language}</div>
                 </Inline>
               )}
 
               {project.downloads > 0 && (
                 <Inline>
                   <FiDownload strokeWidth={1} />
-                  <span>{project.downloads.toLocaleString('en-US')}</span>
+                  <div>{project.downloads.toLocaleString('en-US')}</div>
                 </Inline>
               )}
             </div>
@@ -107,9 +113,7 @@ export const getStaticProps: GetStaticProps<ProjectsPageProps> = async () => {
   const projects = await bufferIterable(loadProjects());
 
   // Remove undefined values because they cannot be serialized
-  for (const project of projects) {
-    deleteUndefined(project);
-  }
+  deleteUndefined(projects);
 
   projects.sort((a, b) => b.stars - a.stars);
 
