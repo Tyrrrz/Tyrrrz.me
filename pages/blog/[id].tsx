@@ -28,11 +28,9 @@ const CoverSection: FC<BlogPostPageProps> = ({ post }) => {
   }
 
   return (
-    <section
-      className={c('mt-4', 'p-4', 'bg-purple-100', 'rounded', 'border', 'border-purple-500')}
-    >
+    <section className={c('p-4', 'border', 'border-purple-500', 'rounded', 'bg-purple-100')}>
       <div className={c('w-fit', 'mx-auto')}>
-        <Image src={post.coverUrl} width={800} height={450} alt="Cover image" />
+        <Image src={post.coverUrl} width={800} height={450} alt="Cover image" priority />
       </div>
     </section>
   );
@@ -49,7 +47,7 @@ const ArticleSection: FC<BlogPostPageProps> = ({ post }) => {
   };
 
   return (
-    <section className={c('mt-4')}>
+    <section>
       <article>
         <Markdown
           source={post.source}
@@ -61,9 +59,17 @@ const ArticleSection: FC<BlogPostPageProps> = ({ post }) => {
   );
 };
 
+const UkraineSection: FC = () => {
+  return (
+    <section>
+      <UkraineAlert />
+    </section>
+  );
+};
+
 const SubscribeSection: FC = () => {
   return (
-    <section className={c('mt-4', 'p-4', 'border', 'rounded', 'space-y-1')}>
+    <section className={c('p-4', 'border', 'border-purple-500', 'rounded', 'space-y-1')}>
       <div className={c('font-semibold')}>🔔 Subscribe for more</div>
 
       <div>
@@ -79,7 +85,7 @@ const SubscribeSection: FC = () => {
 
 const CommentSection: FC<BlogPostPageProps> = ({ post }) => {
   return (
-    <section className={c('mt-4')}>
+    <section>
       <Giscus
         repo="Tyrrrz/Tyrrrz.me"
         repoId="MDEwOlJlcG9zaXRvcnkyMDY0MDIxMDc="
@@ -110,37 +116,38 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
         rssUrl="/blog/rss.xml"
       />
 
-      <section>
-        <Heading>{post.title}</Heading>
+      <div className={c('space-y-4')}>
+        <section>
+          {/* Title */}
+          <Heading>{post.title}</Heading>
 
-        <div className={c('flex', 'flex-wrap', '-mt-2', 'gap-x-3', 'font-light')}>
-          <Inline>
-            <FiCalendar strokeWidth={1} />
-            <span>
-              {new Date(post.date).toLocaleDateString('en-US', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-              })}
-            </span>
-          </Inline>
+          {/* Misc info */}
+          <div className={c('flex', 'flex-wrap', '-mt-2', 'gap-x-3', 'font-light')}>
+            <Inline>
+              <FiCalendar strokeWidth={1} />
+              <div>
+                {new Date(post.date).toLocaleDateString('en-US', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+                })}
+              </div>
+            </Inline>
 
-          <Inline>
-            <FiClock strokeWidth={1} />
-            <span>{Math.round(post.readingTimeMins)} min read</span>
-          </Inline>
-        </div>
-      </section>
+            <Inline>
+              <FiClock strokeWidth={1} />
+              <div>{Math.round(post.readingTimeMins)} min read</div>
+            </Inline>
+          </div>
+        </section>
 
-      <CoverSection post={post} />
-
-      <section className={c('mt-4')}>
-        <UkraineAlert />
-      </section>
-
-      <ArticleSection post={post} />
-      <SubscribeSection />
-      <CommentSection post={post} />
+        {/* Detailed info */}
+        <CoverSection post={post} />
+        <UkraineSection />
+        <ArticleSection post={post} />
+        <SubscribeSection />
+        <CommentSection post={post} />
+      </div>
     </>
   );
 };
@@ -168,7 +175,7 @@ export const getStaticProps: GetStaticProps<BlogPostPageProps, BlogPostPageParam
   await publishBlogPostAssets(id);
   const post = await loadBlogPost(id);
 
-  // Undefined values cannot be serialized
+  // Remove undefined values because they cannot be serialized
   deleteUndefined(post);
 
   return {

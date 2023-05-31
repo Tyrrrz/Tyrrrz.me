@@ -81,22 +81,30 @@ const NavLink: FC<NavLinkProps> = ({ href, children }) => {
 };
 
 const Header: FC = () => {
-  const links = [
-    { href: '/', label: 'home' },
-    { href: '/projects', label: 'projects' },
-    { href: '/blog', label: 'blog' },
-    { href: '/speaking', label: 'speaking' },
-    { href: '/donate', label: 'donate' }
-  ];
+  const links = useMemo(
+    () => [
+      { href: '/', label: 'home' },
+      { href: '/projects', label: 'projects' },
+      { href: '/blog', label: 'blog' },
+      { href: '/speaking', label: 'speaking' },
+      { href: '/donate', label: 'donate' }
+    ],
+    []
+  );
 
-  const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const router = useRouter();
+  const [isMobileNavVisible, setIsMobileNavVisible] = useState(false);
+
+  // Hide the mobile nav when the page changes
+  useEffect(() => {
+    setIsMobileNavVisible(false);
+  }, [router.pathname]);
 
   return (
     <header>
       <div
         className={c(
           'flex',
-          'mx-auto',
           'p-4',
           'border-b-2',
           'border-neutral-100',
@@ -105,15 +113,15 @@ const Header: FC = () => {
         )}
       >
         {/* Logo */}
-        <div className={c('my-1', 'text-xl', 'font-mono', 'font-semibold', 'tracking-wide')}>
+        <div className={c('text-xl', 'font-mono', 'font-semibold', 'tracking-wide')}>
           <Link variant="hidden" href="/">
             <span className={c('text-neutral-400')}>://</span>
             <span>tyrrrz.me</span>
           </Link>
         </div>
 
-        {/* Full nav */}
-        <nav className={c('hidden', 'sm:flex', 'px-2', 'gap-x-2', 'text-lg')}>
+        {/* Desktop nav */}
+        <nav className={c('hidden', 'sm:flex', 'px-2', 'gap-2', 'text-lg')}>
           {links.map((link, i) => (
             <NavLink key={i} href={link.href}>
               {link.label}
@@ -123,8 +131,8 @@ const Header: FC = () => {
 
         {/* Mobile nav button */}
         <button
-          className={c('sm:hidden', 'text-2xl', { 'text-purple-500': isMenuVisible })}
-          onClick={() => setIsMenuVisible((v) => !v)}
+          className={c('sm:hidden', 'text-2xl', { 'text-purple-500': isMobileNavVisible })}
+          onClick={() => setIsMobileNavVisible((v) => !v)}
         >
           <FiMenu />
         </button>
@@ -134,7 +142,7 @@ const Header: FC = () => {
       <div className={c('sm:hidden', 'overflow-hidden')}>
         <nav
           className={c(
-            { '-mt-[100%]': !isMenuVisible },
+            { '-mt-[100%]': !isMobileNavVisible },
             'p-2',
             'border-b-2',
             'border-neutral-100',

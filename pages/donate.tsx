@@ -60,6 +60,7 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
         </List>
       </section>
 
+      {/* Donor list */}
       <section>
         <Heading variant="h2">Top donors</Heading>
 
@@ -81,18 +82,23 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
                 'border',
                 {
                   'border-purple-500': i <= 8,
-                  'border-purple-300': i > 8 && i <= 32
+                  'border-purple-300': i > 8 && i <= 32,
+                  'border-purple-100': i > 32
                 },
                 'rounded'
               )}
             >
               <div className={c('text-lg')}>
                 <Inline>
-                  <FiDollarSign strokeWidth={1} /> <span>{donation.amount.toFixed(0)}</span>
+                  <FiDollarSign strokeWidth={1} />
+                  <div>{donation.amount.toFixed(0)}</div>
                 </Inline>
               </div>
 
-              <div className={c('font-semibold', 'break-all')}>
+              <div
+                className={c('font-semibold', 'text-ellipsis', 'overflow-hidden')}
+                title={donation.name}
+              >
                 {donation.name || '[ anonymous ]'}
               </div>
               <div className={c('font-light')}>{donation.platform}</div>

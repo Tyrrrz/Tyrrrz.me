@@ -1,4 +1,4 @@
-import type { Donation } from '~/data/donate';
+import { Donation } from '~/data/donate';
 import { groupBy } from '~/utils/array';
 import { bufferIterable } from '~/utils/async';
 import { getBuyMeACoffeeToken, getPrivateDonors } from '~/utils/env';
