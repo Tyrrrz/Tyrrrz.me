@@ -1,7 +1,6 @@
 import c from 'classnames';
 import { FC, PropsWithChildren } from 'react';
 import { FiLink } from 'react-icons/fi';
-import Inline from '~/components/inline';
 import Link from '~/components/link';
 
 type HeadingProps = PropsWithChildren<{
@@ -10,10 +9,10 @@ type HeadingProps = PropsWithChildren<{
 }>;
 
 const Heading: FC<HeadingProps> = ({ id, level = 1, children }) => {
-  const RawHeading = `h${level}` as keyof JSX.IntrinsicElements;
+  const Proxy = `h${level}` as const;
 
   return (
-    <RawHeading
+    <Proxy
       id={id}
       className={c(
         'group',
@@ -27,18 +26,18 @@ const Heading: FC<HeadingProps> = ({ id, level = 1, children }) => {
         'font-semibold'
       )}
     >
-      <Inline>
+      <div className={c('flex', 'items-baseline', 'gap-2')}>
         <div>{children}</div>
 
         {id && (
-          <div className={c('sm:invisible', 'group-hover:visible', 'ml-1', 'mt-1', 'text-base')}>
+          <div className={c('sm:invisible', 'group-hover:visible', 'text-base')}>
             <Link href={`#${id}`}>
               <FiLink />
             </Link>
           </div>
         )}
-      </Inline>
-    </RawHeading>
+      </div>
+    </Proxy>
   );
 };
 
