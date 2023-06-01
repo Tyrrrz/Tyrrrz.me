@@ -26,17 +26,19 @@ const Heading: FC<HeadingProps> = ({ id, level = 1, children }) => {
         'font-semibold'
       )}
     >
-      <div className={c('flex', 'items-baseline', 'gap-2')}>
-        <div>{children}</div>
+      {children}
 
-        {id && (
-          <div className={c('sm:invisible', 'group-hover:visible', 'text-base')}>
+      {id && (
+        <>
+          {/* Non-breakable space so that the link doesn't end up breaking off by itself */}
+          &nbsp;
+          <span className={c('sm:invisible', 'group-hover:visible', 'text-base')}>
             <Link href={`#${id}`}>
-              <FiLink />
+              <FiLink className={c('inline', 'align-baseline')} />
             </Link>
-          </div>
-        )}
-      </div>
+          </span>
+        </>
+      )}
     </Proxy>
   );
 };
