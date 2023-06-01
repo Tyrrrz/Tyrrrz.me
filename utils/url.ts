@@ -10,3 +10,10 @@ export const formatUrlWithQuery = (url: string, params: { [key: string]: string 
 
   return base + '?' + searchParams.toString();
 };
+
+export const slugify = (text: string) => {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gu, '-')
+    .replace(/^-|-$/gu, '');
+};

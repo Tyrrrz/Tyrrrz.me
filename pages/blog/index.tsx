@@ -43,7 +43,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
       <section className={c('mt-8', 'space-y-6')}>
         {postsByYear.map(({ key: year, items }, i) => (
           <section key={i}>
-            <Heading variant="h2">{year}</Heading>
+            <Heading level={2}>{year}</Heading>
 
             <div className={c('ml-4')}>
               <Timeline>

@@ -61,7 +61,7 @@ const UkrainePage: NextPage = () => {
       </section>
 
       <section>
-        <Heading variant="h2">How to help financially</Heading>
+        <Heading level={2}>How to help financially</Heading>
 
         <Paragraph>
           When it comes to financial aid, the most effective thing you can do is donate to one of
@@ -127,7 +127,7 @@ const UkrainePage: NextPage = () => {
       </section>
 
       <section>
-        <Heading variant="h2">Other ways to help</Heading>
+        <Heading level={2}>Other ways to help</Heading>
 
         <Paragraph>
           If you don&apos;t have the means to help financially, there are also other things you can

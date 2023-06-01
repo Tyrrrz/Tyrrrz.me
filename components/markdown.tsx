@@ -10,6 +10,7 @@ import Paragraph from '~/components/paragraph';
 import Pre from '~/components/pre';
 import Quote from '~/components/quote';
 import Syntax from '~/components/syntax';
+import { slugify } from '~/utils/url';
 
 type MarkdownProps = {
   source: string;
@@ -23,20 +24,55 @@ const Markdown: FC<MarkdownProps> = ({ source, transformLinkHref, transformImage
       transformImageUri={transformImageSrc}
       transformLinkUri={transformLinkHref}
       components={{
-        h1: ({ children }) => {
-          return <Heading variant="h1">{children}</Heading>;
+        h1: ({ node, children }) => {
+          const id =
+            node.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
+
+          return (
+            <Heading id={id} level={1}>
+              {children}
+            </Heading>
+          );
         },
-        h2: ({ children }) => {
-          return <Heading variant="h2">{children}</Heading>;
+        h2: ({ node, children }) => {
+          const id =
+            node.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
+
+          return (
+            <Heading id={id} level={2}>
+              {children}
+            </Heading>
+          );
         },
-        h3: ({ children }) => {
-          return <Heading variant="h3">{children}</Heading>;
+        h3: ({ node, children }) => {
+          const id =
+            node.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
+
+          return (
+            <Heading id={id} level={3}>
+              {children}
+            </Heading>
+          );
         },
-        h4: ({ children }) => {
-          return <Heading variant="h4">{children}</Heading>;
+        h4: ({ node, children }) => {
+          const id =
+            node.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
+
+          return (
+            <Heading id={id} level={4}>
+              {children}
+            </Heading>
+          );
         },
-        h5: ({ children }) => {
-          return <Heading variant="h5">{children}</Heading>;
+        h5: ({ node, children }) => {
+          const id =
+            node.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
+
+          return (
+            <Heading id={id} level={5}>
+              {children}
+            </Heading>
+          );
         },
         a: ({ href, children }) => {
           return <Link href={href!}>{children}</Link>;

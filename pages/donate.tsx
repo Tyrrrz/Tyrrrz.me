@@ -62,7 +62,7 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
 
       {/* Donor list */}
       <section>
-        <Heading variant="h2">Top donors</Heading>
+        <Heading level={2}>Top donors</Heading>
 
         <div
           className={c(
