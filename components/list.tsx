@@ -7,10 +7,10 @@ type ListProps = PropsWithChildren<{
 }>;
 
 const List: FC<ListProps> = ({ variant = 'unordered', start = 1, children }) => {
-  const RawList = variant === 'unordered' ? 'ul' : 'ol';
+  const Proxy = variant === 'unordered' ? 'ul' : 'ol';
 
   return (
-    <RawList
+    <Proxy
       className={c(
         'ml-8',
         'my-4',
@@ -23,7 +23,7 @@ const List: FC<ListProps> = ({ variant = 'unordered', start = 1, children }) => 
       start={start}
     >
       {children}
-    </RawList>
+    </Proxy>
   );
 };
 
