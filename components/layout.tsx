@@ -60,12 +60,12 @@ const NavLink: FC<NavLinkProps> = ({ href, children }) => {
       className={c(
         'px-2',
         'py-1',
-        'rounded',
         'border-2',
         {
           'border-transparent': !isActive,
           'border-purple-500': isActive
         },
+        'rounded',
         {
           'bg-purple-100': isActive
         },
