@@ -81,9 +81,9 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
                 'p-4',
                 'border',
                 {
-                  'border-purple-500': i <= 8,
-                  'border-purple-300': i > 8 && i <= 32,
-                  'border-purple-100': i > 32
+                  'border-purple-500': donation.amount >= 100,
+                  'border-purple-300': donation.amount >= 25 && donation.amount < 100,
+                  'border-purple-100': donation.amount < 25
                 },
                 'rounded'
               )}
