@@ -257,7 +257,7 @@ noneResult.Match(
 );
 ```
 
-Overall, the `Match(...)` API works fairly well when we're dealing with isolated values, but becomes noticeably more convoluted when there are multiple dependent operations involved. For example, let's imagine we also have a method called `GetEnvironmentVariable(...)` that returns an `Option<string>`:
+Overall, the `Match(...)` API works fairly well when we're dealing with isolated values, but it becomes noticeably more convoluted when there are multiple dependent operations involved. For example, let's imagine we also have a method called `GetEnvironmentVariable(...)` that returns an `Option<string>`:
 
 ```csharp
 // Resolves an environment variable, or returns 'none' if it's not set
