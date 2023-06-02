@@ -26,18 +26,14 @@ const Heading: FC<HeadingProps> = ({ id, level = 1, children }) => {
         'font-semibold'
       )}
     >
-      {children}
+      <span className={c({ 'mr-2': !!id })}>{children}</span>
 
       {id && (
-        <>
-          {/* Non-breakable space so that the link doesn't end up breaking off by itself */}
-          &nbsp;
-          <span className={c('sm:invisible', 'group-hover:visible', 'text-base')}>
-            <Link href={`#${id}`}>
-              <FiLink className={c('inline', 'align-baseline')} />
-            </Link>
-          </span>
-        </>
+        <span className={c('sm:invisible', 'group-hover:visible', 'text-base')}>
+          <Link href={`#${id}`}>
+            <FiLink className={c('inline', 'align-baseline')} />
+          </Link>
+        </span>
       )}
     </Proxy>
   );
