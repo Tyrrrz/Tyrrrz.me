@@ -183,7 +183,7 @@ While it is possible to simulate the same flow programmatically — by authentic
 
 The main difference from the `ANDROID` client is that `TVHTML5_SIMPLY_EMBEDDED_PLAYER` also supports a `thirdParty` object that contains the URL of the page where the video is supposedly embedded. While it's not strictly required to include this parameter, specifying `https://www.youtube.com` **allows the request to succeed even for videos that prohibit embedding on third-party websites**.
 
-One significant drawback of impersonating this client, however, is that it does not represent an installable app like `ANDROID`, but rather a JavaScript-based player that runs in the browser. This type of client is susceptible to an additional security measure used by YouTube, which obfuscates the URLs contained within the stream metadata. Here is how an individual stream descriptor looks in that case:
+One significant drawback of impersonating this client, however, is that it does not represent a native app like `ANDROID`, but rather a JavaScript-based player that runs in the browser. This type of client is susceptible to an additional security measure used by YouTube, which obfuscates the URLs contained within the stream metadata. Here is how an individual stream descriptor looks in that case:
 
 ```json
 {
