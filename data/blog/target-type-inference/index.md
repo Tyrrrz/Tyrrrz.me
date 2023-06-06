@@ -1,5 +1,5 @@
 ---
-title: 'Simulating Target Method Type Inference in C#'
+title: 'Simulating Target Type Inference in C#'
 date: '2020-03-10'
 ---
 
