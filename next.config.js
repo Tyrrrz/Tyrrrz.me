@@ -29,7 +29,7 @@ const config = {
 
   redirects: async () => [
     {
-      source: '/projects/*',
+      source: '/projects/:slug',
       destination: '/projects',
       permanent: true
     },
