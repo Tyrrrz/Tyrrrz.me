@@ -28,11 +28,13 @@ const config = {
   },
 
   redirects: async () => [
+    // Old version of the site had a separate page for each project
     {
       source: '/projects/:slug',
       destination: '/projects',
       permanent: true
     },
+    // Renamed blog posts
     {
       source: '/blog/return-type-inference',
       destination: '/blog/target-type-inference',
