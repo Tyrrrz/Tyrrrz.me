@@ -25,7 +25,20 @@ const config = {
       process.env.SITE_URL ||
       (process.env.VERCEL_URL && 'https://' + process.env.VERCEL_URL) ||
       'http://localhost:3000'
-  }
+  },
+
+  redirects: async () => [
+    {
+      source: '/projects/*',
+      destination: '/projects',
+      permanent: true
+    },
+    {
+      source: '/blog/return-type-inference',
+      destination: '/blog/target-type-inference',
+      permanent: true
+    }
+  ]
 };
 
 const plugins = [
