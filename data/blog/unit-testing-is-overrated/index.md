@@ -526,7 +526,7 @@ public class FakeApp : IDisposable
 }
 ```
 
-The majority of the work here is already done by [`WebApplicationFactory`](https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-3.1), which is a utility provided by the framework that allows us to bootstrap the app in-memory for testing purposes. It also provides us with API to override configuration, service registrations, and the request pipeline if needed.
+The majority of the work here is already done by [`WebApplicationFactory`](https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests), which is a utility provided by the framework that allows us to bootstrap the app in-memory for testing purposes. It also provides us with API to override configuration, service registrations, and the request pipeline if needed.
 
 We can use an instance of this object in tests to run the app, send requests with the provided `HttpClient`, and then check that the response matches our expectations. This instance can be either shared among multiple tests or instead created separately for each one.
 

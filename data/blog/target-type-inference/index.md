@@ -7,7 +7,7 @@ Above everything else in software development, I really enjoy building framework
 
 One such case happened not so long ago, when I was trying to figure out how to make the compiler determine the generic type of a method based on its expected return type. Seeing as C# can only infer generics from method arguments, this initially seemed impossible, however I was able to come up with a way to make it work.
 
-In this article I will show a little trick I came up with to simulate target type inference, as well as some examples where that can be useful.
+In this article I will show a little trick I came up with to simulate target type inference, as well as some examples of where that can be useful.
 
 ## Type inference
 
@@ -129,7 +129,7 @@ public static Option<int> Parse(string number)
 }
 ```
 
-As you can see, in case with `Option.Some<T>(...)`, we can drop the generic argument because the compiler can infer it based on the type of `value`, which is `int`. On the other hand, the same doesn't work with `Option.None<T>(...)` because it doesn't have any parameters, hence why we need to specify the type manually.
+As you can see, in case with `Option.Some<T>(...)`, we were able to drop the generic argument because the compiler could infer it from the type of `value`, which is `int`. On the other hand, the same wouldn't work with `Option.None<T>(...)` because it doesn't have any parameters, hence why the type needed to be specified manually.
 
 Even though the type argument for `Option.None<T>(...)` seems to be inherently obvious from the context, the compiler is not able to deduce it. This is because, as mentioned earlier, type inference in C# only works by analyzing the data that flows in and not the other way around.
 
@@ -173,11 +173,11 @@ public static class Option
 }
 ```
 
-With these changes, `Option.None` now returns a dummy `NoneOption` object, which essentially represents an empty option whose type hasn't been decided yet. Because `NoneOption` is not generic, we were able to drop the generic arguments and turn `Option.None` into a property.
+With these changes, `Option.None` now returns a dummy `NoneOption` object, which essentially represents an empty option whose type hasn't been decided yet. Because `NoneOption` is not generic, we were able to also drop generics from the corresponding factory method, and turn it into a property.
 
 Additionally, we made it so `Option<T>` implements an implicit conversion from `NoneOption`. Although operators themselves can't be generic in C#, they still retain type arguments of the declaring type, allowing us to define this conversion for _every possible_ variant of `Option<T>`.
 
-All of this allows us to write `Option.None` and have the compiler coerce it automatically to the destination type. From the consumer's point of view, it looks as though we've implemented target type inference:
+All of this allows us to write `Option.None` and have the compiler coerce it automatically to the destination type. From the consumer's point of view, it looks as though we've successfully implemented target type inference:
 
 ```csharp
 public static Option<int> Parse(string number)
@@ -190,7 +190,7 @@ public static Option<int> Parse(string number)
 
 ## Type inference for result containers
 
-Just like we did with `Option<T>`, we may want to apply the same treatment to `Result<TOk, TError>`. This type fulfills a similar purpose, except that it also has a fully fledged value representing the negative case, instead of just being empty.
+Just like we did with `Option<T>`, we may want to apply the same treatment to `Result<TOk, TError>`. This type fulfills a similar purpose, except that it also has a fully fledged value representing the negative case, that provides additional information about the error.
 
 Here's how we could implement it:
 
