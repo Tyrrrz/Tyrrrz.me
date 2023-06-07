@@ -55,7 +55,7 @@ Which in turn can be used like this:
 var list = List.Create(1, 3, 5); // List<int>
 ```
 
-In the above scenario we could've specified the type explicitly by writing `List.Create<int>(...)`, but we didn't have to. The compiler was able to detect it automatically based on the arguments we passed to the method, which are constrained by the same type as the returned list itself.
+In the above scenario we could've specified the type explicitly by writing `List.Create<int>(...)`, but we didn't have to. The compiler was able to detect it automatically based on the arguments passed to the method, which are constrained by the same type as the returned list itself.
 
 Interestingly enough, all the examples shown above are in fact based on the same form of type inference, which works by analyzing the constraints imposed by other expressions, whose type is already known. In other words, it examines the flow of data that _goes in_ and draws conclusions about the data that _comes out_.
 
@@ -103,7 +103,7 @@ public readonly struct Option<T>
 }
 ```
 
-This API design is fairly basic. The implementation above hides the actual value away from the consumers, surfacing it only through the `Match(...)` method, which unwraps the container by handling both of its potential states. Additionally, there are `Select(...)` and `Bind(...)` methods that can be used to safely transform the value, regardless of whether it's actually been set or not.
+This API design is fairly basic. The implementation above hides the underlying value away from the consumers, surfacing it only through the `Match(...)` method, which unwraps the container by handling both of its potential states. Additionally, there are `Select(...)` and `Bind(...)` methods that can be used to safely transform the value, regardless of whether it's actually been set or not.
 
 Also, in this example, `Option<T>` is defined as a `readonly struct`. Seeing as it's mainly returned from methods and referenced in local scopes, this decision makes sense from a performance point of view.
 
@@ -173,11 +173,11 @@ public static class Option
 }
 ```
 
-With these changes, `Option.None` now returns a dummy `NoneOption` object, which essentially represents an empty option whose type hasn't been decided yet. Because `NoneOption` is not generic, we were also able to drop the generics from the corresponding factory method and turn it into a property.
+With these changes, `Option.None` now returns a dummy `NoneOption` object, which is essentially an empty option whose type hasn't been decided yet. Because `NoneOption` is not generic, we were also able to drop the generics from the corresponding factory method and turn it into a property.
 
 Additionally, we made it so `Option<T>` implements an implicit conversion from `NoneOption`. Although operators themselves can't be generic in C#, they still retain type arguments of the declaring type, allowing us to define this conversion for _every possible_ variant of `Option<T>`.
 
-All of this allows us to write `Option.None` and have the compiler coerce it automatically to the destination type. From the consumer's point of view, it looks as though we've successfully implemented target type inference:
+All of this lets us write `Option.None` and have the compiler coerce it automatically to the destination type. From the consumer's point of view, it looks as though we've successfully implemented target type inference:
 
 ```csharp
 public static Option<int> Parse(string number)
