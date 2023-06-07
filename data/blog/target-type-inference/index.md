@@ -103,7 +103,7 @@ public readonly struct Option<T>
 }
 ```
 
-This API design is fairly basic. The implementation above hides the actual value away from consumers, surfacing it only through the `Match(...)` method, which unwraps the container by handling both of its potential states. Additionally, there are `Select(...)` and `Bind(...)` methods that can be used to safely transform the value, regardless of whether it's actually been set or not.
+This API design is fairly basic. The implementation above hides the actual value away from the consumers, surfacing it only through the `Match(...)` method, which unwraps the container by handling both of its potential states. Additionally, there are `Select(...)` and `Bind(...)` methods that can be used to safely transform the value, regardless of whether it's actually been set or not.
 
 Also, in this example, `Option<T>` is defined as a `readonly struct`. Seeing as it's mainly returned from methods and referenced in local scopes, this decision makes sense from a performance point of view.
 
@@ -135,7 +135,7 @@ Even though the type argument for `Option.None<T>(...)` seems to be inherently o
 
 Of course, ideally, we would want the compiler to figure out the type of `T` in `Option.None<T>(...)` based on the _return type_ this expression is _expected_ to have, as dictated by the signature of the containing method. If not, we would want it to at least get the `T` from the first branch of the conditional expression, where it was already inferred from `value`.
 
-Unfortunately, neither of these is possible with C#'s type system because it would need to work out the type in reverse, which is something it can't do. That said, we can help it a little.
+Unfortunately, neither of these is possible with C#'s type system because it would need to work out the types in reverse, which is something it can't do. That said, we can help it a little.
 
 We can simulate _target type inference_ by having `Option.None()` return a special non-generic type, representing an option with deferred initialization that can be coerced into `Option<T>`. Here's how that would look:
 
@@ -173,7 +173,7 @@ public static class Option
 }
 ```
 
-With these changes, `Option.None` now returns a dummy `NoneOption` object, which essentially represents an empty option whose type hasn't been decided yet. Because `NoneOption` is not generic, we were able to also drop generics from the corresponding factory method, and turn it into a property.
+With these changes, `Option.None` now returns a dummy `NoneOption` object, which essentially represents an empty option whose type hasn't been decided yet. Because `NoneOption` is not generic, we were also able to drop the generics from the corresponding factory method and turn it into a property.
 
 Additionally, we made it so `Option<T>` implements an implicit conversion from `NoneOption`. Although operators themselves can't be generic in C#, they still retain type arguments of the declaring type, allowing us to define this conversion for _every possible_ variant of `Option<T>`.
 
@@ -190,7 +190,7 @@ public static Option<int> Parse(string number)
 
 ## Type inference for result containers
 
-Just like we did with `Option<T>`, we may want to apply the same treatment to `Result<TOk, TError>`. This type fulfills a similar purpose, except that it also has a fully fledged value representing the negative case, that provides additional information about the error.
+Just like we did with `Option<T>`, we may want to apply the same treatment to `Result<TOk, TError>`. This type fulfills a similar purpose, except that it also has a fully fledged value that represents the negative case, providing additional information about the error.
 
 Here's how we could implement it:
 
