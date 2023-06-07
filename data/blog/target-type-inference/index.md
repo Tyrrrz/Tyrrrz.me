@@ -3,9 +3,9 @@ title: 'Simulating Target Type Inference in C#'
 date: '2020-03-10'
 ---
 
-Above everything else in software development, I really enjoy building frameworks that enable other developers to create something cool. Sometimes, when chasing that perfect design I have in mind, I find myself coming up with weird hacks that really push the C# language to the limit.
+Above everything else in software development, I really enjoy building frameworks that enable other developers to create something cool. Sometimes, when chasing that perfect design I have in mind, I find myself coming up with weird hacks that push the C# language to the limit.
 
-One such case happened not so long ago, when I was trying to figure out how to make the compiler determine the generic type of a method based on its expected return type. Seeing as C# can only infer generics from method arguments, this initially seemed impossible, however I was able to come up with a way to make it work.
+One such case happened not so long ago, when I was trying to figure out how to make the compiler determine the generic type of a method based on its expected return type. Seeing as C# can only infer generics from method arguments, this initially seemed impossible, however I was able to find a way to make it work.
 
 In this article I will show a little trick I came up with to simulate target type inference, as well as some examples of where that can be useful.
 
