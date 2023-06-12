@@ -13,7 +13,7 @@ However, despite there being many different approaches, modern "best practices" 
 
 The benefit of this approach is often supported by the argument that unit tests provide the most value during development because they're able to catch errors quickly and help enforce design patterns that facilitate modularity. This idea has become so widely accepted that the term "unit testing" is now somewhat conflated with automated testing in general, leading to widespread confusion around the topic.
 
-When I was a less experienced developer, I believed in following these "best practices" to the letter, as I thought that would help improve the quality of my code. I didn't particularly enjoy writing unit tests because of all the ceremony involved with abstractions and mocking, but it was the recommended approach after all, so who am I to know better.
+When I was a less experienced developer, I believed in following these "best practices" to the letter, as I thought that would help improve the quality of my code. I didn't particularly enjoy writing unit tests because of all the ceremony involved with abstractions and mocking, but it was the recommended approach after all, so who was I to know better.
 
 It was only later, as I've experimented more and built more projects, that I started to realize that there are much better ways to approach testing and that, in most cases, **focusing on unit tests is a complete waste of time**.
 
@@ -731,7 +731,7 @@ public async Task User_can_get_solar_times_for_a_specific_location_and_date()
 
 Finally, we may also want to do something to ensure that our Redis caching layer works correctly as well. Even though we're using it in our tests, it never actually returns a cached response because the database gets reset between tests.
 
-The problem with testing things like caching is that they can't be defined by functional requirements. A user, with no awareness of the app's internal affairs, has no way of knowing whether the responses are served from cache or not.
+The problem with testing things like caching is that they can't be defined by functional requirements. A user, with no awareness of the app's internal affairs, has no way of knowing whether the responses are served from the cache or not.
 
 However, if our goal is only to test the integration between the app and Redis, we don't need to write implementation-aware tests and can do something like this instead:
 
@@ -765,7 +765,7 @@ At the end of the day we have a simple test suite that looks like this:
 
 ![Test suite](example-test-results.png)
 
-Note that the duration of the tests is pretty good, with the fastest integration test completing in 55ms and the slowest one finishing in just under a second (due to suffering from cold start). Considering that these tests involve the entire lifecycle, include all dependencies and infrastructure, while relying on a grand total of zero mocks, I would say that this is more than acceptable.
+Note that the execution duration of tests is pretty good, with the fastest integration test completing in 55ms and the slowest one finishing in just under a second (due to suffering from cold start). Considering that these tests involve the entire lifecycle, include all dependencies and infrastructure, while relying on a grand total of zero mocks, I would say that this is more than acceptable.
 
 If you want to tinker with the example project yourself, you can find it [on GitHub](https://github.com/Tyrrrz/FuncTestingInAspNetCoreExample).
 
@@ -787,7 +787,7 @@ Another common concern is that high-level tests often suffer from a lack of loca
 
 Although there are ways to mitigate this issue, ultimately it's always going to be a trade-off: isolated tests are better at indicating the cause of an error, while integrated tests are better at highlighting the impact. Both are equally useful, so it comes down to what you consider to be more important.
 
-At the end of the day, I still think functional testing is worth it even despite these shortcomings, as I find that it leads to a better developer experience overall. It's been a while since I've done traditional unit-focused testing and I have no plans of going back.
+At the end of the day, I still think functional testing is worth it even despite these challenges, as I find that it leads to a better developer experience overall. It's been a while since I've done traditional unit-focused testing and I have no plans of going back.
 
 ## Summary
 
