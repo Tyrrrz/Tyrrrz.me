@@ -10,8 +10,8 @@ import UkraineAlert from '~/components/ukraineAlert';
 const HomePage: NextPage = () => {
   const age = new Date(Date.now() - Date.parse('1995-04-28')).getUTCFullYear() - 1970;
 
-  const microsoftMvpUrl = 'https://mvp.microsoft.com/en-us/PublicProfile/5004136';
   const githubStarUrl = 'https://stars.github.com/profiles/tyrrrz';
+  const microsoftMvpUrl = 'https://www.credly.com/badges/04f634b6-189f-4bed-8acb-974541039ef9';
 
   return (
     <>
@@ -45,11 +45,11 @@ const HomePage: NextPage = () => {
           </Paragraph>
           <Paragraph>
             I&apos;m also an active member of the developer community, a{' '}
-            <Link href={microsoftMvpUrl}>Microsoft MVP</Link> and a{' '}
-            <Link href={githubStarUrl}>GitHub Star</Link> — I spend most of my free time maintaining
-            a few popular <Link href="/projects">open-source projects</Link>, speaking at various{' '}
-            <Link href="/speaking">technical conferences</Link>, or sharing knowledge and experience
-            on <Link href="/blog">my blog</Link>.
+            <Link href={githubStarUrl}>GitHub Star</Link> and an{' '}
+            <Link href={microsoftMvpUrl}>ex-Microsoft MVP</Link> — I spend most of my free time
+            maintaining a few popular <Link href="/projects">open-source projects</Link>, speaking
+            at various <Link href="/speaking">technical conferences</Link>, or sharing knowledge and
+            experience on <Link href="/blog">my blog</Link>.
           </Paragraph>
         </div>
       </section>
