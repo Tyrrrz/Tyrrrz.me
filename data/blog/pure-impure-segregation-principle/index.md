@@ -3,15 +3,15 @@ title: 'Pure-Impure Segregation Principle'
 date: '2020-08-24'
 ---
 
-Two months ago I posted an article detailing why I think that [Unit Testing is Overrated](/blog/unit-testing-is-overrated), which seemed to resonate quite a lot with readers, prompting very involved and interesting discussions. And although most commentators mainly shared their personal experiences, a few have also voiced criticism of the way some arguments were presented.
+Two months ago I published an article detailing why I think that [Unit Testing is Overrated](/blog/unit-testing-is-overrated), which seemed to resonate quite a lot with readers, prompting very involved and interesting discussions. And although most commenters mainly shared their personal experiences, a few have also voiced criticism of the way some arguments were presented.
 
 In particular, one person mentioned that the drawbacks I've described, especially those pertaining to abstractions and mocking, are really just a byproduct of object-oriented programming and its inherent flaws. Had my example been designed with functional principles in mind, many of the outlined problems would never have surfaced.
 
 More specifically, the suggested solution was to refactor the presented class hierarchy by extracting the pure business logic away from the rest of the code. Getting rid of the impure dependency eliminates the need for mocking, which in turn simplifies unit testing.
 
-This exact approach was actually mentioned in later parts of the post as well, albeit in a slightly different context. Although it does make isolated testing easier for that particular code sample, it doesn't invalidate the main issues raised by the article.
+This is a valid approach, and it does work well in that particular example due to how the code is structured. However, it's not a universal solution and, while it does help with some immediate challenges of unit testing, it does not invalidate the broader issues raised by the article.
 
-That said, I also think that the underlying principle of code separation based on purity is very important and often overlooked. When used correctly, it can guide software design, providing benefits in terms of readability, portability and, as mentioned, unit testing.
+That said, I also think that the underlying principle of code separation based on purity is very important and often overlooked. When used correctly, it can guide software design, providing benefits in terms of readability, portability and, as mentioned, testing.
 
 Depending on whom you ask, this principle may have different names, such as [functional core & imperative shell](https://destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell), [impure-pure-impure sandwich](https://blog.ploeh.dk/2017/02/02/dependency-rejection), and some others. And while most developers seem to agree on its value, there's still some misunderstanding remaining as to how it's applied beyond simple academic examples.
 
@@ -53,7 +53,7 @@ public static void IsFoodEdible(DateTimeOffset expiration, DateTimeOffset instan
 
 In this case, the impurity comes from the fact that this function generates side effects by interacting with the standard output stream. Since its evaluation influences something other than its returned value, it breaks the second rule we've outlined earlier.
 
-As a general rule, **any function that doesn't return anything** (or whose return value may be ignored) **is guaranteed to be impure**, because a pure function without a return value is inherently useless. Furthermore, if a function executes asynchronously, it's also a reliable giveaway that a function is impure, since asynchrony naturally comes from I/O operations.
+As a general guideline, **any function that doesn't return anything** (or whose return value may be ignored) **is guaranteed to be impure**, because a pure function without a return value is inherently useless. Furthermore, if a function executes asynchronously, it's also a reliable giveaway that a function is impure, since asynchrony naturally comes from I/O operations.
 
 Finally, the function in the following example may seem impure at a first glance too, but actually isn't:
 
@@ -477,7 +477,7 @@ public static int Wrap(int value, int period) => value % period;
 
 Seeing as the above code literally just represents a mathematical expression, it seems logical that it must be pure. However, this function shares the exact same problem as the one in the previous snippet.
 
-The modulus operator has an exceptional outcome, which occurs when the supplied divisor is equal to zero. If we were to try and invoke `Wrap(123, 0)`, it would throw an exception, indicating that the function is actually impure as well.
+The modulo operator has an exceptional outcome, which occurs when the supplied divisor is equal to zero. If we were to try and invoke `Wrap(123, 0)`, it would throw an exception, indicating that the function is actually impure as well.
 
 Notably, this problem could be avoided if we used something like `Option<int>` as the return type instead. This approach eliminates the need for an exception, but comes at an expense of making basic arithmetic operations appear more cumbersome.
 
@@ -520,6 +520,6 @@ Overall, purity is a pretty useful concept, as it helps us understand how some o
 
 The pure-impure segregation principle aims to limit impurities to an essential minimum, by decoupling them from the rest of the code. Ultimately, the goal is to push all non-pure operations towards the outermost layers of the system, while keeping the domain layer comprised entirely out of pure functions.
 
-Designing software in such way leads to an architecture that resembles a pipeline rather than a hierarchy, which favors functional style of programming. Depending on the project, this may aid in expressing the flow of data more clearly, among other useful benefits.
+Designing software in such a way leads to an architecture that resembles a pipeline rather than a hierarchy, which favors functional style of programming. Depending on the project, this may aid in expressing the flow of data more clearly, among other useful benefits.
 
 However, this is not always practical and there are scenarios where extracting pure code comes at a cost of severely reduced cohesiveness. In any case, if your goal is to facilitate testing without mocking, [architecting your solution for high-level testing](/blog/unit-testing-is-overrated) is likely going to be a much better time investment.
