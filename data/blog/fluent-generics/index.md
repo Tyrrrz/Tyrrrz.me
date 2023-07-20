@@ -5,7 +5,7 @@ date: '2020-11-17'
 
 Generic programming is a powerful feature available in many statically typed languages. It offers a way to write code that seamlessly operates against many different types, by targeting the features they share rather than the types themselves. This provides the means for building flexible and reusable components without having to sacrifice type safety or introduce unnecessary duplication.
 
-Even though generics have been around in C# for a while, I still sometimes manage to find new and interesting ways to use them. For example, in one of my [previous articles](/blog/return-type-inference) I wrote about a trick I came up with that helps achieve return type inference, providing an easier way to work with certain container types.
+Even though generics have been around in C# for a while, I still sometimes manage to find new and interesting ways to use them. For example, in one of my [previous articles](/blog/return-type-inference) I wrote about a trick I came up with that helps achieve target type inference, providing an easier way to work with certain container types.
 
 Recently, I was also working on some code involving generics and had an unusual challenge: I needed to define a signature where all type arguments were optional, but usable in arbitrary combinations with each other. Initially I attempted to do it by introducing type overloads, but that led to an impractical design that I wasn't very fond of.
 
@@ -76,7 +76,7 @@ public abstract class Endpoint<TReq, TRes> : EndpointBase
 
 Here we have a basic generic class that takes a type argument corresponding to the request it's meant to receive and another type argument that specifies the response format it's expected to provide. This class also defines the `ExecuteAsync(...)` method which the user will need to override to implement the logic relevant to a particular endpoint.
 
-We can use this as foundation to build our route handlers like so:
+We can use this as the foundation to build our route handlers like so:
 
 ```csharp
 public class SignInRequest

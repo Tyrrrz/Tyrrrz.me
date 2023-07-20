@@ -9,13 +9,13 @@ Consequentially, the value provided by such tests is directly dependent on how w
 
 In an ideal world, our test scenarios, including the environment they execute in, should perfectly match real-life conditions. This is always desirable, but might not always be practical, as the system may rely on components that are difficult to test with, either because they are not readily accessible or because their behavior is inconsistent or slow.
 
-A common practice in cases like this is to replace such dependencies with lightweight substitutes that act as _test doubles_. Although doing so does lead to lower confidence, it's often an unavoidable trade-off when it comes to designing a robust and deterministic test suite.
+A common practice in cases like these is to replace such dependencies with lightweight substitutes that act as _test doubles_. Although doing so does lead to lower confidence, it's often an unavoidable trade-off when it comes to designing a robust and deterministic test suite.
 
 That said, while test doubles can be implemented in different ways, most of the time developers tend to resort to _mocking_ as their default choice. This is unfortunate, as it leads to overuse of mocks where other forms of substitutes are typically more suitable, making tests [implementation-aware and fragile](https://en.wikipedia.org/wiki/Mock_object#Limitations) as a result.
 
 When writing tests, I prefer to avoid mocks as much as possible and rely on _fake_ implementations instead. They require a bit of additional upfront investment, but provide many practical advantages which are important to consider.
 
-In this article we will look at the differences between these two variants of test doubles, identify how using one over the other impacts test design, and why using fakes often results in more manageable test suites.
+In this article we will look at the differences between these two variants of test doubles, identify how using one over the other impacts test design, and see why fakes often help in building more manageable test suites.
 
 ## Drawbacks of mocking
 
@@ -385,4 +385,4 @@ Due to the popularity of mocking frameworks and the convenience they provide, ma
 
 In many cases, it may be a better idea to use fakes instead. These are test doubles that represent complete but simplified implementations of their real-life counterparts, rather than just a set of prearranged responses.
 
-Because fakes are naturally separate from the scenarios in which they are used, it's easier to design tests that are not coupled to internal specifics of the system. Besides that, their self-contained nature makes them reusable as well, which lends itself to better long-term maintainability.
+Because fakes are naturally separated from the scenarios in which they are used, it's easier to design tests that are not coupled to internal specifics of the system. Besides that, their self-contained nature makes them reusable as well, which lends itself to better long-term maintainability.
