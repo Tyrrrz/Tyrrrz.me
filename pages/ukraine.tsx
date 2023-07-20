@@ -143,7 +143,7 @@ const UkrainePage: NextPage = () => {
           <ListItem>Reach out to Ukrainian friends or colleagues, offer them help</ListItem>
 
           <ListItem>
-            <Link href="https://www.ethicalconsumer.org/ethicalcampaigns/boycotts/should-we-boycott-russia">
+            <Link href="https://ethicalconsumer.org/ethicalcampaigns/boycotts/should-we-boycott-russia">
               Avoid physical products made in Russia
             </Link>{' '}
             (bar codes starting with <Code>460</Code>-<Code>469</Code>)

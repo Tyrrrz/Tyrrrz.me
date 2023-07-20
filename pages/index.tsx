@@ -11,7 +11,7 @@ const HomePage: NextPage = () => {
   const age = new Date(Date.now() - Date.parse('1995-04-28')).getUTCFullYear() - 1970;
 
   const githubStarUrl = 'https://stars.github.com/profiles/tyrrrz';
-  const microsoftMvpUrl = 'https://www.credly.com/badges/04f634b6-189f-4bed-8acb-974541039ef9';
+  const microsoftMvpUrl = 'https://credly.com/badges/04f634b6-189f-4bed-8acb-974541039ef9';
 
   return (
     <>
