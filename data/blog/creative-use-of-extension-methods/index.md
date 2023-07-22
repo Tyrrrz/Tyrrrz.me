@@ -1,5 +1,5 @@
 ---
-title: 'Creative Use of Extension Methods'
+title: 'Creative Use of Extension Methods in C#'
 date: '2019-01-26'
 ---
 
