@@ -3,11 +3,11 @@ title: 'Creative Use of Extension Methods in C#'
 date: '2019-01-26'
 ---
 
-I'm sure everyone with at least some background in C# is aware of extension methods — a nice feature that lets developers extend existing types with new methods.
+I'm sure that everyone with at least some background in C# is aware of extension methods — a nice feature that lets developers extend existing types with new methods.
 
 This is extremely convenient in case you want to add functionality to types that you don't have control over. In fact, I think everyone at some point authored extensions for the base class library just to make some things more accessible.
 
-But besides the more obvious use cases, there are a few other interesting patterns that directly rely on extension methods, showing how they can be used in a slightly less conventional way.
+But besides the more obvious use cases, there are a few other interesting patterns that directly rely on extension methods, and show how they can be used in a slightly less conventional way.
 
 ## Adding methods to enums
 
@@ -103,7 +103,7 @@ public class ClosedCaptionTrack
 }
 ```
 
-In the current state, if someone wanted to get a closed caption displayed at specific point in time, they would have to run a LINQ like this one:
+In the current state, if someone wanted to get a closed caption displayed at a specific point in time, they would have to run a LINQ like this one:
 
 ```csharp
 var time = TimeSpan.FromSeconds(67); // 1:07
@@ -112,7 +112,7 @@ var caption = track.Captions
     .FirstOrDefault(cc => cc.Offset <= time && cc.Offset + cc.Duration >= time);
 ```
 
-This really calls for a helper method of some sorts which can be implemented either as a member method or an extension method. I personally prefer the latter.
+This really calls for a helper method of some sorts which can be implemented either as a member method or an extension method. For the reasons explained earlier, I personally prefer the latter:
 
 ```csharp
 public static class ClosedCaptionTrackExtensions
@@ -126,7 +126,7 @@ An extension method here achieves the same thing as a normal method, but it prov
 
 1. It's clear that this method only works with public members of the class and doesn't mutate its private state in some obscure way
 2. It's obvious that this method simply provides a shortcut and exists only for convenience
-3. The method is part of an entirely separate class (or even assembly) which helps us separate data from logic
+3. This method is part of an entirely separate class (or potentially even another assembly) which helps us isolate data from logic
 
 Overall, using an extension method approach here helps draw the line between what's _necessary_ and what's _helpful_.
 
@@ -134,7 +134,7 @@ Overall, using an extension method approach here helps draw the line between wha
 
 When designing an interface you always want to keep the contract minimal in order to make it easier to implement. It helps a lot when your interface exposes the most generic type of functionality so that others (or you) can build on top of it and cover more specific cases.
 
-If that didn't make any sense, here's an example of a typical interface that saves some model to a file:
+If that didn't make much sense, here's an example of a typical interface that saves some model to a file:
 
 ```csharp
 public interface IExportService
@@ -196,6 +196,6 @@ public static class ExportServiceExtensions
 }
 ```
 
-By refactoring the initial interface we've made it a lot more versatile and maintainable, and, thanks to extension methods, we didn't have to sacrifice usability in any way.
+By refactoring the initial interface, we've made it a lot more versatile and maintainable, and, thanks to extension methods, we didn't have to sacrifice usability in any way.
 
-All in all, I think extension methods are an invaluable tool that can help us make [simple things simple and complex things possible](https://en.wikiquote.org/wiki/Alan_Kay).
+All in all, I think that extension methods are an invaluable tool that can help [keep simple things simple and make complex things possible](https://en.wikiquote.org/wiki/Alan_Kay).
