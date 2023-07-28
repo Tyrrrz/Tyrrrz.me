@@ -1,5 +1,5 @@
 ---
-title: 'Simulating Target Type Inference in C#'
+title: 'Simulating Target-Type Inference in C#'
 date: '2020-03-10'
 ---
 
@@ -7,7 +7,7 @@ Above everything else in software development, I really enjoy building framework
 
 One such case happened not so long ago, when I was trying to figure out how to make the compiler determine the generic type of a method based on its expected return type. Seeing as C# can only infer generics from method arguments, this initially seemed impossible, however I was able to find a way to make it work.
 
-In this article I will show a little trick I came up with to simulate target type inference, as well as some examples of where that can be useful.
+In this article I will show a little trick I came up with to simulate target-type inference, as well as some examples of where that can be useful.
 
 ## Type inference
 
@@ -137,7 +137,7 @@ Of course, ideally, we would want the compiler to figure out the type of `T` in 
 
 Unfortunately, neither of these is possible with C#'s type system because it would need to work out the types in reverse, which is something it can't do. That said, we can help it a little.
 
-We can simulate _target type inference_ by having `Option.None()` return a special non-generic type, representing an option with deferred initialization that can be coerced into `Option<T>`. Here's how that would look:
+We can simulate _target-type inference_ by having `Option.None()` return a special non-generic type, representing an option with deferred initialization that can be coerced into `Option<T>`. Here's how that would look:
 
 ```csharp
 public readonly struct Option<T>
@@ -177,7 +177,7 @@ With these changes, `Option.None` now returns a dummy `NoneOption` object, which
 
 Additionally, we made it so `Option<T>` implements an implicit conversion from `NoneOption`. Although operators themselves can't be generic in C#, they still retain type arguments of the declaring type, allowing us to define this conversion for _every possible_ variant of `Option<T>`.
 
-All of this lets us write `Option.None` and have the compiler coerce it automatically to the destination type. From the consumer's point of view, it looks as though we've successfully implemented target type inference:
+All of this lets us write `Option.None` and have the compiler coerce it automatically to the destination type. From the consumer's point of view, it looks as though we've successfully implemented target-type inference:
 
 ```csharp
 public static Option<int> Parse(string number)
@@ -452,4 +452,4 @@ public class Translator
 
 ## Summary
 
-Although type inference in C# has its limits, we can push them a bit further with the help of implicit conversion operators. Using a simple trick shown in this article, we can simulate target type inference, enabling some potentially interesting design opportunities.
+Although type inference in C# has its limits, we can push them a bit further with the help of implicit conversion operators. Using a simple trick shown in this article, we can simulate target-type inference, enabling some potentially interesting design opportunities.
