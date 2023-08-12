@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Trigger deploy
-        uses: satak/webrequest-action@v1.2.4
+        uses: tyrrrz/action-http-request@v1
         with:
           url: ${{ secrets.VERCEL_WEBHOOK }}
           method: POST
