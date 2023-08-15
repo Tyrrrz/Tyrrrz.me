@@ -88,7 +88,7 @@ const UkrainePage: NextPage = () => {
           </ListItem>
 
           <ListItem>
-            <Link href="https://prytulafoundation.org/en/home/support_page?source=tyrrrz">
+            <Link href="https://prytulafoundation.org/en/home/support_page">
               <span className={c('font-semibold')}>Serhiy Prytula</span> Foundation
             </Link>{' '}
             (defensive & humanitarian aid)
