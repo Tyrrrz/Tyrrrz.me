@@ -1,6 +1,6 @@
 import c from 'classnames';
 import { NextPage } from 'next';
-import { FiGithub, FiTwitter, FiYoutube } from 'react-icons/fi';
+import { FiGithub, FiInstagram, FiTwitter, FiYoutube } from 'react-icons/fi';
 import Heading from '~/components/heading';
 import Image from '~/components/image';
 import Link from '~/components/link';
@@ -74,6 +74,11 @@ const HomePage: NextPage = () => {
         <Link variant="discreet" href="https://youtube.com/@Tyrrrz">
           <div className={c('px-2')}>
             <FiYoutube strokeWidth={1} />
+          </div>
+        </Link>
+        <Link variant="discreet" href="https://instagram.com/Tyrrrz">
+          <div className={c('px-2')}>
+            <FiInstagram strokeWidth={1} />
           </div>
         </Link>
       </section>
