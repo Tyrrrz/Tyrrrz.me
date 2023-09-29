@@ -403,7 +403,7 @@ Ever since `/get_video_info` was removed, YouTube has been providing fewer muxed
 
 Fortunately, this is fairly easy to do using [FFmpeg](https://ffmpeg.org), which is an open-source tool for processing multimedia files. For example, assuming you have downloaded the two streams as `audio.mp4` and `video.webm`, you can combine them together in a file named `output.mov` with the following command:
 
-```bash
+```console
 $ ffmpeg -i 'audio.mp4' -i 'video.webm' 'output.mov'
 ```
 
@@ -411,19 +411,19 @@ Keep in mind that muxing can be a computationally expensive task, especially if 
 
 Most YouTube streams are provided in `webm` and `mp4` formats, so if you stick to either of those containers for all inputs and outputs, you should be able to perform muxing without transcoding. To do that, add the `-c copy` flag to the command, instructing FFmpeg to copy the input streams directly to the output file:
 
-```bash
+```console
 $ ffmpeg -i 'audio.mp4' -i 'video.mp4' -c copy 'output.mp4'
 ```
 
 However, if you plan to download YouTube videos for archival purposes, you will probably want to prioritize reducing the output size over the execution time. In that case, you can re-encode the data using the [`H.265`](https://trac.ffmpeg.org/wiki/Encode/H.265) codec, which should result in a much more efficient compression rate:
 
-```bash
+```console
 $ ffmpeg -i 'audio.mp4' -i 'video.mp4' -c:a aac -c:v libx265 'output.mp4'
 ```
 
 Using the above command, I was able to download and mux a 4K video, while cutting the file size by more than 50% compared to the streams that YouTube provided. If you want to improve the compression even further, you can also specify a slower encoding preset with the `-preset` option, but note that it will make the conversion process take significantly longer:
 
-```bash
+```console
 $ ffmpeg -i 'audio.mp4' -i 'video.mp4' -c:a aac -c:v libx265 -preset slow 'output.mp4'
 ```
 
