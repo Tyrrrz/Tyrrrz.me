@@ -14,19 +14,17 @@ import { slugify } from '~/utils/url';
 
 type MarkdownProps = {
   source: string;
-  transformLinkHref?: (href: string) => string;
-  transformImageSrc?: (src: string) => string;
+  transformUrl?: (src: string) => string;
 };
 
-const Markdown: FC<MarkdownProps> = ({ source, transformLinkHref, transformImageSrc }) => {
+const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
   return (
     <ReactMarkdown
-      transformImageUri={transformImageSrc}
-      transformLinkUri={transformLinkHref}
+      urlTransform={transformUrl}
       components={{
         h1: ({ node, children }) => {
           const id =
-            node.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
+            node?.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
 
           return (
             <Heading id={id} level={1}>
@@ -36,7 +34,7 @@ const Markdown: FC<MarkdownProps> = ({ source, transformLinkHref, transformImage
         },
         h2: ({ node, children }) => {
           const id =
-            node.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
+            node?.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
 
           return (
             <Heading id={id} level={2}>
@@ -46,7 +44,7 @@ const Markdown: FC<MarkdownProps> = ({ source, transformLinkHref, transformImage
         },
         h3: ({ node, children }) => {
           const id =
-            node.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
+            node?.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
 
           return (
             <Heading id={id} level={3}>
@@ -56,7 +54,7 @@ const Markdown: FC<MarkdownProps> = ({ source, transformLinkHref, transformImage
         },
         h4: ({ node, children }) => {
           const id =
-            node.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
+            node?.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
 
           return (
             <Heading id={id} level={4}>
@@ -66,7 +64,7 @@ const Markdown: FC<MarkdownProps> = ({ source, transformLinkHref, transformImage
         },
         h5: ({ node, children }) => {
           const id =
-            node.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
+            node?.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
 
           return (
             <Heading id={id} level={5}>
@@ -105,6 +103,7 @@ const Markdown: FC<MarkdownProps> = ({ source, transformLinkHref, transformImage
         pre: ({ node, children }) => {
           // Language is set on the child <code> element
           if (
+            node &&
             node.children.length === 1 &&
             node.children[0] &&
             node.children[0].type === 'element' &&

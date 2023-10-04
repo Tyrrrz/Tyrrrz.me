@@ -37,22 +37,19 @@ const CoverSection: FC<BlogPostPageProps> = ({ post }) => {
 };
 
 const ArticleSection: FC<BlogPostPageProps> = ({ post }) => {
-  // Transform local-relative URLs to site-relative URLs
-  const transformUrl = (url: string) => {
-    if (isAbsoluteUrl(url) || url.startsWith('/')) {
-      return url;
-    }
-
-    return `/blog/${post.id}/${url}`;
-  };
-
   return (
     <section>
       <article>
         <Markdown
           source={post.source}
-          transformLinkHref={transformUrl}
-          transformImageSrc={transformUrl}
+          // Transform local-relative URLs to site-relative URLs
+          transformUrl={(url: string) => {
+            if (isAbsoluteUrl(url) || url.startsWith('/')) {
+              return url;
+            }
+
+            return `/blog/${post.id}/${url}`;
+          }}
         />
       </article>
     </section>
