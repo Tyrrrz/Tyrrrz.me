@@ -10,7 +10,8 @@ jobs:
 
     steps:
       - name: Trigger deploy
-        uses: tyrrrz/action-http-request@v1
+        uses: tyrrrz/action-http-request@66a047c7508f4418114d1080fbfc348621cdc78f # 1.1.0
         with:
           url: ${{ secrets.VERCEL_WEBHOOK }}
           method: POST
+          retry-count: 5
