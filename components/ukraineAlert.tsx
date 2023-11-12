@@ -12,6 +12,10 @@ const UkraineAlert: FC = () => {
         'border-t-blue-500',
         'border-r-yellow-400',
         'border-b-yellow-400',
+        'dark:border-l-blue-300',
+        'dark:border-t-blue-300',
+        'dark:border-r-yellow-500',
+        'dark:border-b-yellow-500',
         'rounded',
         'space-y-1'
       )}
