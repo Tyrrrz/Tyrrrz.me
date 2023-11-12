@@ -67,7 +67,8 @@ const NavLink: FC<NavLinkProps> = ({ href, children }) => {
         },
         'rounded',
         {
-          'bg-purple-100': isActive
+          'bg-purple-100': isActive,
+          'dark:bg-purple-900': isActive
         },
         'transition-colors',
         'duration-300'
@@ -108,6 +109,7 @@ const Header: FC = () => {
           'p-4',
           'border-b-2',
           'border-neutral-100',
+          'dark:border-neutral-800',
           'items-center',
           'justify-between'
         )}
@@ -146,6 +148,7 @@ const Header: FC = () => {
             'p-2',
             'border-b-2',
             'border-neutral-100',
+            'dark:border-neutral-800',
             'space-y-1',
             'text-lg',
             'transition-all',
@@ -179,7 +182,15 @@ type LayoutProps = PropsWithChildren;
 
 const Layout: FC<LayoutProps> = ({ children }) => {
   return (
-    <>
+    <div
+      className={c(
+        'flex',
+        'flex-col',
+        'min-h-screen',
+        'dark:bg-neutral-900',
+        'dark:text-neutral-200'
+      )}
+    >
       <Meta />
       <Analytics />
 
@@ -189,7 +200,7 @@ const Layout: FC<LayoutProps> = ({ children }) => {
         <Header />
         <Main>{children}</Main>
       </div>
-    </>
+    </div>
   );
 };
 
