@@ -12,6 +12,7 @@ const Code: FC<CodeProps> = ({ children }) => {
         'border-purple-500',
         'rounded',
         'bg-purple-100',
+        'dark:bg-purple-900',
         'text-sm',
         'font-mono'
       )}

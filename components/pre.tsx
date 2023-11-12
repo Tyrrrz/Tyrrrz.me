@@ -12,6 +12,7 @@ const Pre: FC<PreProps> = ({ children }) => {
         'border-purple-500',
         'rounded',
         'bg-purple-100',
+        'dark:bg-purple-900',
         'overflow-auto',
         '[&>code]:p-0',
         '[&>code]:border-none'

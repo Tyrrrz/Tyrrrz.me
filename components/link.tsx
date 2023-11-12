@@ -21,8 +21,10 @@ const Link: FC<LinkProps> = ({
     <Proxy
       className={c({
         'text-blue-500': variant === 'normal',
+        'dark:text-blue-300': variant === 'normal',
         'hover:underline': variant === 'normal',
-        'hover:text-blue-500': variant === 'discreet'
+        'hover:text-blue-500': variant === 'discreet',
+        'dark:hover:text-blue-300': variant === 'discreet'
       })}
       href={href}
       target={external ? '_blank' : undefined}

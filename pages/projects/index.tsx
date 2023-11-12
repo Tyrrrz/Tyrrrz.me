@@ -44,7 +44,9 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
               {
                 'border-purple-500': project.stars >= 1000,
                 'border-purple-300': project.stars >= 100 && project.stars < 1000,
-                'border-purple-100': project.stars < 100
+                'dark:border-purple-700': project.stars >= 100 && project.stars < 1000,
+                'border-purple-100': project.stars < 100,
+                'dark:border-purple-900': project.stars < 100
               },
               'rounded'
             )}
