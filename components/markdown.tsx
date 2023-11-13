@@ -95,7 +95,11 @@ const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
           );
         },
         img: ({ src, alt }) => {
-          return <Image src={src!} alt={alt!} />;
+          return (
+            <Link href={src!} external>
+              <Image src={src!} alt={alt!} />
+            </Link>
+          );
         },
         blockquote: ({ children }) => {
           return <Quote>{children}</Quote>;
