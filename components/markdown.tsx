@@ -95,10 +95,13 @@ const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
           );
         },
         img: ({ src, alt }) => {
+          // Flex container to display the link as a block
           return (
-            <Link href={src!} external>
-              <Image src={src!} alt={alt!} />
-            </Link>
+            <div className={c('flex')}>
+              <Link href={src!}>
+                <Image src={src!} alt={alt!} />
+              </Link>
+            </div>
           );
         },
         blockquote: ({ children }) => {
