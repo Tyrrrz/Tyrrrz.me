@@ -132,7 +132,19 @@ const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
           return <Code>{children}</Code>;
         },
         hr: () => {
-          return <hr className={c('w-3/4', 'mx-auto', 'my-4', 'border', 'rounded')} />;
+          return (
+            <hr
+              className={c(
+                'w-3/4',
+                'mx-auto',
+                'my-4',
+                'border',
+                'border-neutral-100',
+                'dark:border-neutral-800',
+                'rounded'
+              )}
+            />
+          );
         }
       }}
     >
