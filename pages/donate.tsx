@@ -45,18 +45,6 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
           <ListItem>
             <Link href="https://buymeacoffee.com/Tyrrrz">BuyMeACoffee</Link> (one-time)
           </ListItem>
-
-          <ListItem>
-            Ethereum: <Code>0x8c7D4568d4F3FC4BDBaE615C971a514f8B2236B6</Code>
-          </ListItem>
-
-          <ListItem>
-            Bitcoin: <Code>3C9UMPHcxwSBkBuXuizcGdAnLSM54Cyoej</Code>
-          </ListItem>
-
-          <ListItem>
-            Solana: <Code>7r7oDiMUJ4CcwTUxqYvqBJHgJ7EzmyHF64SxAGZPzz6M</Code>
-          </ListItem>
         </List>
       </section>
 
