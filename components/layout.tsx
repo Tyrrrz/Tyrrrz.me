@@ -3,11 +3,12 @@ import c from 'classnames';
 import { useRouter } from 'next/router';
 import { FC, PropsWithChildren, useEffect, useMemo, useState } from 'react';
 import FadeIn from 'react-fade-in';
-import { FiMenu } from 'react-icons/fi';
+import { FiMenu, FiMoon, FiSun } from 'react-icons/fi';
 import Link from '~/components/link';
 import Meta from '~/components/meta';
 import useDebounce from '~/hooks/useDebounce';
 import useRouterStatus from '~/hooks/useRouterStatus';
+import useTheme from '~/hooks/useTheme';
 
 const Loader: FC = () => {
   // Only show the loading indicator if the navigation takes a while.
@@ -81,6 +82,19 @@ const NavLink: FC<NavLinkProps> = ({ href, children }) => {
   );
 };
 
+const ThemeSwitcher: FC = () => {
+  const [theme, setTheme] = useTheme();
+
+  return (
+    <button
+      className={c('text-blue-500', 'dark:text-yellow-500')}
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+    >
+      {theme === 'dark' ? <FiMoon /> : <FiSun />}
+    </button>
+  );
+};
+
 const Header: FC = () => {
   const links = useMemo(
     () => [
@@ -123,21 +137,32 @@ const Header: FC = () => {
         </div>
 
         {/* Desktop nav */}
-        <nav className={c('hidden', 'sm:flex', 'px-2', 'gap-2', 'text-lg')}>
+        <nav className={c('hidden', 'sm:flex', 'px-2', 'gap-x-2', 'text-lg')}>
           {links.map((link, i) => (
             <NavLink key={i} href={link.href}>
               {link.label}
             </NavLink>
           ))}
+
+          {/* Theme switcher */}
+          <div className={c('flex', 'ml-2', 'mt-0.5', 'text-2xl')}>
+            <ThemeSwitcher />
+          </div>
         </nav>
 
-        {/* Mobile nav button */}
-        <button
-          className={c('sm:hidden', 'text-2xl', { 'text-purple-500': isMobileNavVisible })}
-          onClick={() => setIsMobileNavVisible((v) => !v)}
-        >
-          <FiMenu />
-        </button>
+        {/* Mobile buttons */}
+        <div className={c('sm:hidden', 'flex', 'gap-x-5', 'text-2xl')}>
+          {/* Theme switcher */}
+          <ThemeSwitcher />
+
+          {/* Nav button */}
+          <button
+            className={c('sm:hidden', { 'text-purple-500': isMobileNavVisible })}
+            onClick={() => setIsMobileNavVisible((v) => !v)}
+          >
+            <FiMenu />
+          </button>
+        </div>
       </div>
 
       {/* Mobile nav */}
@@ -181,24 +206,33 @@ const Main: FC<PropsWithChildren> = ({ children }) => {
 type LayoutProps = PropsWithChildren;
 
 const Layout: FC<LayoutProps> = ({ children }) => {
+  const [theme] = useTheme();
+
   return (
     <div
-      className={c(
-        'flex',
-        'flex-col',
-        'min-h-screen',
-        'dark:bg-neutral-900',
-        'dark:text-neutral-200'
-      )}
+      className={c({
+        dark: theme === 'dark',
+        light: theme === 'light'
+      })}
     >
-      <Meta />
-      <Analytics />
+      <div
+        className={c(
+          'flex',
+          'flex-col',
+          'min-h-screen',
+          'dark:bg-neutral-900',
+          'dark:text-neutral-200'
+        )}
+      >
+        <Meta />
+        <Analytics />
 
-      <Loader />
+        <Loader />
 
-      <div className={c('container', 'max-w-4xl', 'mx-auto')}>
-        <Header />
-        <Main>{children}</Main>
+        <div className={c('container', 'max-w-4xl', 'mx-auto')}>
+          <Header />
+          <Main>{children}</Main>
+        </div>
       </div>
     </div>
   );
