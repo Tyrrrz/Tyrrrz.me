@@ -22,7 +22,7 @@ const getCampaigns = async function* () {
       );
     }
 
-    // https://docs.patreon.com/#get-api-oauth2-v2-identity
+    // https://docs.patreon.com/#get-api-oauth2-v2-campaigns
     type ResponseBody = {
       data: {
         id: string;
@@ -72,7 +72,7 @@ const getPledges = async function* (campaignId: string) {
       );
     }
 
-    // https://docs.patreon.com/#get-api-oauth2-v2-campaigns-campaign_id
+    // https://docs.patreon.com/#get-api-oauth2-v2-campaigns-campaign_id-members
     type ResponseBody = {
       data: {
         id: string;
