@@ -13,7 +13,7 @@ import useTheme from '~/hooks/useTheme';
 const Loader: FC = () => {
   // Only show the loading indicator if the navigation takes a while.
   // This prevents the indicator from flashing during faster navigation.
-  const isVisible = useDebounce(useRouterStatus() === 'loading', 300);
+  const { value: isVisible } = useDebounce(useRouterStatus() === 'loading', 300);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -83,7 +83,7 @@ const NavLink: FC<NavLinkProps> = ({ href, children }) => {
 };
 
 const ThemeSwitcher: FC = () => {
-  const [theme, setTheme] = useTheme();
+  const { theme, setTheme } = useTheme();
 
   return (
     <button
@@ -206,7 +206,7 @@ const Main: FC<PropsWithChildren> = ({ children }) => {
 type LayoutProps = PropsWithChildren;
 
 const Layout: FC<LayoutProps> = ({ children }) => {
-  const [theme] = useTheme();
+  const { theme } = useTheme();
 
   return (
     <div
