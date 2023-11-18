@@ -7,7 +7,7 @@ type Theme = 'light' | 'dark';
 const useTheme = () => {
   const systemPreferredTheme = useMedia('(prefers-color-scheme: dark)') ? 'dark' : 'light';
   const [userPreferredTheme, setUserPreferredTheme] = useLocalState<Theme | null>('theme', null);
-  const [actualTheme, setActualTheme] = useState<Theme>('dark');
+  const [actualTheme, setActualTheme] = useState<Theme>(systemPreferredTheme);
 
   // If the user has not set a preferred theme, use the system's preferred theme
   useEffect(() => {
@@ -16,7 +16,7 @@ const useTheme = () => {
     } else {
       setActualTheme(systemPreferredTheme);
     }
-  }, [userPreferredTheme, systemPreferredTheme]);
+  }, [systemPreferredTheme, userPreferredTheme]);
 
   return [actualTheme, setUserPreferredTheme] as const;
 };
