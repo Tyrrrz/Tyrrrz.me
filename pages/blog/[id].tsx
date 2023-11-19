@@ -11,6 +11,7 @@ import Markdown from '~/components/markdown';
 import Meta from '~/components/meta';
 import UkraineAlert from '~/components/ukraineAlert';
 import { BlogPost, loadBlogPost, loadBlogPostRefs, publishBlogPostAssets } from '~/data/blog';
+import useTheme from '~/hooks/useTheme';
 import { deleteUndefined } from '~/utils/object';
 import { isAbsoluteUrl } from '~/utils/url';
 
@@ -81,6 +82,8 @@ const SubscribeSection: FC = () => {
 };
 
 const CommentSection: FC<BlogPostPageProps> = ({ post }) => {
+  const { userPreferredTheme } = useTheme();
+
   return (
     <section>
       <Giscus
@@ -94,7 +97,13 @@ const CommentSection: FC<BlogPostPageProps> = ({ post }) => {
         reactionsEnabled="1"
         emitMetadata="0"
         inputPosition="top"
-        theme="preferred_color_scheme"
+        theme={
+          userPreferredTheme === 'dark'
+            ? 'dark'
+            : userPreferredTheme === 'light'
+            ? 'light'
+            : 'preferred_color_scheme'
+        }
         lang="en"
         loading="lazy"
       />
