@@ -6,7 +6,8 @@ const getCampaigns = async function* () {
   let cursor = '';
 
   while (true) {
-    const url = formatUrlWithQuery('https://patreon.com/api/oauth2/v2/campaigns', {
+    // The 'www' part is essential 😒
+    const url = formatUrlWithQuery('https://www.patreon.com/api/oauth2/v2/campaigns', {
       'page[cursor]': cursor
     });
 
@@ -52,8 +53,9 @@ const getPledges = async function* (campaignId: string) {
   let cursor = '';
 
   while (true) {
+    // The 'www' part is essential 😒
     const url = formatUrlWithQuery(
-      `https://patreon.com/api/oauth2/v2/campaigns/${campaignId}/members`,
+      `https://www.patreon.com/api/oauth2/v2/campaigns/${campaignId}/members`,
       {
         'page[cursor]': cursor,
         'fields[member]': 'full_name,lifetime_support_cents'
