@@ -86,7 +86,7 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
             {/* Misc info */}
             <div className={c('flex', 'flex-wrap', 'mt-1', 'gap-x-3', 'font-light')}>
               <Inline>
-                <FiStar className={c('fill-yellow-400')} strokeWidth={1} />
+                <FiStar className={c('dark:text-yellow-400', 'fill-yellow-400')} strokeWidth={1} />
                 <div>{project.stars.toLocaleString('en-US')}</div>
               </Inline>
 
