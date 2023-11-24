@@ -7,6 +7,7 @@ on:
 jobs:
   redeploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Trigger deploy
