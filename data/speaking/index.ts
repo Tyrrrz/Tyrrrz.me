@@ -183,6 +183,17 @@ const engagements: SpeakingEngagement[] = [
     eventUrl:
       'https://kommunity.com/svitla-systems/events/svitla-smart-talk-interacting-with-command-line-in-net-using-cliwrap-3d39c180',
     presentationUrl: 'https://slideshare.net/AlexeyGolub/intro-to-cliwrap'
+  },
+  {
+    title: 'Reality-Driven Testing Using TestContainers',
+    kind: 'talk',
+    event: '.NET Conf (Ukraine)',
+    date: '2023-12-13',
+    language: 'ukrainian',
+    eventUrl: 'https://kommunity.com/svitla-systems/events/svitla-smart-talk-net-conf-db7d2cd9',
+    presentationUrl:
+      'https://slideshare.net/AlexeyGolub/realitydriven-testing-using-testcontainers',
+    recordingUrl: 'https://youtube.com/watch?v=ORapxIWoEco'
   }
 ];
 
