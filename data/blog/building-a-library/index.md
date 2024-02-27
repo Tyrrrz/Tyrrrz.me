@@ -3,7 +3,7 @@ title: 'Building a library in .NET'
 date: '2024-10-28'
 ---
 
-Developing a library involves a lot of moving pieces, and not all of them are just about writing code. In today's software development landscape, we also need to consider the infrastructure behind our code, how we build, test, and distribute our library — and most importantly, how we can optimize and automate these processes to make them as efficient as possible.
+Developing a library involves a lot of moving pieces, and not all of them are just about writing code. The status quo of modern software development practices puts a prerequisite on quality, which means that we also need to consider the infrastructure and tooling behind our code, how we build, test, and distribute our library — and most importantly, how we can optimize and automate these processes to make them as efficient as possible.
 
 While setting up such processes is not a very challenging task in itself, the abundance of different options available and the various strategies to consider can make things overwhelming. And although there is no universal solution, there are still a few common approaches that can be applied to most .NET library projects out there.
 
