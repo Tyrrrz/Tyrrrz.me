@@ -3,13 +3,34 @@ title: 'Building a library in .NET'
 date: '2024-10-28'
 ---
 
-Developing a library involves a lot of moving pieces, and not all of them are just about writing code. The status quo of modern software development practices puts a prerequisite on quality, which means that we also need to consider the infrastructure and tooling behind our code, how we build, test, and distribute our library — and most importantly, how we can optimize and automate these processes to make them as efficient as possible.
+Developing a .NET library involves a lot of moving pieces, and not all of them are just about writing code. Beyond the functionality of the library itself, we also need to consider the infrastructure and the tooling that supports it — how the code is built, packaged, tested, and deployed — and how to optimize those processes to make them as efficient as possible.
 
-While setting up such processes is not a very challenging task in itself, the abundance of different options available and the various strategies to consider can make things overwhelming. And although there is no universal solution, there are still a few common approaches that can be applied to most .NET library projects out there.
+Although none of these aspects are inherently difficult, the abundance of different approaches and strategies to consider can become overwhelming, especially when you're starting out. And while there is no one-size-fits-all solution, there are still a few common approaches that can be applied to most .NET library projects out there.
 
-In this article we're going to explore the current state of the art when it comes to building a library in .NET — starting from configuring your project settings, setting up a working CI/CD pipeline, and finally publishing the library to NuGet. I will show some of the most common approaches, highlighting their trade-offs, and share my personal recommendations, leaning on my 8-year experience of building and maintaining several widely used libraries in .NET. Hopefully, this will give you a solid starting point if you're building your own library and help avoid some of the common pitfalls along the way.
+In this article, we will explore the current lay of the land when it comes to building a .NET library, covering everything from fine-tuning the project settings to setting up a continuous integration and delivery pipeline. If you're planning to start a new .NET library project, hopefully this can serve as a starting point for you to build upon.
 
 ## Project structure
+
+The first thing you need to do when starting a new library is to decide on a project structure. This is important because it will affect how easy it is to work on and maintain your library in the future. A good project structure should be easy to understand and navigate, and it should make it clear where each piece of code belongs.
+
+A common project structure for .NET libraries looks like this:
+
+```
+my-library/
+├── src/
+│   └── MyLibrary/
+│       ├── MyLibrary.csproj
+│       ├── MyLibrary.cs
+│       └── ...
+├── tests/
+│   └── MyLibrary.Tests/
+│       ├── MyLibrary.Tests.csproj
+│       ├── MyLibrary.Tests.cs
+│       └── ...
+├── docs/
+│   └── ...
+└── ...
+```
 
 ## Targeting and polyfills
 
