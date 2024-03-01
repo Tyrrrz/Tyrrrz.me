@@ -3,11 +3,11 @@ title: 'Building a library in .NET'
 date: '2024-10-28'
 ---
 
-Developing a .NET library involves a lot of moving pieces, and not all of them are just about writing code. Beyond the functionality of the library itself, we also need to consider the infrastructure and the tooling behind it — how the code is built, packaged, tested, and deployed — and how to optimize those processes to make them as efficient as possible.
+Developing a library involves a lot of moving pieces, and not all of them are just about writing code. Beyond the functionality of the library itself, we also need to consider the infrastructure behind it — how the code is built, tested, packaged, and deployed — and how to leverage the tools and services available to us to make these processes as efficient as possible.
 
-Although none of these aspects are particularly complicated, the abundance of different approaches and strategies to consider can be overwhelming, especially when you're starting out. And while there is no one-size-fits-all solution, there are still a few common approaches that can be applied to most .NET library projects out there.
+Although none of these things are inherently complicated, the abundance of different approaches and technical options can make it difficult to make the right decisions. And while there is no true one-size-fits-all solution, there are still a few common patterns that can be applied to most .NET library projects out there.
 
-In this article, we will explore the current lay of the land when it comes to building a .NET library, covering everything from fine-tuning the project settings to setting up a continuous integration and delivery pipeline. If you're planning to start a new .NET library project, hopefully this can serve as a starting point for you to build upon.
+In this article, we will explore the current lay of the land when it comes to building a .NET library, covering everything from project settings and build tooling to testing and deployment workflows. Hopefully, this will provide a decent starting point if you're looking to build your own library, and help avoid some of the common pitfalls along the way.
 
 ## Project structure
 
