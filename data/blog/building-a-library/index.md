@@ -3,11 +3,12 @@ title: 'Building a library in .NET'
 date: '2024-10-28'
 ---
 
-Developing a library involves a lot of moving pieces, and not all of them are just about writing code. Beyond the functionality of the library itself, we also need to consider the infrastructure behind it — how the code is built, tested, packaged, and deployed — and how to leverage the tools and services available to us to make these processes as efficient as possible.
+Developing a library involves a lot of moving pieces, and not all of them are just about writing code. Beyond the functionality of the library itself, we also need to consider the infrastructure behind it — how the code is built and packaged, how it's tested and deployed — and how to leverage the tools and services available to us to make those processes as efficient as possible.
 
-Although none of these things are inherently complicated, the abundance of different approaches and technical options can make it difficult to make the right decisions. And while there is no true one-size-fits-all solution, there are still a few common patterns that can be applied to most .NET library projects out there.
+Although the .NET ecosystem has come a long way in the recent years, many aspects of library development are still somewhat confusing and under-documented.
 
-In this article, we will explore the current lay of the land when it comes to building a .NET library, covering everything from project settings and build tooling to testing and deployment workflows. Hopefully, this will provide a decent starting point if you're looking to build your own library, and help avoid some of the common pitfalls along the way.
+
+In this article, we will explore the current lay of the land when it comes to developing a library in .NET, covering everything from project settings and build process tweaks to testing and deployment automation. We will go over the most popular strategies that are used in the community, discuss their trade-offs, and highlight some of the pitfalls to avoid.
 
 ## Project structure
 
