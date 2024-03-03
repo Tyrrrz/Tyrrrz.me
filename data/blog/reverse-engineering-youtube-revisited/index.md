@@ -39,7 +39,7 @@ First thing you'll notice is that this endpoint requires an API key, which is pa
 
 The request body itself is a JSON object with two top-level properties: `videoId` and `context`. The former is the 11-character ID of the video you want to retrieve the metadata for, while the latter contains various information that YouTube uses to tailor the response to the client's preferences and capabilities.
 
-In particular, depending on the client you choose to impersonate using the `clientName` and `clientVersion` properties, the response may contain slightly different data, or just fail to resolve altogether for certain videos. While there are many clients available, only a few of them provide a measurable advantage over the others — which is why `ANDROID` is used in the example above, as it's the easiest to work with.
+In particular, depending on the client you choose to impersonate using the `clientName` and `clientVersion` properties, the response may contain slightly different data, or just fail to resolve altogether for certain videos. While there are many clients available, only a few of them provide a measurable advantage over the others — which is why `ANDROID`, being the easiest work with, is used in the example above.
 
 After receiving the response, you should find a JSON object that contains the video metadata, stream descriptors, closed captions, activity tracking URLs, ad placements, post-playback screen elements — basically everything that the client needs in order to show the video to the user. It's a massive blob of data, so to make things simpler I've outlined only the most interesting parts below:
 

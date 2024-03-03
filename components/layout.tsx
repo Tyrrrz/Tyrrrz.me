@@ -203,9 +203,7 @@ const Main: FC<PropsWithChildren> = ({ children }) => {
   );
 };
 
-type LayoutProps = PropsWithChildren;
-
-const Layout: FC<LayoutProps> = ({ children }) => {
+const Page: FC<PropsWithChildren> = ({ children }) => {
   const { theme } = useTheme();
 
   return (
@@ -224,17 +222,25 @@ const Layout: FC<LayoutProps> = ({ children }) => {
           'dark:text-neutral-200'
         )}
       >
-        <Meta />
-        <Analytics />
-
         <Loader />
-
         <div className={c('container', 'max-w-4xl', 'mx-auto')}>
           <Header />
           <Main>{children}</Main>
         </div>
       </div>
     </div>
+  );
+};
+
+type LayoutProps = PropsWithChildren;
+
+const Layout: FC<LayoutProps> = ({ children }) => {
+  return (
+    <>
+      <Meta />
+      <Analytics />
+      <Page>{children}</Page>
+    </>
   );
 };
 
