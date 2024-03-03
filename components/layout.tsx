@@ -203,7 +203,7 @@ const Main: FC<PropsWithChildren> = ({ children }) => {
   );
 };
 
-const Content: FC<PropsWithChildren> = ({ children }) => {
+const Page: FC<PropsWithChildren> = ({ children }) => {
   const { theme } = useTheme();
 
   return (
@@ -239,7 +239,7 @@ const Layout: FC<LayoutProps> = ({ children }) => {
     <>
       <Meta />
       <Analytics />
-      <Content>{children}</Content>
+      <Page>{children}</Page>
     </>
   );
 };
