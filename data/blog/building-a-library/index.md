@@ -7,7 +7,6 @@ Developing a library involves a lot of moving pieces, and not all of them are ju
 
 Although the .NET ecosystem has come a long way in the recent years, many aspects of library development are still somewhat confusing and under-documented.
 
-
 In this article, we will explore the current lay of the land when it comes to developing a library in .NET, covering everything from project settings and build process tweaks to testing and deployment automation. We will go over the most popular strategies that are used in the community, discuss their trade-offs, and highlight some of the pitfalls to avoid.
 
 ## Project structure
