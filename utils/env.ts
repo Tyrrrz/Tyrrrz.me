@@ -28,6 +28,7 @@ export const getSiteUrl = (path?: string) => {
   return value;
 };
 
+// https://github.com/settings/tokens
 export const getGitHubToken = () => {
   const value = process.env.GITHUB_TOKEN;
   if (!value) {
@@ -37,6 +38,7 @@ export const getGitHubToken = () => {
   return value;
 };
 
+// https://patreon.com/portal/registration/register-clients
 export const getPatreonToken = () => {
   const value = process.env.PATREON_TOKEN;
   if (!value) {
@@ -46,6 +48,7 @@ export const getPatreonToken = () => {
   return value;
 };
 
+// https://developers.buymeacoffee.com/dashboard
 export const getBuyMeACoffeeToken = () => {
   const value = process.env.BUYMEACOFFEE_TOKEN;
   if (!value) {
