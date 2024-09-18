@@ -41,6 +41,10 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
           <ListItem>
             <Link href="https://patreon.com/Tyrrrz">Patreon</Link> (recurring)
           </ListItem>
+
+          <ListItem>
+            <span className={c('line-through')}>Buy Me A Coffee</span> (not supported anymore)
+          </ListItem>
         </List>
       </section>
 

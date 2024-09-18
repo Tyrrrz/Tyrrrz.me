@@ -1,108 +1,137 @@
 import { Donation } from '~/data/donate';
-import { groupBy } from '~/utils/array';
-import { bufferIterable } from '~/utils/async';
-import { getBuyMeACoffeeToken, getPrivateDonors } from '~/utils/env';
-import { formatUrlWithQuery } from '~/utils/url';
-
-const getSupporters = async function* () {
-  let page = 1;
-
-  while (true) {
-    const url = formatUrlWithQuery('https://developers.buymeacoffee.com/api/v1/supporters', {
-      page: page.toString()
-    });
-
-    const response = await fetch(url, {
-      headers: {
-        'authorization': `Bearer ${getBuyMeACoffeeToken()}`,
-        // BMAC's Cloudflare sometimes blocks requests with no user agent
-        'user-agent': 'tyrrrz.me'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Request 'GET ${url}' failed. Status: ${response.status}. Body: '${await response.text()}'.`
-      );
-    }
-
-    // https://developers.buymeacoffee.com/#/apireference?id=onetime-supporters-v1supporters
-    type ResponseBody = {
-      data: {
-        payer_email: string;
-        payer_name?: string;
-        supporter_name?: string;
-        support_visibility: number;
-        support_coffees: number;
-        support_coffee_price: string;
-        is_refunded?: boolean;
-      }[];
-      last_page: number;
-    };
-
-    const body: ResponseBody = await response.json();
-
-    yield* body.data;
-
-    if (page >= body.last_page) {
-      break;
-    }
-
-    page++;
-  }
-};
 
 export const getBuyMeACoffeeDonations = async function* () {
-  // Filter out refunds and project into a simpler structure
-  const pledges = (await bufferIterable(getSupporters()))
-    .filter((supporter) => !supporter.is_refunded)
-    .map((supporter) => {
-      const email = supporter.payer_email;
-      const name = supporter.supporter_name || supporter.payer_name;
-      const amount = Number(supporter.support_coffee_price) * supporter.support_coffees;
+  // BuyMeACoffee donations are no longer supported, so return a constant array of previous donors
+  const donations: Donation[] = [
+    { name: 'Someone', amount: 563, platform: 'BuyMeACoffee' },
+    { name: '832', amount: 210, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 100, platform: 'BuyMeACoffee' },
+    { name: 'Lloyd#4414 (374879107286171648)', amount: 75, platform: 'BuyMeACoffee' },
+    { name: 'Peter W', amount: 60, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 50, platform: 'BuyMeACoffee' },
+    { name: 'Gwyneth Peña-Siguenza', amount: 50, platform: 'BuyMeACoffee' },
+    { name: 'Karl Essinger', amount: 50, platform: 'BuyMeACoffee' },
+    { name: 'ACPWinitiate', amount: 40, platform: 'BuyMeACoffee' },
+    { name: 'Baksa Krisztián', amount: 30, platform: 'BuyMeACoffee' },
+    { name: 'ChihYang', amount: 25, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 25, platform: 'BuyMeACoffee' },
+    { name: 'Lez', amount: 25, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 25, platform: 'BuyMeACoffee' },
+    { name: 'Stevoisiak', amount: 25, platform: 'BuyMeACoffee' },
+    { name: 'Yuzheng Lin', amount: 25, platform: 'BuyMeACoffee' },
+    { name: '@frakman1', amount: 25, platform: 'BuyMeACoffee' },
+    { name: '@Foritus', amount: 25, platform: 'BuyMeACoffee' },
+    { name: '@noseratio', amount: 25, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 25, platform: 'BuyMeACoffee' },
+    { name: '@hhrafn', amount: 25, platform: 'BuyMeACoffee' },
+    { name: 'Ivan B.', amount: 25, platform: 'BuyMeACoffee' },
+    { name: '@timheuer', amount: 25, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 25, platform: 'BuyMeACoffee' },
+    { name: 'lupus', amount: 25, platform: 'BuyMeACoffee' },
+    { name: 'Richard', amount: 25, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 25, platform: 'BuyMeACoffee' },
+    { name: 'Foritus', amount: 25, platform: 'BuyMeACoffee' },
+    { name: 'Vince', amount: 24, platform: 'BuyMeACoffee' },
+    { name: 'Jacob P./CanePlayz', amount: 20, platform: 'BuyMeACoffee' },
+    { name: '@lucidbrot', amount: 20, platform: 'BuyMeACoffee' },
+    { name: '@Meteorburn', amount: 20, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Bill Fairchild', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'siyuan', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Pete Malowany', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 15, platform: 'BuyMeACoffee' },
+    { name: '@Reiko_LJ', amount: 15, platform: 'BuyMeACoffee' },
+    { name: '佐藤 士文', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Eamon White', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 15, platform: 'BuyMeACoffee' },
+    { name: '@elliotcolgan', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Khalid Abuhakmeh', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Ulf Treger', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Liam Chase', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'McCovican', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'eggeggss', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Rich Burgess', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'sathh', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Montegro on GitHub', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'happy customer', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Przemyslaw Ryciuk', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Jim Wilson', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Dook', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Piotr', amount: 15, platform: 'BuyMeACoffee' },
+    { name: 'Stefan Monov', amount: 10, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 10, platform: 'BuyMeACoffee' },
+    { name: '@veetalin', amount: 10, platform: 'BuyMeACoffee' },
+    { name: 'RGM', amount: 10, platform: 'BuyMeACoffee' },
+    { name: 'someone grateful', amount: 10, platform: 'BuyMeACoffee' },
+    { name: 'Jeffrey James Hancorn @athelstanhall', amount: 10, platform: 'BuyMeACoffee' },
+    { name: '@angelyordanov', amount: 10, platform: 'BuyMeACoffee' },
+    { name: 'Kay', amount: 10, platform: 'BuyMeACoffee' },
+    { name: 'Filip Navara', amount: 10, platform: 'BuyMeACoffee' },
+    { name: 'Michael Dayah', amount: 10, platform: 'BuyMeACoffee' },
+    { name: 'Chrismclegless', amount: 9, platform: 'BuyMeACoffee' },
+    { name: 'Holiday Pootis', amount: 9, platform: 'BuyMeACoffee' },
+    { name: 'LevYastrebov', amount: 9, platform: 'BuyMeACoffee' },
+    { name: 'dziban303', amount: 9, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 9, platform: 'BuyMeACoffee' },
+    { name: 'Perry Straw', amount: 9, platform: 'BuyMeACoffee' },
+    { name: 'John Kurtz', amount: 9, platform: 'BuyMeACoffee' },
+    { name: 'Reza Andalibi', amount: 8, platform: 'BuyMeACoffee' },
+    { name: 'Angelos Tsiflas', amount: 6, platform: 'BuyMeACoffee' },
+    { name: 'ls', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Paul', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Kimberly', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'disodiumedta', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Ciaran McGovern', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Vencabot', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'hager egmont', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Goodadvise', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Toni_conlay', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Kibubek', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Mohammed Faraz Matin', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'adamm', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Øyvind Børnes', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'BigFan', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Hiroyuki Fujikawa', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Gruso', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Ma Cynthia Elena IGNACIO Mendoza', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 5, platform: 'BuyMeACoffee' },
+    { name: '@84jcon', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Calvin', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Deng Zfeng', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'YAROSLAV PRYADUNOV', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Ali', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Team Jesus', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Jim', amount: 5, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 3, platform: 'BuyMeACoffee' },
+    { name: 'iamarsenibragimov', amount: 3, platform: 'BuyMeACoffee' },
+    { name: 'Seraphine', amount: 3, platform: 'BuyMeACoffee' },
+    { name: 'Aidan Paradis', amount: 3, platform: 'BuyMeACoffee' },
+    { name: 'STEPHEN VERNYI', amount: 3, platform: 'BuyMeACoffee' },
+    { name: 'Volentér Krisztián', amount: 3, platform: 'BuyMeACoffee' },
+    { name: 'Skaamit', amount: 3, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 3, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 3, platform: 'BuyMeACoffee' },
+    { name: 'Vinayak Lakhani', amount: 3, platform: 'BuyMeACoffee' },
+    { name: 'Abdull', amount: 3, platform: 'BuyMeACoffee' },
+    { name: 'tktcorporation', amount: 3, platform: 'BuyMeACoffee' },
+    { name: 'Anonymous', amount: 3, platform: 'BuyMeACoffee' },
+    { name: 'Jeremie', amount: 3, platform: 'BuyMeACoffee' },
+    { name: '@steskalj', amount: 3, platform: 'BuyMeACoffee' },
+    { name: 'wesbyte', amount: 3, platform: 'BuyMeACoffee' }
+  ];
 
-      const isPrivate =
-        getPrivateDonors().includes(email) ||
-        getPrivateDonors().includes(name || '') ||
-        supporter.support_visibility === 0;
-
-      return {
-        email,
-        name,
-        amount,
-        isPrivate
-      };
-    });
-
-  // Sum up all pledges with the same email
-  const pledgesByEmail = groupBy(pledges, (pledge) => pledge.email).map(({ items }) => {
-    const last = items.at(-1);
-    const amount = items.reduce((acc, cur) => acc + cur.amount, 0);
-
-    return {
-      ...last,
-      amount
-    };
-  });
-
-  // Sum up all pledges with the same name
-  const pledgesByName = groupBy(pledgesByEmail, (pledge) => pledge.name).map(({ items }) => {
-    const last = items.at(-1);
-    const amount = items.reduce((acc, cur) => acc + cur.amount, 0);
-
-    return {
-      ...last,
-      amount
-    };
-  });
-
-  for (const pledge of pledgesByName) {
-    const donation: Donation = {
-      name: !pledge.isPrivate ? pledge.name : undefined,
-      amount: pledge.amount,
-      platform: 'BuyMeACoffee'
-    };
-
-    yield donation;
-  }
+  yield* donations;
 };
