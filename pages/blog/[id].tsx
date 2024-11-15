@@ -126,7 +126,12 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
       <div className={c('space-y-4')}>
         <section>
           {/* Title */}
-          <Heading>{post.title}</Heading>
+          <Heading>
+            <span className={c('font-mono', 'text-neutral-400')}>
+              <Link href="/blog">‥</Link>/
+            </span>
+            <span>{post.title}</span>
+          </Heading>
 
           {/* Misc info */}
           <div className={c('flex', 'flex-wrap', '-mt-2', 'gap-x-3', 'font-light')}>
