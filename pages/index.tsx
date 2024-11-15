@@ -1,6 +1,6 @@
 import c from 'classnames';
 import { NextPage } from 'next';
-import { FaGithub, FaInstagram, FaTwitter, FaYoutube, FaBluesky } from 'react-icons/fa6';
+import { FaGithub, FaTwitter, FaBluesky } from 'react-icons/fa6';
 import Heading from '~/components/heading';
 import Image from '~/components/image';
 import Link from '~/components/link';
@@ -74,16 +74,6 @@ const HomePage: NextPage = () => {
         <Link variant="discreet" href="https://bsky.app/profile/tyrrrz.me">
           <div className={c('px-2')}>
             <FaBluesky strokeWidth={1} />
-          </div>
-        </Link>
-        <Link variant="discreet" href="https://youtube.com/@Tyrrrz">
-          <div className={c('px-2')}>
-            <FaYoutube strokeWidth={1} />
-          </div>
-        </Link>
-        <Link variant="discreet" href="https://instagram.com/Tyrrrz">
-          <div className={c('px-2')}>
-            <FaInstagram strokeWidth={1} />
           </div>
         </Link>
       </section>
