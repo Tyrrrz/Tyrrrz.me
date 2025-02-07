@@ -33,7 +33,7 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
           These are all the speaking engagements I&apos;ve had in the past, or plan to have in the
           future. Where available, follow the links to see the video recordings. If you want me to
           speak at your event, please contact me on{' '}
-          <Link href="https://twitter.com/Tyrrrz">Twitter</Link>.
+          <Link href="https://bsky.app/profile/tyrrrz.me">Bluesky</Link>.
         </Paragraph>
       </section>
 

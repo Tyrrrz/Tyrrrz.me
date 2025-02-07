@@ -72,7 +72,8 @@ const SubscribeSection: FC = () => {
 
       <div>
         Want to know when I post a new article? Follow me on{' '}
-        <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or subscribe to the{' '}
+        <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or{' '}
+        <Link href="https://bsky.app/profile/tyrrrz.me">Bluesky</Link>, or subscribe to the{' '}
         <Link href="/blog/rss.xml" external>
           RSS Feed
         </Link>
@@ -101,8 +102,8 @@ const CommentSection: FC<BlogPostPageProps> = ({ post }) => {
           userPreferredTheme === 'dark'
             ? 'dark'
             : userPreferredTheme === 'light'
-            ? 'light'
-            : 'preferred_color_scheme'
+              ? 'light'
+              : 'preferred_color_scheme'
         }
         lang="en"
         loading="lazy"
@@ -125,7 +126,12 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
       <div className={c('space-y-4')}>
         <section>
           {/* Title */}
-          <Heading>{post.title}</Heading>
+          <Heading>
+            <span className={c('font-mono', 'text-neutral-400')}>
+              <Link href="/blog">‥</Link>/
+            </span>
+            <span>{post.title}</span>
+          </Heading>
 
           {/* Misc info */}
           <div className={c('flex', 'flex-wrap', '-mt-2', 'gap-x-3', 'font-light')}>

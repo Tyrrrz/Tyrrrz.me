@@ -35,7 +35,7 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
             <span className={c('font-semibold')}>
               <Link href="https://github.com/sponsors/Tyrrrz">GitHub Sponsors</Link>
             </span>{' '}
-            (recurring, one-time)
+            (one-time or recurring)
           </ListItem>
 
           <ListItem>
@@ -43,7 +43,7 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
           </ListItem>
 
           <ListItem>
-            <Link href="https://buymeacoffee.com/Tyrrrz">BuyMeACoffee</Link> (one-time)
+            <span className={c('line-through')}>Buy Me A Coffee</span> (not supported anymore)
           </ListItem>
         </List>
       </section>
