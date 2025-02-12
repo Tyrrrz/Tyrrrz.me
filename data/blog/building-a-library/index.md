@@ -7,11 +7,13 @@ Developing a library involves a lot of moving pieces, and not all of them are ju
 
 Even in such a mature and opinionated ecosystem as .NET, there is no true one-size-fits-all solution. The tooling landscape — both within the SDK and the wider software world — is vast and constantly evolving, so with many different knobs to turn and approaches to consider, it can be difficult to know where to start.
 
-I have been maintaining [several open-source libraries in .NET](/projects) for a decade and a half, and through a lot of trial and error, I have come to develop a set of practices that I find to be both effective and sustainable. These practices are not necessarily "best" in any absolute sense, but they have worked well for me and my projects, and I believe they can be a good starting point for others as well.
+I have been maintaining [several open-source libraries in .NET](/projects) for over a decade, and through a lot of trial and error, I have come to develop a set of practices that I find to be both effective and sustainable. These practices are not necessarily "best" in any absolute sense, but they have worked well for me and my projects, and I believe they can be a good starting point for others as well.
 
-In this article, I will outline a typical .NET library setup, covering build settings, productivity extensions, testing, publishing workflows, and the services that help automate and tie everything together. We will go over different strategies, discuss the trade-offs between them, and see how they can be combined to establish a solid foundation for your library project.
+In this article, I will outline a typical .NET library setup, covering build settings, productivity extensions, testing and publishing workflows, and the services that help automate and tie everything together. We will go over different strategies, discuss the trade-offs between them, and see how they can be combined to establish a solid foundation for your library project.
 
-## Local environment
+## Repository structure
+
+Before we can dive any deeper, we need to establish a basic structure for our library project.
 
 ## Targeting and polyfills
 
