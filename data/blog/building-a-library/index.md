@@ -13,9 +13,7 @@ In this article, I will outline a typical .NET library setup, covering build set
 
 ## Bootstrapping the project
 
-Much like everything else in life, a .NET project has a beginning — and that beginning is the `dotnet new` command. This command is the entry point for creating new projects in the .NET ecosystem, and it is the first step in setting up our solution.
-
-Some developers have really strong opinions on how a project (library or otherwise) should be organized. Honestly, I don't believe that it matters all that much. However, in order to have some common ground as we'll be moving deeper into the article, let's agree on the following structure:
+Much like everything else in life, a .NET project has a beginning — and that beginning is the `dotnet new` command. It's safe to assume that, if you're reading this article, you're probably already familiar with how to set up a new project. However, since we're going to be referring and relying on the project structure later on, let's use this opportunity to establish a common ground:
 
 ```
 ├── MyLibrary
@@ -35,6 +33,8 @@ dotnet new xunit -n MyLibrary.Tests -o MyLibrary.Tests
 dotnet new sln -n MyLibrary
 dotnet sln add MyLibrary/MyLibrary.csproj MyLibrary.Tests/MyLibrary.Tests.csproj
 ```
+
+Some developers have really strong opinions on how a project (library or otherwise) should be organized. Honestly, I don't believe that it matters all that much and regardless of what you choose, the rest of the article will still be applicable.
 
 As you can see, the layout we adopted here is quite simple: the library code is in the `MyLibrary` project, the tests are in the `MyLibrary.Tests` project, and the solution file `MyLibrary.sln` ties them together. The solution file is not strictly required as you can still just build and test the projects individually, but it does makes things a lot easier when using the `dotnet` CLI or managing the project in an IDE. Also, while I have chosen `xunit` as the template for the test project, you are free to pick whichever testing framework you're comfortable with. Beyond this point, we will just assume that both the library code and the tests have already been written.
 
