@@ -1,5 +1,5 @@
 ---
-title: '(The Uninteresting Side of) Building a library in .NET'
+title: '(The Unglamorous Side of) Building a library in .NET'
 date: '2024-10-28'
 ---
 
@@ -11,9 +11,52 @@ I have been maintaining [several open-source libraries in .NET](/projects) for o
 
 In this article, I will outline a typical .NET library setup, covering build settings, productivity extensions, testing and publishing workflows, and the services that help automate and tie everything together. We will go over different strategies, discuss the trade-offs between them, and see how they can be combined to establish a solid foundation for your library project.
 
-## Repository structure
+## Bootstrapping the project
 
-Before we can dive any deeper, we need to establish a basic structure for our library project.
+Much like everything else in life, a .NET project has a beginning — and that beginning is the `dotnet new` command. This command is the entry point for creating new projects in the .NET ecosystem, and it is the first step in setting up our solution.
+
+Some developers have really strong opinions on how a project (library or otherwise) should be organized. Honestly, I don't believe that it matters all that much. However, in order to have some common ground as we'll be moving deeper into the article, let's agree on the following structure:
+
+```
+├── MyLibrary
+│   ├── MyLibrary.csproj
+│   └── (...)
+├── MyLibrary.Tests
+│   ├── MyLibrary.Tests.csproj
+│   └── (...)
+└── MyLibrary.sln
+```
+
+The above can be achieved by running the following commands:
+
+```bash
+dotnet new classlib -n MyLibrary -o MyLibrary
+dotnet new xunit -n MyLibrary.Tests -o MyLibrary.Tests
+dotnet new sln -n MyLibrary
+dotnet sln add MyLibrary/MyLibrary.csproj MyLibrary.Tests/MyLibrary.Tests.csproj
+```
+
+As you can see, the layout we adopted here is quite simple: the library code is in the `MyLibrary` project, the tests are in the `MyLibrary.Tests` project, and the solution file `MyLibrary.sln` ties them together. The solution file is not strictly required as you can still just build and test the projects individually, but it does makes things a lot easier when using the `dotnet` CLI or managing the project in an IDE. Also, while I have chosen `xunit` as the template for the test project, you are free to pick whichever testing framework you're comfortable with. Beyond this point, we will just assume that both the library code and the tests have already been written.
+
+Next step is to integrate the project with a version control system. Technically, you do have some options in this regard, but for this article we'll assume that you'll be using [Git](https://git-scm.com) as the version control system, since it's the undisputable standard within the industry. To initialize a Git repository in the root directory, you can run:
+
+```bash
+git init
+```
+
+```
+├── .git
+│   └── (...)
+├── MyLibrary
+│   ├── MyLibrary.csproj
+│   └── (...)
+├── MyLibrary.Tests
+│   ├── MyLibrary.Tests.csproj
+│   └── (...)
+└── MyLibrary.sln
+```
+
+Finally, we'll also assume that we'll be using [GitHub](https://github.com) as the code hosting platform for the project. This is not a strict requirement either, but it's a choice that will make the rest of our job easier, as we'll see later on. For the sake of simplicity, we'll assume that the above repository is synchronized with a GitHub repository at `https://github.com/SpaghettiCoder/MyLibrary`.
 
 ## Targeting and polyfills
 
