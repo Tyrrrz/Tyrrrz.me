@@ -193,7 +193,7 @@ const engagements: SpeakingEngagement[] = [
     eventUrl: 'https://kommunity.com/svitla-systems/events/svitla-smart-talk-net-conf-db7d2cd9',
     presentationUrl:
       'https://slideshare.net/AlexeyGolub/realitydriven-testing-using-testcontainers',
-    recordingUrl: 'https://youtube.com/watch?v=ORapxIWoEco'
+    recordingUrl: 'https://youtu.be/ORapxIWoEco?t=3800'
   }
 ];
 
