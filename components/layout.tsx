@@ -87,7 +87,7 @@ const ThemeSwitcher: FC = () => {
 
   return (
     <button
-      className={c('text-blue-500', 'dark:text-yellow-500')}
+      className={c('text-blue-500', 'dark:text-yellow-500', 'cursor-pointer')}
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
     >
       {theme === 'dark' ? <FiMoon /> : <FiSun />}
