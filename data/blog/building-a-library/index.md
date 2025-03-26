@@ -15,39 +15,7 @@ In this article, I will outline a typical .NET library setup, covering build set
 
 Much like everything else in life, a .NET project has a beginning — and that beginning is the `dotnet new` command. It's safe to assume that, if you're reading this article, you've probably set up a fair share of .NET solutions and don't need any introduction to the process. However, since we'll be relying on certain assumptions about the project structure going forward, let's use this opportunity to establish a common ground.
 
-When it comes to libraries, there are two main ways to organize the directory layout:
-
-- **The simple way**: All projects, regardless of their purpose, are placed in their respective directories within the repository root.
-- **The more scalable way**: Projects are further grouped by their type (library, test, samples, etc.) and nested within the corresponding directories (`src/`, `tests/`, `samples/`, etc.).
-
-Both approaches are valid and have their place, depending on the size and the complexity of the solution. Since we'll not be focusing on the actual codebase in this article, we'll be keeping things simple and go with the first option. The layout we'll be using is as follows:
-
-```
-├── MyLibrary
-│   ├── MyLibrary.csproj
-│   └── (...)
-├── MyLibrary.Tests
-│   ├── MyLibrary.Tests.csproj
-│   └── (...)
-└── MyLibrary.sln
-```
-
-As you can see, the layout we adopted here is quite simple: the library code is in the `MyLibrary` project, the tests are in the `MyLibrary.Tests` project, and the solution file `MyLibrary.sln` ties them together. The solution file is not strictly required as you can still just build and test the projects individually, but it does makes things a lot easier when using the `dotnet` CLI or managing the project in an IDE. Also, while I have chosen `xunit` as the template for the test project, you are free to pick whichever testing framework you're comfortable with. Beyond this point, we will just assume that both the library code and the tests have already been written.
-
-The above set can be achieved by running the following `dotnet` commands:
-
-```bash
-dotnet new classlib -n MyLibrary -o MyLibrary
-dotnet new xunit -n MyLibrary.Tests -o MyLibrary.Tests
-dotnet new sln -n MyLibrary
-dotnet sln add MyLibrary/MyLibrary.csproj MyLibrary.Tests/MyLibrary.Tests.csproj
-```
-
-Next step is to integrate the project with a version control system. Technically, you do have some options in this regard, but for this article we'll assume that you'll be using [Git](https://git-scm.com) as the version control system, since it's the undisputable standard within the industry. To initialize a Git repository in the root directory, you can run:
-
-```bash
-git init
-```
+Generally speaking, there are two main ways to organize a solution in .NET: the simpler way — where all projects are placed in their respective directories within the repository root, and the more scalable way — where projects are further grouped by their type and nested within the corresponding directories (`src/`, `tests/`, `samples/`, etc.). Both approaches are valid and have their place, but since we'll not be focusing on the actual codebase in this article, we'll go with the first option to keep things simple:
 
 ```
 ├── .git
@@ -61,15 +29,393 @@ git init
 └── MyLibrary.sln
 ```
 
+Here we have a solution named `MyLibrary` that contains two projects: `MyLibrary` and `MyLibrary.Tests`. The former is the actual library project, while the latter is a test project that exercises the library's functionality. Additionally, we'll also want to integrate the solution with a version control system, so we'll initialize a [Git](https://git-scm.com) repository in the root directory as well.
+
+The above layout can be achieved by running the following commands in the terminal:
+
+```bash
+dotnet new classlib -n MyLibrary -o MyLibrary
+dotnet new xunit -n MyLibrary.Tests -o MyLibrary.Tests
+dotnet new sln -n MyLibrary
+dotnet sln add MyLibrary/MyLibrary.csproj MyLibrary.Tests/MyLibrary.Tests.csproj
+git init
+```
+
 Finally, we'll also assume that we'll be using [GitHub](https://github.com) as the code hosting platform for the project. This is not a strict requirement either, but it's a choice that will make the rest of our job easier, as we'll see later on. For the sake of simplicity, we'll assume that the above repository is synchronized with a GitHub repository at `https://github.com/SpaghettiCoder/MyLibrary`.
 
 ## Targeting and polyfills
 
+- https://github.com/Tyrrrz/PolyShim
+- https://github.com/SimonCropp/Polyfill
+- https://github.com/Sergio0694/PolySharp
+
 ## Testing workflow
+
+```yml
+# Friendly name of the workflow
+name: main
+
+# Events that trigger the workflow
+# (push and pull_request events with default filters)
+on:
+  push:
+  pull_request:
+
+# Workflow jobs
+jobs:
+  # ID of the job
+  test:
+    # Operating system to run the job on
+    runs-on: ubuntu-latest
+
+    # Steps to run in the job
+    steps:
+      # Check out the repository
+      - uses: actions/checkout@v4 # note that you'd ideally pin versions to hashes, read on to learn more
+
+      # Run the dotnet test command
+      - run: dotnet test --configuration Release
+```
+
+```yml
+name: main
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Setup .NET SDK
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            6.0.x
+
+      - run: dotnet test --configuration Release
+```
+
+```yml
+name: main
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    # Matrix defines a list of arguments to run the job with,
+    # which will be expanded into multiple jobs by GitHub Actions.
+    matrix:
+      os:
+        - windows-latest
+        - ubuntu-latest
+        - macos-latest
+
+    # We can reference the matrix arguments using the `matrix` context object
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            6.0.x
+
+      - - run: dotnet test --configuration Release
+```
+
+Reporting test results
+
+- https://github.com/dorny/test-reporter
+- https://github.com/Tyrrrz/GitHubActionsTestLogger
+
+Dorny:
+
+```yml
+name: main
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    matrix:
+      os:
+        - windows-latest
+        - ubuntu-latest
+        - macos-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            6.0.x
+
+      - run: >
+          dotnet test
+          --configuration Release
+          --logger "trx;LogFileName=test-results.trx"
+
+      - uses: dorny/test-reporter@v1
+        # Run this step even if the previous step fails
+        if: success() || failure()
+        with:
+          name: Test results
+          path: '**/*.trx'
+          reporter: dotnet-trx
+          fail-on-error: true
+```
+
+![Test results using dorny/test-reporter](dorny-test-results.png)
+
+```yml
+# Testing workflow
+name: main
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    matrix:
+      os:
+        - windows-latest
+        - ubuntu-latest
+        - macos-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            6.0.x
+
+      - run: >
+          dotnet test
+          --configuration Release
+          --logger "trx;LogFileName=test-results.trx"
+
+      # Upload test result files as artifacts, so they can be fetched by the reporting workflow
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: '**/*.trx'
+```
+
+```yml
+# Reporting workflow
+name: Test results
+
+on:
+  # Run this workflow after the testing workflow completes
+  workflow_run:
+    workflows:
+      - main
+    types:
+      - completed
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Extract the test result files from the artifacts
+      - uses: dorny/test-reporter@v1
+        with:
+          name: Test results
+          artifact: test-results
+          path: '**/*.trx'
+          reporter: dotnet-trx
+          fail-on-error: true
+```
+
+GitHub Actions Test Logger:
+
+```yml
+name: main
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    matrix:
+      os:
+        - windows-latest
+        - ubuntu-latest
+        - macos-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            6.0.x
+
+      - run: >
+          dotnet test
+          --configuration Release
+          --logger GitHubActions
+```
+
+![Test results using Tyrrrz/GitHubActionsTestLogger](ghatl-test-results.png)
+
+Coverage
+
+```yml
+name: main
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    matrix:
+      os:
+        - windows-latest
+        - ubuntu-latest
+        - macos-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            6.0.x
+
+      - run: >
+          dotnet test
+          --configuration Release
+          --logger GitHubActions
+          --collect:"XPlat Code Coverage"
+          --
+          DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+      # Codecov will automatically merge coverage reports from all jobs
+      - uses: codecov/codecov-action@v3
+```
+
+![Code coverage using codecov/codecov-action](codecov-graph.png)
 
 ## Releasing workflow
 
 ## Security considerations
+
+```yml
+jobs:
+  test:
+    permissions:
+      contents: read
+```
+
+```yml
+name: main
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    matrix:
+      os:
+        - windows-latest
+        - ubuntu-latest
+        - macos-latest
+
+    runs-on: ${{ matrix.os }}
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            6.0.x
+
+      - run: >
+          dotnet test
+          --configuration Release
+          --logger GitHubActions
+          --collect:"XPlat Code Coverage"
+          --
+          DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+      - uses: codecov/codecov-action@v3
+```
+
+```yml
+name: main
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    matrix:
+      os:
+        - windows-latest
+        - ubuntu-latest
+        - macos-latest
+
+    runs-on: ${{ matrix.os }}
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
+        with:
+          dotnet-version: |
+            8.0.x
+            6.0.x
+
+      - run: >
+          dotnet test
+          --configuration Release
+          --logger GitHubActions
+          --collect:"XPlat Code Coverage"
+          --
+          DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+      - uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
+```
 
 ## Changelog
 
