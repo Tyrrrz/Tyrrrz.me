@@ -15,7 +15,7 @@ In this article, I will outline a typical .NET library setup, covering build set
 
 Much like everything else in life, a .NET project has a beginning — and that beginning is the `dotnet new` command. It's safe to assume that, if you're reading this article, you've probably set up a fair share of .NET solutions and don't need any introduction to the process. However, since we'll be relying on certain assumptions about the project structure going forward, let's use this opportunity to establish a common ground.
 
-Generally speaking, there are two main ways to organize a solution in .NET: the simpler way — where all projects are placed in their respective directories within the repository root, and the more scalable way — where projects are further grouped by their type and nested within the corresponding directories (`src/`, `tests/`, `samples/`, etc.). Both approaches are valid and have their place, but since we'll not be focusing on the actual codebase in this article, we'll go with the first option to keep things simple:
+Generally speaking, there are two main ways to organize a solution in .NET: _the simpler way_ — where all projects are placed in their respective directories within the repository root, and _the more scalable way_ — where projects are further grouped by their type and nested within the corresponding directories (`src/`, `tests/`, `samples/`, etc.). Both approaches are valid and have their place, but since we'll not be focusing on the actual codebase in this article, we'll go with the first option to keep things simple:
 
 ```
 ├── .git
@@ -29,19 +29,36 @@ Generally speaking, there are two main ways to organize a solution in .NET: the 
 └── MyLibrary.sln
 ```
 
-Here we have a solution named `MyLibrary` that contains two projects: `MyLibrary` and `MyLibrary.Tests`. The former is the actual library project, while the latter is a test project that exercises the library's functionality. Additionally, we'll also want to integrate the solution with a version control system, so we'll initialize a [Git](https://git-scm.com) repository in the root directory as well.
+Here, we have a project called `MyLibrary` which houses the library code itself and the `MyLibrary.Tests` project that contains automated tests that exercise the library's functionality. Both of these projects are linked together using a solution file,named `MyLibrary.sln` — something that is not strictly required, but simplifies working with the solution from both the IDE and from the command line alike.
 
-The above layout can be achieved by running the following commands in the terminal:
+The layout above can be achieved by running the following commands in the terminal:
 
 ```bash
 dotnet new classlib -n MyLibrary -o MyLibrary
 dotnet new xunit -n MyLibrary.Tests -o MyLibrary.Tests
 dotnet new sln -n MyLibrary
 dotnet sln add MyLibrary/MyLibrary.csproj MyLibrary.Tests/MyLibrary.Tests.csproj
+```
+
+Finally, every code project needs to be integrated with a version control system, and for this we'll be working with [Git](https://git-scm.com).
+
+Finally, we'll also assume that we'll be using [GitHub](https://github.com) as the code hosting platform for the project. This is not a strict requirement either, but it's a choice that will make the rest of our job easier, as we'll see later on. For the sake of simplicity, we'll assume that the above repository is synchronized with a GitHub repository at `https://github.com/SpaghettiCoder/MyLibrary`.
+
+```bash
 git init
 ```
 
-Finally, we'll also assume that we'll be using [GitHub](https://github.com) as the code hosting platform for the project. This is not a strict requirement either, but it's a choice that will make the rest of our job easier, as we'll see later on. For the sake of simplicity, we'll assume that the above repository is synchronized with a GitHub repository at `https://github.com/SpaghettiCoder/MyLibrary`.
+```
+├── .git
+│   └── (...)
+├── MyLibrary
+│   ├── MyLibrary.csproj
+│   └── (...)
+├── MyLibrary.Tests
+│   ├── MyLibrary.Tests.csproj
+│   └── (...)
+└── MyLibrary.sln
+```
 
 ## Targeting and polyfills
 
