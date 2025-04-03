@@ -13,7 +13,7 @@ In this article, I will outline a typical .NET library setup, covering build set
 
 ## Bootstrapping the project
 
-Much like everything else in life, a .NET project has a beginning — and that beginning is the `dotnet new` command. It's safe to assume that, if you're reading this article, you've probably set up a fair share of .NET solutions and don't need any introduction to the process. However, since we'll be relying on certain assumptions about the project structure going forward, let's use this opportunity to establish a common ground.
+Much like everything else in life, a .NET project has a beginning — and that beginning is the `dotnet new` command. It's safe to assume that, if you're reading this article, you've probably set up a fair share of .NET solutions and don't need any introduction to the process. However, since we'll be relying on certain expectations about the project structure going forward, let's use this opportunity to establish a common ground.
 
 Generally speaking, there are two main ways to organize a solution in .NET: _the simpler way_ — where all projects are placed in their respective directories within the repository root, and _the more scalable way_ — where projects are further grouped by their type and nested within the corresponding directories (`src/`, `tests/`, `samples/`, etc.). Both approaches are valid and have their place, but since we'll not be focusing on the actual codebase in this article, we'll go with the first option to keep things simple:
 
@@ -27,9 +27,9 @@ Generally speaking, there are two main ways to organize a solution in .NET: _the
 └── MyLibrary.sln
 ```
 
-Here, we have a project called `MyLibrary` which houses the library code itself and the `MyLibrary.Tests` project which contains automated tests that exercise the library's functionality. Both of these projects are linked together using a solution file, named `MyLibrary.sln`. Although, having a solution file is not strictly required, it's pretty much always included in every project setup because it makes working with groups of projects a lot easier.
+Here we have a bare-bones setup, consisting of the `MyLibrary` project that houses the library code, and the `MyLibrary.Tests` project which contains the corresponding automated tests. These two projects are linked together under the same solution, using a file named `MyLibrary.sln`. Although the solution file itself is not strictly required, it's usually worth including because it makes managing multiple projects quite a bit easier.
 
-You can achieve the above structure either by using an IDE or by running the following `dotnet` commands in the terminal:
+To achieve the structure visualized above, we can either leverage the tooling provided by our IDE or simply run the following `dotnet` commands in the terminal:
 
 ```bash
 dotnet new classlib -n MyLibrary -o MyLibrary
@@ -38,13 +38,16 @@ dotnet new sln -n MyLibrary
 dotnet sln add MyLibrary/MyLibrary.csproj MyLibrary.Tests/MyLibrary.Tests.csproj
 ```
 
-Finally, every code project also needs to be integrated with a version control system, and — while technically there are several options for this — you'll need a really good reason not to choose [Git](https://git-scm.com).
+Finally, we'll also need to integrate the project with a version control system and a code hosting platform, for which we'll use [Git](https://git-scm.com) and [GitHub](https://github.com) respectively. While it's unlikely that you'd consider anything else in place of Git, there is definitely merit to platforms other than GitHub. However, most of the automation-related parts of this article will be based on [GitHub Actions](https://github.com/features/actions).
 
-Finally, we'll also assume that we'll be using [GitHub](https://github.com) as the code hosting platform for the project. This is not a strict requirement either, but it's a choice that will make the rest of our job easier, as we'll see later on. For the sake of simplicity, we'll assume that the above repository is synchronized with a GitHub repository at `https://github.com/SpaghettiCoder/MyLibrary`.
+In order to initialize a Git repository inside our root directory, we can run the commands below:
 
 ```bash
 git init
+dotnet new gitignore
 ```
+
+This creates the `.git` directory with all the associated metadata and an extensive `gitignore` file, compatible with .NET patterns. The resulting file layout should look like this:
 
 ```
 ├── .git
@@ -55,7 +58,14 @@ git init
 ├── MyLibrary.Tests
 │   ├── MyLibrary.Tests.csproj
 │   └── (...)
+├── .gitignore
 └── MyLibrary.sln
+```
+
+We'll also assume that the origin remote of our repository is `https://github.com/SpaghettiCoder/MyLibrary`:
+
+```bash
+git remote add origin https://github.com/SpaghettiCoder/MyLibrary.git
 ```
 
 ## Targeting and polyfills
