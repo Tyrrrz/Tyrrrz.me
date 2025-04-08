@@ -68,6 +68,12 @@ We'll also assume that the origin remote of our repository is `https://github.co
 git remote add origin https://github.com/SpaghettiCoder/MyLibrary.git
 ```
 
+```bash
+dotnet new nugetconfig
+dotnet new buildprops
+dotnet new globaljson
+```
+
 ## Targeting and polyfills
 
 - https://github.com/Tyrrrz/PolyShim
