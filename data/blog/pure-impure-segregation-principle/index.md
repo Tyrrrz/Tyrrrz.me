@@ -440,7 +440,7 @@ Ultimately, we weren't able to push impurities out towards the system boundaries
 
 The main issue is that each stage of the recommendation algorithm depends on additional data derived from the previous stages. Since this behavior is inherently non-deterministic, it's impossible to express it using pure functions alone.
 
-> If you're curious to explore other functional solutions to the above problem, check out Mark Seemann's [series of articles](https://blog.ploeh.dk/2025/04/07/alternative-ways-to-design-with-functional-programming) on this exact topic.
+> If you're curious to continue exploring other functional solutions to the above problem, check out Mark Seemann's [series of articles](https://blog.ploeh.dk/2025/04/07/alternative-ways-to-design-with-functional-programming) on this exact topic.
 
 ## Pure "enough" code
 
