@@ -38,7 +38,7 @@ dotnet new sln -n MyLibrary
 dotnet sln add MyLibrary/MyLibrary.csproj MyLibrary.Tests/MyLibrary.Tests.csproj
 ```
 
-Finally, we'll also need to integrate the project with a version control system and a code hosting platform, for which we'll use [Git](https://git-scm.com) and [GitHub](https://github.com) respectively. While it's unlikely that you'd consider anything else in place of Git, there is definitely merit to platforms other than GitHub. However, most of the automation-related parts of this article will be based on [GitHub Actions](https://github.com/features/actions).
+Beyond that, we'll also need to integrate the project with a version control system and a code hosting platform, for which we'll use [Git](https://git-scm.com) and [GitHub](https://github.com) respectively. While it's unlikely that you'd consider anything else in place of Git, there is definitely merit to platforms other than GitHub. However, most of the automation-related parts of this article will be based on [GitHub Actions](https://github.com/features/actions).
 
 In order to initialize a Git repository inside our root directory, we can run the commands below:
 
