@@ -73,7 +73,7 @@ const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
           );
         },
         a: ({ href, children }) => {
-          return <Link href={href!}>{children}</Link>;
+          return <Link href={href || '#'}>{children}</Link>;
         },
         p: ({ children }) => {
           return <Paragraph>{children}</Paragraph>;
@@ -95,7 +95,12 @@ const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
           );
         },
         img: ({ src, alt }) => {
-          return <Image src={src!} alt={alt!} />;
+          return (
+            <Image
+              src={typeof src === 'string' ? src : src ? URL.createObjectURL(src) : ''}
+              alt={alt || ''}
+            />
+          );
         },
         blockquote: ({ children }) => {
           return <Quote>{children}</Quote>;
