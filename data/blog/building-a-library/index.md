@@ -27,9 +27,9 @@ Generally speaking, there are two main ways to organize a solution in .NET: _the
 └── MyLibrary.sln
 ```
 
-Here we have a bare-bones setup, consisting of the `MyLibrary` project that houses the library code, and the `MyLibrary.Tests` project which contains the corresponding automated tests. These two projects are linked together under the same solution, using a file named `MyLibrary.sln`. Although the solution file itself is not strictly required, it's usually worth including because it makes managing multiple projects quite a bit easier.
+Here we have a bare-bones setup, consisting of the `MyLibrary` project that houses the library code, and the `MyLibrary.Tests` project which contains the corresponding automated tests. These two projects are unified within a single solution scope, using a file named `MyLibrary.sln`, which provides a centralized entry point for the .NET tooling to discover and manage them.
 
-To achieve the structure visualized above, we can either leverage the tooling provided by our IDE or simply run the following `dotnet` commands in the terminal:
+To achieve the structure visualized above, we can either create the solution from the IDE, or simply run the following `dotnet` commands in the terminal:
 
 ```bash
 dotnet new classlib -n MyLibrary -o MyLibrary
@@ -38,16 +38,17 @@ dotnet new sln -n MyLibrary
 dotnet sln add MyLibrary/MyLibrary.csproj MyLibrary.Tests/MyLibrary.Tests.csproj
 ```
 
-Beyond that, we'll also need to integrate the project with a version control system and a code hosting platform, for which we'll use [Git](https://git-scm.com) and [GitHub](https://github.com) respectively. While it's unlikely that you'd consider anything else in place of Git, there is definitely merit to platforms other than GitHub. However, most of the automation-related parts of this article will be based on [GitHub Actions](https://github.com/features/actions).
+Beyond that, the project will also need to be integrated with a version control system and, ultimately, a code hosting platform. There are several ways to go about this, but for this article we'll be using [Git](https://git-scm.com) and [GitHub](https://github.com) respectively. There is definitely merit to other platforms as well — especially if you are not considering making your library open-source — but GitHub is still the most popular and accessible option out there. So, with that in mind, let's assume that our origin remote is hosted on GitHub at `https://github.com/Tyrrrz/MyLibrary`.
 
-In order to initialize a Git repository inside our root directory, we can run the commands below:
+In order to initialize a Git repository rooted in the solution directory, we can run the commands below:
 
 ```bash
-git init
 dotnet new gitignore
+git init
+git remote add origin https://github.com/Tyrrrz/MyLibrary.git
 ```
 
-This creates the `.git` directory with all the associated metadata and an extensive `gitignore` file, compatible with .NET patterns. The resulting file layout should look like this:
+This creates the `.git` directory with all the associated metadata and an extensive `gitignore` file, compatible with typical file and directory patterns used within the .NET ecosystem. Additionally, the last command also adds a remote named `origin`, which points to the GitHub repository we assumed to have created earlier. The resulting file layout should look like this:
 
 ```
 ├── .git
@@ -62,11 +63,9 @@ This creates the `.git` directory with all the associated metadata and an extens
 └── MyLibrary.sln
 ```
 
-We'll also assume that the origin remote of our repository is `https://github.com/SpaghettiCoder/MyLibrary`:
+At this point, we can consider our library solution to be fully bootstrapped. Since we don't really care about the inner workings of the library, we will assume that the code itself is already written and committed, and that the associated tests are also in place and running correctly. Going forward, let's explore what other things we can do to improve our library's development experience and make it easier to maintain in the long run.
 
-```bash
-git remote add origin https://github.com/SpaghettiCoder/MyLibrary.git
-```
+## Configuration files
 
 ```bash
 dotnet new nugetconfig
