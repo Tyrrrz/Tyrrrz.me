@@ -3,7 +3,7 @@ title: '(The Unglamorous Side of) Building a library in .NET'
 date: '2024-10-28'
 ---
 
-Developing a library involves a lot of moving pieces, and not all of them are just about writing code. Beyond the functionality of the library itself, you also have to consider many operational concerns, such as how the library is built, tested, and released — and how those processes should be automated in an efficient and reliable way. These aspects may not be as prominent on the surface, but they still have significant implications both on your own productivity as the author, as well as the experience of the library's consumers.
+Developing a library involves a lot of moving pieces, and not all of them are just about writing code. Beyond the functionality of the library itself, you also have to consider many operational concerns, such as how it is built, tested, and released — and how those processes should be automated in an efficient and reliable way. These aspects may not be as prominent on the surface, but they still have significant implications both on your own productivity as the author, as well as the experience of the library's consumers.
 
 Even in such a mature and opinionated ecosystem as .NET, there is no true one-size-fits-all solution. The tooling landscape — both within the platform and the wider software world — is vast and constantly evolving, so with lots of different knobs to turn and approaches to evaluate, it can be difficult to know where to start.
 
@@ -27,7 +27,7 @@ Generally speaking, there are two main ways to organize a solution in .NET: _the
 └── MyLibrary.sln
 ```
 
-Here we have a bare-bones setup, consisting of the `MyLibrary` project that houses the library code, and the `MyLibrary.Tests` project which contains the corresponding automated tests. These two projects are unified within a single solution scope, using a file named `MyLibrary.sln`, which provides a centralized entry point for the .NET tooling to discover and manage them.
+Here we have a bare-bones setup, consisting of the `MyLibrary` project that houses the library code, and the `MyLibrary.Tests` project which contains the corresponding automated tests. These two projects are unified within a single solution scope using a file named `MyLibrary.sln`, which provides a centralized entry point for the .NET tooling to discover and manage them.
 
 To achieve the structure visualized above, we can either create the solution from the IDE, or simply run the following `dotnet` commands in the terminal:
 
@@ -38,9 +38,9 @@ dotnet new sln -n MyLibrary
 dotnet sln add MyLibrary/MyLibrary.csproj MyLibrary.Tests/MyLibrary.Tests.csproj
 ```
 
-Beyond that, the project will also need to be integrated with a version control system and, ultimately, a code hosting platform. There are several ways to go about this, but for this article we'll be using [Git](https://git-scm.com) and [GitHub](https://github.com) respectively. There is definitely merit to other platforms as well — especially if you are not considering making your library open-source — but GitHub is still the most popular and accessible option out there. So, with that in mind, let's assume that our origin remote is hosted on GitHub at `https://github.com/Tyrrrz/MyLibrary`.
+Beyond that, the project will also need to be integrated with a version control system and a code hosting platform. There are several ways to go about this, but for this article we will stick to the most popular and obvious combination: [Git](https://git-scm.com) and [GitHub](https://github.com). While Git is more or less the de facto standard for version control, there is definitely merit to platforms other than GitHub — but unless you have a specific reason to use something else, I strongly recommend GitHub for its wide adoption, streamlined user experience, and rich ecosystem of tools and integrations.
 
-In order to initialize a Git repository rooted in the solution directory, we can run the commands below:
+So, with all of that in mind, let's assume we've created a new repository on GitHub for our project, accessible at `https://github.com/Tyrrrz/MyLibrary`. Let's now also initialize the repository locally and add the GitHub repository as a remote, so we can keep our changes synchronized. We can do this by running the following commands in the terminal:
 
 ```bash
 dotnet new gitignore
