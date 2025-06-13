@@ -27,9 +27,9 @@ Generally speaking, there are two main ways to organize a solution in .NET: _the
 └── MyLibrary.sln
 ```
 
-Here we have a bare-bones setup, consisting of the `MyLibrary` project that houses the library code, and the `MyLibrary.Tests` project which contains the corresponding automated tests. These two projects are unified within a single solution scope using a file named `MyLibrary.sln`, which provides a centralized entry point for the .NET tooling to discover and manage them.
+Here we have a bare-bones setup, consisting of the `MyLibrary` project that houses the library code, and the `MyLibrary.Tests` project which contains the corresponding automated tests. Both of them are unified within a single solution scope using a file named `MyLibrary.sln`, which provides a centralized entry point for the .NET tooling to discover and manage these projects.
 
-To achieve the structure visualized above, we can either create the solution from the IDE, or simply run the following `dotnet` commands in the terminal:
+To achieve the structure visualized above, we can either create the solution from an IDE, or simply run the following `dotnet` commands in the terminal:
 
 ```bash
 dotnet new classlib -n MyLibrary -o MyLibrary
@@ -38,17 +38,17 @@ dotnet new sln -n MyLibrary
 dotnet sln add MyLibrary/MyLibrary.csproj MyLibrary.Tests/MyLibrary.Tests.csproj
 ```
 
-Beyond that, the project will also need to be integrated with a version control system and a code hosting platform. There are several ways to go about this, but for this article we will stick to the most popular and obvious combination: [Git](https://git-scm.com) and [GitHub](https://github.com). While Git is more or less the de facto standard for version control, there is definitely merit to platforms other than GitHub — but unless you have a specific reason to use something else, I strongly recommend GitHub for its wide adoption, streamlined user experience, and rich ecosystem of tools and integrations.
+Finally, our solution also needs to be integrated with a version control system and, ideally, a code hosting platform. While Git is undeniably the de facto standard when it comes to the former, there's merit to several options as far as the latter is concerned. However, unless you have a specific reason to use something else, I strongly recommend going with the obvious combination of [Git](https://git-scm.com) and [GitHub](https://github.com) due to its wide adoption, streamlined user experience, and rich ecosystem of tools and integrations.
 
-So, with all of that in mind, let's assume we've created a new repository on GitHub for our project, accessible at `https://github.com/Tyrrrz/MyLibrary`. Let's now also initialize the repository locally and add the GitHub repository as a remote, so we can keep our changes synchronized. We can do this by running the following commands in the terminal:
+With that in mind, let's assume we've created a new repository on GitHub, accessible at `https://github.com/Tyrrrz/MyLibrary`. Now we can also initialize the repository locally to keep our changes synchronized:
 
 ```bash
-dotnet new gitignore
 git init
 git remote add origin https://github.com/Tyrrrz/MyLibrary.git
+dotnet new gitignore
 ```
 
-This creates the `.git` directory with all the associated metadata and an extensive `gitignore` file, compatible with typical file and directory patterns used within the .NET ecosystem. Additionally, the last command also adds a remote named `origin`, which points to the GitHub repository we assumed to have created earlier. The resulting file layout should look like this:
+The above commands initialize a new Git repository in the current directory, add a remote named `origin` that points to the GitHub repository we've previously created. Additionally, we also generate a `.gitignore` file specifically tailored for typical file and directory patterns used within the .NET ecosystem. The resulting file layout should look like this:
 
 ```
 ├── .git
