@@ -38,9 +38,11 @@ dotnet new sln -n MyLibrary
 dotnet sln add MyLibrary/MyLibrary.csproj MyLibrary.Tests/MyLibrary.Tests.csproj
 ```
 
-Finally, our solution also needs to be integrated with a version control system and, ideally, a code hosting platform. While Git is undeniably the de facto standard when it comes to the former, there's merit to several options as far as the latter is concerned. However, unless you have a specific reason to use something else, I strongly recommend going with the obvious combination of [Git](https://git-scm.com) and [GitHub](https://github.com) due to its wide adoption, streamlined user experience, and rich ecosystem of tools and integrations.
+Finally, our solution also needs to be integrated with a version control system and, ideally, a code hosting platform. When it comes to the former, things are quite simple: [Git](https://git-scm.com) is essentially the de facto standard in the software world, and .NET is no exception. However, choosing a platform to host your Git repositories is a bit more nuanced, as there are many viable options available and — if you are planning to use them beyond their basic functionality — they all come with some form of vendor lock-in.
 
-With that in mind, let's assume we've created a new repository on GitHub, accessible at `https://github.com/Tyrrrz/MyLibrary`. Now we can also initialize the repository locally to keep our changes synchronized:
+That said, unless you have a specific reason to use something else, I strongly recommend going with the obvious combination of Git and [GitHub](https://github.com) due to its wide adoption, streamlined user experience, and rich ecosystem of tools and integrations. This is especially relevant if you are planning to publish your library as an open-source project, as GitHub is home to the largest community of developers, which helps with discoverability and collaboration.
+
+With all that in mind, let's assume we've created a new repository over at `https://github.com/Tyrrrz/MyLibrary`. Now we can also initialize the repository locally to keep our code and all future changes synchronized:
 
 ```bash
 git init
@@ -48,7 +50,7 @@ git remote add origin https://github.com/Tyrrrz/MyLibrary.git
 dotnet new gitignore
 ```
 
-The above commands initialize a new Git repository in the current directory, add a remote named `origin` that points to the GitHub repository we've previously created. Additionally, we also generate a `.gitignore` file specifically tailored for typical file and directory patterns used within the .NET ecosystem. The resulting file layout should look like this:
+The first two commands above initialize a new Git repository in the current directory and add a remote named `origin` that points to the GitHub repository we've created earlier. Additionally, the last command also generates a `.gitignore` file that is specifically tailored for common file and directory patterns used within the .NET ecosystem. The resulting file layout should look like this:
 
 ```
 ├── .git
@@ -63,7 +65,15 @@ The above commands initialize a new Git repository in the current directory, add
 └── MyLibrary.sln
 ```
 
-At this point, we can consider our library solution to be fully bootstrapped. Since we don't really care about the inner workings of the library, we will assume that the code itself is already written and committed, and that the associated tests are also in place and running correctly. Going forward, let's explore what other things we can do to improve our library's development experience and make it easier to maintain in the long run.
+At this point, we can consider our library solution to be fully bootstrapped. Since we don't really care about the inner workings of the library, we will assume that the code itself is already written, and that the associated tests are also in place and are running correctly. To close this part off, let's commit our changes and push them to the remote repository:
+
+```bash
+git add .
+git commit -m "Initial commit"
+git push -u origin main
+```
+
+Moving on, we're going to explore some of the things we can do to improve our library's development experience and make it easier to maintain in the long run.
 
 ## Configuration files
 
@@ -454,3 +464,5 @@ jobs:
 ## GitHub issue forms
 
 ## Summary
+
+You can reference [`https://github.com/Tyrrrz/MyLibrary`](https://github.com/Tyrrrz/MyLibrary) to see the complete solution that we have built throughout this article. You can also use it a repository template to quickly bootstrap your own library project.
