@@ -75,15 +75,15 @@ git push -u origin main
 
 ## Baseline configuration
 
-Any individual .NET project is essentially a (massive) set of instructions that tell the compiler how to parse and build the code contained within it. These instructions are inherited through various internal `props` and `targets` files and, for the most part, pose no particular interest to you as the developer. However, there are a few key aspects of the build process that you may want to configure — even if solely to establish a set of reasonable defaults.
+Any individual .NET project is essentially a (massive) set of instructions that tell the build toolchain how to parse and compile the code contained within it. These instructions are inherited through various internal `props` and `targets` files and, for the most part, pose no particular interest to you as the developer. However, there are a few key aspects of the build process that you may want to configure — even if solely to establish a set of reasonable defaults.
 
-I call this the "baseline configuration", as its purpose is not to alter how the solution is built, but rather to ensure a consistent and predictable working environment. This is typically achieved with the help of three optional files that are placed at the root of the repository:
+I call these defaults the "baseline configuration", as its purpose is not to alter how the code is built, but rather to ensure a consistent and predictable working environment regardless of where things are running. This is typically achieved with the help of three optional files that are placed at the root of the repository:
 
-- `global.json` — specifies the version of the .NET SDK used for the solution and instructs how to handle version rollovers. This file is primarily useful for defining the minimum SDK version required to work on the solution — for both local scenarios, as well as in CI/CD — as this information is otherwise not encoded anywhere else.
-- `nuget.config` — defines which NuGet package sources are used to resolve dependencies for the solution. This file can be useful if you plan on adding private package sources, but it's also a good idea to include it just to ensure deterministic behavior in different environments.
+- `global.json` — specifies the version of the .NET SDK required for the solution and instructs how to handle rollovers to higher versions. This file is primarily useful for defining the minimum SDK version that your work depends on — for both local scenarios, as well as in CI/CD — as this information is otherwise not encoded anywhere else.
+- `nuget.config` — defines which NuGet package sources are used to resolve external package dependencies for projects in the solution. This file can be useful if you plan on adding private package sources, but it's also a good idea to include it just to ensure deterministic behavior in different environments.
 - `Directory.Build.props` — contains common MSBuild properties that are automatically applied to all projects in descendant directories. This file is useful for specifying solution-wide settings, such as enabled language features, warning levels, and other cross-cutting compiler options.
 
-As you may have guessed, much like everything else, these files can be easily created with the help of the `dotnet new` command:
+As you may have guessed, much like everything else, you can create boilerplates for all of these files using the `dotnet new` command:
 
 ```bash
 dotnet new globaljson
