@@ -38,11 +38,11 @@ dotnet new sln -n MyLibrary
 dotnet sln add MyLibrary/MyLibrary.csproj MyLibrary.Tests/MyLibrary.Tests.csproj
 ```
 
-Besides that, our solution also needs to be integrated with a version control system and, ideally, a code hosting platform. When it comes to the former, things are quite simple: [Git](https://git-scm.com) is essentially the de facto standard in the software world, and .NET is no exception. However, choosing a platform to host your Git repositories is a bit more nuanced, as there are many viable options available and — if you are planning to use them beyond their basic functionality — they all come with some form of vendor lock-in.
+Besides that, our solution also needs to be integrated with a version control system and, ideally, a code hosting platform. When it comes to the former, things are quite simple: [Git](https://git-scm.com) is essentially the de facto standard of version control in the software world, and .NET is no exception. However, choosing a platform to host your Git repositories is a bit more nuanced, as there are many viable options available and — if you are planning to use them beyond their basic functionality — they all come with some form of vendor lock-in.
 
 That said, unless you have a specific reason to use something else, I strongly recommend going with the obvious combination of Git and [GitHub](https://github.com) due to its wide adoption, generous free tier, and rich ecosystem of tools and integrations. This is especially relevant if you are planning to publish your library as an open-source project, as GitHub is home to the largest community of developers, which helps with discoverability and collaboration.
 
-With all that in mind, let's assume we've created a new repository over at `https://github.com/Tyrrrz/MyLibrary`. Now we can also initialize the repository locally and synchronize one with the other:
+With all that in mind, let's assume we've created a new remote repository over at `https://github.com/Tyrrrz/MyLibrary`. Now we can also initialize the repository locally and synchronize the two together:
 
 ```bash
 git init
@@ -50,7 +50,7 @@ git remote add origin https://github.com/Tyrrrz/MyLibrary.git
 dotnet new gitignore
 ```
 
-The first two commands above initialize a new Git repository in the current directory and add a remote named `origin` that points to the GitHub repository we've created earlier. Additionally, the last command also generates a `.gitignore` file that is specifically tailored for common file and directory patterns used within the .NET ecosystem. The resulting file layout should look like this:
+This set of commands does a few things: it creates the `.git` directory with all the repository-specific metadata, adds a remote named `origin` that points to the GitHub repository we've created earlier, and generates a comprehensive [`.gitignore`](https://git-scm.com/docs/gitignore) file that is tailored for common file and directory patterns used within the .NET ecosystem. Once executed, the resulting file structure should look like this:
 
 ```
 ├── .git
@@ -65,7 +65,7 @@ The first two commands above initialize a new Git repository in the current dire
 └── MyLibrary.sln
 ```
 
-At this point, we can consider our library solution to be fully bootstrapped. Since we don't really care about the inner workings of the library, we will assume that the code itself is already written, and that the associated tests are also in place and are running correctly. To close this part off, let's commit our changes and push them to the remote repository:
+At this point, we can consider our library solution to be fully bootstrapped. Since we don't really care about the inner workings of the library, we will assume that its functionality has been fully implemented, and that the associated tests are also in place and running correctly. To close this part off, let's commit our existing codebase and push it to the remote repository:
 
 ```bash
 git add .
@@ -75,21 +75,23 @@ git push -u origin main
 
 ## Baseline configuration
 
-Any individual .NET project is essentially a (massive) set of instructions that tell the build toolchain how to parse and compile the code contained within it. These instructions are inherited through various internal `props` and `targets` files and, for the most part, pose no particular interest to you as the developer. However, there are a few key aspects of the build process that you may want to configure — even if solely to establish a set of reasonable defaults.
+Any individual .NET project is essentially a (massive) set of instructions that direct the toolchain how to parse, compile, and package the code contained within it. These instructions are inherited through various internal `props` and `targets` files and, for the most part, pose no particular interest to you as the developer. However, there are a few key aspects that you may want to configure — even if solely to establish a set of reasonable defaults.
 
-I call these defaults the "baseline configuration", as its purpose is not to alter how the code is built, but rather to ensure a consistent and predictable working environment regardless of where things are running. This is typically achieved with the help of three optional files that are placed at the root of the repository:
+I call these defaults the "baseline configuration", as their purpose is not so much to alter the build process, but rather to ensure a consistent behavior across unpredictable environments. This can be achieved with the help of the following three optional files:
 
-- `global.json` — specifies the version of the .NET SDK required for the solution and instructs how to handle rollovers to higher versions. This file is primarily useful for defining the minimum SDK version that your work depends on — for both local scenarios, as well as in CI/CD — as this information is otherwise not encoded anywhere else.
-- `nuget.config` — defines which NuGet package sources are used to resolve external package dependencies for projects in the solution. This file can be useful if you plan on adding private package sources, but it's also a good idea to include it just to ensure deterministic behavior in different environments.
-- `Directory.Build.props` — contains common MSBuild properties that are automatically applied to all projects in descendant directories. This file is useful for specifying solution-wide settings, such as enabled language features, warning levels, and other cross-cutting compiler options.
+- [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — specifies the version of the .NET SDK required for the solution and instructs how to roll forward to higher versions. Very often a project may depend on certain language, compiler, or tooling features that are not available in older versions of the SDK — so this file is useful for enforcing that requirement. It also provides better developer experience by showing a coherent message when the right version is missing, instead of failing with a cryptic error deep within the build chain.
+- [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — defines, among other things, which NuGet sources are used to resolve external package dependencies for projects in the solution. Even if you're not relying on any custom NuGet feeds, this file is useful to ensure that the default sources are not overridden by higher level configuration files that may be present on the machine.
+- [`Directory.Build.props`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory) — is a file that can be used to specify cross-cutting settings that should be applied to all projects in the solution. Once created, .NET tooling will automatically include the contents of this file when processing project files in the same directory or any of its subdirectories. This is useful for configuring common properties such as language version, warning levels, compiler features, and so on.
 
-As you may have guessed, much like everything else, you can create boilerplates for all of these files using the `dotnet new` command:
+To get started, we can create boilerplates for all three of these files by using the `dotnet new` command:
 
 ```bash
 dotnet new globaljson
 dotnet new nugetconfig
 dotnet new buildprops
 ```
+
+Usually, as new versions of the .NET SDK are released, you want to update your local installation to the latest version. SDK versions are incremental and backwards-compatible, so you can always use the latest version of the SDK to build your projects, even if they target older versions of the framework.
 
 ## Target frameworks and compatibility
 
