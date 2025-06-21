@@ -38,9 +38,9 @@ dotnet new sln -n MyLibrary
 dotnet sln add MyLibrary/MyLibrary.csproj MyLibrary.Tests/MyLibrary.Tests.csproj
 ```
 
-Besides that, our solution also needs to be integrated with a version control system and, ideally, a code hosting platform. When it comes to the former, things are quite simple: [Git](https://git-scm.com) is essentially the de facto standard of version control in the software world, and .NET is no exception. However, choosing a platform to host your Git repositories is a bit more nuanced, as there are many viable options available and — if you are planning to use them beyond their basic functionality — they all come with some form of vendor lock-in.
+Besides that, our solution also needs to be integrated with a version control system and, ideally, a code hosting platform. When it comes to the former, the choice is fairly simple: [Git](https://git-scm.com) is essentially the de facto standard of version control in the software world, and .NET is no exception. However, choosing a platform to host your Git repositories is a bit more nuanced, as there are many viable options available and — if you are planning to use them beyond their basic functionality — they all come with some form of vendor lock-in.
 
-That said, unless you have a specific reason to use something else, I strongly recommend going with the obvious combination of Git and [GitHub](https://github.com) due to its wide adoption, generous free tier, and rich ecosystem of tools and integrations. This is especially relevant if you are planning to publish your library as an open-source project, as GitHub is home to the largest community of developers, which helps with discoverability and collaboration.
+That said, unless you have a specific reason to use something else, I strongly recommend going with the obvious combination of Git and [GitHub](https://github.com) due to its wide adoption, generous free tier, and rich ecosystem of tools and integrations. This is especially relevant if you are planning to publish your library as an open-source project, as GitHub's large community of developers can help with discoverability and collaboration.
 
 With all that in mind, let's assume we've created a new remote repository over at `https://github.com/Tyrrrz/MyLibrary`. Now we can also initialize the repository locally and synchronize the two together:
 
@@ -50,7 +50,7 @@ git remote add origin https://github.com/Tyrrrz/MyLibrary.git
 dotnet new gitignore
 ```
 
-This set of commands does a few things: it creates the `.git` directory with all the repository-specific metadata, adds a remote named `origin` that points to the GitHub repository we've created earlier, and generates a comprehensive [`.gitignore`](https://git-scm.com/docs/gitignore) file that is tailored for common file and directory patterns used within the .NET ecosystem. Once executed, the resulting file structure should look like this:
+This set of commands does a few things: it creates the `.git` directory with all the repository-specific metadata, adds a remote named `origin` that points to the GitHub repository we've created earlier, and generates a comprehensive [`.gitignore`](https://git-scm.com/docs/gitignore) file that is tailored for common file and directory patterns used within the .NET ecosystem. Once all the commands are executed, the resulting file structure should look like this:
 
 ```
 ├── .git
@@ -65,7 +65,7 @@ This set of commands does a few things: it creates the `.git` directory with all
 └── MyLibrary.sln
 ```
 
-At this point, we can consider our library solution to be fully bootstrapped. Since we don't really care about the inner workings of the library, we will assume that its functionality has been fully implemented, and that the associated tests are also in place and running correctly. To close this part off, let's commit our existing codebase and push it to the remote repository:
+At this point, we can consider the initial preparation of our solution to be finished. Since we don't really care about the inner workings of the library, we will simply assume that its functionality has been fully implemented, and that the associated tests are also in place and running correctly. To close this part off, let's commit our existing codebase and push it to the remote repository:
 
 ```bash
 git add .
@@ -75,9 +75,9 @@ git push -u origin main
 
 ## Baseline configuration
 
-Any individual .NET project is essentially a (massive) set of instructions that direct the toolchain how to parse, compile, and package the code contained within it. These instructions are inherited through various internal `props` and `targets` files and, for the most part, pose no particular interest to you as the developer. However, there are a few key aspects that you may want to configure — even if solely to establish a set of reasonable defaults.
+Any individual .NET project is essentially a (massive) set of instructions that direct the toolchain how to parse, compile, and package the code contained within it. These instructions are inherited through various internal `props` and `targets` files and, for the most part, pose no particular interest to you as the developer. However, there are a few key aspects of the build process that you may want to configure — even if solely to establish a set of reasonable defaults.
 
-I call these defaults the "baseline configuration", as their purpose is not so much to alter the build process, but rather to ensure a consistent behavior across unpredictable environments. This can be achieved with the help of the following three optional files:
+I call these defaults the "baseline configuration", as their purpose is not necessarily to fine-tune the compilation behavior, but rather to ensure its consistency across unpredictable environments. This can be achieved with the help of the following three optional files:
 
 - [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — specifies the version of the .NET SDK required for the solution and instructs how to roll forward to higher versions. Very often a project may depend on certain language, compiler, or tooling features that are not available in older versions of the SDK — so this file is useful for enforcing that requirement. It also provides better developer experience by showing a coherent message when the right version is missing, instead of failing with a cryptic error deep within the build chain.
 - [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — defines, among other things, which NuGet feeds are used to resolve external package dependencies for projects in the solution. Even if you're not relying on any custom NuGet registries, this file is useful to ensure that the default sources are not overridden by higher level configuration files that may be present on the machine.
