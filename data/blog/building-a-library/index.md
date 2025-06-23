@@ -75,15 +75,15 @@ git push -u origin main
 
 ## Baseline configuration
 
-Any individual .NET project is essentially a (massive) set of instructions that direct the toolchain how to parse, compile, and package the code contained within it. These instructions are inherited through various internal `props` and `targets` files and, for the most part, pose no particular interest to you as the developer. However, there are a few key aspects of the build process that you may want to configure — even if solely to establish a set of reasonable defaults.
+Any individual .NET project is essentially a (massive) set of instructions that direct the toolchain how to parse, compile, and package the code contained within it. These instructions are inherited through various internal `props` and `targets` files and, for the most part, pose no particular interest to you as the developer. However, there are a few aspects of the build process that you may want to configure — even if solely to establish a set of reasonable defaults.
 
-I call these defaults the "baseline configuration", as their purpose is not necessarily to fine-tune the compilation behavior, but rather to ensure its consistency across unpredictable environments. This can be achieved with the help of the following three optional files:
+I call these defaults the "baseline configuration", as their purpose is not necessarily to fine-tune or change the behavior of the build, but rather to ensure its consistency across unpredictable environments. This can be achieved with the help of the following three optional files:
 
-- [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — specifies the version of the .NET SDK required for the solution and instructs how to roll forward to higher versions. Very often a project may depend on certain language, compiler, or tooling features that are not available in older versions of the SDK — so this file is useful for enforcing that requirement. It also provides better developer experience by showing a coherent message when the right version is missing, instead of failing with a cryptic error deep within the build chain.
-- [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — defines, among other things, which NuGet feeds are used to resolve external package dependencies for projects in the solution. Even if you're not relying on any custom NuGet registries, this file is useful to ensure that the default sources are not overridden by higher level configuration files that may be present on the machine.
-- [`Directory.Build.props`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory) — is a file that can be used to specify cross-cutting settings that should be applied to all projects in the solution. Once created, .NET tooling will automatically include the contents of this file when processing project files in the same directory or any of its subdirectories. This is useful for configuring common properties such as language version, warning levels, compiler features, and so on.
+- [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — specifies which version of the .NET SDK should be used for the solution and instructs how to roll forward to higher versions. Very often a project may depend on certain language, compiler, or tooling features that are not available in older versions of the SDK — so this file is useful for enforcing that requirement. It also lends to a better developer experience, as the failure to locate the right SDK version will short-circuit the process with a clear error message, rather than allowing the toolchain to fail due to missing underlying functionality.
+- [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — defines, among other things, which NuGet feeds should be used to resolve external package dependencies for projects in the solution. Even if you're not relying on any custom NuGet registries, this file is useful to ensure that the default sources are not overridden by higher level configuration files that may be present in the environment.
+- [`Directory.Build.props`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory) — is a file that can be used to specify cross-cutting settings that apply to all projects in the solution. Once created, .NET tooling will automatically include the property and item groups defined in this file when processing projects nested within the same directory. This is useful for setting things like the language version or enabling features such as nullable reference types, whose default states may vary depending on the SDK version and the target framework.
 
-To get started, we can create boilerplates for all three of these files by using the `dotnet new` command:
+To get started, we can generate boilerplates for all three of these files by using the `dotnet new` command:
 
 ```bash
 dotnet new globaljson
@@ -91,7 +91,60 @@ dotnet new nugetconfig
 dotnet new buildprops
 ```
 
-Usually, as new versions of the .NET SDK are released, you want to update your local installation to the latest version. SDK versions are incremental and backwards-compatible, so you can always use the latest version of the SDK to build your projects, even if they target older versions of the framework.
+By default, a `global.json` file generated this way will specify the same version of the .NET SDK that was used to create it, with no roll forward option. This means that anyone attempting to build the solution will need to have the exact same version of the SDK installed on their machine, which is obviously not very practical. Let's modify that file so it looks like this instead:
+
+```json
+{
+  "sdk": {
+    "version": "9.0.100",
+    "rollForward": "latestMinor"
+  }
+}
+```
+
+As of writing, the latest release of the .NET SDK is .NET 9.0, so we set the `version` property to `9.0.100` — the lowest version within the same major. Together with the `rollForward` option set to `latestMinor`, this creates a rule that allows the solution to be built by any version of the SDK within the `9.x` band, but not lower or higher.
+
+Now you may be wondering how to decide which SDK version to set in the `global.json` file. In order to answer that, let's consider how the SDK version affects the projects in our solution. We may want to target a specific version of the SDK for a few reasons:
+
+- Any of the projects target a framework version that was introduced in the specified SDK version. For example, if you wanted to target .NET 8, you would need the .NET 8 SDK (or higher) installed to do it.
+- Any of the projects depend on language features introduced in C#/F# versions released alongside the specified SDK version. For example, if you wanted to use C# 13's [`field` keyword](https://learn.microsoft.com/dotnet/csharp/whats-new/csharp-13#the-field-keyword), you would need to set the SDK version to at least `9.0.100`, as the C# 13 compiler comes bundled with .NET 9.
+- Any of the projects depend on tooling features introduced in the specified SDK version. For example,
+
+Moving onto the `nuget.config` file, we can leave it as is, since it already contains the default NuGet sources that are used to resolve package dependencies:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <!--To inherit the global NuGet package sources remove the <clear/> line below -->
+    <clear />
+    <add key="nuget" value="https://api.nuget.org/v3/index.json" />
+  </packageSources>
+</configuration>
+```
+
+Finally, let's take a look at which helpful properties we may want to include in the `Directory.Build.props` file.
+
+```xml
+<Project>
+  <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
+  <PropertyGroup>
+    <Version>0.0.0-dev</Version>
+    <Company>Tyrrrz</Company>
+    <Copyright>Copyright (C) Oleksii Holub</Copyright>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- Disable nullability warnings on older frameworks because there is no nullability info for BCL -->
+  <PropertyGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1'))">
+    <Nullable>annotations</Nullable>
+  </PropertyGroup>
+</Project>
+```
 
 ## Target frameworks and compatibility
 
