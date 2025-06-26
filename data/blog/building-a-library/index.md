@@ -11,11 +11,11 @@ I have been maintaining [several open-source libraries in .NET](/projects) for o
 
 In this article, I will outline a typical .NET library setup, covering build settings, productivity extensions, testing and publishing workflows, and the services that help automate and tie everything together. We will go over different strategies, discuss the trade-offs between them, and see how they can be combined to establish a solid foundation for your library project.
 
-## Bootstrapping the project
+## Scaffolding the project
 
-Much like everything else in life, a .NET project has a beginning — and that beginning is the `dotnet new` command. It's safe to assume that, if you're reading this article, you've probably set up a fair share of .NET solutions and don't need any introduction to the process. However, since we'll be relying on certain expectations about the project structure going forward, let's use this opportunity to establish a common ground.
+Much like everything else in life, a .NET project has a beginning — and that beginning is the `dotnet new` command. It's safe to assume that, if you're reading this article, you've probably set up a fair share of .NET solutions and don't need any introduction to the process. However, since we'll be relying on certain expectations about the file structure going forward, let's use this opportunity to establish a common ground.
 
-Generally speaking, there are two main ways to organize a solution in .NET: _the simpler way_ — where all projects are placed in their respective directories within the repository root, and _the more scalable way_ — where projects are further grouped by their type and nested within the corresponding directories (`src/`, `tests/`, `samples/`, etc.). Both approaches are valid and have their place, but since we'll not be focusing on the actual codebase in this article, we'll go with the first option to keep things simple:
+Generally speaking, there are two main ways to organize a solution in .NET: _the simpler way_ — where all projects are placed in their respective directories in the root of the codebase, and _the more scalable way_ — where projects are further grouped by their type and nested within the corresponding directories (`src/`, `tests/`, `samples/`, etc.). Both approaches are valid and have their place, but since we'll not be focusing on the actual codebase in this article, we'll go with the first option to keep things simple:
 
 ```
 ├── MyLibrary
@@ -29,7 +29,7 @@ Generally speaking, there are two main ways to organize a solution in .NET: _the
 
 Here we have a bare-bones setup, consisting of the `MyLibrary` project that houses the library code, and the `MyLibrary.Tests` project which contains the corresponding automated tests. Both of them are unified within a single solution scope using a file named `MyLibrary.sln`, which provides a centralized entry point for the .NET tooling to discover and manage these projects.
 
-To achieve the structure visualized above, we can either create the solution from an IDE, or simply run the following `dotnet` commands in the terminal:
+To achieve the structure visualized above, we can either create the solution from an IDE of choice, or simply run the following `dotnet` commands in the terminal:
 
 ```bash
 dotnet new classlib -n MyLibrary -o MyLibrary
@@ -38,9 +38,9 @@ dotnet new sln -n MyLibrary
 dotnet sln add MyLibrary/MyLibrary.csproj MyLibrary.Tests/MyLibrary.Tests.csproj
 ```
 
-Besides that, our solution also needs to be integrated with a version control system and, ideally, a code hosting platform. When it comes to the former, the choice is fairly simple: [Git](https://git-scm.com) is essentially the de facto standard of version control in the software world, and .NET is no exception. However, choosing a platform to host your Git repositories is a bit more nuanced, as there are many viable options available and — if you are planning to use them beyond their basic functionality — they all come with some form of vendor lock-in.
+Besides that, our solution also needs to be integrated with a version control system and, ideally, a code hosting platform. When it comes to the former, the choice is fairly simple: [Git](https://git-scm.com) is the absolute standard of version control in the software world, and .NET is no exception. However, choosing a platform to host your Git repositories is a bit more nuanced, as there are many viable options available and — if you are planning to use them beyond their basic functionality — they all come with some form of vendor lock-in.
 
-That said, unless you have a specific reason to use something else, I strongly recommend going with the obvious combination of Git and [GitHub](https://github.com) due to its wide adoption, generous free tier, and rich ecosystem of tools and integrations. This is especially relevant if you are planning to publish your library as an open-source project, as GitHub's large community of developers can help with discoverability and collaboration.
+That said, unless you have a specific reason to use something else, I strongly recommend going with the obvious combination of Git and [GitHub](https://github.com) due to its wide adoption, generous free tier, and rich ecosystem of tools and integrations. This is especially relevant if you are planning to publish your library as an open-source project, as GitHub's large community of developers lends to better discoverability and collaboration opportunities.
 
 With all that in mind, let's assume we've created a new remote repository over at `https://github.com/Tyrrrz/MyLibrary`. Now we can also initialize the repository locally and synchronize the two together:
 
@@ -50,7 +50,7 @@ git remote add origin https://github.com/Tyrrrz/MyLibrary.git
 dotnet new gitignore
 ```
 
-This set of commands does a few things: it creates the `.git` directory with all the repository-specific metadata, adds a remote named `origin` that points to the GitHub repository we've created earlier, and generates a comprehensive [`.gitignore`](https://git-scm.com/docs/gitignore) file that is tailored for common file and directory patterns used within the .NET ecosystem. Once all the commands are executed, the resulting file structure should look like this:
+This set of commands does a few things: it creates the `.git` directory with all the repository-specific metadata, adds a remote named `origin` pointing to the GitHub repository we've created earlier, and generates a comprehensive [`.gitignore`](https://git-scm.com/docs/gitignore) file tailored for common file and directory patterns used within the .NET ecosystem. Once all the commands are executed, the resulting file structure should look like this:
 
 ```
 ├── .git
@@ -65,7 +65,7 @@ This set of commands does a few things: it creates the `.git` directory with all
 └── MyLibrary.sln
 ```
 
-At this point, we can consider the initial preparation of our solution to be finished. Since we don't really care about the inner workings of the library, we will simply assume that its functionality has been fully implemented, and that the associated tests are also in place and running correctly. To close this part off, let's commit our existing codebase and push it to the remote repository:
+At this point, we can consider the initial scaffolding of our solution to be complete. Since we don't really care about the inner workings of the library, we will simply assume that its functionality has been fully implemented, and that the associated tests are also in place and running correctly. To close this part off, let's commit our existing codebase and push it to the remote repository:
 
 ```bash
 git add .
@@ -77,13 +77,13 @@ git push -u origin main
 
 Any individual .NET project is essentially a (massive) set of instructions that direct the toolchain how to parse, compile, and package the code contained within it. These instructions are inherited through various internal `props` and `targets` files and, for the most part, pose no particular interest to you as the developer. However, there are a few aspects of the build process that you may want to configure — even if solely to establish a set of reasonable defaults.
 
-I call these defaults the "baseline configuration", as their purpose is not necessarily to fine-tune or change the behavior of the build, but rather to ensure its consistency across unpredictable environments. This can be achieved with the help of the following three optional files:
+I call these defaults the "baseline configuration", as their purpose is not to significantly alter the behavior of the build, but rather to ensure its consistency across unpredictable environments. This can be achieved with the help of the following three optional files:
 
-- [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — specifies which version of the .NET SDK should be used for the solution and instructs how to roll forward to higher versions. Very often a project may depend on certain language, compiler, or tooling features that are not available in older versions of the SDK — so this file is useful for enforcing that requirement. It also lends to a better developer experience, as the failure to locate the right SDK version will short-circuit the process with a clear error message, rather than allowing the toolchain to fail due to missing underlying functionality.
-- [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — defines, among other things, which NuGet feeds should be used to resolve external package dependencies for projects in the solution. Even if you're not relying on any custom NuGet registries, this file is useful to ensure that the default sources are not overridden by higher level configuration files that may be present in the environment.
-- [`Directory.Build.props`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory) — is a file that can be used to specify cross-cutting settings that apply to all projects in the solution. Once created, .NET tooling will automatically include the property and item groups defined in this file when processing projects nested within the same directory. This is useful for setting things like the language version or enabling features such as nullable reference types, whose default states may vary depending on the SDK version and the target framework.
+- [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — specifies which version of the .NET SDK should be used for the solution and optionally instructs how to roll forward to higher versions.
+- [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — configures the NuGet package manager, including the sources from which it should resolve package dependencies.
+- [`Directory.Build.props`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory) — used to define custom MSBuild properties that are automatically applied to all projects in the solution.
 
-To get started, we can generate boilerplates for all three of these files by using the `dotnet new` command:
+Before we explore these files in detail, let's get started by generating boilerplates for all three of them by running the following `dotnet new` commands in the root of our solution directory:
 
 ```bash
 dotnet new globaljson
@@ -91,26 +91,31 @@ dotnet new nugetconfig
 dotnet new buildprops
 ```
 
-By default, a `global.json` file generated this way will specify the same version of the .NET SDK that was used to create it, with no roll forward option. This means that anyone attempting to build the solution will need to have the exact same version of the SDK installed on their machine, which is obviously not very practical. Let's modify that file so it looks like this instead:
+Generally speaking, the purpose of the `global.json` file is to pin the version of the .NET SDK that the solution was intended to work with. When you generate this file using `dotnet new globaljson`, it will default to the version of the SDK that was used to run the command (i.e. same as `dotnet --version`) — meaning that anyone who attempts to build the solution will need to have that exact version installed on their machine. This is useful for ensuring that the solution is built with a consistent set of tools, but it can also be unnecessarily restrictive.
+
+To make things more flexible, we can modify the `global.json` file to allow for a wider range of SDK versions. This is done by specifying a `rollForward` option, which instructs the .NET tooling how to handle cases where there is not an exact match but a higher version of the SDK is available. Let's modify that file so it looks like this instead:
 
 ```json
 {
   "sdk": {
     "version": "9.0.100",
-    "rollForward": "latestMinor"
+    "rollForward": "latestMajor"
   }
 }
 ```
 
-As of writing, the latest release of the .NET SDK is .NET 9.0, so we set the `version` property to `9.0.100` — the lowest version within the same major. Together with the `rollForward` option set to `latestMinor`, this creates a rule that allows the solution to be built by any version of the SDK within the `9.x` band, but not lower or higher.
+As of writing, the latest iteration of .NET is .NET 9.0, so we set the `version` property to `9.0.100` — the lowest feature and patch version of the .NET 9.0 SDK. Together with the `rollForward` option set to `latestMajor`, this creates a rule that allows the solution to be built by any version of the .NET SDK that is within the `9.x` band or higher.
 
-Now you may be wondering how to decide which SDK version to set in the `global.json` file. In order to answer that, let's consider how the SDK version affects the projects in our solution. We may want to target a specific version of the SDK for a few reasons:
+It may seem counterintuitive to create a configuration that limits the SDK to a specific version, but then allow any higher version to supersede that requirement — in fact, isn't that already the default behavior? Yes, the default behavior in .NET is to simply use the highest available version of the SDK when running `dotnet` commands, but the above `global.json` file enforces an additional requirement, which clearly communicates the minimum version of the SDK that the solution is expected to work with.
 
-- Any of the projects target a framework version that was introduced in the specified SDK version. For example, if you wanted to target .NET 8, you would need the .NET 8 SDK (or higher) installed to do it.
-- Any of the projects depend on language features introduced in C#/F# versions released alongside the specified SDK version. For example, if you wanted to use C# 13's [`field` keyword](https://learn.microsoft.com/dotnet/csharp/whats-new/csharp-13#the-field-keyword), you would need to set the SDK version to at least `9.0.100`, as the C# 13 compiler comes bundled with .NET 9.
-- Any of the projects depend on tooling features introduced in the specified SDK version. For example,
+In general, choosing the version to pin in the `global.json` file comes down to the following considerations:
+
+- If you are using any features that are specific to a particular version of the SDK, you should pin that version. For example, if you're planning to target `net9.0` in any of your projects or use one of the newer C# 13 or F# 9 features, you should set the `version` property to `9.0.100`.
+- If you need to rely on a security fix or another change that was introduced in a more specific version of the SDK, you should pin that version instead. For example, setting the `version` to `9.0.301` will ensure that
 
 Moving onto the `nuget.config` file, we can leave it as is, since it already contains the default NuGet sources that are used to resolve package dependencies:
+
+Even if you're not relying on any custom NuGet registries, this file is useful to ensure that the default sources are not overridden by higher level configuration files that may be present in the environment.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -529,6 +534,14 @@ jobs:
 ```
 
 ## Releasing workflow
+
+```
+          -p:CSharpier_Bypass=true
+          -p:ContinuousIntegrationBuild=true
+          -p:PublishRepositoryUrl=true
+          -p:EmbedUntrackedSources=true
+          -p:DebugType=embedded
+```
 
 ```yml
 name: main
