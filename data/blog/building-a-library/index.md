@@ -113,6 +113,8 @@ In general, choosing the version to pin in the `global.json` file comes down to 
 - If you are using any features that are specific to a particular version of the SDK, you should pin that version. For example, if you're planning to target `net9.0` in any of your projects or use one of the newer C# 13 or F# 9 features, you should set the `version` property to `9.0.100`.
 - If you need to rely on a security fix or another change that was introduced in a more specific version of the SDK, you should pin that version instead. For example, setting the `version` to `9.0.301` will ensure that
 
+AS a general recommendation, if you don't want to hyper-optimize `global.json` to find the absolute minimum version that your solution can work with, you can simply set it to the latest stable version of the SDK that is available. SDK releases are almost always backwards compatible, and there's generally no reason to avoid upgrading.
+
 Moving onto the `nuget.config` file, we can leave it as is, since it already contains the default NuGet sources that are used to resolve package dependencies:
 
 Even if you're not relying on any custom NuGet registries, this file is useful to ensure that the default sources are not overridden by higher level configuration files that may be present in the environment.
@@ -168,6 +170,8 @@ IsTrimmable/IsAotCompatible
 `IsTargetFrameworkCompatible`
 
 ## Testing workflow
+
+Let's summarize what we have so far.
 
 ```yml
 # Friendly name of the workflow
