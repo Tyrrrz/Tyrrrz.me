@@ -146,11 +146,21 @@ Finally, let's take a look at which helpful properties we may want to include in
 </Project>
 ```
 
+Don't resolve `<ContinuousIntegrationBuild>` automatically. Sourcelink
+
 ## Target frameworks and compatibility
+
+Which to target (minimal required and latest version (for analyzers))
+
+How compat works between frameworks
+
+IsTrimmable/IsAotCompatible
 
 - https://github.com/Tyrrrz/PolyShim
 - https://github.com/SimonCropp/Polyfill
 - https://github.com/Sergio0694/PolySharp
+
+`IsTargetFrameworkCompatible`
 
 ## Testing workflow
 
@@ -430,8 +440,6 @@ jobs:
 
 ![Code coverage using codecov/codecov-action](codecov-graph.png)
 
-## Releasing workflow
-
 ## Security considerations
 
 ```yml
@@ -520,9 +528,384 @@ jobs:
       - uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
 ```
 
+## Releasing workflow
+
+```yml
+name: main
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    # Test job remains unchanged, but is omitted for brevity
+    # ...
+
+  pack:
+    # Operating system doesn't matter here, but Ubuntu-based GitHub Actions
+    # runners are both the fastest and the cheapest.
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      # Clone the repository at current commit
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      # Install the .NET SDK
+      - uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
+        with:
+          dotnet-version: 8.0.x
+
+      # Create NuGet packages
+      - run: dotnet pack --configuration Release
+```
+
+```yml
+name: main
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    # Test job remains unchanged, but is omitted for brevity
+    # ...
+
+  pack:
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: write # this is required to upload artifacts
+      contents: read
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
+        with:
+          dotnet-version: 8.0.x
+
+      - run: dotnet pack --configuration Release
+
+      # Upload all nupkg files as an artifact blob
+      - uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
+        with:
+          name: packages
+          path: '**/*.nupkg'
+```
+
+![artifacts](artifacts.png)
+
+```yml
+name: main
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    # Test job remains unchanged, but is omitted for brevity
+    # ...
+
+  pack:
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
+        with:
+          dotnet-version: 8.0.x
+
+      - run: dotnet pack --configuration Release
+
+      - uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
+        with:
+          name: packages
+          path: '**/*.nupkg'
+
+  deploy:
+    # Only run this job when a new tag is pushed to the repository
+    if: ${{ github.event_name == 'push' && github.ref_type == 'tag' }}
+
+    # We only want the deploy stage to run after both the test and pack stages
+    # have completed successfully.
+    needs:
+      - test
+      - pack
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+
+    steps:
+      # Download the packages artifact
+      - uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        with:
+          name: packages
+
+      # Install the .NET SDK
+      - uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
+        with:
+          dotnet-version: 8.0.x
+
+      # Upload the packages to NuGet
+      - run: >
+          dotnet nuget push "**/*.nupkg"
+          --source https://api.nuget.org/v3/index.json
+          --api-key ${{ secrets.NUGET_API_KEY }}
+```
+
+![secrets](secrets.png)
+
+```xml
+<Project>
+
+  <PropertyGroup>
+    <!-- ... -->
+
+    <!-- Update this when making a new release -->
+    <Version>1.2.3</Version>
+  </PropertyGroup>
+
+</Project>
+```
+
+```yml
+name: main
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    # Test job remains unchanged, but is omitted for brevity
+    # ...
+
+  pack:
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
+        with:
+          dotnet-version: 8.0.x
+
+      # Set the package version to the tag name (on release)
+      # or fall back to a placeholder value (on regular commits).
+      - run: >
+          dotnet pack
+          --configuration Release
+          -p:Version=${{ github.ref_name || '0.0.0-ci' }}
+
+      - uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
+        with:
+          name: packages
+          path: '**/*.nupkg'
+
+  deploy:
+    # Deploy job remains unchanged, but is omitted for brevity
+    # ...
+```
+
+```yml
+name: main
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    # Test job remains unchanged, but is omitted for brevity
+    # ...
+
+  pack:
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
+        with:
+          dotnet-version: 8.0.x
+
+      # Set the package version to the tag name (on release)
+      # or fall back to an auto-generated value (on regular commits).
+      - run: >
+          dotnet pack
+          --configuration Release
+          -p:Version=${{ (github.ref_type == 'tag' && github.ref_name) || format('0.0.0-ci-{0}', github.sha) }}
+
+      - uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
+        with:
+          name: packages
+          path: '**/*.nupkg'
+
+  # Deploy on all commits this time, not just tags
+  deploy:
+    needs:
+      - test
+      - pack
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+
+    steps:
+      - uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        with:
+          name: packages
+
+      - uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
+        with:
+          dotnet-version: 8.0.x
+
+      - run: >
+          dotnet nuget push "**/*.nupkg"
+          --source https://api.nuget.org/v3/index.json
+          --api-key ${{ secrets.NUGET_API_KEY }}
+```
+
+```yml
+name: main
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    # Test job remains unchanged, but is omitted for brevity
+    # ...
+
+  pack:
+    # Pack job remains unchanged, but is omitted for brevity
+    # ...
+
+  deploy:
+    needs:
+      - test
+      - pack
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+
+    steps:
+      - uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        with:
+          name: packages
+
+      - uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
+        with:
+          dotnet-version: 8.0.x
+
+      # Deploy to NuGet.org (only tagged releases)
+      - if: ${{ github.ref_type == 'tag' }}
+        run: >
+          dotnet nuget push "**/*.nupkg"
+          --source https://api.nuget.org/v3/index.json
+          --api-key ${{ secrets.NUGET_API_KEY }}
+
+      # Deploy to GitHub Packages (all commits and releases)
+      - run: >
+          dotnet nuget push "**/*.nupkg"
+          --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+          --api-key ${{ secrets.GITHUB_TOKEN }}
+```
+
+![release notes](release-notes.png)
+
+```console
+$ gh release create 1.2.3 --repo my/repo --generate-notes
+```
+
+```yml
+name: main
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    # Test job remains unchanged, but is omitted for brevity
+    # ...
+
+  pack:
+    # Pack job remains unchanged, but is omitted for brevity
+    # ...
+
+  deploy:
+    needs:
+      - test
+      - pack
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      contents: write # this is required to create releases
+
+    steps:
+      - uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        with:
+          name: packages
+
+      - uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
+        with:
+          dotnet-version: 8.0.x
+
+      - if: ${{ github.ref_type == 'tag' }}
+        run: >
+          dotnet nuget push "**/*.nupkg"
+          --source https://api.nuget.org/v3/index.json
+          --api-key ${{ secrets.NUGET_API_KEY }}
+
+      - run: >
+          dotnet nuget push "**/*.nupkg"
+          --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+          --api-key ${{ secrets.GITHUB_TOKEN }}
+
+      # Create a GitHub release with auto-generated release notes, and upload the packages as assets
+      - if: ${{ github.ref_type == 'tag' }}
+        run: >
+          gh release create ${{ github.ref_name }}
+          $(find . -type f -wholename **/*.nupkg -exec echo {} \; | tr '\n' ' ')
+          --repo ${{ github.event.repository.full_name }}
+          --title ${{ github.ref_name }}
+          --generate-notes
+          --verify-tag
+```
+
 ## Changelog
 
 ## Formatting
+
+CSharpier
 
 ## GitHub issue forms
 
