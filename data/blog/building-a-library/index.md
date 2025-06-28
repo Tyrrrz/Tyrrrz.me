@@ -29,7 +29,7 @@ Generally speaking, there are two main ways to organize a solution in .NET: _the
 
 Here we have a bare-bones setup, consisting of the `MyLibrary` project that houses the library code, and the `MyLibrary.Tests` project which contains the corresponding automated tests. Both of them are unified within a single solution scope using a file named `MyLibrary.sln`, which provides a centralized entry point for the .NET tooling to discover and manage these projects.
 
-To achieve the structure visualized above, we can either create the solution from an IDE of choice, or simply run the following `dotnet` commands in the terminal:
+To achieve the structure visualized above, you can either create the solution from an IDE of choice, or simply run the following `dotnet` commands in the terminal:
 
 ```bash
 dotnet new classlib -n MyLibrary -o MyLibrary
@@ -80,10 +80,10 @@ Any individual .NET project is essentially a (massive) set of instructions that 
 I call these defaults the "baseline configuration", as their purpose is not to significantly alter the behavior of the build, but rather to ensure its consistency across unpredictable environments. This can be achieved with the help of the following three optional files:
 
 - [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — specifies which version of the .NET SDK should be used for the solution and optionally instructs how to roll forward to higher versions.
-- [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — configures the NuGet package manager, including the sources from which it should resolve package dependencies.
-- [`Directory.Build.props`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory) — used to define custom MSBuild properties that are automatically applied to all projects in the solution.
+- [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — configures the NuGet package manager, including the feeds from which it should resolve package dependencies.
+- [`Directory.Build.props`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory) — defines custom MSBuild properties that are automatically applied to all projects in the solution.
 
-Before we explore these files in detail, let's get started by generating boilerplates for all three of them by running the following `dotnet new` commands in the root of our solution directory:
+Before we explore each of these files in detail, let's get started by generating boilerplates for all of them. We can do that by running the following `dotnet new` commands in the root of our solution directory:
 
 ```bash
 dotnet new globaljson
@@ -91,9 +91,9 @@ dotnet new nugetconfig
 dotnet new buildprops
 ```
 
-Generally speaking, the purpose of the `global.json` file is to pin the version of the .NET SDK that the solution was intended to work with. When you generate this file using `dotnet new globaljson`, it will default to the version of the SDK that was used to run the command (i.e. same as `dotnet --version`) — meaning that anyone who attempts to build the solution will need to have that exact version installed on their machine. This is useful for ensuring that the solution is built with a consistent set of tools, but it can also be unnecessarily restrictive.
+First off, we have the `global.json` file, whose purpose is to declare which version of the .NET SDK the solution is intended to work with. Normally, this information is not encoded in the solution file or anywhere else, so the .NET tooling relies on the default behavior of simply using the latest SDK that is available in the environment. This behavior is fine — as long as the automatically selected version happens to be higher than what the codebase needs — but it's a good idea to use `global.json` to specify that requirement explicitly.
 
-To make things more flexible, we can modify the `global.json` file to allow for a wider range of SDK versions. This is done by specifying a `rollForward` option, which instructs the .NET tooling how to handle cases where there is not an exact match but a higher version of the SDK is available. Let's modify that file so it looks like this instead:
+However, when you generate the `global.json` file via `dotnet new`, it will pin the solution to the latest version of the .NET SDK that is installed on your machine. It means that anyone who wants to build the solution will also need to have that exact version installed on their machine — which is clearly too restrictive. Instead, let's modify the file so that it looks like this:
 
 ```json
 {
@@ -104,20 +104,11 @@ To make things more flexible, we can modify the `global.json` file to allow for 
 }
 ```
 
-As of writing, the latest iteration of .NET is .NET 9.0, so we set the `version` property to `9.0.100` — the lowest feature and patch version of the .NET 9.0 SDK. Together with the `rollForward` option set to `latestMajor`, this creates a rule that allows the solution to be built by any version of the .NET SDK that is within the `9.x` band or higher.
+As of writing, the latest iteration of .NET is .NET 9.0, so we set the `version` property to `9.0.100` — the lowest feature and patch version of the `9.x` stream. Together with the `rollForward` option set to `latestMajor`, this creates a rule that allows the solution to be built by any version of the .NET SDK starting with .NET 9.0.
 
-It may seem counterintuitive to create a configuration that limits the SDK to a specific version, but then allow any higher version to supersede that requirement — in fact, isn't that already the default behavior? Yes, the default behavior in .NET is to simply use the highest available version of the SDK when running `dotnet` commands, but the above `global.json` file enforces an additional requirement, which clearly communicates the minimum version of the SDK that the solution is expected to work with.
+Depending on your needs, you may choose to set the `version` property to a more specific version, or configure `rollForward` to be less permissive — either to declare a dependency on certain bug fixes introduced in later versions, or to protect against potential breaking changes that may come with future major updates. However, the approach above is a great starting point that should work well for most projects.
 
-In general, choosing the version to pin in the `global.json` file comes down to the following considerations:
-
-- If you are using any features that are specific to a particular version of the SDK, you should pin that version. For example, if you're planning to target `net9.0` in any of your projects or use one of the newer C# 13 or F# 9 features, you should set the `version` property to `9.0.100`.
-- If you need to rely on a security fix or another change that was introduced in a more specific version of the SDK, you should pin that version instead. For example, setting the `version` to `9.0.301` will ensure that
-
-AS a general recommendation, if you don't want to hyper-optimize `global.json` to find the absolute minimum version that your solution can work with, you can simply set it to the latest stable version of the SDK that is available. SDK releases are almost always backwards compatible, and there's generally no reason to avoid upgrading.
-
-Moving onto the `nuget.config` file, we can leave it as is, since it already contains the default NuGet sources that are used to resolve package dependencies:
-
-Even if you're not relying on any custom NuGet registries, this file is useful to ensure that the default sources are not overridden by higher level configuration files that may be present in the environment.
+Moving on, we have the `nuget.config` file, which contains various settings for the NuGet package manager. This file is used to configure how NuGet resolves package dependencies, including the sources from which it fetches them. By default, the `nuget.config` file generated by `dotnet new` contains a single source pointing to the official NuGet registry at `https://api.nuget.org/v3/index.json`:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -129,6 +120,8 @@ Even if you're not relying on any custom NuGet registries, this file is useful t
   </packageSources>
 </configuration>
 ```
+
+Even if you're not relying on any custom NuGet registries, this file is useful to ensure that the default sources are not overridden by higher level configuration files that may be present in the environment.
 
 Finally, let's take a look at which helpful properties we may want to include in the `Directory.Build.props` file.
 
