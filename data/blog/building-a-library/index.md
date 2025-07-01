@@ -79,7 +79,7 @@ Any individual .NET project is essentially a (massive) set of instructions that 
 
 I call these defaults the "baseline configuration", as their purpose is not to significantly alter the behavior of the build, but rather to ensure its consistency across unpredictable environments. This can be achieved with the help of the following three optional files:
 
-- [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — specifies which version of the .NET SDK should be used for the solution and optionally instructs how to roll forward to higher versions.
+- [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — specifies the version of the .NET SDK that should be used for the solution and optionally instructs how to roll forward to higher versions.
 - [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — configures the NuGet package manager, including the feeds from which it should resolve package dependencies.
 - [`Directory.Build.props`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory) — defines custom MSBuild properties that are automatically applied to all projects in the solution.
 
@@ -91,9 +91,9 @@ dotnet new nugetconfig
 dotnet new buildprops
 ```
 
-First off, we have the `global.json` file, which can be used to declare the version of the .NET SDK that the solution is intended to work with. Normally, this information is not encoded in the solution file or anywhere else, so the .NET tooling relies on the default behavior of simply resolving the latest SDK that is available in the environment. This behavior is fine for local development — since you can reasonably guarantee that a compatible version of the SDK is installed on your machine — but it's a good idea to make that requirement explicit to communicate it clearly to other collaborators (or your future self).
+First off, we have the `global.json` file, whose purpose is to declare which version of the .NET SDK the solution is intended to work with. Normally, this information is not encoded in the solution file or anywhere else, so the .NET tooling relies on the default behavior of simply resolving the latest SDK that is available in the environment. This behavior is fine for local development — since you can reasonably guarantee that a compatible version of the SDK is installed on your machine — but it's a good idea to make that requirement explicit to communicate it clearly to other collaborators (as well as your future self).
 
-Naturally, in order to be considered compatible, an SDK must provide the capabilities that the codebase depends on, such as access to certain target frameworks, language features, compiler options, and whatnot. When it comes to the .NET SDK versioning schema, these aspects are typically governed by the first two components of the version number (i.e. `9.0.***`), while the rest of the numbers are reserved for bug fixes and minor improvements (i.e. `*.*.307`). For example, if a project is written with C# 13 syntax and targets `net9.0`, you'd need the .NET 9.0 SDK in order to build it — but the exact version is not that important.
+Naturally, in order to be considered compatible, the SDK must provide the capabilities that the codebase depends on, such as access to certain target frameworks, language features, compiler options, and whatnot. When it comes to the [.NET SDK versioning schema](https://learn.microsoft.com/dotnet/core/versions), these aspects are typically governed by the first two components of the version label (i.e. `9.0.***`), while the rest of the numbers are reserved for bug fixes and minor improvements (i.e. `*.*.307`). For example, if a project is written with C# 13 syntax and targets `net9.0`, you'd need the .NET 9.0 SDK in order to build it — but the exact version is not that important.
 
 When you generate a `global.json` file via `dotnet new`, however, it defaults to the full version of the latest .NET SDK available on your machine. It means that anyone who wants to build the solution will also be required to have that _exact same SDK version_ installed, which is way too restrictive. To fix that, let's modify the file to look like this instead:
 
@@ -106,11 +106,9 @@ When you generate a `global.json` file via `dotnet new`, however, it defaults to
 }
 ```
 
-In this example we are using .NET 9.0, so we set the `version` property to `9.0.100` — the lowest feature and patch version of the `9.x` stream. SDK versions in .NET are structured as `major.minor.feature0patch`
+At the time of writing, the current iteration of .NET is .NET 9.0, so we set the `version` property to `9.0.100` — the lowest SDK version within the `9.0` band. Together with the `rollForward` option set to `latestFeature`, this effectively creates a rule that allows the solution to be built by any feature or patch version of the .NET 9.0 SDK, but not by an SDK of other major and minor versions (e.g. .NET 8.0 or .NET 10.0).
 
-— the lowest feature and patch version of the `9.x` stream. Together with the `rollForward` option set to `latestMinor`, this creates a rule that allows the solution to be built with any version of the .NET SDK within the `9.x` stream, which effectively translates to `9.0 <= Required SDK Version < 10.0`. Note that, even though the next .NET 10.0 release is still going to be mostly compatible with our solution, it will not include the .NET 9.0 Runtime which we need to run tests and debug the library, hence why it's excluded from the range.
-
-Depending on your needs, you may choose to set the `version` property to a more specific minor, feature or patch version, or configure `rollForward` to be less permissive — either to declare a dependency on certain bug fixes introduced in later versions, or to guard against potential breaking changes in future major releases. However, the approach above is a great starting point and should work well for most projects out there.
+The reason for specifically choosing `latestFeature` instead of `latestMinor` or even `latestMajor` is to ensure runtime compatibility for tests and other executable projects in the solution. While .NET SDK versions are generally backward-compatible, each SDK includes its corresponding version of the runtime, which is not. As a result, although a project targeting `net9.0` can still be built with the .NET 10.0 SDK, it can only be executed with the .NET 9.0 runtime — indirectly requiring the use of the SDK version that matches it.
 
 Moving along, we have the `nuget.config` file, which contains various settings for the NuGet package manager. This file is used to configure how NuGet resolves package dependencies, including the sources from which it fetches them. By default, the `nuget.config` file generated by `dotnet new` contains a single source pointing to the official NuGet registry at `https://api.nuget.org/v3/index.json`:
 
