@@ -72,8 +72,7 @@ const SubscribeSection: FC = () => {
 
       <div>
         Want to know when I post a new article? Follow me on{' '}
-        <Link href="https://twitter.com/Tyrrrz">Twitter</Link> or{' '}
-        <Link href="https://bsky.app/profile/tyrrrz.me">Bluesky</Link>, or subscribe to the{' '}
+        <Link href="https://bsky.app/profile/tyrrrz.me">Bluesky</Link> or subscribe to the{' '}
         <Link href="/blog/rss.xml" external>
           RSS Feed
         </Link>

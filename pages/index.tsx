@@ -1,6 +1,6 @@
 import c from 'classnames';
 import { NextPage } from 'next';
-import { FaGithub, FaTwitter, FaBluesky } from 'react-icons/fa6';
+import { FaGithub, FaBluesky } from 'react-icons/fa6';
 import Heading from '~/components/heading';
 import Image from '~/components/image';
 import Link from '~/components/link';
@@ -64,11 +64,6 @@ const HomePage: NextPage = () => {
         <Link variant="discreet" href="https://github.com/Tyrrrz">
           <div className={c('px-2')}>
             <FaGithub strokeWidth={1} />
-          </div>
-        </Link>
-        <Link variant="discreet" href="https://twitter.com/Tyrrrz">
-          <div className={c('px-2')}>
-            <FaTwitter strokeWidth={1} />
           </div>
         </Link>
         <Link variant="discreet" href="https://bsky.app/profile/tyrrrz.me">
