@@ -91,9 +91,9 @@ dotnet new nugetconfig
 dotnet new buildprops
 ```
 
-First off, we have the `global.json` file, whose purpose is to declare which version of the .NET SDK the solution is intended to work with. Normally, this information is not encoded in the solution file or anywhere else, so the .NET tooling relies on the default behavior of simply resolving the latest SDK that is available in the environment. This behavior is fine for local development — since you can reasonably guarantee that a compatible version of the SDK is installed on your machine — but it's a good idea to make that requirement explicit to communicate it clearly to other collaborators (as well as your future self).
+First off, we have the `global.json` file, whose purpose is to declare which version of the .NET SDK the solution is intended to work with. Normally, this information is not encoded in the solution file or anywhere else, so the .NET tooling relies on the default behavior of simply resolving the latest SDK that is available in the environment. This behavior is fine for local development — since you can reasonably guarantee that a compatible version of the SDK is installed on your machine — but it's a good idea to make that requirement explicit to communicate it clearly to other collaborators (and your future self) as well.
 
-Naturally, in order to be considered compatible, the SDK must provide the capabilities that the codebase depends on, such as access to certain target frameworks, language features, compiler options, and whatnot. When it comes to the [.NET SDK versioning schema](https://learn.microsoft.com/dotnet/core/versions), these aspects are typically governed by the first two components of the version label (i.e. `9.0.***`), while the rest of the numbers are reserved for bug fixes and minor improvements (i.e. `*.*.307`). For example, if a project is written with C# 13 syntax and targets `net9.0`, you'd need the .NET 9.0 SDK in order to build it — but the exact version is not that important.
+Naturally, in order to be considered compatible, the SDK must provide the capabilities that the codebase depends on, such as access to certain target frameworks, language features, compiler options, and whatnot. When it comes to the [.NET SDK versioning schema](https://learn.microsoft.com/dotnet/core/versions), these aspects are typically governed by the first two components of the version label (i.e. `9.0.***`), while the rest of the numbers indicate bug fixes and minor improvements (i.e. `*.*.307`). For example, if a project is written with C# 13 syntax and targets `net9.0`, you'd need the .NET 9.0 SDK in order to build it — but the exact version is not that important.
 
 When you generate a `global.json` file via `dotnet new`, however, it defaults to the full version of the latest .NET SDK available on your machine. It means that anyone who wants to build the solution will also be required to have that _exact same_ SDK version installed, which is way too restrictive. To fix that, let's modify the file to look like this instead:
 
@@ -108,24 +108,40 @@ When you generate a `global.json` file via `dotnet new`, however, it defaults to
 
 At the time of writing, the current iteration of .NET is .NET 9.0, so we set the `version` property to `9.0.100` — the lowest SDK version within the `9.0` band. Together with the `rollForward` option set to `latestFeature`, this effectively creates a rule that allows the solution to be built by any feature or patch version of the .NET 9.0 SDK, but not by an SDK of another major or minor version (e.g. .NET 8.0 or .NET 10.0).
 
-The reason for specifically choosing `latestFeature` instead of `latestMinor` or even `latestMajor` is to ensure runtime compatibility for executable projects in the solution, such as tests. Although .NET SDKs are generally backward-compatible between different major and minor versions, each SDK includes its corresponding version of the runtime, which is not. As a result, while a project targeting `net9.0` can still be built with the .NET 10.0 SDK, it can only be executed with the .NET 9.0 runtime — making it more practical to use the matching version of the SDK.
+The reason for specifically choosing `latestFeature` instead of `latestMinor` or even `latestMajor` is to ensure runtime compatibility for executable projects in the solution, such as tests. Although .NET SDKs are generally backward-compatible between different major and minor versions, each SDK includes its corresponding version of the runtime, which is not. As a result, while a project targeting `net9.0` can still be built with the .NET 10.0 SDK, it can only be executed with the .NET 9.0 runtime — making the matching SDK version more preferable.
 
-Moving along, we also have `nuget.config` — a file that configures various settings related to the NuGet package manager, the most important being the sources from which it resolves dependencies. By default, NuGet relies on the official [NuGet.org](https://nuget.org) registry, but this behavior can be overridden by other instances of the `nuget.config` file that may be present in the environment. To ensure a consistent (and secure) developer experience, we can create a solution-level configuration file that explicitly defines the package sources we want to use.
+Moving along, we also have `nuget.config` — a file that can be used to configure the locations from which the NuGet package manager resolves dependencies. By default, NuGet relies on the official [NuGet.org](https://nuget.org) registry, but this behavior can be overridden by other instances of the `nuget.config` file that may be present in the environment, at either global or parent level. To ensure a consistent (and secure) developer experience, we can create a solution-level configuration file that explicitly defines the package sources we want to fetch from.
 
-Conveniently, running `dotnet new nugetconfig` generates a file that does exactly that. Here's how it looks:
+Conveniently, running `dotnet new nugetconfig` generates a file that does exactly that. Here's what it looks like:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
   <packageSources>
-    <!--To inherit the global NuGet package sources remove the <clear /> line below -->
     <clear />
     <add key="nuget" value="https://api.nuget.org/v3/index.json" />
   </packageSources>
 </configuration>
 ```
 
-As explained in the comment above, the `<clear />` element is used to remove any previously defined package sources, effectively ignoring overrides from other `nuget.config` files. Following that, the `<add />` element re-defines the official NuGet registry, setting it as the sole source for package dependencies. With this setup, running `dotnet restore` will always resolve packages from the default NuGet feed, regardless of the machine on which the solution is built.
+The above setup makes use of NuGet's additive key-value configuration system, by first clearing any previously defined package sources, and then adding the NuGet.org registry as the only source. This makes it so that only the official registry is used for resolving package dependencies, effectively ignoring any overrides that may have been defined in other `nuget.config` files on the machine.
+
+This takes care of the fetching part, but what about pushing packages? In order to ensure that the solution is also configured to push packages to the same registry, we can add a `<config>` section with a `defaultPushSource` key, like so:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <config>
+    <add key="defaultPushSource" value="https://api.nuget.org/v3/index.json" />
+  </config>
+  <packageSources>
+    <clear />
+    <add key="nuget" value="https://api.nuget.org/v3/index.json" />
+  </packageSources>
+</configuration>
+```
+
+With these two sections in place, the official NuGet.org registry will be used when running either `dotnet restore` or `dotnet nuget push` commands, ensuring that only the intended source is used for both fetching and publishing packages.
 
 Finally, we have the `Directory.Build.props` file, which is used to define custom MSBuild properties that should be automatically applied to all projects in the repository. This file is particularly useful for configuring various cross-cutting concerns, such as assembly and package metadata, compiler options, build settings, and so on.
 
