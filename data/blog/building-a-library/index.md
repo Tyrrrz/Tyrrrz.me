@@ -110,9 +110,9 @@ At the time of writing, the current iteration of .NET is .NET 9.0, so we set the
 
 The reason for specifically choosing `latestFeature` instead of `latestMinor` or even `latestMajor` is to ensure runtime compatibility for executable projects in the solution, such as tests. Although .NET SDKs are generally backward-compatible between different major and minor versions, each SDK includes its corresponding version of the runtime, which is not. As a result, while a project targeting `net9.0` can still be built with the .NET 10.0 SDK, it can only be executed with the .NET 9.0 runtime — making the matching SDK version more preferable.
 
-Moving along, we also have `nuget.config` — a file that can be used to configure the locations from which the NuGet package manager resolves dependencies. By default, NuGet relies on the official [NuGet.org](https://nuget.org) registry, but this behavior can be overridden by other instances of the `nuget.config` file that may be present in the environment, at either global or parent level. To ensure a consistent (and secure) developer experience, we can create a solution-level configuration file that explicitly defines the package sources we want to fetch from.
+Moving along, we also have `nuget.config` — a file that can be used to configure how the NuGet package manager locates and resolves external project dependencies. By default, NuGet pulls packages from the official [NuGet.org](https://nuget.org) registry, but this can be overridden by global or ancestor instances of the `nuget.config` file that may be present in the environment. To ensure a consistent (and secure) developer experience, we can create a solution-level configuration file to explicitly define desired package sources and maintain the same behavior regardless of the environment.
 
-Conveniently, running `dotnet new nugetconfig` generates a file that does exactly that. Here's what it looks like:
+Conveniently, running `dotnet new nugetconfig` generates a file that does exactly that. However, for a library project, we ideally want to configure not only the feeds from which the dependencies are resolved, but also where our own NuGet packages will be pushed to. To that end, let's adapt the generated file like so:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -121,27 +121,15 @@ Conveniently, running `dotnet new nugetconfig` generates a file that does exactl
     <clear />
     <add key="nuget" value="https://api.nuget.org/v3/index.json" />
   </packageSources>
-</configuration>
-```
-
-The above setup makes use of NuGet's additive key-value configuration system, by first clearing any previously defined package sources, and then adding the NuGet.org registry as the only source. This makes it so that only the official registry is used for resolving package dependencies, effectively ignoring any overrides that may have been defined in other `nuget.config` files on the machine.
-
-This takes care of the fetching part, but what about pushing packages? In order to ensure that the solution is also configured to push packages to the same registry, we can add a `<config>` section with a `defaultPushSource` key, like so:
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
   <config>
     <add key="defaultPushSource" value="https://api.nuget.org/v3/index.json" />
   </config>
-  <packageSources>
-    <clear />
-    <add key="nuget" value="https://api.nuget.org/v3/index.json" />
-  </packageSources>
 </configuration>
 ```
 
-With these two sections in place, the official NuGet.org registry will be used when running either `dotnet restore` or `dotnet nuget push` commands, ensuring that only the intended source is used for both fetching and publishing packages.
+Here we have the `<packageSources>` section, which defines the sources from which NuGet will resolve package dependencies. This setting is enumerable, so we start with the `<clear />` element to remove any previously defined sources, and then add a single source named `nuget` that points to the official NuGet registry. This ensures that all projects in the solution will use this source for package resolution, regardless of any other sources that may be configured on the machine.
+
+Next, we have the `<config>` section, which defines the default push source for NuGet packages. This is where our own packages will be pushed to when we run the `dotnet nuget push` command. By setting the `defaultPushSource` key to the same URL as the package source, we ensure that our library can be published to NuGet.org without any additional configuration.
 
 Finally, we have the `Directory.Build.props` file, which is used to define custom MSBuild properties that should be automatically applied to all projects in the repository. This file is particularly useful for configuring various cross-cutting concerns, such as assembly and package metadata, compiler options, build settings, and so on.
 
