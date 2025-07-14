@@ -80,7 +80,7 @@ Any individual .NET project is essentially a (massive) set of instructions that 
 I call these defaults the "baseline configuration", as their purpose is not to significantly alter the behavior of the build, but rather to ensure its consistency across unpredictable environments. This can be achieved with the help of the following three optional files:
 
 - [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — specifies the version of the .NET SDK that should be used for the solution and optionally instructs how to roll forward to higher versions.
-- [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — configures the NuGet package manager, including the feeds from which it should resolve package dependencies.
+- [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — configures settings related to the NuGet package manager, including the feeds from which it should resolve package dependencies.
 - [`Directory.Build.props`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory) — defines custom MSBuild properties that are automatically applied to all projects in the solution.
 
 Before we explore each of these files in detail, let's get started by generating boilerplates for all of them. We can do that by running the following `dotnet new` commands in the root of our solution directory:
@@ -110,7 +110,7 @@ At the time of writing, the current iteration of .NET is .NET 9.0, so we set the
 
 The reason for specifically choosing `latestFeature` instead of `latestMinor` or even `latestMajor` is to ensure runtime compatibility for executable projects in the solution, such as tests. Although .NET SDKs are generally backward-compatible between different major and minor versions, each SDK includes its corresponding version of the runtime, which is not. As a result, while a project targeting `net9.0` can still be built with the .NET 10.0 SDK, it can only be executed with the .NET 9.0 runtime — making the matching SDK version more preferable.
 
-Moving along, we also have `nuget.config` — a file that can be used to configure how the NuGet package manager locates and resolves external project dependencies. By default, NuGet pulls packages from the official [NuGet.org](https://nuget.org) registry, but this can be overridden by global or ancestor instances of the `nuget.config` file that may be present in the environment. To ensure a consistent (and secure) developer experience, we can create a solution-level configuration file to explicitly define desired package sources and maintain the same behavior regardless of the environment.
+Moving along, we also have `nuget.config` — a file that can be used to configure how the NuGet package manager locates and resolves external dependencies. By default, NuGet pulls packages from the official [NuGet.org](https://nuget.org) registry, but this behavior can be overridden by user-specific settings and thus may vary between environments. To ensure a consistent (and secure) developer experience, we can create a solution-level configuration file that explicitly defines the desired package sources, and helps avoid unexpected issues when restoring dependencies on other machines.
 
 Conveniently, running `dotnet new nugetconfig` generates a file that does exactly that. However, for a library project, we ideally want to configure not only the feeds from which the dependencies are resolved, but also where our own NuGet packages will be pushed to. To that end, let's adapt the generated file like so:
 
