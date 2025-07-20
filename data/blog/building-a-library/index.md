@@ -114,9 +114,9 @@ The reason for specifically choosing `latestFeature` instead of `latestMinor` or
 
 ### `nuget.config`
 
-Moving along, we also have `nuget.config` — a file that can be used to configure how the NuGet package manager integrates with the build process and, most importantly, where it pulls and pushes packages. By default, NuGet relies on the official [NuGet.org](https://nuget.org) registry as its external package source, but this can vary between different environments due to user- and machine-specific overrides. To ensure a consistent (and secure) developer experience, we can create a solution-level configuration file that explicitly re-establishes the intended behavior.
+Moving along, we also have `nuget.config` — a file that can configure how the NuGet package manager integrates with the build process and, most importantly, the sources it uses to restore and publish packages. By default, NuGet connects to the official [NuGet.org](https://nuget.org) registry, but this may vary between different environments due to user- and machine-specific overrides. To ensure a consistent (and secure) developer experience, we can create a solution-level configuration file that explicitly enforces the intended behavior and prevents global settings from interfering with it.
 
-Running `dotnet new nugetconfig` provides a great starting point: it generates a `nuget.config` file that removes all previously defined package sources and re-adds the official registry as the only feed. However, since we are working on a library project — which involves both pulling package dependencies, as well as pushing new packages — it also makes sense to define the default destination for the latter. To that end, let's edit the generated file to look like this:
+Running `dotnet new` provides a great starting point: it generates a `nuget.config` file that removes all previously defined package sources and re-adds the official registry as the only feed. However, that only affects where the packages are pulled from, but since we are working on a library project, it's also a good idea to define where the packages are pushed. To that end, let's edit the generated file to look like so:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
