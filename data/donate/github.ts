@@ -96,6 +96,8 @@ const getSponsorActivities = async function* () {
     if (!data.viewer.sponsorsActivities.pageInfo.hasNextPage) {
       break;
     }
+
+    cursor = data.viewer.sponsorsActivities.pageInfo.endCursor;
   }
 };
 
