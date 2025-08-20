@@ -102,7 +102,9 @@ const getSponsorActivities = async function* () {
 };
 
 export const getGitHubSponsorsDonations = async function* () {
-  const activities = await bufferIterable(getSponsorActivities());
+  const activities = (await bufferIterable(getSponsorActivities()))
+    // For some reason, activities can sometimes be null
+    .filter((activity) => !!activity);
 
   const sponsors = distinctBy(
     activities.map((activity) => activity.sponsor),
