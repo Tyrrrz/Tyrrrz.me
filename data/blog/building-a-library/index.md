@@ -189,7 +189,7 @@ The default behavior is a sensible safeguard, seeing as certain language constru
 
 Following that, we enable the [Nullable Reference Types](https://learn.microsoft.com/dotnet/csharp/nullable-references) feature of the C# compiler, as it is a great way to improve the safety of our code and to more accurately advertise the capabilities of our APIs to the consumers. There are two modes in which this feature can be configured: `annotations`, which instructs the compiler to emit nullability annotations for the types and members defined by our library; and `enable`, which also produces compiler warnings about potential violations of the nullability contracts during development.
 
-Nullable Reference Types is a compiler, framework, and language feature all at the same time, so its availability is subject to certain constraints too. In its native form, NRT was introduced with .NET Core 3.0 and .NET Standard 2.1 — and, while it's possible to backport its `annotations` mode to older frameworks using polyfills, the `enable` mode's compiler checks are not practical unless the target framework itself exposes proper nullability metadata as well.
+Nullable Reference Types is a feature tied to the compiler, framework, and the language at the same time, so its availability is subject to certain constraints too. In its native form, NRT was introduced with .NET Core 3.0 and .NET Standard 2.1 — and, while it's possible to backport the parts required for annotating our own types using polyfills, the development-time compiler checks are not practical unless the target framework exposes proper nullability metadata about itself as well.
 
 Therefore, in order to make the most out of NRT across the board, we configure the feature in its `annotations` mode as the baseline, and extend it to the `enable` mode for the frameworks that fully support it. Doing so, our library will compile and provide its own nullability annotations for all targets, but we'll get warnings in our code only when building against newer frameworks.
 
@@ -205,23 +205,46 @@ Doing so allows us to blindly run `dotnet pack` followed by `dotnet nuget push` 
 
 Finally, the last two sections of the `props` file are reserved for assembly- and package-related metadata, respectively. These properties are used to populate the corresponding informational fields in the compiled assemblies (e.g. version, company, copyright) and the generated NuGet packages (e.g. authors, description, license). Remember to replace the placeholders with the actual values that are relevant to your project.
 
-## Target frameworks and compatibility
+## Frameworks and compatibility
 
-Which to target (minimal required and latest version (for analyzers))
+With the baseline configuration in place, we can now turn our attention to the settings that are specific to the library project itself. Perhaps the most important of them all — and the one that typically causes the most confusion — is which target frameworks to choose.
 
-How compat works between frameworks
+When building an application, the choice of the target framework is usually straightforward, as you can simply pick the latest stable version of .NET that is available at the time of development. This allows you to benefit from the newest features and improvements, without having to worry about much else. Library authors, on the other hand, have to consider a wider range of factors, as their code is meant to be consumed by other applications that may be running on different versions of .NET.
 
-IsTrimmable/IsAotCompatible
+As much as .NET tries to be a high-level technology that abstracts away platform details, it ironically comes with many of its own platforms, making the concept of a _target framework_ quite complicated. Indeed, it's not limited to just versions, but also includes different flavors, such as .NET (Core), .NET Framework, .NET Standard, Mono, Xamarin, UWP, as well as sometimes their platform-specific variants. Figuring out which of these are relevant to your specific project can be an exercise in history rather than technology, so let's first try to consolidate the way of the land.
 
-- https://github.com/Tyrrrz/PolyShim
-- https://github.com/SimonCropp/Polyfill
-- https://github.com/Sergio0694/PolySharp
+If you've heard anything about library development in .NET, you must've also heard about [.NET Standard](https://learn.microsoft.com/dotnet/standard/net-standard) — a specification that defines a set of APIs that are guaranteed to be available on all .NET implementations that support a given version of the standard. The idea behind .NET Standard was to create a common ground for library authors, allowing them to write library code once and import it anywhere, without having to worry about the underlying platform.
 
-`IsTargetFrameworkCompatible`
+Essentially, .NET Standard was a spiritual successor to the Portable Class Libraries (PCL) concept, which was introduced in the early days of .NET Core to address the fragmentation of the .NET ecosystem. When .NET Core was released, the purpose of .NET Standard was to ease the transition of library developers to the new platform, by providing a set of APIs that all .NET implementations — both new and old — had to support.
 
-## Testing workflow
+You'll notice I'm referring to .NET Standard in the past tense, and that's because its relevance has greatly diminished over time, to the point where it's arguably obsolete. As the cross-platform .NET Core (now just .NET) continued to evolve from both the technology and adoption perspectives, it became the default choice for building applications, effectively unifying the ecosystem. Consequently, the need for a common specification that bridges different platforms has also faded away.
 
-Let's summarize what we have so far.
+## Automation workflow: building & testing
+
+Just like any other software project, building a library is an iterative process that involves writing code, compiling it, running tests, and repeating the cycle until the desired functionality is achieved. The tooling provided by the .NET SDK makes it really easy to perform these tasks, either via the command line or through an IDE. For example, with the setup we've established so far, building and testing the solution is a matter of running a single command:
+
+```bash
+$ dotnet test
+
+Microsoft (R) Test Execution Command Line Tool Version 17.8.0 (x64)
+Copyright (c) Microsoft Corporation.  All rights reserved.
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     8, Skipped:     0, Total:     8, Duration: 993 ms - MyLibrary.Tests.dll (net9.0)
+Passed!  - Failed:     0, Passed:     8, Skipped:     0, Total:     8, Duration: 913 ms - MyLibrary.Tests.dll (net462)
+```
+
+Behind the scenes, the above command works by identifying the projects referenced by the solution file in the current directory, building them, and then executing tests found in appropriately marked test projects against all available target frameworks. If all tests pass, the command exits with a zero exit code, indicating success; otherwise, it exits with a non-zero code, signaling failure. Note how running the command does not put the responsibility of figuring out dependency graphs, build order, or test discovery on us — the project files and tooling takes care of all that automatically.
+
+Now, while it is nice that we can run the build and tests locally, we would ideally want this process to be completely automated — so that it runs on every code change, without us having to do anything manually. This ensures that the code is always in a working state, and that new changes don't introduce any unwanted regressions.
+
+Since we're already using GitHub to host our code repository, we can leverage its built-in automation platform, [GitHub Actions](https://github.com/features/actions) to achieve that. GitHub Actions allows us to define workflows that are triggered by specific events, such as pushing code to the repository or opening a pull request. These workflows can then run a series of jobs, which are essentially scripts that execute commands in a specified environment.
+
+GitHub Actions workflows are conceptually based around events — so you can listen to specific types of events that indicate that something happened in the repository, and then run a series of commands in response to that event. While it's completely free for open-source projects, it also comes with a generous monthly allowance of free minutes for private repositories as well.
+
+For a typical testing workflow, it is standard to run dotnet test on every push to the repository, as well as on every pull request. To that end, you can create a workflow file that looks something like this:
 
 ```yml
 # Friendly name of the workflow
@@ -243,7 +266,7 @@ jobs:
     # Steps to run in the job
     steps:
       # Check out the repository
-      - uses: actions/checkout@v4 # note that you'd ideally pin versions to hashes, read on to learn more
+      - uses: actions/checkout@v4 # ideally pin versions to hashes, read on to learn more
 
       # Run the dotnet test command
       - run: dotnet test --configuration Release
