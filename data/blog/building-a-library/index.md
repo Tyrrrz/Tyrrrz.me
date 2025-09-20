@@ -199,23 +199,25 @@ The second group of properties is dedicated to other toolchain options that are 
 
 Next, we get to the **`IsPackable`** property, which controls whether a given project should be included in the packaging process. The default value is `true`, meaning that every project is treated as packable unless specified otherwise. By inverting the default, we establish a more intentional convention where NuGet packages are only created for projects that deliberately opt in.
 
-With this setup in place, we can blindly run `dotnet pack` followed by `dotnet nuget push **/*.nupkg` on the entire solution to generate and publish all relevant NuGet artifacts in one go. Other assemblies, such as those produced by the tests and sample projects, will be automatically excluded from the process, greatly simplifying the release workflow and its automation.
+With this setup in place, we can blindly run `dotnet pack` followed by `dotnet nuget push **/*.nupkg` on the entire solution to generate and publish all relevant NuGet artifacts in one go. Other assemblies, such as those produced by the tests and sample projects, will be automatically excluded from the process — greatly simplifying the release workflow along with its automation.
 
-Finally, we have the third group of properties — these are used to define common metadata that gets embedded into the output assemblies and the corresponding NuGet packages. The **`<Version>`** property plays a crucial role in the package management system, as it's the primary way to distinguish different iterations of the same package. For local development, we set it to a placeholder value of `0.0.0-dev`, which will be overridden with a proper version number during the release process.
+Finally, we have the third group of properties — these are used to define common metadata that gets embedded into the output assemblies and the corresponding NuGet packages. The **`<Version>`** property in particular plays a crucial role in the package management system, as it's the primary way to distinguish different iterations of the same package. For local development, we set it to a placeholder value of `0.0.0-dev`, which will be overridden with a proper version number during the release process.
 
 The remaining fields, including **`Company`**, **`Description`**, and **`PackageProjectUrl`**, are purely informational and get surfaced in various places, such as file properties and the NuGet package details. The purpose of these fields is to provide context about the package, its author, and where to find more information about it — so make sure to fill them out with accurate values that reflect your identity and the nature of your library.
 
 Although these metadata properties are only relevant to the library projects in our solution, we still define them in `Directory.Build.props` to avoid repetition. In the scenario that we have multiple NuGet packages that we want to publish from the same repository, this setup allows us to maintain a single source of truth for these values, while still being able to override them on a per-project basis if needed.
 
-## Library-specific configuration
+## Library configuration
 
-The settings we've established so far form the baseline configuration that applies to all projects in the solution. However, since our primary focus is on building a library, we also need to consider the settings that are specific to the library project itself. These settings are defined directly within the project file (i.e. `MyLibrary.csproj`), and they focus on aspects such as target frameworks, package metadata, and other build options that are relevant to the library.
+The settings we've established so far form the baseline configuration that applies to all projects in the solution. However, since our primary focus is on building a library, we also need to consider some properties that are specific to the library project itself. They are defined directly within the project file (i.e. `MyLibrary.csproj`), and they focus on aspects such as target frameworks, compatibility, and other relevant build options.
+
+Since our library project was initially created using `dotnet new classlib`, the project file comes with some basic configuration. We won't be using any of it, so let's instead replace the contents with the following:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net9.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
@@ -225,17 +227,11 @@ The settings we've established so far form the baseline configuration that appli
 </Project>
 ```
 
-With the baseline configuration in place, we can now turn our attention to the settings that are specific to the library project itself. Perhaps the most important of them all — and the one that typically causes the most confusion — is which target frameworks to choose.
+When building a library, one of the most important things to consider is compatibility. In the .NET world, this is determined by the _target framework_ that the library is built against. The target framework essentially defines the set of APIs that are available to the library, as well as the runtime environment in which it will be executed. In order to import a library into an application, the application's target framework must be compatible with that of the library.
 
-When building an application, the choice of the target framework is usually straightforward, as you can simply pick the latest stable version of .NET that is available at the time of development. This allows you to benefit from the newest features and improvements, without having to worry about much else. Library authors, on the other hand, have to consider a wider range of factors, as their code is meant to be consumed by other applications that may be running on different versions of .NET.
+The tooling provides a way to specify multiple target frameworks for a single project using the **`<TargetFrameworks>`** property (note the plural form). This allows us to build the library against different versions of .NET, thereby maximizing its compatibility with various applications. When running the build, the tooling will produce separate assemblies for each target framework, which can then be packaged and published as a single NuGet package.
 
-As much as .NET tries to be a high-level technology that abstracts away platform details, it ironically comes with many of its own platforms, making the concept of a _target framework_ quite complicated. Indeed, it's not limited to just versions, but also includes different flavors, such as .NET (Core), .NET Framework, .NET Standard, Mono, Xamarin, UWP, as well as sometimes their platform-specific variants. Figuring out which of these are relevant to your specific project can be an exercise in history rather than technology, so let's first try to consolidate the way of the land.
-
-If you've heard anything about library development in .NET, you must've also heard about [.NET Standard](https://learn.microsoft.com/dotnet/standard/net-standard) — a specification that defines a set of APIs that are guaranteed to be available on all .NET implementations that support a given version of the standard. The idea behind .NET Standard was to create a common ground for library authors, allowing them to write library code once and import it anywhere, without having to worry about the underlying platform.
-
-Essentially, .NET Standard was a spiritual successor to the Portable Class Libraries (PCL) concept, which was introduced in the early days of .NET Core to address the fragmentation of the .NET ecosystem. When .NET Core was released, the purpose of .NET Standard was to ease the transition of library developers to the new platform, by providing a set of APIs that all .NET implementations — both new and old — had to support.
-
-You'll notice I'm referring to .NET Standard in the past tense, and that's because its relevance has greatly diminished over time, to the point where it's arguably obsolete. As the cross-platform .NET Core (now just .NET) continued to evolve from both the technology and adoption perspectives, it became the default choice for building applications, effectively unifying the ecosystem. Consequently, the need for a common specification that bridges different platforms has also faded away.
+Choosing the right target frameworks to support is not a trivial task, as it involves planning, compromise, and a good understanding of the .NET ecosystem. The reason for that is the sheer number of different .NET implementations and versions that exist, each with its own set of capabilities and limitations.
 
 What to target in tests?
 
