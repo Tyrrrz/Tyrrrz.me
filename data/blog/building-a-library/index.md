@@ -205,15 +205,15 @@ Finally, we have the third group of properties — these are used to define comm
 
 The remaining fields, including **`Company`**, **`Description`**, and **`PackageProjectUrl`**, are purely informational properties that get surfaced in various places, such as assembly and NuGet package details. The purpose of these fields is to provide context about the package, its author, and where to find more information about it — so make sure to fill them out with accurate values that reflect the identity and nature of your library.
 
-Most importantly, when developing a library, you also need to consider the license under which it will be distributed. The **`PackageLicenseExpression`** property allows you to specify a [standard SPDX license identifier](https://spdx.org/licenses) that indicates the terms of use for your package. Here, we set it to `MIT`, arguably the most popular permissive open-source license, but feel free to explore [other options](https://choosealicense.com) as well to find the best fit for your project.
+Most importantly, when developing a library, we also need to consider the license under which it will be distributed. The **`PackageLicenseExpression`** property allows us to specify a [standard SPDX license identifier](https://spdx.org/licenses) that indicates the terms of use for our package. Here, we set it to `MIT`, arguably the most popular permissive open-source license, but feel free to explore [other options](https://choosealicense.com) as well to find the best fit for your project.
 
 Although all these metadata properties are only really relevant to the packable projects in our solution, there is no harm in applying them globally through `Directory.Build.props`. In the scenario that we have multiple NuGet packages that we want to publish from the same repository, this setup allows us to maintain a single source of truth for all metadata, while still being able to override specific fields on a per-project basis if needed.
 
 ## Library configuration
 
-With the baseline configuration in place, we can now turn our attention to the specifics of the library project itself. These settings build upon what we've already established earlier, and focus on aspects that are particularly relevant to libraries, such as target frameworks, compatibility, and other packaging options.
+With the baseline configuration in place, we can now turn our attention to the specifics of the library project itself. These settings build upon what we've already established earlier, and focus on things like target frameworks, compatibility, and various other packaging options.
 
-Since our library project was initially created using `dotnet new classlib`, the project file (i.e. `MyLibrary.csproj`) comes with some basic configuration. We won't be using any of it, so let's instead replace the contents with the following:
+Since our library project was initially created using `dotnet new classlib`, the project file (i.e. `MyLibrary.csproj`) comes with some boilerplate configuration. We won't be using any of it, so let's instead replace the contents with the following:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -229,15 +229,28 @@ Since our library project was initially created using `dotnet new classlib`, the
 </Project>
 ```
 
-When building a library, one of the most important things you have to consider early is compatibility. In the .NET world, this is mainly determined by the _target framework_ that the library is built against. The target framework essentially defines the set of shared APIs that are available to the library, as well as the runtime environment in which it will be executed.
+When it comes to building libraries, a key aspect that you'll need to consider from the very beginning is **compatibility**. In the .NET world, this is mainly determined by the _target framework_ that the library is built against. The target framework essentially defines the set of shared APIs that are available to the library, as well as the runtime environments in which its code can be executed.
 
-In most cases, for an application to be able to reference a library, the library must target the same implementation of the framework (i.e. .NET Framework, .NET (Core), Xamarin, Mono, etc.) of a version that is either the same as, or lower than, the application's target framework. For example, an application targeting `net6.0` can reference libraries built for `net6.0` or `net5.0`, but not `net7.0` or `net8.0` or `net462`.
+In most cases, for an application to be able to reference a library, both must target the same framework implementation (such as .NET Framework, .NET (Core), Xamarin, Mono, etc.), with the library’s version being equal to or lower than that of the application. For example, an application targeting `net6.0` can reference libraries built for `net6.0` or `net5.0` or lower, but not `net7.0` (version too high) or `net462` (wrong implementation).
+
+The whole concept of frameworks in .NET is extremely confusing, especially for newcomers. There are multiple different implementations of .NET, each with its own set of versions and capabilities, as well as a variety of naming conventions that have changed over time. I mean, how does it make sense that `net5.0` is actually compatible with `netcoreapp3.0`, but not, for example, `net45`?
 
 Things are further complicated by the existence of meta-frameworks, such as .NET Standard, which are designed to abstract away the differences between certain .NET implementations and their various versions. And if that didn't make things complex enough, .NET takes it up a level by making all of the naming conventions extremely inconsistent and confusing.
 
 Choosing the right target frameworks to support is not a trivial task, as it involves planning, compromise, and a good understanding of the .NET ecosystem. The reason for that is the sheer number of different .NET implementations and versions that exist, each with its own set of capabilities and limitations.
 
 In order to make the lives of library developers a bit easier, the .NET tooling provides a way to specify multiple target frameworks for a single project using the **`<TargetFrameworks>`** property (note the plural form). This allows us to build the library against different versions of .NET, thereby maximizing its compatibility with various applications. When running the build, the tooling will produce separate assemblies for each target framework, which can then be packaged and published as a single NuGet package.
+
+Here's how I would recommend deciding on the target frameworks to support in a typical library project:
+
+- Always target the latest version of .NET (currently `net9.0`). Of course, your library should work with the latest and greatest version of .NET and there is no better way to ensure that than to build it against that version directly. This also makes sure that your library uses the native versions of the latest APIs, instead of relying on polyfills if applicable.
+- If possible without too much extra effort, target `netstandard2.0` as well. By targeting this version of .NET Standard, your library will automatically be compatible with a wide range of .NET implementations, including .NET Framework 4.6.1 and later, .NET Core 2.0 and later, and Xamarin.
+- If needed, add additional targets for earlier versions of .NET Core, for example if your library can leverage more of the framework's capabilities when not constrained by .NET Standard.
+
+At the same time, avoid:
+
+- Don't bother targeting `netstandard2.1` since it's only supported by .NET Core 3.0 and later, anyway. This version doesn't add any meaningful compatibility benefits over `netstandard2.0`.
+- Don't target the legacy .NET Framework unless absolutely necessary. If you do need to support it, target the latest version that is still widely used (currently `net462`), as it provides the best compatibility with other .NET implementations.
 
 What to target in tests?
 
