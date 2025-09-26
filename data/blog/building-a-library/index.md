@@ -183,7 +183,7 @@ Starting off with the first group of options, we set the **`<LangVersion>`** pro
 
 The default behavior is a sensible safeguard, seeing as language constructs may sometimes depend on certain runtime capabilities to work correctly. However, library projects, unlike applications, cannot afford to simply target the latest version of .NET — they need to maximize compatibility with their potential consumers and that often involves targeting frameworks that are several versions behind the bleeding edge.
 
-Therefore, setting the language version explicitly forces the compiler to ignore the official guidelines and evaluate the availability of each language feature independently from the target framework. Doing so immediately unlocks some of the newest syntax that doesn't have any runtime dependencies, while also allowing other features to be backported manually to older frameworks using polyfills.
+Therefore, setting the language version explicitly forces the compiler to ignore the official guidelines and evaluate the availability of each language feature independently from the target framework. Doing so immediately unlocks some of the newest syntax that doesn't have any runtime dependencies, while also allowing other features to be backported manually to older frameworks using [polyfills](<https://en.wikipedia.org/wiki/Polyfill_(programming)>).
 
 Following that, we enable the [**Nullable Reference Types**](https://learn.microsoft.com/dotnet/csharp/nullable-references) feature of the C# compiler, as it is a great way to improve the safety of our code and to more accurately advertise the capabilities of our APIs. There are two modes in which this feature can be configured: `annotations`, which instructs the compiler to emit nullability annotations for all types and members that we define; and `enable`, which also produces compiler warnings about related violations during development.
 
@@ -255,6 +255,8 @@ At the same time, avoid:
 What to target in tests?
 
 ## Polyfills
+
+Concept of [_polyfills_](<https://en.wikipedia.org/wiki/Polyfill_(programming)>).
 
 Some missing functionality can be backported to make newer APIs available on older frameworks. C# is not as flexible in this regard as languages, such as JavaScript, but you can still leverage some of its facilities, such as extension methods and type shims, to achieve similar results.
 
