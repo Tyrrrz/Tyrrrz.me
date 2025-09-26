@@ -254,6 +254,115 @@ At the same time, avoid:
 
 What to target in tests?
 
+## Polyfills
+
+Some missing functionality can be backported to make newer APIs available on older frameworks. C# is not as flexible in this regard as languages, such as JavaScript, but you can still leverage some of its facilities, such as extension methods and type shims, to achieve similar results.
+
+```csharp
+// Single out frameworks that don't have the desired API natively
+#if (NETCOREAPP && !NETCOREAPP2_1_OR_GREATER) || (NETFRAMEWORK) || (NETSTANDARD && !NETSTANDARD2_1_OR_GREATER)
+
+using System;
+
+// No namespace declaration, so that the extension methods are available globally
+internal static class PolyfillExtensions
+{
+    // https://learn.microsoft.com/en-us/dotnet/api/system.string.contains#system-string-contains(system-char-system-stringcomparison)
+    public static bool Contains(this string str, char c, StringComparison comparison) =>
+        str.Contains(c.ToString(), comparison);
+
+    // https://learn.microsoft.com/en-us/dotnet/api/system.string.contains#system-string-contains(system-string-system-stringcomparison)
+    public static bool Contains(this string str, string sub, StringComparison comparison) =>
+        str.IndexOf(sub, comparison) >= 0;
+}
+#endif
+```
+
+```csharp
+var str = "Hello world";
+
+// On older frameworks, this call is implemented by the polyfill above
+var contains = str.Contains('w');
+```
+
+```csharp
+#if (NETCOREAPP && !NETCOREAPP3_0_OR_GREATER) || (NETFRAMEWORK) || (NETSTANDARD && !NETSTANDARD2_1_OR_GREATER)
+
+// Put this type shim in the System namespace to match the official type
+namespace System;
+
+// https://learn.microsoft.com/en-us/dotnet/api/system.index
+internal readonly struct Index(int value) : IEquatable<Index>
+{
+    private readonly int _value = value;
+
+    public Index(int value, bool fromEnd = false)
+        : this(fromEnd ? ~value : value)
+    {
+        if (value < 0)
+            throw new ArgumentOutOfRangeException(nameof(value), "value must be non-negative");
+    }
+
+    public int Value => _value < 0 ? ~_value : _value;
+
+    public bool IsFromEnd => _value < 0;
+
+    public int GetOffset(int length)
+    {
+        var offset = _value;
+        if (IsFromEnd)
+            offset += length + 1;
+
+        return offset;
+    }
+
+    public override bool Equals(object? value) => value is Index index && _value == index._value;
+
+    public bool Equals(Index other) => _value == other._value;
+
+    public override int GetHashCode() => _value;
+
+    public override string ToString()
+    {
+        if (IsFromEnd)
+            return "^" + (uint)Value;
+
+        return ((uint)Value).ToString();
+    }
+
+    public static Index Start => new(0);
+
+    public static Index End => new(~0);
+
+    public static Index FromStart(int value) =>
+        value >= 0
+            ? new Index(value)
+            : throw new ArgumentOutOfRangeException(nameof(value), "value must be non-negative");
+
+    public static Index FromEnd(int value) =>
+        value >= 0
+            ? new Index(~value)
+            : throw new ArgumentOutOfRangeException(nameof(value), "value must be non-negative");
+
+    public static implicit operator Index(int value) => FromStart(value);
+}
+
+// https://learn.microsoft.com/en-us/dotnet/api/system.range
+internal readonly struct Range(Index start, Index end)
+{
+    // ... omitted for brevity ...
+}
+#endif
+```
+
+```csharp
+var array = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+// On older frameworks, these work through the polyfills above
+var last = array[^1];
+var part = array[3..^1];
+```
+
 ## Workflow automation: building & testing
 
 Just like any other software project, developing a library is an iterative process that revolves around the repeated cycle of writing and testing code. The setup we've established so far, along with the tooling provided by .NET, makes this process really simple — we can build and test our entire solution by running a single command:
