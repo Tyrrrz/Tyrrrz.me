@@ -211,7 +211,7 @@ Although all these metadata properties are only relevant to the packable project
 
 ## Library configuration
 
-With the baseline configuration in place, we can now turn our attention to the specifics of the library project itself. These settings build upon what we've already established earlier, and focus on things like target frameworks, compatibility, and various other options.
+With the baseline configuration out of the way, we can now shift our attention from cross-cutting concerns to the specifics of the library project itself. These are the settings that dictate how the library is built, what frameworks it targets, and what additional features it supports.
 
 When it comes to building libraries, a key aspect that you'll have to consider from the very beginning is **compatibility**. In the .NET world, this is mainly determined by the _target framework_ that the library is built against. The target framework is what defines the set of shared APIs that are available to the library, as well as the runtime environment it is expected to operate in.
 
