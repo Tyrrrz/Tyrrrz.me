@@ -211,13 +211,15 @@ Although all these metadata properties are only relevant to the packable project
 
 ## Library configuration
 
-With the baseline configuration in place, we can now shift our attention from cross-cutting concerns to the specifics of the library project itself. These are the settings that dictate how the library is built, what features it supports, and which framework it targets.
+With the baseline configuration in place, we can now shift our attention from cross-cutting concerns to the specifics of the library project itself. These are the settings that dictate how the library is built, what features it supports, and which framework(s) it targets.
 
-The last of the three is particularly important, as the **target framework** determines the set of shared APIs and runtime capabilities available to your library and, by extension, its compatibility with potential consumers. Choosing the right framework to target is a balancing act between wider support and access to modern features, and it requires a good understanding of the .NET ecosystem to make an informed decision.
+The last of the three is particularly important, as the **target framework** specifies the set of shared APIs and runtime capabilities that the library can access, effectively determining its compatibility with potential consumers. Choosing the right framework to target is a balancing act between audience reach and feature availability — and so it requires a good understanding of the .NET ecosystem as a whole.
 
-Generally speaking, **for an application to be able to reference a library, both must target the same framework implementation** (such as .NET Framework, .NET (Core), UWP, Xamarin, Mono, etc.), **with the library's framework version being equal or lower**. For example, an application targeting `net6.0` can import libraries built for `net6.0` or `net5.0` or lower, but not `net7.0` (version too high) or `net45` (different implementation).
+Without doubt, the whole concept of frameworks in .NET is extremely confusing, especially for newcomers. Historically, .NET has gone through several stages of evolution, resulting in a fragmented ecosystem with many different implementations and versions coexisting simultaneously. Things are not helped by the fact that these implementations come with convoluted naming conventions that are neither intuitive nor consistent.
 
-Without doubt, the whole concept of frameworks in .NET is extremely confusing, especially for newcomers. Besides just different framework versions, you also have to consider different implementations — each with its own set of capabilities and convoluted naming conventions. Things are further complicated by the existence of meta-frameworks, such as [.NET Standard](https://learn.microsoft.com/dotnet/standard/net-standard), which can also be targeted — although they are not actual frameworks, but rather specifications that certain implementations can conform to.
+In any case, **for an application to be able to reference a library, both must target the same framework implementation** (such as .NET Framework, .NET (Core), UWP, Xamarin, Mono, etc.), **with the library's framework version being equal or lower**. For example, an application targeting `net6.0` can import libraries built for `net6.0` or `net5.0` or lower, but not `net7.0` (version too high) or `net45` (different implementation).
+
+Besides just different framework versions, you also have to consider different implementations — each with its own set of capabilities and convoluted naming conventions. Things are further complicated by the existence of meta-frameworks, such as [.NET Standard](https://learn.microsoft.com/dotnet/standard/net-standard), which can also be targeted — although they are not actual frameworks, but rather specifications that certain implementations can conform to.
 
 Moreover, it's usually not enough to pick a single framework for your library and
 
