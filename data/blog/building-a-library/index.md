@@ -270,6 +270,10 @@ Concept of [_polyfills_](<https://en.wikipedia.org/wiki/Polyfill_(programming)>)
 Some missing functionality can be backported to make newer APIs available on older frameworks. C# is not as flexible in this regard as languages, such as JavaScript, but you can still leverage some of its facilities, such as extension methods and type shims, to achieve similar results.
 
 ```csharp
+// The polyfill code below is shown for illustrative purposes only.
+// In a real-world scenario, you would typically rely on a polyfill library
+// and won't have to implement these bits yourself.
+
 // Single out frameworks that don't have the desired API natively
 #if (NETCOREAPP && !NETCOREAPP2_1_OR_GREATER) || (NETFRAMEWORK) || (NETSTANDARD && !NETSTANDARD2_1_OR_GREATER)
 
@@ -297,6 +301,11 @@ var contains = str.Contains('w');
 ```
 
 ```csharp
+// The polyfill code below is shown for illustrative purposes only.
+// In a real-world scenario, you would typically rely on a polyfill library
+// and won't have to implement these bits yourself.
+
+// Single out frameworks that don't have the desired API natively
 #if (NETCOREAPP && !NETCOREAPP3_0_OR_GREATER) || (NETFRAMEWORK) || (NETSTANDARD && !NETSTANDARD2_1_OR_GREATER)
 
 // Put this type shim in the System namespace to match the official type
@@ -373,6 +382,10 @@ var array = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 var last = array[^1];
 var part = array[3..^1];
 ```
+
+## Code formatting
+
+CSharpier, dotnet format
 
 ## Workflow automation: building & testing
 
