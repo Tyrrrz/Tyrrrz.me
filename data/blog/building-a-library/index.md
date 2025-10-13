@@ -213,9 +213,9 @@ Although all these metadata properties are only relevant to the packable project
 
 With the baseline configuration in place, we can now shift our attention from cross-cutting concerns to the specifics of the library project itself. These are the settings that dictate how the library is built, what features it supports, and which framework it targets.
 
-The last of the three is particularly important, as the [**target framework**](https://learn.microsoft.com/dotnet/standard/frameworks) defines the set of shared APIs that the library can access, in turn effectively determining its compatibility with the client code. Choosing the right framework to target is therefore a balancing act between audience reach and feature availability — and so it requires a good understanding of the .NET ecosystem as a whole.
+The last of the three is particularly important, as the [**target framework**](https://learn.microsoft.com/dotnet/standard/frameworks) defines the set of shared APIs that the library can access, in turn effectively determining its compatibility with the client code. Choosing the right framework to target is therefore a balancing act between audience reach and feature availability — and so it requires a good understanding of the .NET landscape as a whole.
 
-Unfortunately, .NET is not exactly the simplest landscape to navigate. Decades of evolution have led to a fragmented ecosystem with different implementations of the runtime, each with its own capabilities, versions, and convoluted naming conventions. Although most of these frameworks have progressively been absorbed or displaced by the modern .NET (Core) line, there are still many projects out there that continue to rely on them.
+Unfortunately, .NET is not exactly the simplest tech platform to navigate. Decades of evolution have led to a fragmented ecosystem with different implementations of the runtime, each with its own capabilities, versions, and convoluted naming conventions. Although most of these frameworks have progressively been absorbed or displaced by the modern .NET (Core) line, there are still many projects out there that continue to rely on them.
 
 For a better understanding, here is a brief summary of the most notable implementations that you may encounter:
 
