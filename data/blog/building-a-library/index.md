@@ -186,7 +186,7 @@ The default behavior is a sensible safeguard, seeing as language constructs may 
 
 Therefore, setting the language version explicitly forces the compiler to ignore the official guidelines and evaluate the availability of each language feature independently from the target framework. Doing so immediately unlocks some of the newest syntax that doesn't have any runtime dependencies, while also allowing other features to be backported manually to older frameworks using [polyfills](<https://en.wikipedia.org/wiki/Polyfill_(programming)>).
 
-Following that, we enable the [**Nullable Reference Types**](https://learn.microsoft.com/dotnet/csharp/nullable-references) feature of the C# compiler, as it is a great way to improve the safety of our code and to more accurately advertise the capabilities of our APIs. There are two modes in which this feature can be configured: `annotations`, which instructs the compiler to emit nullability annotations for all types and members that we define; and `enable`, which also produces compiler warnings about related violations during development.
+Following that, we enable the [**Nullable Reference Types**](https://learn.microsoft.com/dotnet/csharp/nullable-references) feature of the C# compiler (**`<Nullable>`**), as it is a great way to improve the safety of our code and to more accurately advertise the capabilities of our APIs. There are two modes in which this feature can be configured: `annotations`, which instructs the compiler to emit nullability annotations for all types and members that we define; and `enable`, which also produces compiler warnings about related violations during development.
 
 Just like many other language and compiler features, Nullable Reference Types is subject to certain availability constraints as well. In its native form, NRT was introduced with the release of C# 8 and .NET Core 3.0 — and, although it's possible to backport the bits required to annotate our own types, the compiler checks are not going to be very useful when targeting older frameworks that don't provide nullability information themselves.
 
@@ -194,31 +194,33 @@ Because of that, we configure this feature in a conditional way: activating the 
 
 Note how the example above relies on the `Condition="..."` attribute to validate framework compatibility. Instead of hard-codding a sequence of separate checks for each specific framework that our projects may target, we can rely on the [`IsTargetFrameworkCompatible`](https://learn.microsoft.com/visualstudio/msbuild/property-functions#msbuild-property-functions) function to establish a version boundary that accounts for different flavors of .NET. In this scenario, NRT will be fully enabled for both .NET Standard 2.1, .NET Core 3.0, as well as any newer implementations of .NET.
 
-To round off the first section, we also set the **`TreatWarningsAsErrors`** property to `true`, directing the compiler to block the build if any warnings are encountered. In effect, this forces developers to address every potential issue in the codebase — either by fixing it or by explicitly declaring it as non-problematic. Although not required, it's generally a good idea to enable this setting for library projects as they tend to have somewhat higher expectations when it comes to code quality.
+To round off the first section, we also set the **`<TreatWarningsAsErrors>`** property to `true`, directing the compiler to block the build if any warnings are encountered. In effect, this forces developers to address every potential issue in the codebase — either by fixing it or by explicitly declaring it as non-problematic. Although not required, it's generally a good idea to enable this setting for library projects as they tend to have somewhat higher expectations when it comes to code quality.
 
-The second group of properties is dedicated to other toolchain options that are not specifically related to the compilation stage. Here, we set the **`CheckEolTargetFramework`** property to `false` and **`SuppressTfmSupportBuildWarnings`** to `true`, disabling various warnings when building for frameworks that have exited their support lifecycle. As mentioned before, libraries do often need to target older frameworks for compatibility reasons, so these warnings are not particularly useful in our context.
+The second group of properties is dedicated to other toolchain options that are not specifically related to the compilation stage. Here, we set the **`<CheckEolTargetFramework>`** property to `false` and **`<SuppressTfmSupportBuildWarnings>`** to `true`, disabling various warnings when building for frameworks that have exited their support lifecycle. As mentioned before, libraries do often need to target older frameworks for compatibility reasons, so these warnings are not particularly useful in our context.
 
-Next, we get to the **`IsPackable`** property, which controls whether a given project should be included in the packaging process. The default value is `true`, meaning that every project is treated as packable unless specified otherwise. By inverting the default, we establish a more intentional convention where NuGet packages are only created for projects that deliberately opt in.
+Next, we get to the **`<IsPackable>`** property, which controls whether a given project should be included in the packaging process. The default value is `true`, meaning that every project is treated as packable unless specified otherwise. By inverting the default, we establish a more intentional convention where NuGet packages are only created for projects that deliberately opt in.
 
 With this setup in place, we can blindly run `dotnet pack` followed by `dotnet nuget push **/*.nupkg` on the entire solution to generate and publish all relevant NuGet artifacts in one go. Other assemblies, such as those produced by the tests and sample projects, will be automatically excluded from the process — greatly simplifying the release workflow along with its automation.
 
 Finally, we have the third group of properties — these are used to define common metadata that gets embedded into the output assemblies and the corresponding NuGet packages. The **`<Version>`** property in particular plays a crucial role in the package management system, as it's the primary way to distinguish different iterations of the same package. For local development, we set it to a placeholder value of `0.0.0-dev`, which will be overridden with a proper version number during the release process.
 
-The remaining fields, including **`Company`**, **`Description`**, and **`PackageProjectUrl`**, are purely informational properties that get surfaced in various places, such as assembly and NuGet package details. The purpose of these fields is to provide context about the package, its author, and where to find more information about it — so make sure to fill them out with accurate values that reflect the identity and nature of your library.
+The remaining fields, including **`<Company>`**, **`<Description>`**, and **`<PackageProjectUrl>`**, are purely informational properties that get surfaced in various places, such as assembly and NuGet package details. The purpose of these fields is to provide context about the package, its author, and where to find more information about it — so make sure to fill them out with accurate values that reflect the identity and nature of your library.
 
-Most importantly, when developing a library, we also need to consider the license under which it will be distributed. The **`PackageLicenseExpression`** property allows us to specify a [standard SPDX license identifier](https://spdx.org/licenses) that indicates the terms of use for our package. Here, we set it to `MIT`, arguably the most popular permissive open-source license, but feel free to explore [other options](https://choosealicense.com) as well to find the best fit for your project.
+Most importantly, when developing a library, we also need to consider the license under which it will be distributed. The **`<PackageLicenseExpression>`** property allows us to specify a [standard SPDX license identifier](https://spdx.org/licenses) that indicates the terms of use for our package. Here, we set it to `MIT`, arguably the most popular permissive open-source license, but feel free to explore [other options](https://choosealicense.com) as well to find the best fit for your project.
 
 Although all these metadata properties are only relevant to the packable projects in our solution, there is no harm in applying them globally through `Directory.Build.props`. In the scenario that we have multiple NuGet packages that we want to publish from the same repository, this setup allows us to maintain a single source of truth for all metadata, while still being able to override specific fields on a per-project basis if necessary.
 
 ## Library configuration
 
-With the baseline configuration in place, we can now shift our attention from cross-cutting concerns to the specifics of the library project itself. These are the settings that dictate how the library is built, what features it supports, and which framework it targets.
+### Target frameworks
 
-The last of the three is particularly important, as the [**target framework**](https://learn.microsoft.com/dotnet/standard/frameworks) defines the set of shared APIs and runtime capabilities that your library can rely on, in turn also determining its overall compatibility. Choosing the right framework to target is therefore a balancing act between audience reach and feature availability — and so it requires a good understanding of the .NET ecosystem as a whole.
+With the baseline configuration in place, we can now shift our attention from cross-cutting concerns to the specifics of the library project itself. These are the settings that dictate how the library is built, what features it supports, and which frameworks it targets.
 
-Unfortunately, .NET is not exactly the simplest technical landscape to navigate. Decades of evolution have fragmented the platform into different implementations — each with its own purpose and limitations, development stacks, versions, and convoluted naming conventions. Although most of these have progressively been absorbed or displaced by the modern .NET (Core) line and its offerings, there are still many projects out there that continue to use them.
+The last of the three is particularly important, as the [**target framework**](https://learn.microsoft.com/dotnet/standard/frameworks) defines the set of shared APIs and runtime capabilities that your library can rely on, in turn also determining its overall compatibility. Choosing the right framework to target is therefore a balancing act between feature availability and audience reach — and so it requires a good understanding of the .NET ecosystem as a whole.
 
-So, for a bit of context, here is a quick overview of the main frameworks that you are likely to encounter these days:
+Unfortunately, .NET is not exactly the simplest technical landscape to navigate. Decades of evolution have fragmented the platform into different implementations — each with its own purpose and restrictions, development stacks, versions, and convoluted naming conventions. Although most of these have progressively been absorbed or displaced by the modern .NET (Core) line and its offerings, there are still many projects out there that continue to use them.
+
+As a library author, it's crucial to be aware of the various contexts in which your code may be used. So, for a better understanding of the situation, let's briefly go over the main frameworks that are relevant today:
 
 - [**.NET (Core)**](https://dotnet.microsoft.com) — the modern, open-source, and cross-platform implementation of .NET. It started as a limited subset of .NET Framework (called .NET Core), but has since turned into a unified platform that encompasses all workloads (dropping the "Core"). All new applications are expected to target this implementation going forward.
 - [**.NET Framework**](https://dotnet.microsoft.com/learn/dotnet/what-is-dotnet-framework) — the original, proprietary, Windows-only implementation of .NET. Legacy technology as of 2019, with no new major releases planned. Still has a massive user base due to its long history. Superseded by .NET (Core).
@@ -230,49 +232,57 @@ So, for a bit of context, here is a quick overview of the main frameworks that y
 
 If the earlier remark about convoluted naming conventions wasn't apparent enough, things get a bit more confusing (and mildly comical) when you introduce the corresponding _framework monikers_ into the mix. For example, among the following list of targets, which two do you think belong to the same lineage: `netcoreapp3.1`, `netcore45`, `net46`, `net5.0`? This is not a trick question, by the way.
 
-Anyway, in order for a library to be referenced by another project, it must be built against a framework that is compatible with the one used by that project. In most cases, it means that both of them need to target the same implementation of .NET, and the library's version must be equal to or lower than that of the other project. Alternatively, if the library targets .NET Standard, then the version of that standard must be supported by the project's framework — however, the [rules for that](https://dotnet.microsoft.com/platform/dotnet-standard#versions) are more complex.
+Anyway, in order for a library to be referenced by another project, it must be built against a framework that is compatible with the one used by that project. In most cases, it means that both of them need to target the same implementation of .NET, and the library's target version must be equal to or lower than that of the other project. Alternatively, if the library targets .NET Standard, then the version of that standard must be supported by the project's framework — however, the [rules for that](https://dotnet.microsoft.com/platform/dotnet-standard#versions) are more complex.
 
-As you can probably imagine, it's also not enough to just pick a single target framework for your library and call it a day. In order to cover a broad range of clients — and provide the best possible experience across that range — you often need to target multiple frameworks (or their versions) simultaneously. This is where [_multi-targeting_](https://learn.microsoft.com/visualstudio/msbuild/net-sdk-multitargeting) comes into play.
+As you can probably imagine, it's also not enough to just pick a single target framework for your library and call it a day. In order to cover a broad range of clients — and provide the best possible experience across that range — you often need to target multiple frameworks (and/or their versions) simultaneously. This is where [_multi-targeting_](https://learn.microsoft.com/visualstudio/msbuild/net-sdk-multitargeting) comes into play.
 
-With multi-targeting, the .NET SDK works by building the project independently for each of the specified target frameworks, producing separate assemblies in the process. When the project is packed into a NuGet package, these assemblies are then organized in such a way that the consuming project can automatically pick the most appropriate one based on its own target framework.
+With multi-targeting, the .NET SDK works by building the project independently for each of the specified target frameworks, producing separate assemblies in the process. When the library is packed into a NuGet package, these assemblies are then organized in such a way that the consuming project can automatically pick the most appropriate assets based on its own requirements.
 
-As a library author, it's up to you to decide how much effort you're willing to invest in supporting non-mainstream or outdated frameworks. There is no one set of target frameworks that fits all scenarios, but here are some general guidelines that I personally follow when making these decisions:
+Like mentioned before, compatibility is a compromise and there's no universal answer to which frameworks you should support. However, here are some general guidelines that I follow when deciding what to target in my libraries:
 
-- **Always target the latest version of the mainline .NET implementation** (currently `net9.0`). Your library should definitely be compatible with the newest version of the platform and there is no better way to ensure that than by targeting it directly. Additionally, this also gives you access to some of the newer analyzers that rely on the framework for their functionality.
-- If possible, **target `netstandard2.0` as well**. By doing so, your library will automatically be compatible with a [wide range of .NET implementations](https://learn.microsoft.com/dotnet/standard/net-standard?tabs=net-standard-2-0), including almost all versions of .NET (Core 2.0 and later), some versions of .NET Framework (4.6.1 and later), and Mono (5.4 and later). This maximizes the potential audience for your library without cherry-picking.
-- If `netstandard2.0` is too low for your library's needs, **consider targeting individual versions of the implementations that you want to support instead**. For example, targeting `net5.0` and `net462` will cover a decent range of platforms, while giving you access to more modern APIs than .NET Standard 2.0.
-- If not targeting `netstandard2.0`, **target at least the earliest LTS version of .NET (Core) that you can reasonably afford to support** (for example, `net6.0`). This ensures that your library remains relevant and usable for a significant portion of the .NET ecosystem.
-- **Don't bother targeting `netstandard2.1`**. It's only implemented by .NET Core 3.0+, so it doesn't add any meaningful compatibility benefits.
-- If your library heavily relies on certain platform APIs, **target the earliest version of the implementation that provides them to leverage native APIs instead of polyfills**.
-- Worst case scenario, **if you can't afford to support non-mainstream implementations of .NET, it's okay to focus solely on .NET (Core)** exclusively since this is what all new apps are built on anyway.
+- **Always target the latest version of the mainline .NET implementation**. Your library should definitely be compatible with the newest version of .NET (currently `net9.0`) and there is no better way to ensure that than by targeting it directly.
+  - Additionally, this also provides you with an improved development experience — particularly through built-in analyzers that rely on framework support for their functionality.
+- **Establish a lower bound by targeting .NET Standard 2.0 as well**. By doing so, your library will automatically be compatible with a [wide range of relatively modern .NET implementations](https://learn.microsoft.com/dotnet/standard/net-standard?tabs=net-standard-2-0), maximizing your audience without much cherry-picking.
+  - This version of .NET Standard offers a good balance between compatibility and API availability, making it a solid choice for the baseline target.
+  - Targeting `netstandard2.0` is more or less equivalent to multi-targeting `netcoreapp2.0`, `net461`, and `uap10.0`, which covers .NET (Core), .NET Framework, and UWP, along with related development platforms, such as Mono, Xamarin, and Unity.
+  - If `netstandard2.0`'s API set is too narrow for your library's needs, consider targeting higher versions of the individual implementations that you want to support instead. For example, targeting `net5.0` and `net462` will still cover a decent range of platforms, while giving you access to more modern APIs.
+  - Avoid targeting `netstandard2.1`, as it's not supported by .NET Framework and UWP, largely diminishing its usefulness as a compatibility layer.
+  - Avoid targeting `netstandard1.x`, as the corresponding implementations are too old and have very limited API sets.
+  - Avoid targeting individual .NET implementations that are older than .NET Standard 2.0 (e.g. `netcoreapp1.1`, `net45`, `sl5`, etc.), as they are all outdated technologies.
+- **Target intermediate versions if you have framework-dependent code paths**. For example, if your library already targets .NET 9.0 and .NET Standard 2.0, but conditionally relies on certain APIs that were introduced in .NET 5.0, then you should also target `net5.0` explicitly to ensure that those code paths are available as early as possible.
+  - This is also relevant if your library uses polyfills to backport newer APIs to older frameworks. In such cases, you want to include the frameworks that natively support those APIs to prioritize them over polyfills where possible.
+  - If you prefer to keep things lean, you can limit intermediate targets to only those that are [LTS (Long-Term Support) releases](https://versionsof.net), such as .NET 6.0, .NET 8.0, etc.
+- In the worst case, **it's acceptable if your library can only reasonably target .NET (Core) and not other implementations**. Sometimes it's not worth the effort or simply impossible to provide support for legacy frameworks, so it's fine to focus solely on the modern .NET line.
 
-Avoid targeting .NET Framework directly -- a bunch of issues with package references
-
-Unity - .NET Standard.
-
-In the case of `MyLibrary`, we will assume that our decision-making process has led us to target `netstandard2.0` for maximum compatibility, as well as `net9.0` to ensure that we stay up-to-date with the latest developments in the platform.
-
-Since our library was initially created using `dotnet new classlib`, the project file `MyLibrary.csproj` comes with some boilerplate configuration. We won't be needing any of it, so let's instead replace the contents with the following:
+Let's now go back and apply these principles to our `MyLibrary` project. Since our library was initially created using `dotnet new classlib`, the project file (`MyLibrary.csproj`) comes with some boilerplate configuration. We won't be needing any of it, so let's instead replace the contents with the following:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net9.0</TargetFrameworks>
-    <IsPackable>true</IsPackable>
+    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net9.0</TargetFrameworks>
     <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+    <IsPackable>true</IsPackable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
 </Project>
 ```
 
-AOT/Trim stuff - can polyfill, but frameworks won't have annotations for their own methods/types.
+Here, we define the **`<TargetFrameworks>`** property (note the plural form) to specify a semicolon-separated list of target frameworks that our library should be built for. In this case, we are targeting `netstandard2.0` as our baseline, `net6.0` and `net7.0` as intermediate versions, and `net9.0` as the latest stable release of .NET.
+
+The reason for singling out .NET 6.0 and .NET 7.0 in particular is because our library is also published with [trimming and AOT support](https://learn.microsoft.com/dotnet/core/deploying/trimming/prepare-libraries-for-trimming). These are advanced compilation options enabled by **`<IsTrimmable>`** and **`<IsAotCompatible>`** respectively and they ensure that the library can be safely used in scenarios where tree shaking is required by the compiler.
+
+Because these features rely on framework annotations and cannot be backported, we conditionally enable them only for the frameworks that natively support them: trimming was introduced in .NET 6.0, while AOT compatibility came later in .NET 7.0. As a result, our library will be trimmable when built for .NET 6.0 and above, and AOT-compatible when built for .NET 7.0 and above.
+
+In the above project file, we also have set the **`<IsPackable>`** property to `true`, declaring our intent to include this project in the packaging process. As you may recall, the baseline configuration in `Directory.Build.props` set the default value of this property to `false`, so we need to explicitly opt in here.
+
+Finally, we enable the **`<GenerateDocumentationFile>`** property to instruct the build process to produce an XML documentation file alongside the compiled assemblies. This file contains the [XML comments](https://learn.microsoft.com/dotnet/csharp/programming-guide/xmldoc) extracted from our source code and is automatically included in the NuGet package, making it available to consumers through IntelliSense and other tooling.
 
 What to target in tests?
 
-## Polyfills
+### Polyfills
 
 Concept of [_polyfills_](<https://en.wikipedia.org/wiki/Polyfill_(programming)>).
 
