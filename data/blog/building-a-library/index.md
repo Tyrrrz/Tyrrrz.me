@@ -216,19 +216,19 @@ Although all these metadata properties are only relevant to the packable project
 
 With the baseline configuration in place, we can now shift our attention from cross-cutting concerns to the specifics of the library project itself. These are the settings that dictate how the library is built, what features it supports, and which frameworks it targets.
 
-The last of the three is particularly important, as the [**target framework**](https://learn.microsoft.com/dotnet/standard/frameworks) defines the set of shared APIs and runtime capabilities that your library can rely on, in turn also determining its overall compatibility. Choosing the right framework to target is therefore a balancing act between feature availability and audience reach — and so it requires a good understanding of the .NET ecosystem as a whole.
+The last of the three is particularly important, as the [_target framework_](https://learn.microsoft.com/dotnet/standard/frameworks) defines the set of shared APIs and runtime capabilities that your library can rely on, in turn also determining its overall compatibility. Choosing the right framework to target is therefore a balancing act between feature availability and audience reach — and so it requires a good understanding of the .NET ecosystem as a whole.
 
-Unfortunately, .NET is not exactly the simplest technical landscape to navigate. Decades of evolution have fragmented the platform into different implementations — each with its own purpose, restrictions, development stacks, and convoluted naming conventions. Although most of them have progressively been absorbed or displaced by .NET (Core), there are still many projects out there that continue to use them.
+Unfortunately, .NET is not exactly the simplest technical landscape to navigate. Decades of evolution have fragmented the platform into different implementations — each with its own purpose, restrictions, development stacks, and convoluted naming conventions. Although most of these implementations have progressively been absorbed or displaced by .NET (Core), they are not entirely irrelevant yet.
 
-Being the author of a library means you need to be aware of the various environments in which your code may be executed. To that end, let's briefly review the most commonly used flavors of .NET:
+Being the author of a library means you need to be aware of the various development contexts in which it may be used. To that end, let's briefly review the main flavors of .NET that you're likely to encounter:
 
-- [**.NET (Core)**](https://dotnet.microsoft.com) — the modern, open-source, and cross-platform implementation of .NET. It started as a limited subset of .NET Framework (called .NET Core), but has since turned into a unified platform that encompasses all workloads (dropping the "Core"). All new applications are expected to target this implementation going forward.
-- [**.NET Framework**](https://dotnet.microsoft.com/learn/dotnet/what-is-dotnet-framework) — the original, proprietary, Windows-only implementation of .NET. Legacy technology as of 2019, with no new major releases planned. Still has a massive user base due to its long history. Superseded by .NET (Core).
-- [**Mono**](https://mono-project.com) — an older open-source and cross-platform implementation of .NET Framework that was created to seamlessly bring .NET applications to non-Windows systems. Legacy technology as of 2019, with no new major releases planned. Superseded by .NET (Core).
-- [**Xamarin**](https://dotnet.microsoft.com/apps/xamarin) — a set of tools and libraries built on top of Mono to facilitate mobile application development for iOS and Android. Legacy technology as of 2024, with no new major releases planned. Superseded by .NET MAUI and .NET (Core).
-- [**Universal Windows Platform (UWP)**](https://learn.microsoft.com/windows/uwp/get-started/universal-application-platform-guide) — a platform for building modern Windows applications that can run across various device types. Based on a subset of .NET Framework (ironically, also called .NET Core, though unrelated), but with its own set of APIs and restrictions. Legacy technology as of 2024, with no new major releases planned. Superseded by WinUI and .NET (Core).
-- [**Unity**](https://unity.com) — a popular game development engine that uses a customized version of Mono to run C# scripts. As of 2025, Unity does not yet support .NET (Core), making it the only modern technology that still primarily relies on Mono.
-- [**.NET Standard**](https://learn.microsoft.com/dotnet/standard/net-standard) — not an actual implementation, but rather a specification that defines a set of APIs that different .NET implementations can conform to. It was created to facilitate code sharing between different frameworks, but has since become relatively obsolete due to the unification brought by .NET (Core).
+- [.NET (Core)](https://dotnet.microsoft.com) — the modern, open-source, and cross-platform implementation of .NET. It started as a limited subset of .NET Framework (called .NET Core), but has since turned into a unified platform that encompasses all workloads (dropping the "Core"). All new applications are expected to target this implementation going forward.
+- [.NET Framework](https://dotnet.microsoft.com/learn/dotnet/what-is-dotnet-framework) — the original, proprietary, Windows-only implementation of .NET. Legacy technology as of 2019, with no new major releases planned. Still has a massive user base due to its long history. Superseded by .NET (Core).
+- [Mono](https://mono-project.com) — an older open-source and cross-platform implementation of .NET Framework that was created to seamlessly bring .NET applications to non-Windows systems. Legacy technology as of 2019, with no new major releases planned. Superseded by .NET (Core).
+- [Xamarin](https://dotnet.microsoft.com/apps/xamarin) — a set of tools and libraries built on top of Mono to facilitate mobile application development for iOS and Android. Legacy technology as of 2024, with no new major releases planned. Superseded by .NET MAUI and .NET (Core).
+- [Universal Windows Platform (UWP)](https://learn.microsoft.com/windows/uwp/get-started/universal-application-platform-guide) — a platform for building modern Windows applications that can run across various device types. Based on a subset of .NET Framework (ironically, also called .NET Core, though unrelated), but with its own set of APIs and restrictions. Legacy technology as of 2024, with no new major releases planned. Superseded by WinUI and .NET (Core).
+- [Unity](https://unity.com) — a popular game development engine that uses a customized version of Mono to run C# scripts. As of 2025, Unity does not yet support .NET (Core), making it the only modern technology that still primarily relies on Mono.
+- [.NET Standard](https://learn.microsoft.com/dotnet/standard/net-standard) — not an actual implementation, but rather a specification that defines a set of APIs that different .NET implementations can conform to. It was created to facilitate code sharing between different frameworks, but has since become less impactful due to the unification brought by .NET (Core).
 
 In case the earlier remark about convoluted naming conventions wasn't apparent enough, things get a bit more confusing (and mildly comical) when you introduce the corresponding _framework monikers_ into the mix. For example, among the following list of targets, which two do you think belong to the same family: `netcoreapp3.1`, `netcore45`, `net46`, `net5.0`? This is not a trick question, by the way.
 
@@ -240,12 +240,12 @@ As you may probably imagine, it's also not enough to just pick a single target f
 
 With multi-targeting, the .NET SDK works by building the project independently for each of the specified target frameworks, producing separate assemblies in the process. When the library is packed into a NuGet package, these assemblies are then organized in such a way that the consuming project can automatically pick the most appropriate assets based on its own requirements.
 
-Regardless, compatibility is always a compromise and early in the development of your library it may be tricky to gauge how far you should go to support older frameworks or niche environments, especially when the cost of doing so isn’t yet clear. That said, here are a few of my own practical recommendations that can help you get started:
+Regardless, compatibility is always a compromise and early in the development of your library it may be tricky to gauge how far you should go to support older or niche frameworks, especially when the cost of doing so isn't clear yet. That said, here are a few of my personal recommendations that can help you get started:
 
-- **Always target the latest version of the mainline .NET implementation**. Your library should definitely be compatible with the newest version of .NET (currently `net9.0`) and there is no better way to ensure that than by targeting it directly.
+- **Always target the latest version of .NET (Core)**. Your library should definitely be compatible with the newest version of .NET (currently `net9.0`) and there is no better way to ensure that than by targeting it directly.
   - Additionally, this also provides you with an improved development experience — particularly through built-in analyzers that only work when targeting the latest framework.
 - **Establish a compatibility baseline by targeting .NET Standard 2.0 as well**. By doing so, your library will automatically be supported by a [wide range of relatively modern .NET implementations](https://learn.microsoft.com/dotnet/standard/net-standard?tabs=net-standard-2-0), maximizing your audience without much cherry-picking.
-  - This version of .NET Standard offers a good balance between compatibility and API availability, making it a solid lower boundary for most libraries.
+  - This version of the standard offers a good balance between compatibility and API availability, making it a solid lower boundary for most libraries.
   - Targeting `netstandard2.0` is more or less equivalent to multi-targeting `netcoreapp2.0`, `net461`, and `uap10.0`, which covers .NET (Core), .NET Framework, and UWP, along with related development platforms, such as Mono, Xamarin, and Unity.
   - If `netstandard2.0`'s API set is too narrow for your library's needs, consider targeting higher versions of the individual implementations that you want to support instead. For example, targeting `net5.0` and `net462` will still cover a decent range of platforms, while giving you access to more modern APIs.
   - Avoid targeting `netstandard2.1`, as it's not supported by .NET Framework and UWP, largely diminishing its usefulness as a compatibility layer.
@@ -254,9 +254,23 @@ Regardless, compatibility is always a compromise and early in the development of
 - **Target intermediate versions if you have framework-dependent code paths**. For example, if your library already targets .NET 9.0 and .NET Standard 2.0, but conditionally relies on certain APIs that were introduced in .NET 5.0, then you should also target `net5.0` explicitly to ensure that those code paths are available as early as possible.
   - This is also relevant if your library uses polyfills to backport newer APIs to older frameworks. In such cases, you want to include the frameworks that natively support those APIs to prioritize them over polyfills where possible.
   - If you prefer to keep things lean, you can limit intermediate targets to only those that are [long-term support (LTS) releases](https://versionsof.net), such as .NET 6.0, .NET 8.0, etc.
-- In the worst case, **it's acceptable if your library can only reasonably target .NET (Core) and not other implementations**. Sometimes it's impossible or simply not worth the effort to provide support for legacy frameworks, so it's fine to focus solely on the modern .NET line.
+- In the worst case, **it's acceptable if your library can only reasonably target .NET (Core) and not other implementations**. Sometimes it's impossible or simply not worth the effort to provide support for legacy frameworks, so it's fine to focus solely on the modern .NET family.
 
-Let's now go back and apply these principles to our `MyLibrary` project. Since our library was initially created using `dotnet new classlib`, the project file (`MyLibrary.csproj`) comes with some boilerplate configuration. We won't be needing any of it, so let's instead replace the contents with the following:
+For the `MyLibrary` example, we'll assume that our code is fairly portable and allows us to target both .NET 9.0 and .NET Standard 2.0 without too many issues. Let's now edit the project file (`MyLibrary.csproj`) to reflect that:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net9.0</TargetFrameworks>
+  </PropertyGroup>
+
+</Project>
+```
+
+Here, we set the **`<TargetFrameworks>`** property (note the plural form) to a semicolon-separated list of frameworks that we want to target. In our case, we include both `netstandard2.0` and `net9.0`, allowing our library to be compatible with a fairly wide range of clients, while also providing the best possible experience for those using the latest .NET version.
+
+### Additional settings
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -271,8 +285,6 @@ Let's now go back and apply these principles to our `MyLibrary` project. Since o
 
 </Project>
 ```
-
-Here, we define the **`<TargetFrameworks>`** property (note the plural form) to specify a semicolon-separated list of target frameworks that our library should be built for. In this case, we are targeting `netstandard2.0` as our baseline, `net6.0` and `net7.0` as intermediate versions, and `net9.0` as the latest stable release of .NET.
 
 The reason for singling out .NET 6.0 and .NET 7.0 in particular is because our library is also published with [trimming and AOT support](https://learn.microsoft.com/dotnet/core/deploying/trimming/prepare-libraries-for-trimming). These are advanced compilation options enabled by **`<IsTrimmable>`** and **`<IsAotCompatible>`** respectively and they ensure that the library can be safely used in scenarios where tree shaking is required by the compiler.
 
