@@ -410,12 +410,12 @@ internal readonly struct Index(int value) : IEquatable<Index>
     public static Index FromStart(int value) =>
         value >= 0
             ? new Index(value)
-            : throw new ArgumentOutOfRangeException(nameof(value), "value must be non-negative");
+            : throw new ArgumentOutOfRangeException(nameof(value), "Value must be non-negative.");
 
     public static Index FromEnd(int value) =>
         value >= 0
             ? new Index(~value)
-            : throw new ArgumentOutOfRangeException(nameof(value), "value must be non-negative");
+            : throw new ArgumentOutOfRangeException(nameof(value), "Value must be non-negative.");
 
     public static implicit operator Index(int value) => FromStart(value);
 }
