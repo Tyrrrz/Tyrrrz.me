@@ -251,10 +251,10 @@ Regardless, compatibility is always a compromise and early in the development of
   - Avoid targeting `netstandard2.1`, as it's not supported by .NET Framework and UWP, largely diminishing its usefulness as a compatibility layer.
   - Avoid targeting `netstandard1.x`, as the corresponding implementations are too old and have very limited API sets.
   - Avoid targeting individual .NET implementations that don't implement .NET Standard 2.0 (e.g. `netcoreapp1.1`, `net45`, `sl5`, etc.), as they are all outdated technologies.
-- **Target intermediate versions if you have framework-dependent code paths**. For example, if your library already targets .NET 9.0 and .NET Standard 2.0, but conditionally relies on certain APIs that were introduced in .NET 5.0, then you should also target `net5.0` explicitly to ensure that those code paths are available as early as possible.
-  - This is also relevant if your library uses polyfills to backport newer APIs to older frameworks. In such cases, you want to include the frameworks that natively support those APIs to prioritize them over polyfills where possible.
+- **Target intermediate versions if you have framework-dependent code paths**. For example, if your library already targets .NET 9.0 and .NET Standard 2.0, but conditionally relies on certain APIs that were introduced in .NET 5.0, then you should separately target `net5.0` as well to ensure that those code paths are available as early as possible.
+  - This is similarly relevant if your library uses polyfills to backport newer APIs to older frameworks. In such cases, you want to also include the frameworks that provide those APIs natively, so that polyfills are only used when necessary.
   - If you prefer to keep things lean, you can limit intermediate targets to only those that are [long-term support (LTS) releases](https://versionsof.net), such as .NET 6.0, .NET 8.0, etc.
-- In the worst case, **it's acceptable if your library can only reasonably target .NET (Core) and not other implementations**. Sometimes it's impossible or simply not worth the effort to provide support for legacy frameworks, so it's fine to focus solely on the modern .NET family.
+- In the worst case, **it's acceptable if your library can only reasonably target .NET (Core) and not other implementations**. Sometimes it's impossible or simply not worth the effort to support legacy frameworks, so it's fine to focus solely on the modern .NET family.
 
 For the `MyLibrary` example, we'll assume that our code is fairly portable and allows us to target both .NET 9.0 and .NET Standard 2.0 without too many issues. Let's now edit the project file (`MyLibrary.csproj`) to reflect that:
 
@@ -268,39 +268,52 @@ For the `MyLibrary` example, we'll assume that our code is fairly portable and a
 </Project>
 ```
 
-Here, we set the **`<TargetFrameworks>`** property (note the plural form) to a semicolon-separated list of frameworks that we want to target. In our case, we include both `netstandard2.0` and `net9.0`, allowing our library to be compatible with a fairly wide range of clients, while also providing the best possible experience for those using the latest .NET version.
+Here, we use the **`<TargetFrameworks>`** property (note the plural form) to specify a semicolon-separated list of target frameworks that our library should be built for. In this case, we have `netstandard2.0` and `net9.0`, which aligns with the earlier recommendations and provides a good balance between compatibility and modern features.
 
-### Additional settings
+If we were to now run the `dotnet build` command on this project, the tooling would create two separate outputs: one at `bin/Debug/netstandard2.0/*` and another at `bin/Debug/net9.0/*`. Each of these directories would contain the compiled assembly along with any other artifacts relevant to that specific target framework.
+
+### Miscellaneous settings
+
+While we took care of the most important aspect of the library configuration by defining the target frameworks, there are a few other settings that are worth mentioning as well. Let's expand our project file to include them:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net6.0;net7.0;net9.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
     <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
-    <IsPackable>true</IsPackable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
 </Project>
 ```
 
-The reason for singling out .NET 6.0 and .NET 7.0 in particular is because our library is also published with [trimming and AOT support](https://learn.microsoft.com/dotnet/core/deploying/trimming/prepare-libraries-for-trimming). These are advanced compilation options enabled by **`<IsTrimmable>`** and **`<IsAotCompatible>`** respectively and they ensure that the library can be safely used in scenarios where tree shaking is required by the compiler.
+In the updated snippet above, we start off by setting **`<IsPackable>`** to `true`, which declares our intent to include this project in the packaging process. As you may recall, the baseline configuration in `Directory.Build.props` established `false` as the default value for this property, so we need to explicitly override it here to make sure that a NuGet package is generated for our library.
 
-Because these features rely on framework annotations and cannot be backported, we conditionally enable them only for the frameworks that natively support them: trimming was introduced in .NET 6.0, while AOT compatibility came later in .NET 7.0. As a result, our library will be trimmable when built for .NET 6.0 and above, and AOT-compatible when built for .NET 7.0 and above.
+Following that, we also add **`<IsTrimmable>`** and **`<IsAotCompatible>`**, conditionally enabling them both for the appropriate target frameworks. These properties signal to the .NET toolchain that our library is designed to be compatible with [assembly trimming](https://learn.microsoft.com/dotnet/core/deploying/trimming/prepare-libraries-for-trimming) and [ahead-of-time (AOT) compilation](https://learn.microsoft.com/dotnet/core/deploying/native-aot/#aot-compatibility-analyzers), imposing certain constraints on the code to ensure that it can be safely processed by these optimizations.
 
-In the above project file, we also have set the **`<IsPackable>`** property to `true`, declaring our intent to include this project in the packaging process. As you may recall, the baseline configuration in `Directory.Build.props` set the default value of this property to `false`, so we need to explicitly opt in here.
+While not strictly required, these features are becoming increasingly prevalent in the .NET ecosystem, especially in development contexts where performance and binary size reduction are critical. If you don't heavily rely on reflection and run-time code generation, you should always enable trimming and AOT compatibility to make your library more versatile and future-proof.
 
-Finally, we enable the **`<GenerateDocumentationFile>`** property to instruct the build process to produce an XML documentation file alongside the compiled assemblies. This file contains the [XML comments](https://learn.microsoft.com/dotnet/csharp/programming-guide/xmldoc) extracted from our source code and is automatically included in the NuGet package, making it available to consumers through IntelliSense and other tooling.
+You may have also noticed that we extended the list of target frameworks to include .NET 6.0 and .NET 7.0 as well. That is because the above-mentioned optimizations rely on framework annotations and are only available when targeting .NET 6.0+ and .NET 7.0+ respectively. To make sure that our users can benefit from these features as early as possible (and not just on .NET 9.0+), we need to explicitly target these intermediate versions too.
 
-What to target in tests?
+Finally, we get to the **`<GenerateDocumentationFile>`** property, which we enable to instruct the build process to produce an XML documentation file alongside the compiled assemblies. This file contains the [XML comments](https://learn.microsoft.com/dotnet/csharp/programming-guide/xmldoc) extracted from the source code and is automatically included in the NuGet package, making those comments available to consumers directly within their IDEs.
 
-### Polyfills
+### Polyfills and backports
 
-Concept of [_polyfills_](<https://en.wikipedia.org/wiki/Polyfill_(programming)>).
+Throughout this article, there were several mentions of a concept called [_polyfills_](<https://en.wikipedia.org/wiki/Polyfill_(programming)>) — a general programming technique that allows developers to replicate the behavior of newer APIs on older platforms that don't support them natively. This technique is particularly useful when building libraries as it allows us to leverage modern features, while still maintaining compatibility with legacy frameworks.
 
-Some missing functionality can be backported to make newer APIs available on older frameworks. C# is not as flexible in this regard as languages, such as JavaScript, but you can still leverage some of its facilities, such as extension methods and type shims, to achieve similar results.
+Polyfills are authored and applied differently depending on the programming language and its capabilities. In JavaScript, for example, polyfills are typically implemented as standalone scripts that augment the global environment or prototype chains of built-in types. In C#, however, the process is a bit more involved due to the statically typed and compiled nature of the language.
+
+To create a polyfill in C#, you are mostly limited to two approaches:
+
+- **Global extension methods** — by defining extension methods on existing types, we can effectively add new functionality that appears as if it were part of the original type. When such extension methods are defined in the global namespace, they become available throughout the entire codebase without requiring any additional `using` directives, effectively mimicking instance methods.
+- **Type shims** — by defining new types that replicate the behavior of newer types, we can provide alternative implementations that can be used in place of the original types. By placing these type shims in the same namespace as the official types, you can ensure that they are picked up by the compiler when the official types are not available.
+
+These approaches can be combined with [_conditional compilation_](https://learn.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives#conditional-compilation) directives to ensure that polyfills are only included in the build when targeting frameworks that lack the desired APIs. This way, when the library is built for modern frameworks, the native implementations are used instead, avoiding any potential conflicts or performance issues.
+
+As an example, let's say we wanted to polyfill the `string.Contains(char, StringComparison)` and `string.Contains(string, StringComparison)` methods, which were introduced in .NET Core 2.1. Here's how we could implement these polyfills using the extension method approach described above:
 
 ```csharp
 // The polyfill code below is shown for illustrative purposes only.
@@ -315,23 +328,31 @@ using System;
 // No namespace declaration, so that the extension methods are available globally
 internal static class PolyfillExtensions
 {
-    // https://learn.microsoft.com/dotnet/api/system.string.contains#system-string-contains(system-char-system-stringcomparison)
     public static bool Contains(this string str, char c, StringComparison comparison) =>
         str.Contains(c.ToString(), comparison);
 
-    // https://learn.microsoft.com/dotnet/api/system.string.contains#system-string-contains(system-string-system-stringcomparison)
     public static bool Contains(this string str, string sub, StringComparison comparison) =>
         str.IndexOf(sub, comparison) >= 0;
 }
 #endif
 ```
 
+There are a couple things to note about the above snippet. First, we use conditional compilation directives to ensure that the polyfill code is only included when targeting frameworks that don't have the `string.Contains` methods natively. This is achieved thanks to the automatically defined target framework symbols that the .NET SDK provides during the build process.
+
+Second, we define the extension methods in the global namespace (by omitting the `namespace` declaration) so that they are available throughout the entire codebase without requiring a `using` directive. This way, any code that calls `string.Contains` will automatically pick up our polyfill methods when the native implementations are not available.
+
+Finally, we mark the class that defines the extension methods as `internal`, limiting its visibility to within the same assembly. In doing so, we avoid exposing these polyfill methods to the consumers of our library, preventing any potential naming conflicts or confusion.
+
+With the polyfill in place, we can now use the `string.Contains(...)` methods in our library code without worrying about compatibility issues:
+
 ```csharp
 var str = "Hello world";
 
 // On older frameworks, this call is implemented by the polyfill above
-var contains = str.Contains('w');
+var contains = str.Contains('w', StringComparison.OrdinalIgnoreCase);
 ```
+
+Alternatively, if we wanted to polyfill the `System.Index` and `System.Range` types, which were introduced in .NET Core 3.0, we could implement them using the type shim approach like so:
 
 ```csharp
 // The polyfill code below is shown for illustrative purposes only.
@@ -344,7 +365,6 @@ var contains = str.Contains('w');
 // Put this type shim in the System namespace to match the official type
 namespace System;
 
-// https://learn.microsoft.com/dotnet/api/system.index
 internal readonly struct Index(int value) : IEquatable<Index>
 {
     private readonly int _value = value;
@@ -400,13 +420,16 @@ internal readonly struct Index(int value) : IEquatable<Index>
     public static implicit operator Index(int value) => FromStart(value);
 }
 
-// https://learn.microsoft.com/dotnet/api/system.range
 internal readonly struct Range(Index start, Index end)
 {
     // ... omitted for brevity ...
 }
 #endif
 ```
+
+Unlike the previous example, instead of defining the polyfills within the global namespace, we place them in the `System` namespace to match the official types. This way, when the consuming code references `System.Index` or `System.Range`, the compiler will pick up our type shims when the native implementations are not available.
+
+Besides just referencing these types in our library code, we can also take advantage of the syntactic sugar they enable, such as the [index and range operators](https://learn.microsoft.com/dotnet/csharp/tutorials/ranges-indexes) in this case:
 
 ```csharp
 var array = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
@@ -415,6 +438,32 @@ var array = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 var last = array[^1];
 var part = array[3..^1];
 ```
+
+Of course, most of the time you wouldn't want to implement polyfills yourself. Instead, you would typically rely on existing polyfill libraries that have already done the heavy lifting for you, such as [PolyShim](https://github.com/Tyrrrz/PolyShim) (by me), [Polyfill](https://github.com/SimonCropp/Polyfill) (by Simon Cropp), or [PolySharp](https://github.com/Sergio0694/PolySharp) (by Sergio Pedri).
+
+All of these libraries are published as source-only packages, meaning that they deliver their code directly through code files instead of compiled assemblies. This approach allows the polyfill code to be seamlessly integrated into your library during the build process, enabling conditional compilation and inlining optimizations — and without imposing additional run-time dependencies on your consumers.
+
+Choosing which one to use is mostly a matter of personal preference, as they all provide similar functionality, albeit with slightly different design philosophies. To feed my ego, let's imagine that our choice fell on PolyShim, so we would add it as a compile-time dependency in our project file like so:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net9.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PolyShim" Version="1.15.0" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>
+```
+
+Do note that while polyfills defined this way are incredibly useful, they can't replicate every kind of API. For example, at least at the time of writing, it's not possible to polyfill instance properties, static members, array indexers, and interface implementations.
 
 ## Code formatting
 
