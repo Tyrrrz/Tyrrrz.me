@@ -308,12 +308,12 @@ Polyfills are authored and applied differently depending on the programming lang
 
 To create a polyfill in C#, you are limited to two main approaches:
 
-- **Method polyfills**, which are provided through extension methods that substitute missing instance methods on existing built-in types. By defining them in the global namespace (i.e. without a `namespace` declaration), they become automatically available throughout the entire codebase without requiring explicit `using` directives.
-- **Type polyfills**, which are provided through custom shims that mimic the behavior of the official built-in types by reimplementing their functionality from scratch. They use the same name and namespace as the originals, allowing them to serve as seamless drop-in replacements when the official types are completely unavailable.
+- **Method polyfills**, which are provided through extension methods that substitute missing instance methods on existing built-in types. By defining them in the global namespace, they become automatically available throughout the entire codebase without requiring explicit `using` directives.
+- **Type polyfills**, which are provided through custom shims that mimic the behavior of the built-in types by reimplementing their functionality from scratch. They use the same name and namespace as the originals, allowing them to serve as seamless drop-in replacements when the official types are completely unavailable.
 
 These approaches can be combined with [_conditional compilation directives_](https://learn.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives#conditional-compilation) to ensure that polyfills are only included in the build when targeting frameworks that lack the desired APIs. This way, when the library is built for modern frameworks, the native implementations are used instead, avoiding any potential conflicts or performance issues.
 
-As an example, let's say we wanted to polyfill the `string.Contains(char, StringComparison)` and `string.Contains(string, StringComparison)` methods, which were introduced in .NET Core 2.1. Here's how we could implement these polyfills using the extension method approach described above:
+As an example, let's say we wanted to polyfill the `string.Contains(char, StringComparison)` and `string.Contains(string, StringComparison)` methods, which were introduced in .NET Core 2.1. Since the `string` type itself is available across all frameworks, we can implement polyfills for the missing members using the extension method approach described above:
 
 ```csharp
 // The polyfill code below is shown for illustrative purposes only.
@@ -337,7 +337,7 @@ internal static class PolyfillExtensions
 #endif
 ```
 
-There are a couple things to note about the above snippet. First, we use conditional compilation directives to ensure that the polyfill code is only included when targeting frameworks that don't have the `string.Contains(...)` methods natively. This is achieved thanks to the automatically defined target framework symbols that the .NET SDK provides during the build process.
+There are a couple things to note about this snippet. First, we use conditional compilation directives to ensure that the polyfill code is only included when targeting frameworks that don't have the `string.Contains(...)` methods natively. In our case, that includes all of .NET Framework, as well as .NET Standard versions prior to 2.1 and .NET Core versions prior to 2.1.
 
 Second, we define the extension methods in the global namespace (by omitting the `namespace` declaration) so that they are accessible on every applicable type without requiring a `using` directive. By doing so, any code that calls `string.Contains(...)` will pick up our polyfill methods when the native implementations are not available.
 
@@ -349,12 +349,12 @@ With the polyfills in place, we can now use the above `string.Contains(...)` met
 var str = "Hello world";
 
 // On newer frameworks, this call uses the native implementation.
-// On older frameworks, this call is implemented by the polyfills above.
-// Same code seamlessly works everywhere.
+// On older frameworks, this call is implemented by the polyfills.
+// Same code works everywhere without any changes.
 var contains = str.Contains('w', StringComparison.OrdinalIgnoreCase);
 ```
 
-Alternatively, if we wanted to polyfill the `System.Index` and `System.Range` types, which were introduced in .NET Core 3.0, we could implement them using the type shim approach like so:
+On the other hand, if we wanted to polyfill the `System.Index` and `System.Range` types, which were introduced in .NET Core 3.0, we would need to use the type shim approach instead, as these types are not available at all on older frameworks:
 
 ```csharp
 // The polyfill code below is shown for illustrative purposes only.
@@ -429,14 +429,14 @@ internal readonly struct Range(Index start, Index end)
 #endif
 ```
 
-Unlike the previous example, instead of defining the polyfills globally, we place them in the `System` namespace to match the official types. This way, when the consuming code references `System.Index` or `System.Range`, the compiler will pick up our type shims if the native implementations are missing:
+Unlike the previous example, rather than defining these polyfills globally, we place them in the `System` namespace to match the official types. This way, when the consuming code references `System.Index` or `System.Range`, the compiler picks up our type shims in the absence of native implementations:
 
 ```csharp
 using System;
 
 // On newer frameworks, this relies on the native implementations.
-// On older frameworks, this relies on the polyfills above.
-// Same code seamlessly works everywhere.
+// On older frameworks, this relies on the polyfills.
+// Same code works everywhere without any changes.
 var index = new Index(1, fromEnd: true);
 var range = new Range(
     new Index(3),
@@ -450,17 +450,23 @@ By re-defining framework APIs this way, any language features that rely on them 
 var array = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
 // On newer frameworks, this relies on the native implementations.
-// On older frameworks, this relies on the polyfills above.
-// Same code seamlessly works everywhere.
+// On older frameworks, this relies on the polyfills.
+// Same code works everywhere without any changes.
 var last = array[^1];
 var part = array[3..^1];
 ```
 
-Of course, most of the time you wouldn't want to implement polyfills yourself. Instead, you would typically rely on existing polyfill libraries that have already done the heavy lifting for you, such as [PolyShim](https://github.com/Tyrrrz/PolyShim) (by me), [Polyfill](https://github.com/SimonCropp/Polyfill) (by Simon Cropp), or [PolySharp](https://github.com/Sergio0694/PolySharp) (by Sergio Pedri).
+Of course, most of the time you wouldn't want to implement polyfills yourself. Instead, you would typically rely on existing polyfill libraries that have already done the heavy lifting for you — and here you have several options to consider.
 
-COMPATIBILITY PACKAGES
+First of all, many of the built-in .NET types that were introduced in .NET (Core) have official backports provided by Microsoft. For example, installing the [`System.Memory`](https://nuget.org/packages/System.Memory) package adds support for `Span<T>`, `Memory<T>`, and the associated types to projects targeting .NET Framework, where they are not normally available. You can [search for `System.*` on NuGet.org](https://nuget.org/packages?q=system.*) to find other backports as well.
 
-All of these libraries are published as source-only packages, meaning that they deliver their code directly through code files instead of compiled assemblies. This approach allows the polyfill code to be seamlessly integrated into your library during the build process, enabling conditional compilation and inlining optimizations — and without imposing additional run-time dependencies on your consumers.
+Besides that, there are also many community-driven polyfill libraries that cover a wide range of APIs and scenarios. These are typically designed as a one-stop solution for polyfilling various missing features across different frameworks. Some popular options include:
+
+- [PolyShim](https://github.com/Tyrrrz/PolyShim) (by me)
+- [Polyfill](https://github.com/SimonCropp/Polyfill) (by Simon Cropp)
+- [PolySharp](https://github.com/Sergio0694/PolySharp) (by Sergio Pedri)
+
+All of the above libraries are published as source-only packages, meaning that they deliver their code directly through code files instead of compiled assemblies. This approach allows the polyfill code to be seamlessly integrated into your library during the build process, enabling conditional compilation and inlining optimizations — and without imposing additional run-time dependencies on your consumers.
 
 Choosing which one to use is mostly a matter of personal preference, as they all provide similar functionality, albeit with slightly different design philosophies. To feed my ego, let's imagine that our choice fell on PolyShim, so we would add it as a compile-time dependency in our project file like so:
 
