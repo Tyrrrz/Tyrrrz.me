@@ -306,7 +306,7 @@ Throughout this article, there were several mentions of a concept called [_polyf
 
 Polyfills are authored and applied differently depending on the programming language and its capabilities. In JavaScript, for example, they are typically implemented as standalone scripts that augment the global environment or prototype chains of built-in types. In C#, however, the process is a bit awkward due to the statically typed and compiled nature of the language.
 
-To create a polyfill in C#, you are limited to two main approaches:
+To create a polyfill in C#, you are limited to two main options:
 
 - **Method polyfills**, which are provided through extension methods that substitute missing instance methods on existing built-in types. By defining them in the global namespace, they become available throughout the entire codebase without requiring explicit `using` directives.
 - **Type polyfills**, which are provided through custom shims that mimic the behavior of the built-in types by reimplementing their functionality from scratch. They have the same name and namespace as the originals, allowing them to serve as seamless drop-in replacements when the official types are completely unavailable.
@@ -341,9 +341,9 @@ There are a couple things to note about this snippet. First, we use the `#if` di
 
 Second, we omit the `namespace` declaration to define the extension methods in the global namespace, making them immediately accessible on every applicable type. By doing so, any code that calls `string.Contains(...)` will automatically pick up our polyfill methods when the native implementations are not available.
 
-Finally, we mark the class that defines the extension methods as `internal`, constraining its visibility to within the same assembly. This is important, as it prevents exposing these polyfill methods to the consumers of our library, avoiding potential naming conflicts and confusion.
+Finally, we mark the class that defines the extension methods as `internal`, constraining its visibility to within the same assembly. This is important, as it prevents exposing these polyfill methods to the consumers of our library, which could otherwise lead to confusion and, in some cases, build errors.
 
-With the polyfills in place, we can now use the above `string.Contains(...)` methods in our library code without worrying about compatibility issues:
+With the polyfills in place, we can now use the aforementioned `string.Contains(...)` methods in our library code without worrying about compatibility issues:
 
 ```csharp
 var str = "Hello world";
@@ -354,7 +354,7 @@ var str = "Hello world";
 var contains = str.Contains('w', StringComparison.OrdinalIgnoreCase);
 ```
 
-On the other hand, for example, if we wanted to polyfill the entirety of `System.Index` and `System.Range` types, which were introduced in .NET Core 3.0, we would need to use the type shim approach instead. Here's how that would look:
+On the other hand, if we needed to backport an entire type rather than just a few missing methods, we would have to rely on the type shim approach instead. As an example, here's how that would look like for the `System.Index` and `System.Range` types introduced in .NET Core 3.0:
 
 ```csharp
 // The polyfill code below is shown for illustrative purposes only.
@@ -429,7 +429,7 @@ internal readonly struct Range(Index start, Index end)
 #endif
 ```
 
-Unlike the previous example, rather than defining these polyfills globally, we place them in the `System` namespace to match the official types. This way, when the consuming code references `System.Index` or `System.Range`, the compiler will automatically resolve to our polyfill types when the native implementations are missing:
+Unlike the previous example, rather than defining these polyfills globally, we place them in the `System` namespace to match the original naming patterns. This way, when the consuming code references `System.Index` or `System.Range`, the compiler will automatically resolve to our polyfill types if the native implementations are missing:
 
 ```csharp
 using System;
@@ -454,6 +454,36 @@ var array = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 // Same code works everywhere without any changes.
 var last = array[^1];
 var part = array[3..^1];
+```
+
+As you can imagine, being limited to only methods and types makes polyfilling somewhat restrictive. Unfortunately, C# doesn't provide any way to polyfill other kinds of APIs, such as static members, properties, indexers, or interface implementations. That said, it's still possible to cover a decent range of scenarios using the techniques described above.
+
+If you dread the thought of having to write and maintain polyfills yourself for every bit of missing functionality, don't worry. There are several existing community-driven packages that provide a wide variety of polyfills and backports for .NET, allowing you to simply include them as dependencies in your library project and benefit from their work instead. Here are a few options to consider:
+
+- [PolyShim](https://github.com/Tyrrrz/PolyShim) (by me)
+- [Polyfill](https://github.com/SimonCropp/Polyfill) (by Simon Cropp)
+- [PolySharp](https://github.com/Sergio0694/PolySharp) (by Sergio Pedri)
+
+All of the above libraries are published as source-only packages, meaning that they deliver their code directly through code files instead of compiled assemblies. This approach allows the polyfill code to be seamlessly integrated into your library during the build process, enabling conditional compilation and inlining optimizations — and without imposing additional run-time dependencies on your consumers.
+
+As such, you can simply add them as compile-time dependencies in your project file, without worrying about conditions:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net9.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PolyShim" Version="1.15.0" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>
 ```
 
 Of course, most of the time you wouldn't want to implement polyfills yourself. Instead, you would typically rely on existing polyfill libraries that have already done the heavy lifting for you — and here you have several options to consider.
@@ -482,37 +512,7 @@ You can search for [`System.*`](https://nuget.org/packages?q=system.*) or [`Micr
 </Project>
 ```
 
-Besides the official packages, there are also many community-driven polyfill libraries. These are typically more sophisticated and cover a wider range of APIs and scenarios, including both method and type polyfills. Here are a few popular options:
-
-- [PolyShim](https://github.com/Tyrrrz/PolyShim) (by me)
-- [Polyfill](https://github.com/SimonCropp/Polyfill) (by Simon Cropp)
-- [PolySharp](https://github.com/Sergio0694/PolySharp) (by Sergio Pedri)
-
-All of the above libraries are published as source-only packages, meaning that they deliver their code directly through code files instead of compiled assemblies. This approach allows the polyfill code to be seamlessly integrated into your library during the build process, enabling conditional compilation and inlining optimizations — and without imposing additional run-time dependencies on your consumers.
-
-As such, you can simply add them as compile-time dependencies in your project file, without worrying about conditions:
-
-```xml
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net9.0</TargetFrameworks>
-    <IsPackable>true</IsPackable>
-    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
-    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="PolyShim" Version="1.15.0" PrivateAssets="all" />
-  </ItemGroup>
-
-</Project>
-```
-
 Most of the time, as a library author, you'll find yourself relying on a combination of official and community-driven polyfill packages to cover the APIs that you need. This way, you can focus on writing your library code without having to worry about compatibility issues across different frameworks.
-
-Do note that while polyfills defined this way are incredibly useful, they can't replicate every kind of API. For example, at least at the time of writing, it's not possible to polyfill instance properties, static members, array indexers, and interface implementations.
 
 ## Code formatting
 
