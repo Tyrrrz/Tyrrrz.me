@@ -192,7 +192,7 @@ Just like many other language and compiler features, Nullable Reference Types is
 
 Because of that, we configure this feature in a conditional way: activating the `annotations` mode as the baseline for all targets, while extending to the `enable` mode for the frameworks that fully support it. This way, our assemblies will always include nullability annotations, but we'll only get warnings about violations in our own code when building against newer frameworks.
 
-Note how the example above relies on the `Condition="..."` attribute to validate framework compatibility. Instead of hard-codding a sequence of separate checks for each specific framework that our projects may target, we can rely on the [`IsTargetFrameworkCompatible`](https://learn.microsoft.com/visualstudio/msbuild/property-functions#msbuild-property-functions) function to establish a version boundary that accounts for different flavors of .NET. In this scenario, NRT will be fully enabled for both .NET Standard 2.1, .NET Core 3.0, as well as any newer implementations of .NET.
+Note how the example above relies on the `Condition="..."` attribute to validate framework compatibility. Instead of hard-codding a sequence of separate checks for each specific framework that our projects may target, we can rely on the [`IsTargetFrameworkCompatible(...)`](https://learn.microsoft.com/visualstudio/msbuild/property-functions#msbuild-property-functions) function to establish a version boundary that accounts for different flavors of .NET. In this scenario, NRT will be fully enabled for both .NET Standard 2.1, .NET Core 3.0, as well as any newer implementations of .NET.
 
 To round off the first section, we also set the **`<TreatWarningsAsErrors>`** property to `true`, directing the compiler to block the build if any warnings are encountered. In effect, this forces developers to address every potential issue in the codebase — either by fixing it or by explicitly declaring it as non-problematic. Although not required, it's generally a good idea to enable this setting for library projects as they tend to have somewhat higher expectations when it comes to code quality.
 
@@ -343,7 +343,7 @@ Second, we omit the `namespace` declaration to define the extension methods in t
 
 Finally, we mark the class that defines the extension methods as `internal`, constraining its visibility to within the same assembly. This is important, as it prevents exposing these polyfill methods to the consumers of our library, which could otherwise lead to confusion and, in some cases, build errors.
 
-With the polyfills in place, we can now use the aforementioned `string.Contains(...)` methods in our library code without worrying about compatibility issues:
+With the polyfills in place, we can now use the aforementioned `string.Contains(...)` methods in our library code, without worrying about compatibility issues:
 
 ```csharp
 var str = "Hello world";
@@ -354,7 +354,7 @@ var str = "Hello world";
 var contains = str.Contains('w', StringComparison.OrdinalIgnoreCase);
 ```
 
-On the other hand, if we needed to backport an entire type rather than just a few missing methods, we would have to rely on the type shim approach instead. As an example, here's how that would look like for the `System.Index` and `System.Range` types introduced in .NET Core 3.0:
+On the other hand, if we needed to backport an entire type rather than just a few missing methods, we would have to rely on the type shim approach instead. As an example, here's how that would look like for `System.Index` and `System.Range`, which were introduced in .NET Core 3.0:
 
 ```csharp
 // The polyfill code below is shown for illustrative purposes only.
@@ -429,7 +429,9 @@ internal readonly struct Range(Index start, Index end)
 #endif
 ```
 
-Unlike the previous example, rather than defining these polyfills globally, we place them in the `System` namespace to match the original naming patterns. This way, when the consuming code references `System.Index` or `System.Range`, the compiler will automatically resolve to our polyfill types if the native implementations are missing:
+The code above is pretty much a carbon copy of the official implementation of `System.Index` and `System.Range`, with some minor adjustments for simplicity. Here we also enclose everything in a conditional compilation block and apply the `internal` access modifier to ensure that these polyfills are only provided where necessary.
+
+Unlike the previous approach, though, rather than defining the structs globally, we place them in the `System` namespace to match the original naming patterns. This way, if the consuming code references `System.Index` or `System.Range`, the compiler will automatically resolve to our custom types when the native versions are missing:
 
 ```csharp
 using System;
@@ -456,7 +458,49 @@ var last = array[^1];
 var part = array[3..^1];
 ```
 
-As you can imagine, being limited to only methods and types makes polyfilling somewhat restrictive. Unfortunately, C# doesn't provide any way to polyfill other kinds of APIs, such as static members, properties, indexers, or interface implementations. That said, it's still possible to cover a decent range of scenarios using the techniques described above.
+Of course, just like any other code that you write, polyfills are a liability that needs to be tested and maintained over time. As an experienced developer you will naturally want to avoid that responsibility and instead use existing solutions whenever possible. Luckily, here you have several options for that.
+
+First of all, many of the built-in types that were introduced in .NET (Core) have backports provided directly by Microsoft. These are not polyfills in the strictest sense, but rather the official implementations repackaged separately from the framework itself to allow their usage on older platforms.
+
+As an example, let's imagine that our library needs to leverage `Span<T>`, `Memory<T>`, and `IAsyncEnumerable<T>` while retaining the broad compatibility offered by .NET Standard 2.0. To do that, we can add the official [`System.Memory`](https://nuget.org/packages/System.Memory) and [`Microsoft.Bcl.AsyncInterfaces`](https://nuget.org/packages/Microsoft.Bcl.AsyncInterfaces) packages as shown below:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net9.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- System.Memory and related types are natively available starting with netstandard2.1 and netcoreapp2.1. -->
+    <!-- You may also consider updating the <TargetFrameworks> list to add them as intermediate targets. -->
+    <PackageReference
+      Include="System.Memory"
+      Version="4.6.3"
+      Condition="$(![MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) AND
+                 $(![MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1'))"
+    />
+
+    <!-- IAsyncEnumerable and related types are natively available starting with netstandard2.1 and netcoreapp3.0. -->
+    <!-- You may also consider updating the <TargetFrameworks> list to add them as intermediate targets. -->
+    <PackageReference
+      Include="Microsoft.Bcl.AsyncInterfaces"
+      Version="1.1.1"
+      Condition="$(![MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) AND
+                 $(![MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp3.0'))"
+    />
+  </ItemGroup>
+
+</Project>
+```
+
+While these packages fill in missing types in the same fashion as polyfills, they do so through compiled assemblies instead of source code. To prevent imposing redundant run-time dependencies, it's important to include them conditionally by adding the appropriate attribute to each `<PackageReference>` element.
+
+One of the biggest hurdles when it comes to using these official compatibility packages is discovering which APIs are available and which packages provide them. That said, you can get a comprehensive list of all of them by searching for [`System.*`](https://nuget.org/packages?q=system.*) or [`Microsoft.Bcl.*`](https://nuget.org/packages?q=microsoft.*) on NuGet.org.
 
 If you dread the thought of having to write and maintain polyfills yourself for every bit of missing functionality, don't worry. There are several existing community-driven packages that provide a wide variety of polyfills and backports for .NET, allowing you to simply include them as dependencies in your library project and benefit from their work instead. Here are a few options to consider:
 
@@ -486,11 +530,9 @@ As such, you can simply add them as compile-time dependencies in your project fi
 </Project>
 ```
 
-Of course, most of the time you wouldn't want to implement polyfills yourself. Instead, you would typically rely on existing polyfill libraries that have already done the heavy lifting for you — and here you have several options to consider.
+Most of the time, as a library author, you'll find yourself relying on a combination of official and community-driven polyfill packages to cover the APIs that you need. This way, you can focus on writing your library code without having to worry about compatibility issues across different frameworks.
 
-First of all, many of the built-in types that were introduced in .NET (Core) have backports provided directly by Microsoft. For example, you can install the official [`System.Memory`](https://nuget.org/packages/System.Memory) package if your project needs to leverage `Span<T>`, `Memory<T>`, or other related types while targeting older frameworks.
-
-You can search for [`System.*`](https://nuget.org/packages?q=system.*) or [`Microsoft.Bcl.*`](https://nuget.org/packages?q=microsoft.*) on NuGet.org to find more of these official compatibility packages that cover a variety of APIs. Do note that they all come as run-time dependencies, so make sure to use conditional references in the project file to only include them when targeting frameworks that actually need them:
+In order to streamline this process further, we can use the [`EasyCompat`](https://github.com/Tyrrrz/EasyCompat) library, which simplifies the process of adding polyfills to your project.
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -503,16 +545,19 @@ You can search for [`System.*`](https://nuget.org/packages?q=system.*) or [`Micr
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <!-- System.Memory and related types are natively available starting with netstandard2.1 and netcoreapp2.1. -->
-  <!-- You may also consider updating the <TargetFrameworks> list to add them as intermediate targets. -->
-  <ItemGroup Condition="$(![MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) AND ![MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1'))">
-    <PackageReference Include="System.Memory" Version="4.6.3"  />
+  <PropertyGroup>
+    <!-- EasyCompat will automatically add the right packages and apply proper conditions to them -->
+    <EasyCompatFeatures>Memory;AsyncEnumerable;PolyShim</EasyCompatFeatures>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EasyCompat" Version="1.0.0" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>
 ```
 
-Most of the time, as a library author, you'll find yourself relying on a combination of official and community-driven polyfill packages to cover the APIs that you need. This way, you can focus on writing your library code without having to worry about compatibility issues across different frameworks.
+As you can imagine, being limited to polyfilling either methods or full types makes this technique somewhat restrictive. Unfortunately, C# doesn't provide any means to backport other kinds of members on existing types, such as static members, properties, indexers, or interface implementations. Because of that, there will inevitably be scenarios where polyfilling is not feasible at all.
 
 ## Code formatting
 
