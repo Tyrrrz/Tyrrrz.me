@@ -95,22 +95,22 @@ dotnet new buildprops
 
 First off, we have the `global.json` file, whose purpose is to declare which version of the .NET SDK the solution is intended to work with. Normally, this information is not encoded in the solution file or anywhere else, so the .NET tooling relies on the default behavior of simply resolving the latest SDK that is available in the environment. This behavior is fine for local development — since you can reasonably guarantee that a compatible version of the SDK is installed on your machine — but it's a good idea to make that requirement explicit to communicate it clearly to other collaborators (and your future self) as well.
 
-Naturally, in order to be considered compatible, the SDK must provide the capabilities that the codebase depends on, such as access to certain target frameworks, language features, compiler options, and so on. When it comes to the [.NET SDK versioning schema](https://learn.microsoft.com/dotnet/core/versions), these aspects are typically governed by the first two components of the version label (i.e. `9.0.***`), while the rest of the numbers indicate bug fixes and minor improvements (i.e. `*.*.307`). In other words, if a project is written with the C# 13 syntax and targets `net9.0`, you'd need the .NET 9.0 SDK in order to build it — but the exact version is not that important.
+Naturally, in order to be considered compatible, the SDK must provide the capabilities that the codebase depends on, such as access to certain target frameworks, language features, compiler options, and so on. When it comes to the [.NET SDK versioning schema](https://learn.microsoft.com/dotnet/core/versions), these aspects are typically governed by the first two components of the version label (i.e. `10.0.***`), while the rest of the numbers indicate bug fixes and minor improvements (i.e. `*.*.307`). In other words, if a project is written with the C# 14 syntax and targets `net10.0`, you'd need the .NET 10.0 SDK in order to build it — but the exact version is not that important.
 
 When you generate a `global.json` file via `dotnet new`, however, it defaults to the full version of the latest .NET SDK available on your machine. It means that anyone who wants to build the solution will also be required to have that _exact same_ SDK version installed, which is way too restrictive. To fix that, let's modify the file to look like this instead:
 
 ```json
 {
   "sdk": {
-    "version": "9.0.100",
+    "version": "10.0.100",
     "rollForward": "latestFeature"
   }
 }
 ```
 
-At the time of writing, the current iteration of .NET is .NET 9.0, so we set the `version` property to `9.0.100` — the lowest SDK version within the `9.0` band. Together with the `rollForward` option set to `latestFeature`, this effectively creates a rule that allows the solution to be built by any feature or patch version of the .NET 9.0 SDK, but not by an SDK of another major or minor version (e.g. .NET 8.0 or .NET 10.0).
+At the time of writing, the current iteration of .NET is .NET 10.0, so we set the `version` property to `10.0.100` — the lowest SDK version within the `10.0` band. Together with the `rollForward` option set to `latestFeature`, this effectively creates a rule that allows the solution to be built by any feature or patch version of the .NET 10.0 SDK, but not by an SDK of another major or minor version (e.g. .NET 9.0 or .NET 11.0).
 
-The reason for specifically choosing `latestFeature` instead of `latestMinor` or even `latestMajor` is to ensure runtime compatibility for executable projects in the solution, such as tests. Although .NET SDKs are generally backward-compatible between different major and minor versions, each SDK includes its corresponding version of the runtime, which is not. As a result, while a project targeting `net9.0` can still be built with the .NET 10.0 SDK, it can only be executed with the .NET 9.0 runtime — making the matching SDK version more preferable.
+The reason for specifically choosing `latestFeature` instead of `latestMinor` or even `latestMajor` is to ensure runtime compatibility for executable projects in the solution, such as tests. Although .NET SDKs are generally backward-compatible between different major and minor versions, each SDK includes its corresponding version of the runtime, which is not. As a result, while a project targeting `net10.0` can still be built with the .NET 11.0 SDK, it can only be executed with the .NET 10.0 runtime — making the matching SDK version more preferable.
 
 ### `nuget.config`
 
@@ -242,7 +242,7 @@ With multi-targeting, the .NET SDK works by building the project independently f
 
 Regardless, compatibility is always a compromise and early in the development of your library it may be tricky to gauge how far you should go to support older or niche frameworks. That said, here are a few of my personal recommendations that can help you get started:
 
-- **Always target the latest version of .NET (Core)**. Your library should definitely be compatible with the newest version of .NET (currently `net9.0`) and there is no better way to ensure that than by targeting it directly.
+- **Always target the latest version of .NET (Core)**. Your library should definitely be compatible with the newest version of .NET (currently `net10.0`) and there is no better way to ensure that than by targeting it directly.
   - Additionally, this also provides you with an improved development experience — particularly through built-in analyzers that only work when targeting the latest framework.
 - **Establish a compatibility baseline by targeting .NET Standard 2.0 as well**. By doing so, your library will automatically be supported by a [wide range of relatively modern .NET implementations](https://learn.microsoft.com/dotnet/standard/net-standard?tabs=net-standard-2-0), maximizing your audience without much cherry-picking.
   - This version of the standard offers a good balance between compatibility and API availability, making it a solid lower boundary for most libraries.
@@ -251,26 +251,26 @@ Regardless, compatibility is always a compromise and early in the development of
   - Avoid targeting `netstandard2.1`, as it's not supported by .NET Framework and UWP, largely diminishing its usefulness as a compatibility layer.
   - Avoid targeting `netstandard1.x`, as the corresponding implementations are too old and have very limited API sets.
   - Avoid targeting individual .NET implementations that don't follow the .NET Standard 2.0 specification (e.g. `netcoreapp1.1`, `net45`, `sl5`, etc.), as they are all outdated technologies.
-- **Target intermediate versions if you have framework-dependent code paths**. For example, if your library already targets .NET 9.0 and .NET Standard 2.0, but conditionally relies on certain APIs that were introduced in .NET 5.0, then you should separately target `net5.0` as well to ensure that those code paths are available as early as possible.
+- **Target intermediate versions if you have framework-dependent code paths**. For example, if your library already targets .NET 10.0 and .NET Standard 2.0, but conditionally relies on certain APIs that were introduced in .NET 5.0, then you should separately target `net5.0` as well to ensure that those code paths are available as early as possible.
   - This is similarly relevant if your library uses polyfills to backport newer APIs to older frameworks. In such cases, you want to also include the frameworks that provide those APIs natively, so that polyfills are only used when necessary.
   - If you prefer to keep things lean, you can limit intermediate targets to only those that are [long-term support (LTS) releases](https://versionsof.net), such as .NET 6.0, .NET 8.0, etc.
 - In the worst case, **it's acceptable if your library can only reasonably target .NET (Core) and not other implementations**. Sometimes it's impossible or simply not worth the effort to support legacy frameworks, so it's fine to focus solely on the modern .NET family.
 
-For the `MyLibrary` example, we'll assume that our code is fairly portable and allows us to target both .NET 9.0 and .NET Standard 2.0 without too many issues. Let's now edit the project file (`MyLibrary.csproj`) to reflect that:
+For the `MyLibrary` example, we'll assume that our code is fairly portable and allows us to target both .NET 10.0 and .NET Standard 2.0 without too many issues. Let's now edit the project file (`MyLibrary.csproj`) to reflect that:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net10.0</TargetFrameworks>
   </PropertyGroup>
 
 </Project>
 ```
 
-Here, we use the **`<TargetFrameworks>`** property (note the plural form) to specify a semicolon-separated list of target frameworks that our library should be built for. In this case, we have `netstandard2.0` and `net9.0`, which aligns with the earlier recommendations and provides a good balance between compatibility and modern features.
+Here, we use the **`<TargetFrameworks>`** property (note the plural form) to specify a semicolon-separated list of target frameworks that our library should be built for. In this case, we have `netstandard2.0` and `net10.0`, which aligns with the earlier recommendations and provides a good balance between compatibility and modern features.
 
-If we were to now run the `dotnet build` command on this project, the tooling would create two separate outputs: one at `bin/Debug/netstandard2.0/*` and another at `bin/Debug/net9.0/*`. Each of these directories would contain the compiled assemblies along with any other artifacts relevant to that specific target framework.
+If we were to now run the `dotnet build` command on this project, the tooling would create two separate outputs: one at `bin/Debug/netstandard2.0/*` and another at `bin/Debug/net10.0/*`. Each of these directories would contain the compiled assemblies along with any other artifacts relevant to that specific target framework.
 
 ### Miscellaneous settings
 
@@ -280,7 +280,7 @@ While we took care of the most important aspect of the library configuration by 
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net10.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
@@ -302,18 +302,18 @@ Finally, we get to the **`<GenerateDocumentationFile>`** property, which we enab
 
 ### Polyfills and backports
 
-Throughout this article, there were several mentions of a concept called [_polyfill_](<https://en.wikipedia.org/wiki/Polyfill_(programming)>) — a general programming technique that allows developers to replicate the behavior of newer APIs on older platforms that don't support them natively. When building libraries, this technique is particularly useful as it allows us to leverage modern features while still maintaining compatibility with legacy frameworks.
+Throughout this article, there were several mentions of a concept called [_polyfill_](<https://en.wikipedia.org/wiki/Polyfill_(programming)>) — a general programming technique that allows developers to replicate the behavior of newer platform APIs on older targets that don't support them natively. When building libraries, this technique is particularly useful as it allows us to leverage modern features while still maintaining seamless compatibility with legacy frameworks.
 
 Polyfills are authored and applied differently depending on the programming language and its capabilities. In JavaScript, for example, they are typically implemented as standalone scripts that augment the global environment or prototype chains of built-in types. In C#, however, the process is a bit awkward due to the statically typed and compiled nature of the language.
 
 To create a polyfill in C#, you are limited to two main options:
 
-- **Method polyfills**, which are provided through extension methods that substitute missing instance methods on existing built-in types. By defining them in the global namespace, they become available throughout the entire codebase without requiring explicit `using` directives.
-- **Type polyfills**, which are provided through custom shims that mimic the behavior of the built-in types by reimplementing their functionality from scratch. They have the same name and namespace as the originals, allowing them to serve as seamless drop-in replacements when the official types are completely unavailable.
+- **Member polyfills**, which are provided through extension members that substitute missing instance members on existing built-in types. By defining them in the global namespace, they become available throughout the entire codebase without requiring explicit `using` directives.
+- **Type polyfills**, which are provided through custom shims that mimic the behavior of the built-in types by reimplementing their functionality from scratch. They have the same name and namespace as the originals, allowing them to serve as drop-in replacements when the official types are completely unavailable.
 
 These approaches can be combined with the SDK-defined [_preprocessor symbols_](https://learn.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives#conditional-compilation) to ensure that polyfills are only included in the project when targeting frameworks that lack the desired APIs. This way, when the library is built for modern frameworks, the native implementations are used instead, avoiding any potential conflicts, performance issues, or dead code.
 
-As an example, let's say we wanted to polyfill the `string.Contains(char, StringComparison)` and `string.Contains(string, StringComparison)` methods, which were introduced in .NET Core 2.1. Since the `string` type itself is available across all frameworks, we can implement polyfills for the missing members using the extension method approach described above:
+As an example, let's say we wanted to polyfill the `string.Contains(char, StringComparison)` and `string.Contains(string, StringComparison)` methods, which were introduced in .NET Core 2.1. Since the `string` type itself is available across all frameworks, we can implement polyfills for the missing members using the previously described extension member approach:
 
 ```csharp
 // The polyfill code below is shown for illustrative purposes only.
@@ -325,7 +325,7 @@ As an example, let's say we wanted to polyfill the `string.Contains(char, String
 
 using System;
 
-// No namespace declaration, so that the extension methods are available globally
+// No namespace declaration, so that the extension members are available globally
 internal static class PolyfillExtensions
 {
     public static bool Contains(this string str, char c, StringComparison comparison) =>
@@ -339,9 +339,9 @@ internal static class PolyfillExtensions
 
 There are a couple of things to note about this snippet. First, we use the `#if` directive to limit where the polyfill code is provided by singling out frameworks that don't have the `string.Contains(...)` methods natively. In our case, that includes all of .NET Framework, as well as .NET Standard and .NET Core versions prior to 2.1.
 
-Second, we omit the `namespace` declaration to define the extension methods in the global namespace, making them immediately accessible on every applicable type. By doing so, any code that calls `string.Contains(...)` will automatically pick up our polyfill methods when the native implementations are not available.
+Second, we omit the `namespace` declaration to define the extension members in the global namespace, making them immediately accessible on every applicable type. By doing so, any code that calls `string.Contains(...)` will automatically pick up our polyfill methods when the native implementations are not available.
 
-Finally, we mark the class that defines the extension methods as `internal`, constraining its visibility to within the same assembly. This is important, as it prevents these polyfills from being exposed to the consumers of our library, which could otherwise lead to confusion and, in some cases, build errors.
+Finally, we mark the class that defines the extension members as `internal`, constraining its visibility to within the same assembly. This is important, as it prevents these polyfills from being exposed to the consumers of our library, which could otherwise lead to confusion and, in some cases, build errors.
 
 With the polyfills in place, we can now use the aforementioned `string.Contains(...)` methods in our library code, without worrying about compatibility issues:
 
@@ -468,7 +468,7 @@ As an example, let's imagine that our library needs to leverage `Span<T>`, `Memo
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net10.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
@@ -502,7 +502,7 @@ Because `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` come as run-time dep
 
 To find more of these compatibility packages, you can search for [`System.*`](https://nuget.org/packages?q=system.*) and [`Microsoft.Bcl.*`](https://nuget.org/packages?q=microsoft.bcl.*) on NuGet.org. They cover a wide variety of APIs and usually target at least .NET Standard 2.0, making them a good default choice for backporting needs.
 
-However, as official packages, their scope is intentionally conservative — they don't use unconventional techniques like global extension methods to emulate missing members and they also don't aim to polyfill framework support for language and compiler features. That's where community-driven polyfill libraries, such as [PolyShim](https://github.com/Tyrrrz/PolyShim), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolySharp](https://github.com/Sergio0694/PolySharp) come into play.
+However, as official packages, their scope is intentionally conservative — they don't use unconventional techniques like global extension members to emulate missing members and they also don't aim to polyfill framework support for language and compiler features. That's where community-driven polyfill libraries, such as [PolyShim](https://github.com/Tyrrrz/PolyShim), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolySharp](https://github.com/Sergio0694/PolySharp) come into play.
 
 These libraries are specifically designed to fill in the gaps left by the compatibility packages, offering polyfills that facilitate more advanced scenarios. Additionally, they're usually distributed as source-only packages, which inject the polyfill code directly into your project at compile time, eliminating the need for run-time dependencies altogether.
 
@@ -512,7 +512,7 @@ As an example, let's add PolyShim to our library project:
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net10.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
@@ -565,7 +565,7 @@ Copyright (c) Microsoft Corporation.  All rights reserved.
 Starting test execution, please wait...
 A total of 1 test files matched the specified pattern.
 
-Passed!  - Failed:     0, Passed:     8, Skipped:     0, Total:     8, Duration: 993 ms - MyLibrary.Tests.dll (net9.0)
+Passed!  - Failed:     0, Passed:     8, Skipped:     0, Total:     8, Duration: 993 ms - MyLibrary.Tests.dll (net10.0)
 Passed!  - Failed:     0, Passed:     8, Skipped:     0, Total:     8, Duration: 913 ms - MyLibrary.Tests.dll (net462)
 ```
 
