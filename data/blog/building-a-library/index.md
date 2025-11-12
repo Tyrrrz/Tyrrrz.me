@@ -328,11 +328,14 @@ using System;
 // No namespace declaration, so that the extension members are available globally
 internal static class PolyfillExtensions
 {
-    public static bool Contains(this string str, char c, StringComparison comparison) =>
-        str.Contains(c.ToString(), comparison);
+    extension(string str)
+    {
+        public bool Contains(char c, StringComparison comparison) =>
+            str.Contains(c.ToString(), comparison);
 
-    public static bool Contains(this string str, string sub, StringComparison comparison) =>
-        str.IndexOf(sub, comparison) >= 0;
+        public bool Contains(string sub, StringComparison comparison) =>
+            str.IndexOf(sub, comparison) >= 0;
+    }
 }
 #endif
 ```
