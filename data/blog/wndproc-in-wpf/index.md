@@ -89,7 +89,7 @@ public class WndProcService : IDisposable
 }
 ```
 
-By handling the `WndProcCalled` event, you can listen to incoming messages. Typically, you would want to call some Windows API method that subscribes a window to additional WndProc messages using its handle, e.g. [`RegisterPowerSettingNotification(...)`](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerpowersettingnotification) or [`RegisterHotKey(...)`](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey).
+By handling the `WndProcCalled` event, you can listen to incoming messages. Typically, you would want to call some Windows API method that subscribes a window to additional WndProc messages using its handle, e.g. [`RegisterPowerSettingNotification(...)`](https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-registerpowersettingnotification) or [`RegisterHotKey(...)`](https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-registerhotkey).
 
 For example, if we were interested in registering a global hotkey and listening to its events, we could do it in such way:
 

@@ -236,7 +236,7 @@ If we look back, it's clear that high-level testing was tough in 2000, it probab
 
 Most modern application frameworks nowadays provide some sort of separate API layer used for testing, where you can run your application in a simulated in-memory environment that is very close to the real one. Virtualization tools like Docker also make it possible to execute tests that rely on actual infrastructural dependencies, while still remaining deterministic and fast.
 
-We have solutions like [Mountebank](http://mbtest.org), [WireMock](http://wiremock.org), [GreenMail](https://greenmail-mail-test.github.io/greenmail), [Appium](http://appium.io), [Selenium](https://selenium.dev), [Cypress](https://cypress.io), and countless others that simplify different aspects of high-level testing that were once considered unapproachable. Unless you're developing desktop applications for Windows and are stuck with the [UIAutomation framework](https://docs.microsoft.com/en-us/windows/win32/winauto/entry-uiauto-win32), you will likely have many options available.
+We have solutions like [Mountebank](http://mbtest.org), [WireMock](http://wiremock.org), [GreenMail](https://greenmail-mail-test.github.io/greenmail), [Appium](http://appium.io), [Selenium](https://selenium.dev), [Cypress](https://cypress.io), and countless others that simplify different aspects of high-level testing that were once considered unapproachable. Unless you're developing desktop applications for Windows and are stuck with the [UIAutomation framework](https://docs.microsoft.com/windows/win32/winauto/entry-uiauto-win32), you will likely have many options available.
 
 The slow test fallacy is, however, not the only false assumption that the pyramid is based on. The idea of having the majority of testing concentrated at the unit level only works out if those tests actually provide value, which of course depends on how much business logic is contained within the code under test.
 
@@ -528,7 +528,7 @@ public class FakeApp : IDisposable
 }
 ```
 
-The majority of the work here is already done by [`WebApplicationFactory`](https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests), which is a utility provided by the framework that allows us to bootstrap the app in-memory for testing purposes. It also provides us with an API to override configuration, service registrations, and the request pipeline if needed.
+The majority of the work here is already done by [`WebApplicationFactory`](https://docs.microsoft.com/aspnet/core/test/integration-tests), which is a utility provided by the framework that allows us to bootstrap the app in-memory for testing purposes. It also provides us with an API to override configuration, service registrations, and the request pipeline if needed.
 
 We can use an instance of this object in tests to run the app, send requests with the provided `HttpClient`, and then check that the response matches our expectations. This instance can be either shared among multiple tests or instead created separately for each one.
 

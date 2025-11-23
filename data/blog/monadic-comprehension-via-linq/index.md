@@ -9,7 +9,7 @@ LINQ itself is made up of multiple pieces, but from the consumer perspective it 
 
 However, there is one aspect of the query syntax that makes it particularly intriguing in my opinion, and that's the fact that **its usage is actually not limited to collections**. As long as a specific type implements a few key methods required by the compiler, C#'s query notation can be enabled on virtually any type.
 
-This presents a very interesting opportunity where we can use this feature to enhance other types (including our own) with a special comprehension syntax that helps express certain operations in a more concise and clear way. In practice, it allows us to achieve something similar to [F#'s computation expressions](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions) or [Haskell's `do` notation](https://en.wikibooks.org/wiki/Haskell/do_notation).
+This presents a very interesting opportunity where we can use this feature to enhance other types (including our own) with a special comprehension syntax that helps express certain operations in a more concise and clear way. In practice, it allows us to achieve something similar to [F#'s computation expressions](https://docs.microsoft.com/dotnet/fsharp/language-reference/computation-expressions) or [Haskell's `do` notation](https://en.wikibooks.org/wiki/Haskell/do_notation).
 
 In this article we will see how the LINQ query syntax works under the hood, how to integrate it with custom types, and look at some practical scenarios where that can actually be useful.
 
