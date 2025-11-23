@@ -23,9 +23,9 @@ $url =
 
 It has 3 required parameters:
 
-- `market_hash_name` — full name of the item as it appears on the market (URL-encoded)
-- `appid` — ID of the app (game) where this item can be found
-- `currency` — ID of the currency in which we want our prices to be shown
+- `market_hash_name` — full name of the item as it appears on the market (URL-encoded).
+- `appid` — ID of the app (game) where this item can be found.
+- `currency` — ID of the currency in which we want our prices to be shown.
 
 You can get the values for the first two parameters straight from the item's URL. For example, if we were interested in [AK-47 | Redline](https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Redline%20%28Field-Tested%29), we'd be able to inspect the URL and see that the value of `appid` is `730` while `market_hash_name` is equal to `AK-47%20%7C%20Redline%20%28Field-Tested%29`.
 

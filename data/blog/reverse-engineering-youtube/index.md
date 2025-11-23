@@ -76,9 +76,9 @@ YoutubeExplode uses `el=embedded` for the first query. If it fails because the v
 
 When the request fails, the response will contain only a few fields:
 
-- `status` — which is equal to `fail`
-- `errorcode` — integer code that identifies the error
-- `reason` — text message that explains why the video is not available
+- `status` — which is equal to `fail`.
+- `errorcode` — integer code that identifies the error.
+- `reason` — text message that explains why the video is not available.
 
 Error codes seem to be very generic and most of the time it's either `100` or `150`, so they aren't very useful at determining what went wrong.
 
@@ -86,8 +86,8 @@ Error codes seem to be very generic and most of the time it's either `100` or `1
 
 Some videos need to be purchased before they can be watched. In such cases, there will be:
 
-- `requires_purchase` — which is equal to `1`
-- `ypc_vid` — ID of the corresponding preview video (trailer) which can be watched for free
+- `requires_purchase` — which is equal to `1`.
+- `ypc_vid` — ID of the corresponding preview video (trailer) which can be watched for free.
 
 ## Resolving media streams
 
@@ -112,10 +112,10 @@ quality=medium
 
 You will be interested in the following properties:
 
-- `itag` — integer code that identifies the type of the stream
-- `type` — MIME type and codecs
-- `url` — URL that serves the stream
-- `s` — cipher signature used to protect the stream (if present)
+- `itag` — integer code that identifies the type of the stream.
+- `type` — MIME type and codecs.
+- `url` — URL that serves the stream.
+- `s` — cipher signature used to protect the stream (if present).
 
 Note: I've encountered cases when [some of the muxed streams were removed](https://github.com/Tyrrrz/YoutubeExplode/issues/36) despite still appearing in the metadata. Therefore, it's recommended to send HEAD requests to check that each stream is still available. You can get content length as well while you're at it, since it's not present in the metadata.
 
@@ -143,14 +143,14 @@ init=0-708
 
 Adaptive streams have a slightly extended set of properties. I'll list the useful ones:
 
-- `itag` — integer code that identifies the type of the stream
-- `type` — MIME type and codecs
-- `url` — URL that serves the stream
-- `s` — cipher signature used to protect the stream (if present)
-- `clen` — content length of the stream in bytes
-- `bitrate` — bit rate of the stream in kbit/sec
-- `size` — resolution of the video (video-only)
-- `fps` — frame rate of the video (video-only)
+- `itag` — integer code that identifies the type of the stream.
+- `type` — MIME type and codecs.
+- `url` — URL that serves the stream.
+- `s` — cipher signature used to protect the stream (if present).
+- `clen` — content length of the stream in bytes.
+- `bitrate` — bit rate of the stream in kbit/sec.
+- `size` — resolution of the video (video-only).
+- `fps` — frame rate of the video (video-only).
 
 ### Adaptive streams in DASH manifest
 
@@ -175,11 +175,11 @@ The DASH manifest follows [this XML schema](http://standards.iso.org/ittf/Public
 
 They have the following attributes:
 
-- `id` — integer code that identifies the type of the stream
-- `bandwidth` — bit rate of the stream in kbit/sec
-- `width` — width of the video (video-only)
-- `height` — height of the video (video-only)
-- `frameRate` — frame rate of the video (video-only)
+- `id` — integer code that identifies the type of the stream.
+- `bandwidth` — bit rate of the stream in kbit/sec.
+- `width` — width of the video (video-only).
+- `height` — height of the video (video-only).
+- `frameRate` — frame rate of the video (video-only).
 
 The URL can be extracted from the inner text of the `<BaseURL>` node.
 
@@ -303,9 +303,9 @@ private async Task<IReadOnlyList<ICipherOperation>> GetCipherOperationsAsync(str
 
 The output of this method is a collection of `ICipherOperation`s. At this point in time, there can be up to 3 kinds of cipher operations:
 
-- **Swap** — swaps the first character in the signature with another character, identified by its position
-- **Slice** — truncates characters in the signature which come before the specified position
-- **Reverse** — reverses the entire signature
+- **Swap** — swaps the first character in the signature with another character, identified by its position.
+- **Slice** — truncates characters in the signature which come before the specified position.
+- **Reverse** — reverses the entire signature.
 
 Once you successfully extract the type and order of the used operations, you need to store them somewhere so that you can execute them on a signature.
 

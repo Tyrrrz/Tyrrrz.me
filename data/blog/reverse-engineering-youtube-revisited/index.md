@@ -152,8 +152,8 @@ In any case, the steps outlined so far should be enough to resolve and download 
 
 YouTube has an extensive content moderation system, so you may occasionally encounter videos that cannot be played and, thus, downloaded. The two most common reasons for that are:
 
-- The video is blocked in your country, because it features content that the uploader has not licensed for use in your region
-- The video is age-gated, because it features content that is not suitable for minors, as determined by YouTube or the uploader themselves
+- The video is blocked in your country, because it features content that the uploader has not licensed for use in your region.
+- The video is age-gated, because it features content that is not suitable for minors, as determined by YouTube or the uploader themselves.
 
 The way region-based restrictions work is fairly straightforward — YouTube identifies whether your IP address maps to one of the blocked countries and prohibits access to the video if that's the case. There is not much that can be done about it, other than using a VPN to spoof the device's location.
 
