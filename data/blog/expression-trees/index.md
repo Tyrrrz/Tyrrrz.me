@@ -63,7 +63,7 @@ Although it's inherently obvious to us as humans, in order to interpret this rep
 
 In C#, expression trees can be used in either of two directions: we can create them directly via an API and then compile them into run-time instructions, or we can disassemble them from supplied lambda expressions. In this part of the article we will focus on the first one.
 
-The framework offers us with an API to construct expression trees through the [`Expression`](https://docs.microsoft.com/en-us/dotnet/api/system.linq.expressions.expression) class located in the `System.Linq.Expressions` namespace. It exposes various factory methods that can be used to produce expressions of different types.
+The framework offers us with an API to construct expression trees through the [`Expression`](https://docs.microsoft.com/dotnet/api/system.linq.expressions.expression) class located in the `System.Linq.Expressions` namespace. It exposes various factory methods that can be used to produce expressions of different types.
 
 Some of these methods are:
 
@@ -1207,7 +1207,7 @@ Note that with this approach we will only be able to obtain the expression as a 
 
 In order to analyze expression trees, we need to be able to traverse them in a recursive descent manner, starting from the body of the lambda expression and going down to every expression it's made out of. This could be done manually with a large switch expression that calls into itself.
 
-Fortunately, we don't have to reinvent the wheel because the framework already provides a special class for this purpose called [`ExpressionVisitor`](https://docs.microsoft.com/en-us/dotnet/api/system.linq.expressions.expressionvisitor). It's an abstract class that has a visitor method for every expression type, so you can simply inherit from it and override the methods you're interested in.
+Fortunately, we don't have to reinvent the wheel because the framework already provides a special class for this purpose called [`ExpressionVisitor`](https://docs.microsoft.com/dotnet/api/system.linq.expressions.expressionvisitor). It's an abstract class that has a visitor method for every expression type, so you can simply inherit from it and override the methods you're interested in.
 
 For example, we can implement a visitor that prints out all the binary and method call expressions it encounters:
 
@@ -1414,10 +1414,10 @@ Expression trees provide us with a formal structure that lets us analyze existin
 
 Some other interesting articles on the topic:
 
-- [Introduction to expression trees (Microsoft Docs)](https://docs.microsoft.com/en-us/dotnet/csharp/expression-trees)
+- [Introduction to expression trees (Microsoft Docs)](https://docs.microsoft.com/dotnet/csharp/expression-trees)
 - [10X faster execution with compiled expression trees (Particular Software)](https://particular.net/blog/10x-faster-execution-with-compiled-expression-trees)
 - [AutoMapper 5.0 speed increases (Jimmy Bogard)](https://lostechies.com/jimmybogard/2016/06/24/automapper-5-0-speed-increases)
 - [How we did (and did not) improve performance and efficiency in Marten 2.0 (Jeremy D. Miller)](https://jeremydmiller.com/2017/08/01/how-we-did-and-did-not-improve-performance-and-efficiency-in-marten-2-0)
 - [Optimizing Just in Time with Expression Trees (Craig Gidney)](http://twistedoakstudios.com/blog/Post2540_optimizing-just-in-time-with-expression-trees)
 
-I also recommend reading about [code quotations in F#](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/code-quotations), which is a feature similar to expression trees but with more powerful language support.
+I also recommend reading about [code quotations in F#](https://docs.microsoft.com/dotnet/fsharp/language-reference/code-quotations), which is a feature similar to expression trees but with more powerful language support.

@@ -13,7 +13,7 @@ export const getNuGetDownloads = async (packageId: string) => {
     );
   }
 
-  // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource#response
+  // https://docs.microsoft.com/nuget/api/search-query-service-resource#response
   type ResponseBody = {
     data: {
       totalDownloads: number;

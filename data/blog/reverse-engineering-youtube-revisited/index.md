@@ -152,8 +152,8 @@ In any case, the steps outlined so far should be enough to resolve and download 
 
 YouTube has an extensive content moderation system, so you may occasionally encounter videos that cannot be played and, thus, downloaded. The two most common reasons for that are:
 
-- The video is blocked in your country, because it features content that the uploader has not licensed for use in your region
-- The video is age-gated, because it features content that is not suitable for minors, as determined by YouTube or the uploader themselves
+- The video is blocked in your country, because it features content that the uploader has not licensed for use in your region.
+- The video is age-gated, because it features content that is not suitable for minors, as determined by YouTube or the uploader themselves.
 
 The way region-based restrictions work is fairly straightforward — YouTube identifies whether your IP address maps to one of the blocked countries and prohibits access to the video if that's the case. There is not much that can be done about it, other than using a VPN to spoof the device's location.
 
@@ -376,7 +376,7 @@ Unfortunately, the `ratebypass` parameter is not always present in the stream UR
 
 However, YouTube's rate limiting has one interesting aspect — it only affects streams whose content length exceeds a certain threshold. This means that if the stream is small enough, the data will be served at maximum speed, regardless of whether the `ratebypass` parameter is set or not. In my tests, I found that the exact cut-off point seems to be around 10 megabytes, with anything larger than that causing the throttling to kick in.
 
-What makes this behavior more useful is that the threshold doesn't actually apply to the overall size of the stream, but rather to the size of the requested part. In other words, if you try fetching only a portion of the data — using the [`Range` HTTP header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Range) — **YouTube will serve the corresponding content at full speed, as long as the specified byte range is smaller than 10 megabytes**.
+What makes this behavior more useful is that the threshold doesn't actually apply to the overall size of the stream, but rather to the size of the requested part. In other words, if you try fetching only a portion of the data — using the [`Range` HTTP header](https://developer.mozilla.org/docs/Web/HTTP/Headers/Range) — **YouTube will serve the corresponding content at full speed, as long as the specified byte range is smaller than 10 megabytes**.
 
 As a result, you can use this approach to bypass the rate limiting mechanism by dividing the stream into multiple chunks, downloading them separately, and then combining them together into a single file. To do that, you will need to know the total size of the stream, which can be extracted either from the `contentLength` property in the metadata (if available), or from the `Content-Length` header in the initial response.
 
