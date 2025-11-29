@@ -392,7 +392,7 @@ There are a couple of things to note about this snippet. First, we use the `#if`
 
 Second, we ensure that the polyfill types are defined within the `System` namespace, matching the original naming patterns. This way, if the consuming code references `System.Index` or `System.Range`, the compiler will automatically resolve to our custom types when the native versions are missing.
 
-Finally, we mark these types as `internal`, constraining their visibility to within the same assembly. Doing so prevents these polyfills from leaking to the consumers of our library, which is important as it could otherwise cause confusion and, in some cases, build errors.
+Finally, we mark these types as `internal`, constraining their visibility to within the same assembly. Doing so prevents the polyfills from leaking to the consumers of our library, which is important as it could otherwise cause confusion and, in some cases, build errors.
 
 The code itself is pretty much a carbon copy of the official implementation of `Index` and `Range`, with some minor adjustments for simplicity. When it comes to authoring polyfills, our primary goal is to replicate the client-facing behavior of the original APIs — so cutting corners in other areas, such as performance, is generally acceptable.
 
@@ -469,9 +469,9 @@ var contains = str.Contains('w', StringComparison.OrdinalIgnoreCase);
 
 Of course, just like any other code that you write, polyfills are a liability that needs to be tested and maintained over time. As an experienced developer you will naturally want to avoid that responsibility and instead take advantage of existing solutions whenever possible. Luckily, here you have several options for that.
 
-First of all, many of the built-in types that were introduced in .NET (Core) have backports provided directly by Microsoft. These are not polyfills in the strictest sense — since they are delivered as compiled assemblies rather than source code — but they ultimately serve the same purpose regardless.
+First of all, many of the built-in types that were introduced in .NET (Core) have backports provided directly by Microsoft. While they serve the same purpose, these are not polyfills in the strictest sense of the word — but rather parts of the framework that have been extracted and redistributed as NuGet packages to allow their usage on older targets.
 
-As an example, let's imagine that our library needs to leverage `Span<T>`, `Memory<T>`, and `IAsyncEnumerable<T>` while retaining the broad compatibility offered by .NET Standard 2.0. To facilitate that, we can add the official [`System.Memory`](https://nuget.org/packages/System.Memory) and [`Microsoft.Bcl.AsyncInterfaces`](https://nuget.org/packages/Microsoft.Bcl.AsyncInterfaces) packages as shown below:
+As an example, let's imagine that our library needs to leverage `Span<T>`, `Memory<T>`, and `IAsyncEnumerable<T>`, while continuing to benefit from the broad compatibility offered by .NET Standard 2.0. To facilitate that, we can add the official [`System.Memory`](https://nuget.org/packages/System.Memory) and [`Microsoft.Bcl.AsyncInterfaces`](https://nuget.org/packages/Microsoft.Bcl.AsyncInterfaces) packages as shown below:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -485,37 +485,43 @@ As an example, let's imagine that our library needs to leverage `Span<T>`, `Memo
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- System.Memory and related types are natively available starting with netstandard2.1 and netcoreapp2.1. -->
-    <!-- You may also consider updating the <TargetFrameworks> list to add them as intermediate targets. -->
+    <!--
+        System.Memory and related types are natively available starting with netstandard2.1 and netcoreapp2.1,
+        so we exclude those frameworks from getting this package reference.
+        You may also consider updating the <TargetFrameworks> list to add them as intermediate targets.
+     -->
     <PackageReference
       Include="System.Memory"
       Version="4.6.3"
-      Condition="$(![MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) AND
-                 $(![MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1'))"
+      Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) AND
+                 !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1'))"
     />
 
-    <!-- IAsyncEnumerable and related types are natively available starting with netstandard2.1 and netcoreapp3.0. -->
-    <!-- You may also consider updating the <TargetFrameworks> list to add them as intermediate targets. -->
+    <!--
+        IAsyncEnumerable and related types are natively available starting with netstandard2.1 and netcoreapp3.0,
+        so we exclude those frameworks from getting this package reference.
+        You may also consider updating the <TargetFrameworks> list to add them as intermediate targets.
+     -->
     <PackageReference
       Include="Microsoft.Bcl.AsyncInterfaces"
       Version="1.1.1"
-      Condition="$(![MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) AND
-                 $(![MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp3.0'))"
+      Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) AND
+                 !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp3.0'))"
     />
   </ItemGroup>
 
 </Project>
 ```
 
-Because `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` come as run-time dependencies, it's up to us to ensure that they are only included in the build when necessary. In the example above, we use the `Condition="..."` attribute and the `IsTargetFrameworkCompatible(...)` function to exclude the corresponding references when targeting frameworks that provide the desired types natively.
+Because `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` come as run-time dependencies, it's up to us to ensure that they are only included in the build when necessary. In the example above, we use the `Condition="..."` attribute and the `IsTargetFrameworkCompatible(...)` function to exclude the corresponding references when targeting frameworks where the desired types are already provided natively.
 
-To find more of these compatibility packages, you can search for [`System.*`](https://nuget.org/packages?q=system.*) and [`Microsoft.Bcl.*`](https://nuget.org/packages?q=microsoft.bcl.*) on NuGet.org. They cover a wide variety of APIs and usually target at least .NET Standard 2.0, making them a good default choice for backporting needs.
+To find more of these compatibility packages, you can search for [`System.*`](https://nuget.org/packages?q=system.*) and [`Microsoft.Bcl.*`](https://nuget.org/packages?q=microsoft.bcl.*) on NuGet.org. They cover a wide variety of APIs and their targets usually go as low as .NET Standard 2.0, making them a good default choice for backporting needs.
 
-However, as official packages, their scope is intentionally conservative — they don't use unconventional techniques like global extension members to emulate missing members and they also don't aim to polyfill framework support for language and compiler features. That's where community-driven polyfill libraries, such as [PolyShim](https://github.com/Tyrrrz/PolyShim), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolySharp](https://github.com/Sergio0694/PolySharp) come into play.
+However, as official packages, their scope is intentionally conservative — they don't use unconventional techniques like global extensions to substitute missing members and they also don't aim to polyfill framework support for newer language and compiler features. That's where community-driven polyfill libraries, such as [PolyShim](https://github.com/Tyrrrz/PolyShim), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolySharp](https://github.com/Sergio0694/PolySharp) come into play.
 
-These libraries are specifically designed to fill in the gaps left by the compatibility packages, offering polyfills that facilitate more advanced scenarios. Additionally, they're usually distributed as source-only packages, which inject the polyfill code directly into your project at compile time, eliminating the need for run-time dependencies altogether.
+These libraries are specifically designed to fill in the gaps left by the compatibility packages, offering polyfills that facilitate more advanced scenarios. Additionally, they're usually distributed as source-only packages, which inject the polyfill code directly into your project at compile time, eliminating run-time dependencies and the need for conditional references.
 
-As an example, let's add PolyShim to our library project:
+While these polyfill libraries have somewhat different feature sets and design philosophies, they all aim to provide the same developer experience — so choose the one that best fits your needs. We'll go with PolyShim in our case, adding it to the project as follows:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -532,22 +538,24 @@ As an example, let's add PolyShim to our library project:
     <PackageReference
       Include="System.Memory"
       Version="4.6.3"
-      Condition="$(![MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) AND
-                 $(![MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1'))"
+      Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) AND
+                 !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1'))"
     />
 
     <PackageReference
       Include="Microsoft.Bcl.AsyncInterfaces"
       Version="1.1.1"
-      Condition="$(![MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) AND
-                 $(![MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp3.0'))"
+      Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) AND
+                 !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp3.0'))"
     />
 
-    <!-- PrivateAssets="all" ensures that this package is not included as a run-time dependency of our NuGet package. -->
-    <!-- Since polyfills are provided as source files, there is nothing to include anyway. -->
+    <!--
+        PrivateAssets="all" ensures that this package is not included as a run-time dependency of our NuGet package.
+        Since polyfills are provided as source files, there is nothing to include anyway.
+    -->
     <PackageReference
       Include="PolyShim"
-      Version="1.15.0"
+      Version="2.1.0"
       PrivateAssets="all"
     />
   </ItemGroup>
@@ -555,7 +563,13 @@ As an example, let's add PolyShim to our library project:
 </Project>
 ```
 
-Most of the time, as a library author, you'll find yourself relying on a combination of the official and community polyfill packages to establish the necessary compatibility for your code. Although C# doesn't lend itself particularly well to polyfilling, these libraries do a great job at bridging the gaps as much as possible.
+Just like hand-written polyfills from earlier, PolyShim allows us to seamlessly use modern APIs throughout our library code. For example, all of the following snippets will work in our library for all of the configured target frameworks:
+
+```csharp
+
+```
+
+Besides concrete framework APIs, polyfills provided PolyShim also enable support for several language and compiler features, such as nullable reference types, init-only properties, record types, required properties, named tuples, module initializers, overload resolution priority, and much more.
 
 ## Code formatting
 
