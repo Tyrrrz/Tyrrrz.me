@@ -114,14 +114,14 @@ const Header: FC = () => {
 
   // Hide the mobile nav when the page changes
   useEffect(() => {
-    const handleRouteChange = () => {
+    const onChange = () => {
       setIsMobileNavVisible(false);
     };
 
-    router.events.on('routeChangeStart', handleRouteChange);
+    router.events.on('routeChangeStart', onChange);
 
     return () => {
-      router.events.off('routeChangeStart', handleRouteChange);
+      router.events.off('routeChangeStart', onChange);
     };
   }, [router.events]);
 
