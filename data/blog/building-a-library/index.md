@@ -309,9 +309,9 @@ Polyfills are authored and applied differently depending on the programming lang
 To that end, polyfills in C# can be created in two ways:
 
 - **Type polyfills**, which re-implement missing built-in types from scratch, mimicking their original behavior as closely as possible. These polyfills are placed in the same namespaces as the official types to ensure they are picked up correctly by the compiler when the native definitions are not available. Suitable when the desired types are completely missing from the target framework.
-- **Member polyfills**, which rely on [extension members](https://learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/extension-methods) to add missing methods, properties, or operators to existing built-in types. These extension members are placed in the global namespace, making them immediately accessible on every applicable type without requiring any additional `using` directives. Suitable when the desired types exist natively, but lack certain members that were introduced later.
+- **Member polyfills**, which rely on [extension members](https://learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/extension-methods) to shim missing methods, properties, or operators on existing built-in types. These extensions are usually placed in the global namespace to make them immediately accessible on every applicable type, effectively simulating intrinsic members. Suitable when the desired types exist, but lack certain members from later frameworks.
 
-These approaches can be combined with the SDK-provided [_framework preprocessor symbols_](https://learn.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives#conditional-compilation) to ensure that the polyfills are only included in the project when targeting frameworks that don't have the desired APIs. This way, when the library is built for more modern targets, the native implementations are used instead, avoiding any potential conflicts, performance issues, and dead code.
+These approaches can be combined with the SDK-provided [_preprocessor symbols_](https://learn.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives#conditional-compilation) to ensure that the polyfills are only included in the project when targeting frameworks that don't have the desired APIs. This way, when the library is built for more modern targets, the native implementations are used instead, avoiding any potential conflicts, performance issues, and dead code.
 
 As an example, let's consider a scenario where we wanted to use the [`System.Index`](https://learn.microsoft.com/dotnet/api/system.index) and [`System.Range`](https://learn.microsoft.com/dotnet/api/system.range) types in our library. Since these types were introduced in .NET Core 3.0, we'd need to add polyfills if we wanted to retain compatibility with the .NET Standard 2.0 target that we've established earlier. Here's how we could leverage the first approach to achieve that:
 
@@ -438,6 +438,8 @@ using System;
 // No namespace declaration, so that the extension members are available globally
 internal static class PolyfillExtensions
 {
+    // These extension blocks were introduced in C# 14 and, unlike extension methods,
+    // they support properties and operators too, as well as both instance and static receivers.
     extension(string str)
     {
         public bool Contains(string sub, StringComparison comparison) =>
@@ -454,7 +456,7 @@ Here we define an internal class named `PolyfillExtensions`, which contains two 
 
 Similar to the previous example, we also leverage conditional compilation here to ensure that the polyfills are only included when targeting frameworks that lack the required method definitions. Both of these APIs were introduced in the same release, so we can use a single `#if` check for the entire file.
 
-Unlike the type shim approach, however, here we deliberately omit the `namespace` declaration to place the extensions in the global namespace, making them immediately accessible on every matching type. By doing so, any existing and future code that relies on these method signatures will automatically pick up our polyfill implementations when the native members are not available.
+Unlike the type shim approach, however, here we deliberately omit the `namespace` declaration to place the extensions in the global namespace. By doing so, these extensions become available globally without the need for any `using` directives, so that any existing and future code that relies on these method signatures will automatically pick up our polyfill implementations whenever the native members are not available.
 
 Now we can safely use these new `string.Contains(...)` overloads throughout our library code:
 
@@ -467,7 +469,7 @@ var str = "Hello world";
 var contains = str.Contains('w', StringComparison.OrdinalIgnoreCase);
 ```
 
-Of course, just like any other code that you write, polyfills are a liability that needs to be tested and maintained over time. As an experienced developer you will naturally want to avoid that responsibility and instead take advantage of existing solutions whenever possible. Luckily, here you have several options for that.
+Of course, just like any other code that you write, polyfill code is a liability that needs to be tested and maintained over time. As an experienced developer you will naturally want to avoid that responsibility and instead take advantage of existing solutions if possible. Luckily, here you have several options for that.
 
 First of all, many of the built-in types that were introduced in .NET (Core) have backports provided directly by Microsoft. While they serve the same purpose, these are not polyfills in the strictest sense of the word — but rather parts of the framework that have been extracted and redistributed as NuGet packages to allow their usage on older targets.
 
@@ -513,15 +515,17 @@ As an example, let's imagine that our library needs to leverage `Span<T>`, `Memo
 </Project>
 ```
 
-Because `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` come as run-time dependencies, it's up to us to ensure that they are only included in the build when necessary. In the example above, we use the `Condition="..."` attribute and the `IsTargetFrameworkCompatible(...)` function to exclude the corresponding references for the frameworks where the desired types are already present.
+Because `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` come as run-time dependencies, it's up to us to ensure that they are only included in the build when necessary. In the example above, we use the `Condition="..."` attribute together with the familiar `IsTargetFrameworkCompatible(...)` function to exclude the corresponding references for the frameworks where the desired types are already present.
 
-To find more of these compatibility packages, you can search for [`System.*`](https://nuget.org/packages?q=system.*) and [`Microsoft.Bcl.*`](https://nuget.org/packages?q=microsoft.bcl.*) on NuGet.org. They cover a wide variety of APIs and their targets usually include .NET Standard 2.0 or lower, making them a good default choice for backporting needs.
+These sorts of compatibility packages are a great default choice for backporting needs as they are officially maintained, well-tested, and target a wide range of frameworks. You can find more of them on NuGet.org by searching for [`System.*`](https://nuget.org/packages?q=system.*) or [`Microsoft.Bcl.*`](https://nuget.org/packages?q=microsoft.bcl.*).
 
-However, as official packages, their scope is intentionally conservative — they only focus on backporting user-facing framework types. As a result, they don't aim to retrofit newer language and compiler features and don't employ unconventional techniques, such as global extension members. That's where community-driven libraries, such as [PolyShim](https://github.com/Tyrrrz/PolyShim), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolySharp](https://github.com/Sergio0694/PolySharp) come into play.
+However, as they are official packages, their scope is intentionally conservative — they only focus on the most common user-facing framework types, and don't aim to cover more situational APIs or to retrofit support for newer language features. They also don't employ unconventional polyfilling techniques, such as global extension members. Because of that, they may not cover your library's every need, but this is where community-driven polyfill packages can be of help.
 
-These libraries are specifically designed to plug the gaps left by the official compatibility packages, offering polyfills that facilitate more advanced scenarios. Additionally, they're usually distributed as source-only packages, which inject the polyfill code directly into your project at compile time, eliminating run-time dependencies and the need for conditional references.
+When it comes to community polyfill libraries, there are a few popular options to choose from, including [PolyShim](https://github.com/Tyrrrz/PolyShim), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolySharp](https://github.com/Sergio0694/PolySharp). These projects have somewhat different feature sets and design philosophies, but they ultimately have the same goal of plugging the gaps left by the official backport packages, providing polyfills to facilitate a broader range of usage scenarios.
 
-While all these polyfill libraries have the same goal, they have somewhat different design philosophies and feature sets — so consult with their documentation to choose whichever best fits your needs. For the purposes of this article, we'll go with PolyShim and add it to our project like so:
+Additionally, they're usually distributed as static dependencies, which inject the polyfill code directly into your project at compile time. This process effectively mimics the manual polyfill implementation we've seen earlier, but without the need to actually write or maintain any of that code yourself.
+
+Ultimately, it's up to your personal preference which of these libraries you choose, but their usage is fairly similar. For example, adding PolyShim to our project would look something like this:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -552,6 +556,7 @@ While all these polyfill libraries have the same goal, they have somewhat differ
     <!--
         PrivateAssets="all" ensures that this package is not included as a run-time dependency of our NuGet package.
         Since polyfills are provided as source files, there is nothing to include anyway.
+        Condition attribute is not necessary here as PolyShim handles conditional compilation internally.
     -->
     <PackageReference
       Include="PolyShim"
@@ -563,41 +568,9 @@ While all these polyfill libraries have the same goal, they have somewhat differ
 </Project>
 ```
 
-Just like hand-written polyfills from earlier, PolyShim allows us to use modern platform APIs seamlessly throughout our code. For example, all of the following snippets will work in our library for nearly any target framework:
+As a developer, you'll find yourself relying on both of these polyfill solutions depending on the situation: official compatibility packages for common framework types, and community polyfill libraries for more specialized needs. In some cases, you may even need to implement custom polyfills manually if neither of these options cover your requirements.
 
-```csharp
-// PolyShim includes type polyfills, such as System.Threading.Lock.
-using System.Threading;
-
-var syncRoot = new Lock();
-lock (syncRoot)
-{
-    // ...
-}
-```
-
-```csharp
-// PolyShim includes instance member polyfills,
-// such as Stream.ReadExactly(...) and Stream.ReadAtLeast(...).
-using System.IO;
-
-using var stream = new MemoryStream(new byte[] { 1, 2, 3, 4, 5 });
-
-var buffer = new byte[3];
-stream.ReadExactly(buffer);
-stream.ReadAtLeast(buffer, 2);
-```
-
-```csharp
-// PolyShim includes static member polyfills,
-// such as Environment.ProcessId and Environment.ProcessPath.
-using System;
-
-var currentProcessId = Environment.ProcessId;
-var currentProcessPath = Environment.ProcessPath;
-```
-
-Besides user-facing APIs, polyfills provided by PolyShim also enable support for several language and compiler features, such as nullable reference types, record types, init-only properties, required properties, value tuples, and more. This makes it a powerful tool for building modern libraries that remain compatible with a wide range of .NET frameworks.
+Regardless, polyfills are not a perfect solution to the compatibility problem, so you should always weigh their benefits against the added complexity they may introduce. If the balance becomes too unfavorable, it may be better to simply drop support for certain frameworks instead.
 
 ## Code formatting
 
