@@ -302,24 +302,20 @@ Finally, we get to the **`<GenerateDocumentationFile>`** property, which we enab
 
 ### Polyfills and backports
 
-Throughout this article, there were several mentions of a concept called [_polyfill_](<https://en.wikipedia.org/wiki/Polyfill_(programming)>) — a general programming technique that allows developers to replicate the behavior of newer platform APIs on older targets that don't support them natively. When building libraries, this technique is particularly useful as it allows us to leverage modern features without sacrificing compatibility.
+Throughout this article, there were a few mentions of a concept called [_polyfill_](<https://en.wikipedia.org/wiki/Polyfill_(programming)>) — a general programming technique that allows developers to replicate the behavior of newer platform APIs on older targets that don't support them natively. When building libraries, this technique is particularly useful as it allows us to leverage modern framework and compiler features without sacrificing compatibility.
 
-Polyfills are authored and applied differently depending on the programming language and its capabilities. In JavaScript, for example, they are typically implemented as standalone scripts that augment prototype chains of built-in types or the global environment. In C#, however, the statically typed and compiled nature of the language makes things a bit more complicated, but similar results can still be achieved with some creativity.
+Polyfills are authored and applied differently depending on the programming language and its capabilities. For example, in JavaScript — where the term originated — they are implemented as standalone scripts that patch the environment or specific object prototypes to add missing functionality at run time. By contrast, C#'s statically typed and compiled nature rules out that style of polyfilling, but the concept itself remains applicable through other approaches.
 
-To that end, polyfills in C# can be created in two ways:
+In practice, polyfills in C# fall into two main categories:
 
 - **Type polyfills**, which re-implement missing built-in types from scratch, mimicking their original behavior as closely as possible. These polyfills are placed in the same namespaces as the official types to ensure they are picked up correctly by the compiler when the native definitions are not available. Suitable when the desired types are completely missing from the target framework.
 - **Member polyfills**, which rely on [extension members](https://learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/extension-methods) to shim missing methods, properties, or operators on existing built-in types. These extensions are usually placed in the global namespace to make them immediately accessible on every applicable type, effectively simulating intrinsic members. Suitable when the desired types exist, but lack certain members from later frameworks.
 
-These approaches can be combined with the SDK-provided [_preprocessor symbols_](https://learn.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives#conditional-compilation) to ensure that the polyfills are only included in the project when targeting frameworks that don't have the desired APIs. This way, when the library is built for more modern targets, the native implementations are used instead, avoiding any potential conflicts, performance issues, and dead code.
+These approaches can be combined with the SDK-provided [_preprocessor symbols_](https://learn.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives#conditional-compilation) to ensure that the polyfills are only included in the project when targeting frameworks that don't have the desired APIs. This way, when the library is built for more modern environments, the native implementations are used instead, avoiding any potential conflicts, performance issues, and dead code.
 
 As an example, let's consider a scenario where we wanted to use the [`System.Index`](https://learn.microsoft.com/dotnet/api/system.index) and [`System.Range`](https://learn.microsoft.com/dotnet/api/system.range) types in our library. Since these types were introduced in .NET Core 3.0, we'd need to add polyfills if we wanted to retain compatibility with the .NET Standard 2.0 target that we've established earlier. Here's how we could leverage the first approach to achieve that:
 
 ```csharp
-// The polyfill code below is shown for illustrative purposes only.
-// In a real-world scenario, you would typically rely on a polyfill library
-// and won't have to implement these bits yourself.
-
 // Single out frameworks that don't have the desired API natively
 #if (NETCOREAPP && !NETCOREAPP3_0_OR_GREATER) || (NETFRAMEWORK) || (NETSTANDARD && !NETSTANDARD2_1_OR_GREATER)
 
@@ -388,21 +384,21 @@ internal readonly struct Range(Index start, Index end)
 #endif
 ```
 
-There are a couple of things to note about this snippet. First, we use the `#if` directive to limit where the polyfill code is provided by singling out frameworks that don't have these types defined natively. In our case, that includes all of .NET Framework, as well as .NET (Core) versions prior to 3.0 and .NET Standard versions prior to 2.1.
+There are a couple of things to note about this snippet. First, we use the `#if` directive to limit where the polyfill code is available by singling out frameworks that don't provide the corresponding types natively. In our case, that includes all of .NET Framework, as well as .NET (Core) versions prior to 3.0 and .NET Standard versions prior to 2.1.
 
-Second, we ensure that the polyfill types are defined within the `System` namespace, matching the naming patterns of the original types. This way, if the consuming code references `System.Index` or `System.Range`, the compiler will automatically resolve to our custom types when the native versions are missing.
+Second, we ensure that the polyfill types are defined within the `System` namespace, matching the naming patterns of the original types. This way, if the consuming code references `System.Index` or `System.Range`, the compiler will automatically resolve to our own implementations when the native versions are missing.
 
 Finally, we mark these types as `internal`, constraining their visibility to within the same assembly. Doing so prevents the polyfills from leaking to the consumers of our library, which is important as it could otherwise cause confusion and, in some cases, build errors.
 
-The code itself is pretty much a carbon copy of the official implementation of `Index` and `Range`, with some minor adjustments for simplicity. When it comes to authoring polyfills, our primary goal is to replicate the client-facing behavior of the original APIs — so cutting corners in other areas, such as performance, is generally acceptable.
+The code itself is pretty much a carbon copy of the official implementation of `Index` and `Range`, with some minor adjustments for simplicity. When it comes to authoring polyfills, our primary goal is to replicate the client-facing behavior of the original APIs — so cutting corners in other areas, such as performance optimizations, edge cases, and documentation, is generally acceptable.
 
-With the polyfills in place, we can now use the aforementioned types in our library code without any concern for compatibility:
+With the polyfills in place, we can now use the aforementioned types without any concern for compatibility:
 
 ```csharp
 using System;
 
-// On newer frameworks, this relies on the native implementations.
-// On older frameworks, this relies on the polyfills.
+// On newer frameworks, this references the framework-provided types.
+// On older frameworks, this references the polyfilled types.
 // Same code works everywhere without any changes.
 var index = new Index(1, fromEnd: true);
 var range = new Range(
@@ -411,25 +407,21 @@ var range = new Range(
 );
 ```
 
-As an additional benefit, re-defining framework APIs like this also enables related language features that rely on them. In our example, thanks to the above polyfills, we may now use C#'s [index (`^`) and range (`..`) operators](https://learn.microsoft.com/dotnet/csharp/tutorials/ranges-indexes) seamlessly across all target frameworks:
+As an additional benefit, re-defining framework APIs like this also enables related language features that build upon them. In our example, thanks to the above polyfills, we may now use C#'s [index (`^`) and range (`..`) operators](https://learn.microsoft.com/dotnet/csharp/tutorials/ranges-indexes) seamlessly across all target frameworks:
 
 ```csharp
 var array = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
-// On newer frameworks, this relies on the native implementations.
-// On older frameworks, this relies on the polyfills.
+// On newer frameworks, these operators rely on the framework-provided types.
+// On older frameworks, these operators rely on the polyfilled types.
 // Same code works everywhere without any changes.
 var last = array[^1];
 var part = array[3..^1];
 ```
 
-Alternatively, let's say that we also wanted to use the newer overloads of the [`string.Contains(...)`](https://learn.microsoft.com/dotnet/api/system.string.contains) method that accept a `StringComparison` parameter. These overloads were introduced in .NET Core 2.1, so we'd need to add polyfills to support our .NET Standard 2.0 target as well. Since the `string` type itself is present across all frameworks, we can polyfill just the missing members using the second approach:
+For an alternative example, let's say we also wanted to use the newer overloads of the [`string.Contains(...)`](https://learn.microsoft.com/dotnet/api/system.string.contains) method that accept a `StringComparison` parameter. These were introduced in .NET Core 2.1, so supporting a .NET Standard 2.0 target requires polyfilling them as well. Since `string` itself exists across all frameworks, we only need to polyfill the missing members, which makes this a good fit for the second approach:
 
 ```csharp
-// The polyfill code below is shown for illustrative purposes only.
-// In a real-world scenario, you would typically rely on a polyfill library
-// and won't have to implement these bits yourself.
-
 // Single out frameworks that don't have the desired API natively
 #if (NETCOREAPP && !NETCOREAPP2_1_OR_GREATER) || (NETFRAMEWORK) || (NETSTANDARD && !NETSTANDARD2_1_OR_GREATER)
 
@@ -438,7 +430,7 @@ using System;
 // No namespace declaration, so that the extension members are available globally
 internal static class PolyfillExtensions
 {
-    // These extension blocks were introduced in C# 14 and, unlike extension methods,
+    // Extension blocks were introduced in C# 14 and, unlike extension methods,
     // they support properties and operators too, as well as both instance and static receivers.
     extension(string str)
     {
@@ -452,19 +444,19 @@ internal static class PolyfillExtensions
 #endif
 ```
 
-Here we define an internal class named `PolyfillExtensions`, which contains two extension methods that replicate the signatures and mimic the behavior of the original `string.Contains(...)` overloads. The name of the class doesn't actually matter since it's never going to be referenced directly, but it's still a good idea to pick something descriptive.
+Here we define an internal class arbitrarily named `PolyfillExtensions`, which contains two extension methods that mirror the signatures of the original `string.Contains(...)` overloads. The implementations simply delegate to the existing `string.IndexOf(...)` method, which already supports the `StringComparison` parameter.
 
 Similar to the previous example, we also leverage conditional compilation here to ensure that the polyfills are only included when targeting frameworks that lack the required method definitions. Both of these APIs were introduced in the same release, so we can use a single `#if` check for the entire file.
 
-Unlike the type shim approach, however, here we deliberately omit the `namespace` declaration to place the extensions in the global namespace. By doing so, these extensions become available globally without the need for any `using` directives, so that any existing and future code that relies on these method signatures will automatically pick up our polyfill implementations whenever the native members are not available.
+Unlike the type shim approach, however, here we omit the `namespace` declaration altogether. Doing so intentionally places the extensions in the global namespace, making them accessible without any additional `using` directives. As a result, any existing or future code that calls these overloads will transparently bind to the polyfills when the native implementations are unavailable.
 
-Now we can safely use these new `string.Contains(...)` overloads throughout our library code:
+From this point on, we can safely use these new `string.Contains(...)` overloads throughout our library code:
 
 ```csharp
 var str = "Hello world";
 
-// On newer frameworks, this call uses the native implementation.
-// On older frameworks, this call is implemented by the polyfills.
+// On newer frameworks, this calls the framework-provided method.
+// On older frameworks, this calls the polyfilled method.
 // Same code works everywhere without any changes.
 var contains = str.Contains('w', StringComparison.OrdinalIgnoreCase);
 ```
@@ -568,9 +560,11 @@ Ultimately, it's up to your personal preference which of these libraries you cho
 </Project>
 ```
 
-As a developer, you'll find yourself relying on both of these polyfill solutions depending on the situation: official compatibility packages for common framework types, and community polyfill libraries for more specialized needs. In some cases, you may even need to implement custom polyfills manually if neither of these options cover your requirements.
+Just with that single package reference, we immediately gain access to a wide range of polyfills that cover various framework APIs and language features, such as ...
 
-Regardless, polyfills are not a perfect solution to the compatibility problem, so you should always weigh their benefits against the added complexity they may introduce. If the balance becomes too unfavorable, it may be better to simply drop support for certain frameworks instead.
+As a developer, you'll find yourself relying on both of these polyfill solutions depending on the situation: official compatibility packages for common framework types, and community polyfill libraries for more specialized needs. In some scenarios, you may even need to implement custom polyfills manually if neither of these options cover your requirements.
+
+That said, polyfills have their own limitations and are not a perfect solution by any means. Even with the flexibility of extension members, some things are simply impossible to backport effectively, while others may still introduce complexity and maintenance overhead that outweigh their benefits. As always, compatibility is a compromise, so if the balance becomes unfavorable, it may be better to simply drop support for certain frameworks instead.
 
 ## Code formatting
 
