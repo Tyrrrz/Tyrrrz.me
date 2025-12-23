@@ -319,7 +319,7 @@ As an example, let's consider a scenario where we wanted to use the [`System.Ind
 // Single out frameworks that don't have the desired API natively
 #if (NETCOREAPP && !NETCOREAPP3_0_OR_GREATER) || (NETFRAMEWORK) || (NETSTANDARD && !NETSTANDARD2_1_OR_GREATER)
 
-// Put this type shim in the System namespace to match the official type
+// Put these type shims in the System namespace to match the official types
 namespace System;
 
 internal readonly struct Index(int value) : IEquatable<Index>
@@ -330,7 +330,7 @@ internal readonly struct Index(int value) : IEquatable<Index>
         : this(fromEnd ? ~value : value)
     {
         if (value < 0)
-            throw new ArgumentOutOfRangeException(nameof(value), "value must be non-negative");
+            throw new ArgumentOutOfRangeException(nameof(value), "Value must be non-negative.");
     }
 
     public int Value => _value < 0 ? ~_value : _value;
@@ -364,29 +364,51 @@ internal readonly struct Index(int value) : IEquatable<Index>
 
     public static Index End => new(~0);
 
-    public static Index FromStart(int value) =>
-        value >= 0
-            ? new Index(value)
-            : throw new ArgumentOutOfRangeException(nameof(value), "Value must be non-negative.");
+    public static Index FromStart(int value) => new(value, false);
 
-    public static Index FromEnd(int value) =>
-        value >= 0
-            ? new Index(~value)
-            : throw new ArgumentOutOfRangeException(nameof(value), "Value must be non-negative.");
+    public static Index FromEnd(int value) => new(value, true);
 
     public static implicit operator Index(int value) => FromStart(value);
 }
 
-internal readonly struct Range(Index start, Index end)
+internal readonly struct Range(Index start, Index end) : IEquatable<Range>
 {
-    // ... omitted for brevity ...
+    public Index Start { get; } = start;
+
+    public Index End { get; } = end;
+
+    public (int Offset, int Length) GetOffsetAndLength(int length)
+    {
+        var start = Start.IsFromEnd ? length - Start.Value : Start.Value;
+        var end = End.IsFromEnd ? length - End.Value : End.Value;
+
+        if ((uint)end > (uint)length || (uint)start > (uint)end)
+            throw new ArgumentOutOfRangeException(nameof(length));
+
+        return (start, end - start);
+    }
+
+    public override bool Equals(object? value) =>
+        value is Range r && r.Start.Equals(Start) && r.End.Equals(End);
+
+    public bool Equals(Range other) => other.Start.Equals(Start) && other.End.Equals(End);
+
+    public override int GetHashCode() => Start.GetHashCode() * 31 + End.GetHashCode();
+
+    public override string ToString() => Start + ".." + End;
+
+    public static Range StartAt(Index start) => new(start, Index.End);
+
+    public static Range EndAt(Index end) => new(Index.Start, end);
+
+    public static Range All => new(Index.Start, Index.End);
 }
 #endif
 ```
 
 There are a couple of things to note about this snippet. First, we use the `#if` directive to limit where the polyfill code is available by singling out frameworks that don't provide the corresponding types natively. In our case, that includes all of .NET Framework, as well as .NET (Core) versions prior to 3.0 and .NET Standard versions prior to 2.1.
 
-Second, we ensure that the polyfill types are defined within the `System` namespace, matching the naming patterns of the original types. This way, if the consuming code references `System.Index` or `System.Range`, the compiler will automatically resolve to our own implementations when the native versions are missing.
+Second, we ensure that the backported types are defined within the `System` namespace, matching the naming patterns of the original types. This way, if the consuming code references `System.Index` or `System.Range`, the compiler will automatically resolve to our own implementations when the native versions are missing.
 
 Finally, we mark these types as `internal`, constraining their visibility to within the same assembly. Doing so prevents the polyfills from leaking to the consumers of our library, which is important as it could otherwise cause confusion and, in some cases, build errors.
 
@@ -407,19 +429,19 @@ var range = new Range(
 );
 ```
 
-As an additional benefit, re-defining framework APIs like this also enables related language features that build upon them. In our example, thanks to the above polyfills, we may now use C#'s [index (`^`) and range (`..`) operators](https://learn.microsoft.com/dotnet/csharp/tutorials/ranges-indexes) seamlessly across all target frameworks:
+As an additional benefit, re-defining framework APIs this way also enables related language features that build upon them. In our example, thanks to the above polyfills, we may now use C#'s [index (`^`) and range (`..`) operators](https://learn.microsoft.com/dotnet/csharp/tutorials/ranges-indexes) seamlessly across all target frameworks:
 
 ```csharp
-var array = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+var str = "Hello world";
 
 // On newer frameworks, these operators rely on the framework-provided types.
 // On older frameworks, these operators rely on the polyfilled types.
 // Same code works everywhere without any changes.
-var last = array[^1];
-var part = array[3..^1];
+var last = str[^1];
+var part = str[3..^1];
 ```
 
-For an alternative example, let's say we also wanted to use the newer overloads of the [`string.Contains(...)`](https://learn.microsoft.com/dotnet/api/system.string.contains) method that accept a `StringComparison` parameter. These were introduced in .NET Core 2.1, so supporting a .NET Standard 2.0 target requires polyfilling them as well. Since `string` itself exists across all frameworks, we only need to polyfill the missing members, which makes this a good fit for the second approach:
+For an alternative example, let's say we also wanted to use the newer overloads of the [`string.Contains(...)`](https://learn.microsoft.com/dotnet/api/system.string.contains) method that accept a `StringComparison` parameter. These were introduced in .NET Core 2.1, so supporting a .NET Standard 2.0 target requires polyfilling them as well. Since the `string` type itself exists across all frameworks, we only need to polyfill the missing members, which makes this a good fit for the second approach:
 
 ```csharp
 // Single out frameworks that don't have the desired API natively
@@ -444,28 +466,32 @@ internal static class PolyfillExtensions
 #endif
 ```
 
-Here we define an internal class arbitrarily named `PolyfillExtensions`, which contains two extension methods that mirror the signatures of the original `string.Contains(...)` overloads. The implementations simply delegate to the existing `string.IndexOf(...)` method, which already supports the `StringComparison` parameter.
+Here we define an internal class arbitrarily named `PolyfillExtensions`, which contains two extension methods that mirror the signatures of the original `string.Contains(...)` overloads that we want to backport. The implementations simply delegate to the existing `string.IndexOf(...)` method, which already supports the `StringComparison` parameter.
 
 Similar to the previous example, we also leverage conditional compilation here to ensure that the polyfills are only included when targeting frameworks that lack the required method definitions. Both of these APIs were introduced in the same release, so we can use a single `#if` check for the entire file.
 
-Unlike the type shim approach, however, here we omit the `namespace` declaration altogether. Doing so intentionally places the extensions in the global namespace, making them accessible without any additional `using` directives. As a result, any existing or future code that calls these overloads will transparently bind to the polyfills when the native implementations are unavailable.
+Unlike the type shim approach, however, here we omit the `namespace` declaration altogether. Doing so intentionally places the extensions in the global namespace, making them accessible without additional `using` directives. As a result, any existing or future code that calls these overloads will transparently bind to the polyfills when the native implementations are unavailable.
 
-From this point on, we can safely use these new `string.Contains(...)` overloads throughout our library code:
+Finally, having defined these polyfills, we can safely use the new `string.Contains(...)` overloads throughout our library code:
 
 ```csharp
 var str = "Hello world";
 
 // On newer frameworks, this calls the framework-provided method.
-// On older frameworks, this calls the polyfilled method.
+// On older frameworks, this calls the polyfilled (extension) method.
 // Same code works everywhere without any changes.
 var contains = str.Contains('w', StringComparison.OrdinalIgnoreCase);
 ```
 
-Of course, just like any other code that you write, polyfill code is a liability that needs to be tested and maintained over time. As an experienced developer you will naturally want to avoid that responsibility and instead take advantage of existing solutions if possible. Luckily, here you have several options for that.
+Of course, just like any other code that you write, polyfills are a liability that needs to be tested and maintained over time. As an experienced developer you will naturally want to avoid that responsibility and instead seek to take advantage of existing solutions wherever possible. Luckily, here you have several options for that.
 
-First of all, many of the built-in types that were introduced in .NET (Core) have backports provided directly by Microsoft. While they serve the same purpose, these are not polyfills in the strictest sense of the word — but rather parts of the framework that have been extracted and redistributed as NuGet packages to allow their usage on older targets.
+First of all, many of the built-in types that were introduced in .NET (Core) have backports provided directly by Microsoft. These are distributed as NuGet packages identified by the [`System.*`](https://nuget.org/packages?q=system.*) and [`Microsoft.Bcl.*`](https://nuget.org/packages?q=microsoft.bcl.*) prefixes, and are specifically intended to act as compatibility layers when targeting older frameworks.
 
-As an example, let's imagine that our library needs to leverage `Span<T>`, `Memory<T>`, and `IAsyncEnumerable<T>`, while continuing to benefit from the broad compatibility offered by .NET Standard 2.0. To facilitate that, we can add the official [`System.Memory`](https://nuget.org/packages/System.Memory) and [`Microsoft.Bcl.AsyncInterfaces`](https://nuget.org/packages/Microsoft.Bcl.AsyncInterfaces) packages as shown below:
+The two distinct prefixes are not an accidental naming inconsistency — they reflect the slightly different nature of these packages. The `System.*` packages contain republished versions of the exact implementations of various types used internally by the .NET runtime. On the other hand, the `Microsoft.Bcl.*` packages are released separately from the framework and rely on independent (although official) re-implementations.
+
+From a practical standpoint, this distinction is significant only in terms of the level of support and guarantees that you can expect. Most of the time, it makes sense to go for the `Microsoft.Bcl.*` packages only if there is no corresponding `System.*` alternative, or if the latter doesn't target the frameworks that you need.
+
+With that said, let's imagine that our library needs to leverage `Span<T>`, `Memory<T>`, and `IAsyncEnumerable<T>`. All of these types were introduced after .NET Standard 2.0, so we need to polyfill them in order to maintain compatibility. To facilitate that, we can add the official [`System.Memory`](https://nuget.org/packages/System.Memory) and [`Microsoft.Bcl.AsyncInterfaces`](https://nuget.org/packages/Microsoft.Bcl.AsyncInterfaces) packages as shown below:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -507,9 +533,7 @@ As an example, let's imagine that our library needs to leverage `Span<T>`, `Memo
 </Project>
 ```
 
-Because `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` come as run-time dependencies, it's up to us to ensure that they are only included in the build when necessary. In the example above, we use the `Condition="..."` attribute together with the familiar `IsTargetFrameworkCompatible(...)` function to exclude the corresponding references for the frameworks where the desired types are already present.
-
-These sorts of compatibility packages are a great default choice for backporting needs as they are officially maintained, well-tested, and target a wide range of frameworks. You can find more of them on NuGet.org by searching for [`System.*`](https://nuget.org/packages?q=system.*) or [`Microsoft.Bcl.*`](https://nuget.org/packages?q=microsoft.bcl.*).
+Unlike the manual polyfill implementations we've seen earlier, `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` deliver run-time dependencies, so it's up to us to ensure that they are only included when necessary. In the example above, we use the `Condition="..."` attribute together with the familiar `IsTargetFrameworkCompatible(...)` function to exclude the corresponding references for the frameworks where the desired types are already present.
 
 However, as they are official packages, their scope is intentionally conservative — they only focus on the most common user-facing framework types, and don't aim to cover more situational APIs or to retrofit support for newer language features. They also don't employ unconventional polyfilling techniques, such as global extension members. Because of that, they may not cover your library's every need, but this is where community-driven polyfill packages can be of help.
 
@@ -560,9 +584,11 @@ Ultimately, it's up to your personal preference which of these libraries you cho
 </Project>
 ```
 
-Just with that single package reference, we immediately gain access to a wide range of polyfills that cover various framework APIs and language features, such as ...
+Just with that single package reference, we immediately gain access to a wide range of polyfills that cover various framework APIs and language features, such as ... including NRTs which were enabled earlier.
 
 As a developer, you'll find yourself relying on both of these polyfill solutions depending on the situation: official compatibility packages for common framework types, and community polyfill libraries for more specialized needs. In some scenarios, you may even need to implement custom polyfills manually if neither of these options cover your requirements.
+
+Compatibility packages' official and public nature makes them good as polyfills for public contract types.
 
 That said, polyfills have their own limitations and are not a perfect solution by any means. Even with the flexibility of extension members, some things are simply impossible to backport effectively, while others may still introduce complexity and maintenance overhead that outweigh their benefits. As always, compatibility is a compromise, so if the balance becomes unfavorable, it may be better to simply drop support for certain frameworks instead.
 
