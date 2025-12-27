@@ -487,11 +487,11 @@ Of course, just like any other code that you write, polyfills are a liability th
 
 First of all, many of the built-in types that were introduced in .NET (Core) have backports provided directly by Microsoft. These are distributed as NuGet packages identified by the [`System.*`](https://nuget.org/packages?q=system.*) and [`Microsoft.Bcl.*`](https://nuget.org/packages?q=microsoft.bcl.*) prefixes, and are specifically intended to act as compatibility layers when targeting older frameworks.
 
-The two distinct prefixes are not an accidental naming inconsistency — they reflect the slightly different nature of these packages. The `System.*` packages contain republished versions of the exact implementations of various types used internally by the .NET runtime. On the other hand, the `Microsoft.Bcl.*` packages are released separately from the framework and rely on independent (although official) re-implementations.
+Note that the two distinct prefixes are not an accidental naming inconsistency — they reflect the different nature of these offerings. The `System.*` packages represent derived parts of the actual .NET codebase, republished separately from the rest of the runtime. On the other hand, the `Microsoft.Bcl.*` packages are shipped out of band and instead rely on independent (though still official) re-implementations that facilitate wider platform support.
 
-From a practical standpoint, this distinction is significant only in terms of the level of support and guarantees that you can expect. Most of the time, it makes sense to go for the `Microsoft.Bcl.*` packages only if there is no corresponding `System.*` alternative, or if the latter doesn't target the frameworks that you need.
+From a practical standpoint, this distinction mainly affects the guarantees you get around behavioral parity and servicing. However, in most cases, the functionality provided by these two groups of packages rarely overlap, so the choice between them is typically driven by the APIs they cover, while other considerations are secondary.
 
-With that said, let's imagine that our library needs to leverage `Span<T>`, `Memory<T>`, and `IAsyncEnumerable<T>`. All of these types were introduced after .NET Standard 2.0, so we need to polyfill them in order to maintain compatibility. To facilitate that, we can add the official [`System.Memory`](https://nuget.org/packages/System.Memory) and [`Microsoft.Bcl.AsyncInterfaces`](https://nuget.org/packages/Microsoft.Bcl.AsyncInterfaces) packages as shown below:
+With that said, let's imagine that our library needs to leverage `Span<T>`, `Memory<T>`, and `IAsyncEnumerable<T>`. Since these types were introduced after .NET Standard 2.0, we'd need to add polyfills to keep that target supported. To do that, we can rely on [`System.Memory`](https://nuget.org/packages/System.Memory) for `Span<T>` and `Memory<T>`, and [`Microsoft.Bcl.AsyncInterfaces`](https://nuget.org/packages/Microsoft.Bcl.AsyncInterfaces) for `IAsyncEnumerable<T>`, including them in the project like so:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -533,9 +533,13 @@ With that said, let's imagine that our library needs to leverage `Span<T>`, `Mem
 </Project>
 ```
 
-Unlike the manual polyfill implementations we've seen earlier, `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` deliver run-time dependencies, so it's up to us to ensure that they are only included when necessary. In the example above, we use the `Condition="..."` attribute together with the familiar `IsTargetFrameworkCompatible(...)` function to exclude the corresponding references for the frameworks where the desired types are already present.
+Unlike traditional polyfills, which are implemented as internal source code files, these packages provide the polyfilled types within compiled assemblies that get referenced at run-time. For that reason, it's up to us to ensure that they are only included when necessary and don't end up shadowing the native implementations on modern frameworks.
 
-However, as they are official packages, their scope is intentionally conservative — they only focus on the most common user-facing framework types, and don't aim to cover more situational APIs or to retrofit support for newer language features. They also don't employ unconventional polyfilling techniques, such as global extension members. Because of that, they may not cover your library's every need, but this is where community-driven polyfill packages can be of help.
+In the example above, we achieve that by using the familiar `Condition="..."` attribute together with the `IsTargetFrameworkCompatible(...)` function. By doing so, the desired types will be available on all the frameworks that our library targets — but when built for older environments, the resulting NuGet package will also include these compatibility packages as dependencies.
+
+Generally speaking, the official compatibility packages should be your first choice when it comes to polyfilling common framework APIs. They are well-tested, actively maintained, and target a decently broad range of .NET versions, making them a reliable solution for most scenarios.
+
+However, as official packages, their scope is intentionally conservative — they only focus on the most common user-facing framework types, and don't aim to cover more situational APIs or to retrofit support for newer language features. They also don't employ unconventional polyfilling techniques, such as global extension members. Because of that, they may not cover your library's every need, but this is where community-driven polyfill packages can be of help.
 
 When it comes to community polyfill libraries, there are a few popular options to choose from, including [PolyShim](https://github.com/Tyrrrz/PolyShim), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolySharp](https://github.com/Sergio0694/PolySharp). These projects have somewhat different feature sets and design philosophies, but they ultimately have the same goal of plugging the gaps left by the official backport packages, providing polyfills to facilitate a broader range of usage scenarios.
 
