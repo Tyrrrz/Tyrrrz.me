@@ -539,9 +539,9 @@ In the example above, we achieve that by using the familiar `Condition="..."` at
 
 Generally speaking, the official compatibility packages should be your first choice when it comes to polyfilling common platform APIs. They are well-tested, actively maintained, and support a wide range of .NET versions, making them a reliable default in most scenarios. That said, being official also means that their scope is intentionally kept conservative, which limits what they can offer.
 
-This is where community-driven polyfill libraries — such as [PolyShim](https://github.com/Tyrrrz/PolyShim), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolySharp](https://github.com/Sergio0694/PolySharp) — can fill in the gaps. These projects provide a broader selection of polyfills, including support for newer language features and more specialized types that are not covered by the official packages. Beyond that, they often employ more unconventional techniques, such as member polyfills through global extensions, which allow them to backport functionality that would otherwise be impossible to replicate.
+This is where community-driven polyfill libraries — such as [PolyShim](https://github.com/Tyrrrz/PolyShim), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolySharp](https://github.com/Sergio0694/PolySharp) — can fill in the gaps. These projects provide a broader selection of polyfills, including those that facilitate language features and more specialized types that are not covered by the official packages. Beyond that, they often employ more unconventional techniques, such as member polyfills through global extensions, which allow them to backport functionality that would otherwise be impossible to replicate.
 
-Unlike the `System.*` and `Microsoft.Bcl.*` packages, these libraries are also typically designed as purely compile-time dependencies, with zero run-time footprint. When included in the project, they inject the necessary polyfill code directly into the build process, eliminating the need for any external assemblies. This also allows them to leverage conditional compilation to disable unnecessary polyfills automatically, based on the target framework.
+Unlike the `System.*` and `Microsoft.Bcl.*` packages, these libraries are also typically designed as purely compile-time dependencies, with zero run-time footprint. When included in a project, they inject the necessary polyfill code directly into the build process, eliminating the need for any external assemblies. This also allows them to leverage conditional compilation to disable unnecessary polyfills automatically, instead of putting that responsibility on the consumer.
 
 While all these libraries have the same goal, they have somewhat different design philosophies and feature sets, so it's worth exploring each of them to see which one aligns best with your needs. For our example, let's say we decide to go with PolyShim, adding it to our project like so:
 
@@ -573,7 +573,7 @@ While all these libraries have the same goal, they have somewhat different desig
 
     <!--
         PrivateAssets="all" ensures that this package is not included as a run-time dependency of our NuGet package.
-        Since polyfills are provided as source files, there is nothing to include anyway.
+        Since PolyShim's polyfills are provided as source files, there is nothing to include anyway.
         Condition attribute is not necessary here as PolyShim handles conditional compilation internally.
     -->
     <PackageReference
