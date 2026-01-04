@@ -533,7 +533,7 @@ With that said, let's imagine that our library needs to leverage `Span<T>`, `Mem
 </Project>
 ```
 
-Following a similar pattern as before, here we apply the `Condition="..."` attribute together with the `IsTargetFrameworkCompatible(...)` function to ensure that these packages are only included for frameworks that lack the corresponding types natively. Apart from avoiding issues within our own codebase, doing so also prevents these packages from being imposed as run-time dependencies on our library's consumers when they are not needed.
+Following the pattern from before, here we apply the `Condition="..."` attribute together with the `IsTargetFrameworkCompatible(...)` function to ensure that these packages are only included for frameworks that lack the corresponding types natively. Apart from avoiding issues within our own codebase, doing so also prevents these packages from being imposed as run-time dependencies on our library's consumers when they are not needed.
 
 After adding the two package references to our project, we can now freely write code that relies on the associated APIs:
 
@@ -563,7 +563,7 @@ async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadChunksAsync(Stream stream)
 
 Generally speaking, the official compatibility packages should be your first choice when backporting common platform APIs. They are well-tested, actively maintained, and support a wide range of .NET versions, making them a reliable default for most scenarios.
 
-However, being official also means that their scope is rather conservative: they focus solely on widely used framework types — leaving out some of the more specialized functionality and compiler-facing facilities, including those that underpin various language features. Besides that, they also deliberately avoid relying on unconventional polyfilling techniques, like the global extensions trick, which precludes them from covering certain APIs effectively.
+However, being official also means that their scope is rather conservative: they focus only on widely used framework types — leaving out some of the more specialized bits and compiler-facing facilities that underpin various language features. Besides that, they also deliberately avoid relying on unconventional polyfilling techniques, like the global extensions trick, which precludes them from covering certain APIs effectively.
 
 This is where community polyfill libraries, such as [PolyShim](https://github.com/Tyrrrz/PolyShim), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolySharp](https://github.com/Sergio0694/PolySharp), have emerged over the years. These libraries aim to fill in the gaps left by the official compatibility packages, providing polyfills for a broader range of framework and language features, and often employing more advanced techniques to do so.
 
