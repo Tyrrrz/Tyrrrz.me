@@ -468,7 +468,7 @@ internal static class PolyfillExtensions
 
 Here we define an internal class arbitrarily named `PolyfillExtensions`, which contains two extension methods that mirror the signatures of the original `string.Contains(...)` overloads that we want to backport. The implementations simply delegate to the existing `string.IndexOf(...)` method, which already supports the `StringComparison` parameter.
 
-Similar to the previous example, we also leverage conditional compilation here to ensure that the polyfills are only included when building for frameworks that lack the required method definitions. Both of these APIs were introduced in the same release, so we can use a single `#if` check for the entire file.
+Similarly to the previous example, we also leverage conditional compilation here to ensure that the polyfills are only included when building for frameworks that lack the required method definitions. Both of these APIs were introduced in the same release, so we can use a single `#if` check for the entire file.
 
 Unlike the type shim approach, however, here we omit the `namespace` declaration altogether. Doing so intentionally places the extensions in the global namespace, making them accessible without additional `using` directives. As a result, any existing or future code that calls these overloads will transparently bind to the polyfills when the native implementations are unavailable.
 
@@ -491,7 +491,7 @@ Note that the two distinct prefixes are not an accidental naming inconsistency â
 
 From a practical standpoint, this distinction mainly affects the guarantees you get around behavioral parity and servicing. However, in most cases, the functionality provided by these two groups of packages rarely overlap anyway, so the choice between them is typically driven by the APIs they cover rather than their implementation details.
 
-With that said, let's imagine that our library needs to leverage `Span<T>`, `Memory<T>`, and `IAsyncEnumerable<T>`. Since these types were introduced after .NET Standard 2.0, we'd need to add polyfills to keep that target supported. To do that, we can add a reference to [`System.Memory`](https://nuget.org/packages/System.Memory) for `Span<T>` and `Memory<T>`, and [`Microsoft.Bcl.AsyncInterfaces`](https://nuget.org/packages/Microsoft.Bcl.AsyncInterfaces) for `IAsyncEnumerable<T>`, as shown below:
+With that said, let's imagine that our library needs to leverage `Span<T>`, `Memory<T>`, and `IAsyncEnumerable<T>`. Since these types were introduced after .NET Standard 2.0, we'd need to include polyfills to keep that target supported. For that, we can add a reference to [`System.Memory`](https://nuget.org/packages/System.Memory) for `Span<T>` and `Memory<T>`, and [`Microsoft.Bcl.AsyncInterfaces`](https://nuget.org/packages/Microsoft.Bcl.AsyncInterfaces) for `IAsyncEnumerable<T>`:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -533,7 +533,7 @@ With that said, let's imagine that our library needs to leverage `Span<T>`, `Mem
 </Project>
 ```
 
-Similar to the conditional compilation pattern from before, here we apply the `Condition="..."` attribute together with the `IsTargetFrameworkCompatible(...)` function to ensure that the compatibility packages only get referenced when needed. With the target frameworks we have configured for our library, this means that `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` will be included solely for .NET Standard 2.0 builds.
+Similarly to the conditional compilation pattern from before, here we apply the `Condition="..."` attribute together with the `IsTargetFrameworkCompatible(...)` function to ensure that the compatibility packages only get referenced when needed. With the target frameworks we have configured for our library, this means that `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` will be included solely for .NET Standard 2.0 builds.
 
 Note that, unlike the hand-rolled polyfills we've explored earlier, the type definitions provided by these packages are inherently public and cannot be restricted in visibility. Because run-time dependencies are transitive in nature, all of the exported types will be surfaced to the library's consumers as well, creating an implicit contract that you should be mindful of.
 
