@@ -533,11 +533,11 @@ With that said, let's imagine that our library needs to leverage `Span<T>`, `Mem
 </Project>
 ```
 
-Similar to the conditional compilation pattern from before, here we apply the `Condition="..."` attribute together with the `IsTargetFrameworkCompatible(...)` function to ensure that the above compatibility packages are only referenced when needed. In our case, it means that `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` are excluded from all of the library's configured target frameworks, except .NET Standard 2.0.
+Similar to the conditional compilation pattern from before, here we apply the `Condition="..."` attribute together with the `IsTargetFrameworkCompatible(...)` function to ensure that the compatibility packages only get referenced when needed. With the target frameworks we have configured for our library, this means that `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` will be included solely for .NET Standard 2.0 builds.
 
-Note that, unlike the hand-rolled polyfills we've explored earlier, the type definitions provided by these packages are inherently public and cannot be restricted in visibility. Due to the transitive nature of run-time dependencies, this means that those types will be exposed to the consumers of your library as well — which may be beneficial in some scenarios, but also introduces additional coupling that you should be mindful of.
+Note that, unlike the hand-rolled polyfills we've explored earlier, the type definitions provided by these packages are inherently public and cannot be restricted in visibility. Because run-time dependencies are transitive in nature, all of the exported types will be surfaced to the library's consumers as well, creating an implicit contract that you should be mindful of.
 
-Either way, having established the necessary references, we can now freely access all the associated APIs regardless of the target framework:
+Either way, having established the necessary references, we can now freely access the associated APIs regardless of the target framework:
 
 ```csharp
 using System;
@@ -619,6 +619,8 @@ Just with that single package reference, we immediately gain access to a wide ra
 As a developer, you'll find yourself relying on both of these polyfill solutions depending on the situation: official compatibility packages for common framework types, and community polyfill libraries for more specialized needs. In some scenarios, you may even need to implement custom polyfills manually if neither of these options cover your requirements.
 
 Compatibility packages' official and public nature makes them good as polyfills for public contract types.
+
+Reach for the compatibility packages especially when they make up your library's external surface area.
 
 That said, polyfills have their own limitations and are not a perfect solution by any means. Even with the flexibility of extension members, some things are simply impossible to backport effectively, while others may still introduce complexity and maintenance overhead that outweigh their benefits. As always, compatibility is a compromise, so if the balance becomes unfavorable, it may be better to simply drop support for certain frameworks instead.
 
