@@ -533,11 +533,11 @@ With that said, let's imagine that our library needs to leverage `Span<T>`, `Mem
 </Project>
 ```
 
-Similar to the conditional compilation pattern from before, here we apply the `Condition="..."` attribute together with the `IsTargetFrameworkCompatible(...)` function to ensure that the above compatibility packages are referenced only when needed. In our case, that means that `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` end up getting pulled as dependencies only when building for .NET Standard 2.0, while other targets continue to rely on native implementations.
+Similar to the conditional compilation pattern from before, here we apply the `Condition="..."` attribute together with the `IsTargetFrameworkCompatible(...)` function to ensure that the above compatibility packages are pulled only when needed. In our case, that means that `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` end up getting referenced when building for .NET Standard 2.0, while other targets continue to rely on native implementations.
 
-Note that, unlike the hand-rolled polyfills we've explored earlier, the types provided by these packages are inherently public and cannot be restricted in visibility. Due to the transitive nature of run-time dependencies, this means that these types will be exposed to the consumers of your library as well — which may be beneficial in some scenarios, but also introduces additional coupling that you need to be mindful of.
+Note that, unlike the hand-rolled polyfills we've explored earlier, the type definitions provided by these packages are inherently public and cannot be restricted in visibility. Due to the transitive nature of run-time dependencies, this means that those types will be exposed to the consumers of your library as well — which may be beneficial in some scenarios, but also introduces additional coupling that you need to be mindful of.
 
-Either way, having established the necessary references, we can now freely access all the associated APIs without regard for the target framework:
+Either way, having established the necessary references, we can now freely access all the associated APIs regardless of the target framework:
 
 ```csharp
 using System;
