@@ -468,7 +468,7 @@ internal static class PolyfillExtensions
 
 Here we define an internal class arbitrarily named `PolyfillExtensions`, which contains two extension methods that mirror the signatures of the original `string.Contains(...)` overloads that we want to backport. The implementations simply delegate to the existing `string.IndexOf(...)` method, which already supports the `StringComparison` parameter.
 
-Similar to the previous example, we also leverage conditional compilation here to ensure that the polyfills are only included when targeting frameworks that lack the required method definitions. Both of these APIs were introduced in the same release, so we can use a single `#if` check for the entire file.
+Similar to the previous example, we also leverage conditional compilation here to ensure that the polyfills are only included when building for frameworks that lack the required method definitions. Both of these APIs were introduced in the same release, so we can use a single `#if` check for the entire file.
 
 Unlike the type shim approach, however, here we omit the `namespace` declaration altogether. Doing so intentionally places the extensions in the global namespace, making them accessible without additional `using` directives. As a result, any existing or future code that calls these overloads will transparently bind to the polyfills when the native implementations are unavailable.
 
@@ -533,9 +533,11 @@ With that said, let's imagine that our library needs to leverage `Span<T>`, `Mem
 </Project>
 ```
 
-Following the pattern from before, here we apply the `Condition="..."` attribute together with the `IsTargetFrameworkCompatible(...)` function to ensure that these packages are only included for frameworks that lack the corresponding types natively. Apart from avoiding issues within our own codebase, doing so also prevents these packages from being imposed as run-time dependencies on our library's consumers when they are not needed.
+Similar to the conditional compilation pattern from before, here we apply the `Condition="..."` attribute together with the `IsTargetFrameworkCompatible(...)` function to ensure that the above compatibility packages are referenced only when needed. In our case, that means that `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` will end up getting pulled as dependencies only when building for .NET Standard 2.0, while other targets will rely on native implementations.
 
-After adding the two package references to our project, we can now freely write code that relies on the associated APIs:
+Note that, unlike the hand-rolled polyfills we've explored earlier, the types provided by these packages are inherently public and cannot be restricted in visibility. Due to the transitive nature of run-time dependencies, this means that these types will be exposed to the consumers of your library as well — which may be beneficial in some scenarios, but also introduces additional coupling that you need to be mindful of.
+
+Either way, having established the necessary references, we can now freely access all the associated APIs without regard for the target framework:
 
 ```csharp
 using System;
