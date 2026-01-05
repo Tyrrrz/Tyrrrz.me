@@ -533,7 +533,7 @@ With that said, let's imagine that our library needs to leverage `Span<T>`, `Mem
 </Project>
 ```
 
-Similar to the conditional compilation pattern from before, here we apply the `Condition="..."` attribute together with the `IsTargetFrameworkCompatible(...)` function to ensure that the above compatibility packages are referenced only when needed. In our case, that means that `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` will end up getting pulled as dependencies only when building for .NET Standard 2.0, while other targets will rely on native implementations.
+Similar to the conditional compilation pattern from before, here we apply the `Condition="..."` attribute together with the `IsTargetFrameworkCompatible(...)` function to ensure that the above compatibility packages are referenced only when needed. In our case, that means that `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` end up getting pulled as dependencies only when building for .NET Standard 2.0, while other targets continue to rely on native implementations.
 
 Note that, unlike the hand-rolled polyfills we've explored earlier, the types provided by these packages are inherently public and cannot be restricted in visibility. Due to the transitive nature of run-time dependencies, this means that these types will be exposed to the consumers of your library as well — which may be beneficial in some scenarios, but also introduces additional coupling that you need to be mindful of.
 
