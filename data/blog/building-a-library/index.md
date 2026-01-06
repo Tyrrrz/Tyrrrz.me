@@ -487,7 +487,7 @@ Of course, just like any other code that you write, polyfills are a liability th
 
 First of all, many of the built-in types that were introduced in .NET (Core) have backports provided directly by Microsoft. These are distributed as NuGet packages identified by the [`System.*`](https://nuget.org/packages?q=system.*) and [`Microsoft.Bcl.*`](https://nuget.org/packages?q=microsoft.bcl.*) prefixes, and are specifically intended to act as compatibility layers when targeting older frameworks.
 
-Note that the two distinct prefixes are not an accidental naming inconsistency — they reflect the different nature of these offerings. The `System.*` packages represent parts of the actual .NET codebase, published separately from the rest of the runtime, while the `Microsoft.Bcl.*` packages are shipped out of band and instead rely on derived (though still official) re-implementations that facilitate wider platform support.
+Note that the two distinct prefixes are not an accidental naming inconsistency — they reflect the different nature of these offerings. The `System.*` packages usually represent parts of the actual .NET codebase, published separately from the rest of the runtime, while the `Microsoft.Bcl.*` packages are shipped out of band and instead rely on derived (though still official) re-implementations that facilitate wider platform support.
 
 From a practical standpoint, this distinction mainly affects the guarantees you get around behavioral parity and servicing. However, in most cases, the functionality provided by these two groups of packages rarely overlap anyway, so the choice between them is typically driven by the APIs they cover rather than their implementation details.
 
@@ -533,9 +533,9 @@ With that said, let's imagine that our library needs to leverage `Span<T>`, `Mem
 </Project>
 ```
 
-Similarly to the conditional compilation pattern from before, here we apply the `Condition="..."` attribute together with the `IsTargetFrameworkCompatible(...)` function to ensure that the compatibility packages only get referenced when needed. With the target frameworks we have configured for our library, this means that `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` will be included solely for .NET Standard 2.0 builds.
+Similarly to the conditional compilation pattern from before, here we apply the `Condition="..."` attribute together with the `IsTargetFrameworkCompatible(...)` function to ensure that the compatibility packages only get referenced when required. With the target frameworks we have configured for our library, this means that `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` will be included solely for .NET Standard 2.0 builds.
 
-Note that, unlike the hand-rolled polyfills we've explored earlier, the type definitions provided by these packages are inherently public and cannot be restricted in visibility. Because run-time dependencies are transitive in nature, all of the exported types will be surfaced to the library's consumers as well, creating an implicit contract that you should be mindful of.
+Note that, unlike the hand-rolled polyfills we've explored earlier, the type definitions provided by these packages are inherently public and cannot be restricted in visibility. Because run-time dependencies are transitive in nature, all of the exported types will be surfaced to the library's consumers as well, creating an implicit contract that you need be mindful of.
 
 Either way, having established the necessary references, we can now freely access the associated APIs regardless of the target framework:
 
@@ -563,13 +563,23 @@ async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadChunksAsync(Stream stream)
 }
 ```
 
-Generally speaking, the official compatibility packages should be your first choice when backporting common platform APIs. They are well-tested, actively maintained, and support a wide range of .NET versions, making them a reliable default for most scenarios.
+Generally speaking, the official compatibility packages should be your first choice when it comes to backporting common platform APIs. They are well-tested, actively maintained, and support a wide range of .NET versions, making them a reliable default for most scenarios.
 
-However, being official also means that their scope is rather conservative: they focus only on widely used framework types — leaving out some of the more specialized bits and compiler-facing facilities that underpin various language features. Besides that, they also deliberately avoid relying on unconventional polyfilling techniques, like the global extensions trick, which precludes them from covering certain APIs effectively.
+Being official, however, also means that their scope is rather conservative — they tend to only focus on types that make up widely used and cohesive functional slices of the framework, while leaving out many of the more niche and specialized components, including the compiler-facing bits that power various language features. Additionally, they avoid relying on unconventional polyfilling techniques, like the global extensions trick, which further limits their applicability.
 
-This is where community polyfill libraries, such as [PolyShim](https://github.com/Tyrrrz/PolyShim), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolySharp](https://github.com/Sergio0694/PolySharp), have emerged over the years. These libraries aim to fill in the gaps left by the official compatibility packages, providing polyfills for a broader range of framework and language features, and often employing more advanced techniques to do so.
+Historically, library authors have plugged these gaps themselves on an ad-hoc basis, implementing various polyfills as their projects required. Over time, some of these individual efforts grew big enough to evolve into separate open-source projects, combining collections of polyfills into reusable packages that anyone can benefit from.
 
-While all these libraries have the same goal, they have somewhat different design philosophies and feature sets, so it's worth exploring each of them to see which one aligns best with your needs. For our example, let's say we decide to go with PolyShim, adding it to our project like so:
+This brings us to the second option for polyfills in C#: community-driven polyfills libraries. Unlike the official compatibility packages, these libraries are not burdened by corporate commitments and can therefore afford to be more aggressive and thorough in their coverage. Some of the more notable community libraries include:
+
+- [PolySharp](https://github.com/Sergio0694/PolySharp), which mainly focuses on backporting internal APIs that facilitate newer language and compiler features.
+- [Polyfill](https://github.com/SimonCropp/Polyfill), which is an all-encompassing polyfill library that can extend and better integrate official compatibility packages.
+- [PolyShim](https://github.com/Tyrrrz/PolyShim), which is also an all-encompassing polyfill library, but with a goal of supporting even the most decrepit versions of .NET.
+
+Contrary to the official compatibility packages, these libraries are usually designed to be all-encompassing — a single package contains a wide variety of polyfills that cover different scenarios. Instead of being delivered as run-time dependencies, they are published as source-only packages that inject the polyfill code directly into the consuming project's build process.
+
+Being part of the consuming project's build chain allows them to essentially mimic the hand-rolled polyfill process from earlier, but without any of the manual labor. This also means that these polyfills can stay internal to your library and not leak to its consumers, as well as leverage conditional compilation to only include the necessary code paths based on the target framework.
+
+While these libraries have somewhat different design philosophies and feature sets, they all share the common goal of providing comprehensive polyfill solutions for .NET developers. For our continued example, we'll choose to go with PolyShim for no other reason than the fact that I've authored it myself. Here's how we can add it to our project:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
