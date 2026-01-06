@@ -565,7 +565,7 @@ async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadChunksAsync(Stream stream)
 
 Generally speaking, the official compatibility packages should be your first choice when it comes to backporting common platform APIs. They are well-tested, actively maintained, and support a wide range of .NET versions, making them a reliable default for most scenarios.
 
-Being official, however, also means that their scope is rather conservative — they tend to only focus on types that make up widely used and cohesive functional slices of the framework, while leaving out many of the more niche and specialized components, including the compiler-facing bits that power various language features. Additionally, they avoid relying on unconventional polyfilling techniques, like the global extensions trick, which further limits their applicability.
+Being official, however, also means that their scope is rather conservative — they tend to only focus on user-facing types that make up cohesive functional slices of the framework, while leaving out many of the more niche and specialized components, including the compiler-facing bits that power various language features. Additionally, they avoid relying on unconventional polyfilling techniques, like the global extensions trick, which further limits their applicability.
 
 Historically, library authors have plugged these gaps themselves on an ad-hoc basis, implementing various polyfills as their projects required. Over time, some of these individual efforts grew big enough to evolve into separate open-source projects, combining collections of polyfills into reusable packages that anyone can benefit from.
 
