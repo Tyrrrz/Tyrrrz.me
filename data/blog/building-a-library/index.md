@@ -567,15 +567,15 @@ Generally speaking, the official compatibility packages should be your first cho
 
 Being official, however, also means that their scope is rather conservative — they tend to focus on well-defined user-facing feature areas of the framework, while leaving out many of the more niche and specialized components, including the compiler-facing types that power various language constructs. Additionally, they avoid relying on unconventional techniques, like the global extensions trick, which further narrows their applicability.
 
-This brings us to the second polyfill solution: community libraries, such as [PolySharp](https://github.com/Sergio0694/PolySharp), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolyShim](https://github.com/Tyrrrz/PolyShim). All these projects grew out of individual efforts by developers to plug the gaps left by Microsoft's compatibility packages, gradually evolving into open-source collections of shims and backports that anyone can use.
+This brings us to the second polyfill solution: community libraries, such as [PolySharp](https://github.com/Sergio0694/PolySharp), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolyShim](https://github.com/Tyrrrz/PolyShim). All these projects grew out of individual efforts by developers to plug the gaps left by Microsoft's compatibility packages, gradually evolving into open-source collections of shims and backports shared for anybody to use.
 
-Unlike the `System.*` and `Microsoft.Bcl.*` packages, these libraries are typically designed as compile-time dependencies that provide polyfills as source code, rather than run-time assemblies. This approach allows them to offer all polyfills as part of a single all-encompassing package, while letting tree shaking and conditional compilation eliminate any unnecessary code paths automatically.
+Unlike the `System.*` and `Microsoft.Bcl.*` packages, these libraries are typically designed as compile-time dependencies that inject polyfill code directly into the compilation process, rather than as pre-compiled run-time assemblies. Being part of the consuming project's build chain essentially mimics the hand-rolled polyfill process from earlier, allowing them to leverage conditional compilation and tree shaking to provide a more seamless experience.
 
-Being part of the consuming project's build chain essentially mimics the hand-rolled polyfill process from earlier, but without any of the manual labor. This also means that these polyfills can stay internal to your library and not leak to its consumers, as well as leverage conditional compilation to only include the necessary code paths based on the target framework.
+Of course, as community-driven projects, these solutions are not burdened by the same corporate constraints as the official offerings, which means they can afford to be more aggressive and thorough in their coverage. They often include polyfills for more obscure or specialized APIs, as well as compiler-facing types that enable newer language features on older frameworks.
 
-Of course, as community-driven projects, these packages are not burdened by the same corporate constraints as the official offerings, which means they can afford to be more aggressive and thorough in their coverage. They often include polyfills for more obscure or specialized APIs, as well as compiler-facing types that enable newer language features on older frameworks.
+The choice of which community polyfill library to use ultimately comes down to their API coverage and your personal preference. For our example, let's go with PolyShim, adding it to the project like so:
 
-The choice of which community polyfill library to use ultimately comes down to their coverage and your personal preference. For our example, we'll choose to go with PolyShim as it's a project I personally maintain. Here's how we can add it to our project:
+> Disclaimer: I am the author of PolyShim.
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
