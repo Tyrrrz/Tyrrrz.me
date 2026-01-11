@@ -563,11 +563,11 @@ async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadChunksAsync(Stream stream)
 }
 ```
 
-Generally speaking, the official compatibility packages should be your first choice when it comes to backporting common platform APIs. They are thoroughly tested, actively maintained, and support a wide range of .NET versions, making them a reliable default for most scenarios.
+Generally speaking, the official compatibility packages should be your first choice when it comes to backporting common platform APIs. They are well-tested, actively maintained, and support a wide range of .NET versions, making them a reliable default for most scenarios.
 
-Being official, however, also means that their scope is rather conservative — they tend to focus on well-defined user-facing feature areas of the framework, while leaving out many of the more niche and specialized components, including the compiler-facing types that power various language constructs. Additionally, they avoid relying on unconventional polyfilling techniques, like the global extensions trick, which further narrows their applicability.
+Being official, however, also means that their scope is rather conservative — they tend to focus on user-facing feature areas of the framework, while leaving out many specialized and compiler-facing types, including those that power various language constructs. Additionally, they don't provide any member polyfills, as they avoid relying on unconventional polyfilling techniques required to do so.
 
-This naturally brings us to the second solution: community polyfill libraries, such as [PolySharp](https://github.com/Sergio0694/PolySharp), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolyShim](https://github.com/Tyrrrz/PolyShim). All these projects evolved from individual efforts to plug the gaps left by Microsoft's compatibility packages, gradually growing into comprehensive collections of polyfills that cover a wide variety of framework APIs and language features.
+This naturally brings us to the second solution: community polyfill libraries, such as [PolySharp](https://github.com/Sergio0694/PolySharp), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolyShim](https://github.com/Tyrrrz/PolyShim). All these projects were born out of individual efforts to plug the gaps left by Microsoft's compatibility packages, gradually evolving into comprehensive collections of polyfills that cover a wide variety of framework APIs and language features.
 
 Unlike the `System.*` and `Microsoft.Bcl.*` packages, the three libraries mentioned are designed as static dependencies that provide polyfills as source code rather than through pre-compiled assemblies. By integrating into the consumer's build process, they can ship all polyfills as a single package while relying on conditional compilation and tree shaking to automatically exclude anything that isn't needed.
 
