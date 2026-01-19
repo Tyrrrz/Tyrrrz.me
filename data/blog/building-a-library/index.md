@@ -565,17 +565,15 @@ async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadChunksAsync(Stream stream)
 
 Generally speaking, the official compatibility packages should be your first choice when it comes to backporting common platform APIs. They are well-tested, actively maintained, and support a wide range of .NET versions, making them a reliable default for most scenarios.
 
-Being official, however, also means that their scope is rather conservative — they tend to focus on user-facing feature areas of the framework, while leaving out many specialized and compiler-facing types, including those that power various language constructs. Additionally, they don't provide any member polyfills, as they avoid relying on unconventional polyfilling techniques required to do so.
+Being official, however, also means that their scope is rather conservative — they tend to focus on user-facing areas of the framework, while leaving out many specialized and compiler-facing types, including those that power various language features. Additionally, they don't provide any member polyfills, as that requires relying on somewhat unconventional techniques, like the global namespace extension members we've seen earlier.
 
-This naturally brings us to the second solution: community polyfill libraries, such as [PolySharp](https://github.com/Sergio0694/PolySharp), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolyShim](https://github.com/Tyrrrz/PolyShim). All these projects were born out of individual efforts to plug the gaps left by Microsoft's compatibility packages, gradually evolving into comprehensive collections of polyfills that cover a wide variety of framework APIs and language features.
+This naturally brings us to the second solution: community polyfill libraries, such as [PolySharp](https://github.com/Sergio0694/PolySharp), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolyShim](https://github.com/Tyrrrz/PolyShim). All these projects were born out of individual efforts to plug the gaps left by Microsoft's compatibility packages, gradually evolving into comprehensive collections of shims and backports for a wide spectrum of different APIs.
 
-Unlike the `System.*` and `Microsoft.Bcl.*` packages, the three libraries mentioned are designed as static dependencies that provide polyfills as source code rather than through pre-compiled assemblies. By integrating into the consumer's build process, they can ship all polyfills as a single package while relying on conditional compilation and tree shaking to automatically exclude anything that isn't needed.
+As community-driven projects, these libraries are not constrained by corporate support policies, which lets them be more thorough and aggressive in their coverage. Here you will find polyfills for nullable reference types, records, init-only properties, `Index`, `Range`, `ValueTuple<...>`, `ArrayPool<T>`, `Span<T>`, `Memory<T>`, `IEnumerable<T>.Chunk(...)`, `Stream.ReadExactly(...)`, `Environment.ProcessPath`, `Random.Shared`, and pretty much everything in between.
 
-Of course, as community-driven projects, these solutions are also not burdened by the same corporate constraints as the official offerings, which means they can afford to be broader and more aggressive in their coverage. When you install one of these packages, you instantly gain access to its entire catalog of polyfills, spanning a wide variety of framework APIs and language features.
+Unlike the `System.*` and `Microsoft.Bcl.*` packages, they are also distributed as static dependencies, providing polyfills through source code rather than pre-compiled assemblies. This approach effectively mimics hand-rolled implementations, allowing them to ship all polyfills as a single package, use `internal` visibility by default, reduce maintenance overhead, and leverage conditional compilation to filter out unnecessary code automatically.
 
-The choice of which community polyfill library to use ultimately comes down to their API coverage and your personal preference. For our example, let's go with PolyShim, adding it to the project like so:
-
-> Disclaimer: I am the author of PolyShim.
+While the choice between these community libraries largely comes down to API coverage and personal preference, their usage is essentially identical. For our example, let’s assume we've chosen to go with PolyShim, adding it as a dependency like so:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -617,8 +615,6 @@ The choice of which community polyfill library to use ultimately comes down to t
 
 </Project>
 ```
-
-Unlike the `System.*` and `Microsoft.Bcl.*` packages, PolyShim is designed as a compile-time dependency, with zero run-time footprint. When included in a project, it injects the necessary polyfill code directly into the build process, eliminating the need for any external assemblies. This also allows it to leverage conditional compilation to disable unnecessary polyfills automatically, instead of putting that responsibility on the consumer.
 
 Just with that single package reference, we immediately gain access to a wide range of polyfills that cover various framework APIs and language features, such as ... including NRTs which were enabled earlier.
 
