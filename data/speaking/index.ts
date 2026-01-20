@@ -194,6 +194,15 @@ const engagements: SpeakingEngagement[] = [
     presentationUrl:
       'https://slideshare.net/AlexeyGolub/realitydriven-testing-using-testcontainers',
     recordingUrl: 'https://youtu.be/ORapxIWoEco?t=3800'
+  },
+  {
+    title: 'Open Source in war-torn Ukraine and around the world',
+    kind: 'podcast',
+    event: 'Open Path',
+    date: '2026-01-20',
+    language: 'english',
+    eventUrl: 'https://openpath.quest',
+    recordingUrl: 'https://youtube.com/watch?v=tOn-L3tGKw0'
   }
 ];
 
