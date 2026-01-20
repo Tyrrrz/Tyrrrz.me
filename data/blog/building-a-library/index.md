@@ -504,6 +504,7 @@ With that said, let's imagine that our library needs to leverage `Span<T>`, `Mem
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
+  <!-- Make sure to update the package versions if copy-pasting! -->
   <ItemGroup>
     <!--
         System.Memory and related types are natively available starting with netstandard2.1 and netcoreapp2.1,
@@ -552,20 +553,24 @@ async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadChunksAsync(Stream stream)
 {
     using var buffer = MemoryPool<byte>.Shared.Rent(8192);
 
+    // System.Memory provides Span<T> and Memory<T>, but doesn't provide
+    // Stream overloads that accept them, so our usage needs to work around that.
+    var bufferArray = buffer.Memory.ToArray();
+
     while (true)
     {
-        var bytesRead = await stream.ReadAsync(buffer.Memory);
+        var bytesRead = await stream.ReadAsync(bufferArray, 0, bufferArray.Length);
         if (bytesRead <= 0)
             yield break;
 
-        yield return buffer.Memory.Slice(0, bytesRead);
+        yield return bufferArray.AsMemory(0, bytesRead);
     }
 }
 ```
 
-Generally speaking, the official compatibility packages should be your first choice when it comes to backporting common platform APIs. They are well-tested, actively maintained, and support a wide range of .NET versions, making them a reliable default for most scenarios.
+Generally speaking, the official compatibility packages should be your first choice when it comes to backporting common platform APIs. They are well-tested, optimized for performance, and support a wide range of .NET versions, making them a reliable default for most scenarios.
 
-Being official, however, also means that their scope is rather conservative — they tend to focus on user-facing areas of the framework, while leaving out many specialized and compiler-facing types, including those that power various language features. Additionally, they don't provide any member polyfills, as that requires relying on somewhat unconventional techniques, like the global namespace extension members we've seen earlier.
+Being official, however, also means that their scope is rather conservative — they tend to focus on user-facing areas of the framework, while leaving out many specialized and compiler-facing types, including those that power various language features. Additionally, they don't provide any member polyfills, as that requires relying on somewhat unconventional techniques, like the global extension trick we've seen earlier.
 
 This naturally brings us to the second solution: community polyfill libraries, such as [PolySharp](https://github.com/Sergio0694/PolySharp), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolyShim](https://github.com/Tyrrrz/PolyShim). All these projects were born out of individual efforts to plug the gaps left by Microsoft's compatibility packages, gradually evolving into comprehensive collections of shims and backports for a wide spectrum of different APIs.
 
@@ -573,7 +578,7 @@ As community-driven projects, these libraries are not constrained by corporate s
 
 Unlike the `System.*` and `Microsoft.Bcl.*` packages, they are also distributed as static dependencies, providing polyfills through source code rather than pre-compiled assemblies. This approach effectively mimics hand-rolled implementations, allowing them to ship all polyfills as a single package, use `internal` visibility by default, reduce maintenance overhead, and leverage conditional compilation to filter out unnecessary code automatically.
 
-While the choice between these community libraries largely comes down to API coverage and personal preference, their usage is essentially identical. For our example, let’s assume we've chosen to go with PolyShim, adding it as a dependency like so:
+While the choice between these community libraries largely comes down to API coverage and personal preference, their usage is essentially identical. For our example, let's assume we've chosen to go with PolyShim, adding it as a dependency like so:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -586,6 +591,7 @@ While the choice between these community libraries largely comes down to API cov
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
+  <!-- Make sure to update the package versions if copy-pasting! -->
   <ItemGroup>
     <PackageReference
       Include="System.Memory"
@@ -602,13 +608,13 @@ While the choice between these community libraries largely comes down to API cov
     />
 
     <!--
-        PrivateAssets="all" ensures that this package is not included as a run-time dependency of our NuGet package.
-        Since PolyShim's polyfills are provided as source files, there is nothing to include anyway.
-        Condition attribute is not necessary here as PolyShim handles conditional compilation internally.
+        PrivateAssets="all" ensures that PolyShim is not included as a dependency of our own NuGet package.
+        Since PolyShim's polyfills are provided as source files, they get compiled into our assembly directly.
+        Condition attribute is not necessary here as PolyShim handles framework filtering internally.
     -->
     <PackageReference
       Include="PolyShim"
-      Version="2.4.0"
+      Version="2.5.0"
       PrivateAssets="all"
     />
   </ItemGroup>
@@ -616,15 +622,67 @@ While the choice between these community libraries largely comes down to API cov
 </Project>
 ```
 
-Just with that single package reference, we immediately gain access to a wide range of polyfills that cover various framework APIs and language features, such as ... including NRTs which were enabled earlier.
+Note that the `PolyShim`'s package reference differs from the previous ones in two important ways. First, no `Condition="..."` attribute is required here, as PolyShim relies on its own preprocessor symbols to include only the polyfills relevant to the current target framework. Second, the dependency is marked with `PrivateAssets="all"`, ensuring that it's only used during compilation and doesn't get transitively imposed on the consumers of our library.
 
-As a developer, you'll find yourself relying on both of these polyfill solutions depending on the situation: official compatibility packages for common framework types, and community polyfill libraries for more specialized needs. In some scenarios, you may even need to implement custom polyfills manually if neither of these options cover your requirements.
+Both of these differences stem from the fact that PolyShim is a source-only package and integrates directly into the project's build pipeline, rather than behaving like a traditional run-time dependency. This allows it to make framework-specific decisions at compile time and remain an internal implementation detail, without influencing dependency graphs or the public surface of our own package.
 
-Compatibility packages' official and public nature makes them good as polyfills for public contract types.
+With everything in place, we immediately gain access to all of PolyShim's polyfills, allowing us to use modern APIs and language features freely:
 
-Reach for the compatibility packages especially when they make up your library's external surface area.
+```csharp
+using System;
 
-That said, polyfills have their own limitations and are not a perfect solution by any means. Even with the flexibility of extension members, some things are simply impossible to backport effectively, while others may still introduce complexity and maintenance overhead that outweigh their benefits. As always, compatibility is a compromise, so if the balance becomes unfavorable, it may be better to simply drop support for certain frameworks instead.
+// On newer frameworks, this uses the framework-provided types and members.
+// On older frameworks, this uses the polyfilled types and members from PolyShim.
+// Same code works everywhere without any changes.
+public class User
+{
+    // Polyfilled feature: init-only properties (introduced in .NET 5.0)
+    public string Name { get; init; }
+    // Polyfilled feature: nullable reference types (introduced in .NET Core 3.0)
+    public string? Email { get; init; }
+
+    public User(string name, string? email = null)
+    {
+        // Polyfilled feature: the ThrowIfNull(...) method (introduced in .NET 6.0)
+        ArgumentNullException.ThrowIfNull(name);
+        Name = name;
+        Email = email;
+    }
+}
+```
+
+Beyond just being a collection of polyfills, PolyShim can also adapt its behavior based on the presence of the official compatibility packages. For example, seeing as our project still has a reference to `System.Memory`, PolyShim will disable its own polyfills that define `Span<T>` and `Memory<T>`, but will still provide related member polyfills that complement the package. We can take advantage of that to further simplify our earlier example:
+
+```csharp
+using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.IO;
+
+// On newer frameworks, this uses the framework-provided types and members.
+// On older frameworks, this uses the polyfilled types from System.Memory and
+// polyfilled members from PolyShim.
+// Same code works everywhere without any changes.
+async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadChunksAsync(Stream stream)
+{
+    using var buffer = MemoryPool<byte>.Shared.Rent(8192);
+
+    while (true)
+    {
+        // System.Memory provides the Span<T> and Memory<T> types,
+        // while PolyShim adds the missing method overloads, such as the one below.
+        var bytesRead = await stream.ReadAsync(buffer.Memory);
+        if (bytesRead <= 0)
+            yield break;
+
+        yield return buffer.Memory.Slice(0, bytesRead);
+    }
+}
+```
+
+As a library developer, you'll often end up using both the official and community polyfill libraries side by side. The `System.*` and `Microsoft.Bcl.*` packages are a natural fit for types that are part of your library's public contract, as they are widely recognized, well-supported, and reasonable to impose on consumers. Community polyfills, on the other hand, are best suited for APIs that are only used internally or for any other bits that are not covered by the official packages.
+
+That said, polyfills are not an ultimate solution to the compatibility problem — even with the flexibility of extension members, some feature of the language or the runtime cannot be retrofitted in a meaningful and transparent way. As a result, supporting older frameworks is always going to be a trade-off, where the benefits of broader compatibility must be carefully weighed against added complexity, maintenance cost, and long-term impact on the design of your library.
 
 ## Code formatting
 
