@@ -39,25 +39,23 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
   let totalStars = 0;
   let totalRepos = 0;
 
-  type RepoQueryResult = {
-    user: {
-      repositories: {
-        totalCount: number;
-        pageInfo: {
-          hasNextPage: boolean;
-          endCursor: string | null;
-        };
-        nodes: Array<{
-          stargazers: {
-            totalCount: number;
-          };
-        }>;
-      };
-    };
-  };
-
   while (hasNextPage) {
-    const result: RepoQueryResult = await client(
+    const result: {
+      user: {
+        repositories: {
+          totalCount: number;
+          pageInfo: {
+            hasNextPage: boolean;
+            endCursor: string | null;
+          };
+          nodes: Array<{
+            stargazers: {
+              totalCount: number;
+            };
+          }>;
+        };
+      };
+    } = await client(
       `
       query($cursor: String) {
         user(login: "Tyrrrz") {

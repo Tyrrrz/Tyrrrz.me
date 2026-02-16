@@ -99,7 +99,7 @@ const generateImage = (stats: {
     </g>
   </g>
 </svg>
-  `.trim();
+  `;
 };
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
