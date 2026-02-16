@@ -33,18 +33,47 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
 
   const client = createGraphQLClient();
 
-  // Fetch user statistics using GitHub GraphQL API
-  const result: any = await client(`
-    query {
-      user(login: "Tyrrrz") {
-        repositories(first: 100, ownerAffiliations: OWNER, orderBy: {field: STARGAZERS, direction: DESC}) {
-          totalCount
-          nodes {
-            stargazers {
-              totalCount
+  // Fetch all repositories with pagination to get accurate star count
+  let hasNextPage = true;
+  let cursor: string | null = null;
+  let totalStars = 0;
+  let totalRepos = 0;
+
+  while (hasNextPage) {
+    const result: any = await client(
+      `
+      query($cursor: String) {
+        user(login: "Tyrrrz") {
+          repositories(first: 100, after: $cursor, ownerAffiliations: OWNER) {
+            totalCount
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+            nodes {
+              stargazers {
+                totalCount
+              }
             }
           }
         }
+      }
+    `,
+      { cursor }
+    );
+
+    const repos = result.user.repositories.nodes;
+    totalStars += repos.reduce((acc: number, repo: any) => acc + repo.stargazers.totalCount, 0);
+    totalRepos = result.user.repositories.totalCount;
+
+    hasNextPage = result.user.repositories.pageInfo.hasNextPage;
+    cursor = result.user.repositories.pageInfo.endCursor;
+  }
+
+  // Fetch contribution statistics for current year
+  const statsResult: any = await client(`
+    query {
+      user(login: "Tyrrrz") {
         contributionsCollection {
           totalCommitContributions
           totalIssueContributions
@@ -52,26 +81,15 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
           totalPullRequestReviewContributions
           restrictedContributionsCount
         }
-        pullRequests {
-          totalCount
-        }
-        issues {
-          totalCount
-        }
       }
     }
   `);
 
-  const repos = result.user.repositories.nodes;
-  const totalStars = repos.reduce(
-    (acc: number, repo: any) => acc + repo.stargazers.totalCount,
-    0
-  );
-  const contributions = result.user.contributionsCollection;
+  const contributions = statsResult.user.contributionsCollection;
 
   return {
     totalStars,
-    totalRepos: result.user.repositories.totalCount,
+    totalRepos,
     totalCommits: contributions.totalCommitContributions,
     totalPRs: contributions.totalPullRequestContributions,
     totalIssues: contributions.totalIssueContributions,

@@ -58,40 +58,40 @@ const generateSVG = (stats: {
       </text>
     </g>
     
-    <!-- Total Commits -->
+    <!-- Total Commits (This Year) -->
     <g transform="translate(0, ${statSpacing})">
       <text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">
-        💻 Commits
+        💻 Commits (This Year)
       </text>
       <text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">
         ${stats.totalCommits.toLocaleString()}
       </text>
     </g>
     
-    <!-- Total PRs -->
+    <!-- Total PRs (This Year) -->
     <g transform="translate(${(width - 2 * padding) / 2}, ${statSpacing})">
       <text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">
-        🔀 Pull Requests
+        🔀 PRs (This Year)
       </text>
       <text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">
         ${stats.totalPRs.toLocaleString()}
       </text>
     </g>
     
-    <!-- Total Issues -->
+    <!-- Total Issues (This Year) -->
     <g transform="translate(0, ${statSpacing * 2})">
       <text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">
-        📋 Issues
+        📋 Issues (This Year)
       </text>
       <text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">
         ${stats.totalIssues.toLocaleString()}
       </text>
     </g>
     
-    <!-- Total Contributions -->
+    <!-- Total Contributions (This Year) -->
     <g transform="translate(${(width - 2 * padding) / 2}, ${statSpacing * 2})">
       <text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">
-        🎯 Contributions
+        🎯 Contributions (Year)
       </text>
       <text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">
         ${stats.totalContributions.toLocaleString()}
