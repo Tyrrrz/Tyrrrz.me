@@ -4,10 +4,10 @@ import { getGitHubToken, isProduction } from '~/utils/env';
 export type GitHubStats = {
   totalStars: number;
   totalRepos: number;
-  totalCommits: number;
-  totalPRs: number;
-  totalIssues: number;
-  totalContributions: number;
+  yearlyCommits: number;
+  yearlyPRs: number;
+  yearlyIssues: number;
+  yearlyContributions: number;
 };
 
 const createGraphQLClient = () => {
@@ -22,12 +22,12 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
   // Use fake data in development
   if (!isProduction()) {
     return {
-      totalStars: 15000,
-      totalRepos: 85,
-      totalCommits: 12500,
-      totalPRs: 850,
-      totalIssues: 420,
-      totalContributions: 14000
+      totalStars: 16219,
+      totalRepos: 91,
+      yearlyCommits: 1054,
+      yearlyPRs: 35,
+      yearlyIssues: 12,
+      yearlyContributions: 1178
     };
   }
 
@@ -40,7 +40,22 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
   let totalRepos = 0;
 
   while (hasNextPage) {
-    const result: any = await client(
+    const result = await client<{
+      user: {
+        repositories: {
+          totalCount: number;
+          pageInfo: {
+            hasNextPage: boolean;
+            endCursor: string | null;
+          };
+          nodes: Array<{
+            stargazers: {
+              totalCount: number;
+            };
+          }>;
+        };
+      };
+    }>(
       `
       query($cursor: String) {
         user(login: "Tyrrrz") {
@@ -63,7 +78,7 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
     );
 
     const repos = result.user.repositories.nodes;
-    totalStars += repos.reduce((acc: number, repo: any) => acc + repo.stargazers.totalCount, 0);
+    totalStars += repos.reduce((acc, repo) => acc + repo.stargazers.totalCount, 0);
     totalRepos = result.user.repositories.totalCount;
 
     hasNextPage = result.user.repositories.pageInfo.hasNextPage;
@@ -71,7 +86,17 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
   }
 
   // Fetch contribution statistics for current year
-  const statsResult: any = await client(`
+  const statsResult = await client<{
+    user: {
+      contributionsCollection: {
+        totalCommitContributions: number;
+        totalIssueContributions: number;
+        totalPullRequestContributions: number;
+        totalPullRequestReviewContributions: number;
+        restrictedContributionsCount: number;
+      };
+    };
+  }>(`
     query {
       user(login: "Tyrrrz") {
         contributionsCollection {
@@ -90,10 +115,10 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
   return {
     totalStars,
     totalRepos,
-    totalCommits: contributions.totalCommitContributions,
-    totalPRs: contributions.totalPullRequestContributions,
-    totalIssues: contributions.totalIssueContributions,
-    totalContributions:
+    yearlyCommits: contributions.totalCommitContributions,
+    yearlyPRs: contributions.totalPullRequestContributions,
+    yearlyIssues: contributions.totalIssueContributions,
+    yearlyContributions:
       contributions.totalCommitContributions +
       contributions.totalIssueContributions +
       contributions.totalPullRequestContributions +
