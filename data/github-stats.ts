@@ -39,23 +39,25 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
   let totalStars = 0;
   let totalRepos = 0;
 
-  while (hasNextPage) {
-    const result = await client<{
-      user: {
-        repositories: {
-          totalCount: number;
-          pageInfo: {
-            hasNextPage: boolean;
-            endCursor: string | null;
-          };
-          nodes: Array<{
-            stargazers: {
-              totalCount: number;
-            };
-          }>;
+  type RepoQueryResult = {
+    user: {
+      repositories: {
+        totalCount: number;
+        pageInfo: {
+          hasNextPage: boolean;
+          endCursor: string | null;
         };
+        nodes: Array<{
+          stargazers: {
+            totalCount: number;
+          };
+        }>;
       };
-    }>(
+    };
+  };
+
+  while (hasNextPage) {
+    const result: RepoQueryResult = await client(
       `
       query($cursor: String) {
         user(login: "Tyrrrz") {
@@ -78,7 +80,7 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
     );
 
     const repos = result.user.repositories.nodes;
-    totalStars += repos.reduce((acc, repo) => acc + repo.stargazers.totalCount, 0);
+    totalStars += repos.reduce((acc: number, repo) => acc + repo.stargazers.totalCount, 0);
     totalRepos = result.user.repositories.totalCount;
 
     hasNextPage = result.user.repositories.pageInfo.hasNextPage;
@@ -86,7 +88,7 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
   }
 
   // Fetch contribution statistics for current year
-  const statsResult = await client<{
+  type ContributionQueryResult = {
     user: {
       contributionsCollection: {
         totalCommitContributions: number;
@@ -96,7 +98,9 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
         restrictedContributionsCount: number;
       };
     };
-  }>(`
+  };
+
+  const statsResult: ContributionQueryResult = await client(`
     query {
       user(login: "Tyrrrz") {
         contributionsCollection {
