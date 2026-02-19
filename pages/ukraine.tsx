@@ -156,12 +156,6 @@ const UkrainePage: NextPage = () => {
           </ListItem>
 
           <ListItem>
-            <Link href="https://boycottrussia.info/list-of-shame">
-              Boycott international companies that continue operating in Russia
-            </Link>
-          </ListItem>
-
-          <ListItem>
             Ask your employer to implement sanctions against Russia, or help in other ways
           </ListItem>
 
@@ -182,12 +176,6 @@ const UkrainePage: NextPage = () => {
           <ListItem>
             <Link href="https://volunteeringukraine.com">
               Explore volunteering opportunities in Ukraine
-            </Link>
-          </ListItem>
-
-          <ListItem>
-            <Link href="https://fightforua.org">
-              Enlist in the Ukrainian military as a foreign fighter
             </Link>
           </ListItem>
         </List>
