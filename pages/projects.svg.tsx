@@ -1,13 +1,19 @@
 import { GetStaticProps, NextPage } from 'next';
-import { GitHubStats, getGitHubStats } from '~/data/github-stats';
+import { GitHubStats, getGitHubStats } from '~/data/projects/github';
 
 const WIDTH = 440;
 const HEIGHT = 165;
 const PADDING = 20;
 const STAT_SPACING = 50;
-const COL2_X = (WIDTH - 2 * PADDING) / 2;
+// X offset of the second column — half the total content width (WIDTH minus both margins)
+const COLUMN_WIDTH = (WIDTH - 2 * PADDING) / 2;
 
-const GitHubStatsSvg: NextPage<GitHubStats> & { skipLayout: boolean } = ({ totalRepos, totalStars, totalDownloads, totalIssuesAndPRs }) => {
+const ProjectsSvg: NextPage<GitHubStats> & { skipLayout: boolean } = ({
+  totalRepos,
+  totalStars,
+  totalDownloads,
+  totalIssuesAndPRs
+}) => {
   return (
     <svg width={WIDTH} height={HEIGHT} xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -53,7 +59,7 @@ const GitHubStatsSvg: NextPage<GitHubStats> & { skipLayout: boolean } = ({ total
         </g>
 
         {/* Total Stars */}
-        <g transform={`translate(${COL2_X}, 0)`}>
+        <g transform={`translate(${COLUMN_WIDTH}, 0)`}>
           <text x="0" y="0" fontFamily="'Segoe UI', Arial, sans-serif" fontSize="14" fill="#9ca3af">
             ⭐ Total Stars
           </text>
@@ -87,7 +93,7 @@ const GitHubStatsSvg: NextPage<GitHubStats> & { skipLayout: boolean } = ({ total
         </g>
 
         {/* Issues & PRs */}
-        <g transform={`translate(${COL2_X}, ${STAT_SPACING})`}>
+        <g transform={`translate(${COLUMN_WIDTH}, ${STAT_SPACING})`}>
           <text x="0" y="0" fontFamily="'Segoe UI', Arial, sans-serif" fontSize="14" fill="#9ca3af">
             🔖 Issues &amp; PRs
           </text>
@@ -108,11 +114,11 @@ const GitHubStatsSvg: NextPage<GitHubStats> & { skipLayout: boolean } = ({ total
 };
 
 // Skip the site layout — serve raw SVG content only
-GitHubStatsSvg.skipLayout = true;
+ProjectsSvg.skipLayout = true;
 
 export const getStaticProps: GetStaticProps<GitHubStats> = async () => {
   const stats = await getGitHubStats();
   return { props: stats };
 };
 
-export default GitHubStatsSvg;
+export default ProjectsSvg;

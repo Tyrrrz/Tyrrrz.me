@@ -1,20 +1,21 @@
 import Document, { DocumentContext, DocumentInitialProps, Head, Html, Main, NextScript } from 'next/document';
 
 type MyDocumentProps = DocumentInitialProps & {
-  isSvgPage: boolean;
+  isRawResponse: boolean;
 };
 
 export default class MyDocument extends Document<MyDocumentProps> {
   static async getInitialProps(ctx: DocumentContext): Promise<MyDocumentProps> {
     const initialProps = await super.getInitialProps(ctx);
-    return { ...initialProps, isSvgPage: ctx.pathname.endsWith('.svg') };
+    return { ...initialProps, isRawResponse: ctx.pathname.endsWith('.svg') };
   }
 
   render() {
-    // For the SVG page, render only the page content with no HTML wrapper
-    // so the response is a raw <svg> element (combined with the Content-Type
-    // header set in next.config.js, this serves as a proper SVG image).
-    if (this.props.isSvgPage) {
+    // For raw-response pages (e.g. SVG images), render only the page content
+    // with no HTML wrapper so the response is the bare element returned by
+    // the page component (combined with the Content-Type header set in
+    // next.config.js, this serves as a proper image/SVG).
+    if (this.props.isRawResponse) {
       return <Main />;
     }
 
