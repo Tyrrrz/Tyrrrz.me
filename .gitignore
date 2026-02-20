@@ -23,5 +23,8 @@ lerna-debug.log*
 /public/sw.js*
 /public/worker-*.js*
 
+# generated at build time
+/public/github-stats.svg
+
 # blog assets
 /public/blog/

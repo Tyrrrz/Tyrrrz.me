@@ -7,7 +7,9 @@
     "build": "next build",
     "serve": "next start",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "prestart": "node scripts/generate-github-stats.mjs",
+    "prebuild": "node scripts/generate-github-stats.mjs"
   },
   "dependencies": {
     "@giscus/react": "^3.1.0",
