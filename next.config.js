@@ -39,9 +39,10 @@ const config = {
   ],
 
   headers: async () => [
-    // Serve the statically generated SVG page with the correct MIME type
+    // Serve statically generated SVG pages with the correct MIME type.
+    // The source pattern supports wildcards (path-to-regexp syntax).
     {
-      source: '/github-stats.svg',
+      source: '/:path*.svg',
       headers: [{ key: 'Content-Type', value: 'image/svg+xml' }]
     }
   ]

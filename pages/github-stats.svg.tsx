@@ -1,5 +1,4 @@
 import { GetStaticProps, NextPage } from 'next';
-import { ReactElement } from 'react';
 import { GitHubStats, getGitHubStats } from '~/data/github-stats';
 
 const WIDTH = 440;
@@ -8,9 +7,7 @@ const PADDING = 20;
 const STAT_SPACING = 50;
 const COL2_X = (WIDTH - 2 * PADDING) / 2;
 
-const GitHubStatsSvg: NextPage<GitHubStats> & {
-  getLayout: (page: ReactElement) => ReactElement;
-} = ({ totalRepos, totalStars, totalDownloads, totalIssuesAndPRs }) => {
+const GitHubStatsSvg: NextPage<GitHubStats> & { skipLayout: boolean } = ({ totalRepos, totalStars, totalDownloads, totalIssuesAndPRs }) => {
   return (
     <svg width={WIDTH} height={HEIGHT} xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -111,7 +108,7 @@ const GitHubStatsSvg: NextPage<GitHubStats> & {
 };
 
 // Skip the site layout — serve raw SVG content only
-GitHubStatsSvg.getLayout = (page) => page;
+GitHubStatsSvg.skipLayout = true;
 
 export const getStaticProps: GetStaticProps<GitHubStats> = async () => {
   const stats = await getGitHubStats();

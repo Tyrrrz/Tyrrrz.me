@@ -10,7 +10,6 @@ export type GitHubStats = {
 };
 
 const OWNER = 'Tyrrrz';
-const RELEASE_BATCH_SIZE = 10;
 
 const createGraphQLClient = () => {
   return graphql.defaults({
@@ -104,26 +103,20 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
     cursor = result.user.repositories.pageInfo.endCursor;
   }
 
-  // Fetch release download counts via REST API, batched to avoid rate limits
+  // Fetch release download counts via REST API (sequential — no concurrency pressure at build time)
   let totalDownloads = 0;
 
-  for (let i = 0; i < repoNames.length; i += RELEASE_BATCH_SIZE) {
-    const batch = repoNames.slice(i, i + RELEASE_BATCH_SIZE);
-    const batchDownloads = await Promise.all(
-      batch.map(async (repo) => {
-        const releases = await rest.paginate(rest.repos.listReleases, {
-          owner: OWNER,
-          repo,
-          per_page: 100
-        });
-        return releases.reduce(
-          (acc, release) =>
-            acc + release.assets.reduce((a, asset) => a + asset.download_count, 0),
-          0
-        );
-      })
+  for (const repo of repoNames) {
+    const releases = await rest.paginate(rest.repos.listReleases, {
+      owner: OWNER,
+      repo,
+      per_page: 100
+    });
+    totalDownloads += releases.reduce(
+      (acc, release) =>
+        acc + release.assets.reduce((a, asset) => a + asset.download_count, 0),
+      0
     );
-    totalDownloads += batchDownloads.reduce((a, b) => a + b, 0);
   }
 
   return { totalStars, totalRepos, totalDownloads, totalIssuesAndPRs };

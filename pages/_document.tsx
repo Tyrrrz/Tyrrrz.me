@@ -7,7 +7,7 @@ type MyDocumentProps = DocumentInitialProps & {
 export default class MyDocument extends Document<MyDocumentProps> {
   static async getInitialProps(ctx: DocumentContext): Promise<MyDocumentProps> {
     const initialProps = await super.getInitialProps(ctx);
-    return { ...initialProps, isSvgPage: ctx.pathname === '/github-stats.svg' };
+    return { ...initialProps, isSvgPage: ctx.pathname.endsWith('.svg') };
   }
 
   render() {
