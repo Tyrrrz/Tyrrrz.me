@@ -4,10 +4,8 @@ import { getGitHubToken, isProduction } from '~/utils/env';
 export type GitHubStats = {
   totalStars: number;
   totalRepos: number;
-  yearlyCommits: number;
-  yearlyPRs: number;
-  yearlyIssues: number;
-  yearlyContributions: number;
+  totalDownloads: number;
+  totalIssuesAndPRs: number;
 };
 
 const createGraphQLClient = () => {
@@ -24,10 +22,8 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
     return {
       totalStars: 16219,
       totalRepos: 91,
-      yearlyCommits: 1054,
-      yearlyPRs: 35,
-      yearlyIssues: 12,
-      yearlyContributions: 1178
+      totalDownloads: 28500000,
+      totalIssuesAndPRs: 4200
     };
   }
 
@@ -38,6 +34,8 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
   let cursor: string | null = null;
   let totalStars = 0;
   let totalRepos = 0;
+  let totalDownloads = 0;
+  let totalIssuesAndPRs = 0;
 
   while (hasNextPage) {
     const result: {
@@ -51,6 +49,21 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
           nodes: Array<{
             stargazers: {
               totalCount: number;
+            };
+            issues: {
+              totalCount: number;
+            };
+            pullRequests: {
+              totalCount: number;
+            };
+            releases: {
+              nodes: Array<{
+                releaseAssets: {
+                  nodes: Array<{
+                    downloadCount: number;
+                  }>;
+                };
+              }>;
             };
           }>;
         };
@@ -69,6 +82,21 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
               stargazers {
                 totalCount
               }
+              issues(states: [OPEN, CLOSED]) {
+                totalCount
+              }
+              pullRequests(states: [OPEN, CLOSED]) {
+                totalCount
+              }
+              releases(first: 100) {
+                nodes {
+                  releaseAssets(first: 100) {
+                    nodes {
+                      downloadCount
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -80,51 +108,35 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
     const repos = result.user.repositories.nodes;
     totalStars += repos.reduce((acc: number, repo) => acc + repo.stargazers.totalCount, 0);
     totalRepos = result.user.repositories.totalCount;
+    totalIssuesAndPRs += repos.reduce(
+      (acc: number, repo) => acc + repo.issues.totalCount + repo.pullRequests.totalCount,
+      0
+    );
+    totalDownloads += repos.reduce(
+      (acc: number, repo) =>
+        acc +
+        // Note: limited to first 100 releases and 100 assets per release;
+        // repos with more releases/assets may have incomplete download counts.
+        repo.releases.nodes.reduce(
+          (releaseAcc, release) =>
+            releaseAcc +
+            release.releaseAssets.nodes.reduce(
+              (assetAcc, asset) => assetAcc + asset.downloadCount,
+              0
+            ),
+          0
+        ),
+      0
+    );
 
     hasNextPage = result.user.repositories.pageInfo.hasNextPage;
     cursor = result.user.repositories.pageInfo.endCursor;
   }
 
-  // Fetch contribution statistics for current year
-  type ContributionQueryResult = {
-    user: {
-      contributionsCollection: {
-        totalCommitContributions: number;
-        totalIssueContributions: number;
-        totalPullRequestContributions: number;
-        totalPullRequestReviewContributions: number;
-        restrictedContributionsCount: number;
-      };
-    };
-  };
-
-  const statsResult: ContributionQueryResult = await client(`
-    query {
-      user(login: "Tyrrrz") {
-        contributionsCollection {
-          totalCommitContributions
-          totalIssueContributions
-          totalPullRequestContributions
-          totalPullRequestReviewContributions
-          restrictedContributionsCount
-        }
-      }
-    }
-  `);
-
-  const contributions = statsResult.user.contributionsCollection;
-
   return {
     totalStars,
     totalRepos,
-    yearlyCommits: contributions.totalCommitContributions,
-    yearlyPRs: contributions.totalPullRequestContributions,
-    yearlyIssues: contributions.totalIssueContributions,
-    yearlyContributions:
-      contributions.totalCommitContributions +
-      contributions.totalIssueContributions +
-      contributions.totalPullRequestContributions +
-      contributions.totalPullRequestReviewContributions +
-      contributions.restrictedContributionsCount
+    totalDownloads,
+    totalIssuesAndPRs
   };
 };

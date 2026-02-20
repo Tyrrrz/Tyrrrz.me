@@ -4,15 +4,13 @@ import { getGitHubStats } from '~/data/github-stats';
 const generateImage = (stats: {
   totalStars: number;
   totalRepos: number;
-  yearlyCommits: number;
-  yearlyPRs: number;
-  yearlyIssues: number;
-  yearlyContributions: number;
+  totalDownloads: number;
+  totalIssuesAndPRs: number;
 }): string => {
-  const width = 500;
-  const height = 250;
+  const width = 440;
+  const height = 165;
   const padding = 20;
-  const statSpacing = 40;
+  const statSpacing = 50;
 
   return `
 <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
@@ -38,18 +36,8 @@ const generateImage = (stats: {
   
   <!-- Stats Grid -->
   <g transform="translate(${padding}, ${padding + 50})">
-    <!-- Total Stars -->
+    <!-- Repositories -->
     <g>
-      <text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">
-        ⭐ Total Stars
-      </text>
-      <text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">
-        ${stats.totalStars.toLocaleString()}
-      </text>
-    </g>
-    
-    <!-- Total Repositories -->
-    <g transform="translate(${(width - 2 * padding) / 2}, 0)">
       <text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">
         📦 Repositories
       </text>
@@ -58,43 +46,33 @@ const generateImage = (stats: {
       </text>
     </g>
     
-    <!-- Commits (This Year) -->
+    <!-- Total Stars -->
+    <g transform="translate(${(width - 2 * padding) / 2}, 0)">
+      <text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">
+        ⭐ Total Stars
+      </text>
+      <text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">
+        ${stats.totalStars.toLocaleString()}
+      </text>
+    </g>
+    
+    <!-- Total Downloads -->
     <g transform="translate(0, ${statSpacing})">
       <text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">
-        💻 Commits (This Year)
+        📥 Total Downloads
       </text>
       <text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">
-        ${stats.yearlyCommits.toLocaleString()}
+        ${stats.totalDownloads.toLocaleString()}
       </text>
     </g>
     
-    <!-- PRs (This Year) -->
+    <!-- Issues & PRs -->
     <g transform="translate(${(width - 2 * padding) / 2}, ${statSpacing})">
       <text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">
-        🔀 PRs (This Year)
+        🔖 Issues &amp; PRs
       </text>
       <text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">
-        ${stats.yearlyPRs.toLocaleString()}
-      </text>
-    </g>
-    
-    <!-- Issues (This Year) -->
-    <g transform="translate(0, ${statSpacing * 2})">
-      <text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">
-        📋 Issues (This Year)
-      </text>
-      <text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">
-        ${stats.yearlyIssues.toLocaleString()}
-      </text>
-    </g>
-    
-    <!-- Contributions (This Year) -->
-    <g transform="translate(${(width - 2 * padding) / 2}, ${statSpacing * 2})">
-      <text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">
-        🎯 Contributions (This Year)
-      </text>
-      <text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">
-        ${stats.yearlyContributions.toLocaleString()}
+        ${stats.totalIssuesAndPRs.toLocaleString()}
       </text>
     </g>
   </g>
