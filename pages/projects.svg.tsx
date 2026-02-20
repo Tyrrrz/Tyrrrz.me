@@ -5,7 +5,6 @@ const WIDTH = 440;
 const HEIGHT = 165;
 const PADDING = 20;
 const STAT_SPACING = 50;
-// X offset of the second column — half the total content width (WIDTH minus both margins)
 const COLUMN_WIDTH = (WIDTH - 2 * PADDING) / 2;
 
 const ProjectsSvg: NextPage<GitHubStats> & { skipLayout: boolean } = ({
@@ -113,12 +112,12 @@ const ProjectsSvg: NextPage<GitHubStats> & { skipLayout: boolean } = ({
   );
 };
 
-// Skip the site layout — serve raw SVG content only
-ProjectsSvg.skipLayout = true;
-
 export const getStaticProps: GetStaticProps<GitHubStats> = async () => {
   const stats = await getGitHubStats();
   return { props: stats };
 };
+
+// Skip the site layout — serve raw SVG content only
+ProjectsSvg.skipLayout = true;
 
 export default ProjectsSvg;
