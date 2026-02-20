@@ -108,22 +108,22 @@ export const getGitHubStats = async (): Promise<GitHubStats> => {
     cursor = result.user.repositories.pageInfo.endCursor;
   }
 
-  // Fetch total download counts from GitHub releases via REST API
-  let totalDownloads = 0;
-  for (const repo of repoNames) {
-    for await (const response of rest.paginate.iterator(rest.repos.listReleases, {
-      owner: 'Tyrrrz',
-      repo,
-      per_page: 100
-    })) {
-      for (const release of response.data) {
-        totalDownloads += release.assets.reduce(
-          (acc: number, asset) => acc + asset.download_count,
-          0
-        );
-      }
-    }
-  }
+  // Fetch total download counts from GitHub releases via REST API (all repos in parallel)
+  const releasePages = await Promise.all(
+    repoNames.map((repo) =>
+      rest.paginate(rest.repos.listReleases, {
+        owner: 'Tyrrrz',
+        repo,
+        per_page: 100
+      })
+    )
+  );
+
+  const totalDownloads = releasePages.flat().reduce(
+    (acc, release) =>
+      acc + release.assets.reduce((a, asset) => a + asset.download_count, 0),
+    0
+  );
 
   return {
     totalStars,
