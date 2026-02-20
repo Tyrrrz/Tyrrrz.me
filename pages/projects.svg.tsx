@@ -1,5 +1,5 @@
 import { GetStaticProps, NextPage } from 'next';
-import { GitHubStats, getGitHubStats } from '~/data/projects/github';
+import { ProjectStats, loadProjectStats } from '~/data/projects';
 
 const WIDTH = 440;
 const HEIGHT = 165;
@@ -7,7 +7,7 @@ const PADDING = 20;
 const STAT_SPACING = 50;
 const COLUMN_WIDTH = (WIDTH - 2 * PADDING) / 2;
 
-const ProjectsSvg: NextPage<GitHubStats> & { skipLayout: boolean } = ({
+const ProjectsSvg: NextPage<ProjectStats> & { skipLayout: boolean } = ({
   totalRepos,
   totalStars,
   totalDownloads,
@@ -112,8 +112,8 @@ const ProjectsSvg: NextPage<GitHubStats> & { skipLayout: boolean } = ({
   );
 };
 
-export const getStaticProps: GetStaticProps<GitHubStats> = async () => {
-  const stats = await getGitHubStats();
+export const getStaticProps: GetStaticProps<ProjectStats> = async () => {
+  const stats = await loadProjectStats();
   return { props: stats };
 };
 
