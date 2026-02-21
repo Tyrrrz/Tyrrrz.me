@@ -112,14 +112,14 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
 };
 
 export const getStaticProps: GetStaticProps<ProjectsPageProps> = async () => {
-  await publishProjectStats();
-
   const projects = await bufferIterable(loadProjects());
 
   // Remove undefined values because they cannot be serialized
   deleteUndefined(projects);
 
   projects.sort((a, b) => b.stars - a.stars);
+
+  await publishProjectStats(projects);
 
   return {
     props: {

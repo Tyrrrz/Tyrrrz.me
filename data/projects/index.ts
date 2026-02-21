@@ -48,43 +48,13 @@ export const loadProjects = async function* () {
   }
 };
 
-export type ProjectStats = {
-  repos: number;
-  stars: number;
-  downloads: number;
-  issuesAndPRs: number;
-};
-
-export const getProjectStats = async (): Promise<ProjectStats> => {
-  // Use fake data in development
-  if (!isProduction()) {
-    return {
-      repos: 91,
-      stars: 16219,
-      downloads: 28500000,
-      issuesAndPRs: 4200
-    };
-  }
-
-  const repos = await getGitHubRepos();
-  const repoCount = repos.length;
-  const stars = repos.reduce((acc, repo) => acc + (repo.stargazers_count ?? 0), 0);
-  const issuesAndPRs = await getGitHubIssuesAndPRsCount();
-
-  // Downloads from GitHub releases + NuGet, matching the projects page
-  let downloads = 0;
-  for (const repo of repos) {
-    downloads += await getGitHubDownloads(repo.name);
-    downloads += await getNuGetDownloads(repo.name);
-  }
-
-  return { repos: repoCount, stars, downloads, issuesAndPRs };
-};
-
-export const publishProjectStats = async () => {
+export const publishProjectStats = async (projects: Project[]) => {
   const filePath = path.resolve(process.cwd(), 'public', 'projects.svg');
 
-  const { repos, stars, downloads, issuesAndPRs } = await getProjectStats();
+  const repos = projects.length;
+  const stars = projects.reduce((acc, p) => acc + p.stars, 0);
+  const downloads = projects.reduce((acc, p) => acc + p.downloads, 0);
+  const issuesAndPRs = isProduction() ? await getGitHubIssuesAndPRsCount() : 4200;
 
   const WIDTH = 440;
   const HEIGHT = 115;
