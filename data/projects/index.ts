@@ -1,5 +1,5 @@
 import fakes from '~/data/projects/fakes';
-import { getGitHubDownloads, getGitHubRepos } from '~/data/projects/github';
+import { getGitHubDownloads, getGitHubIssuesAndPRsCount, getGitHubRepos } from '~/data/projects/github';
 import { getNuGetDownloads } from '~/data/projects/nuget';
 import { isProduction } from '~/utils/env';
 
@@ -44,4 +44,37 @@ export const loadProjects = async function* () {
 
     yield project;
   }
+};
+
+export type ProjectStats = {
+  repos: number;
+  stars: number;
+  downloads: number;
+  issuesAndPRs: number;
+};
+
+export const loadProjectStats = async (): Promise<ProjectStats> => {
+  // Use fake data in development
+  if (!isProduction()) {
+    return {
+      repos: 91,
+      stars: 16219,
+      downloads: 28500000,
+      issuesAndPRs: 4200
+    };
+  }
+
+  const repos = await getGitHubRepos();
+  const repoCount = repos.length;
+  const stars = repos.reduce((acc, repo) => acc + (repo.stargazers_count ?? 0), 0);
+  const issuesAndPRs = await getGitHubIssuesAndPRsCount();
+
+  // Downloads from GitHub releases + NuGet, matching the projects page
+  let downloads = 0;
+  for (const repo of repos) {
+    downloads += await getGitHubDownloads(repo.name);
+    downloads += await getNuGetDownloads(repo.name);
+  }
+
+  return { repos: repoCount, stars, downloads, issuesAndPRs };
 };
