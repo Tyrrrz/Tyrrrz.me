@@ -1,11 +1,9 @@
 import ellipsize from 'ellipsize';
-import { Feed } from 'feed';
 import frontmatter from 'front-matter';
 import fs from 'fs/promises';
 import markdownToTxt from 'markdown-to-txt';
 import path from 'path';
 import readingTime from 'reading-time';
-import { getSiteUrl } from '~/utils/env';
 
 export type BlogPost = {
   id: string;
@@ -102,36 +100,4 @@ export const publishBlogPostAssets = async (id: string) => {
       return ['', '.png', '.jpg'].includes(path.extname(src));
     }
   });
-};
-
-export const publishBlogFeed = async () => {
-  const filePath = path.resolve(process.cwd(), 'public', 'blog', 'rss.xml');
-  const date = new Date();
-
-  const feed = new Feed({
-    id: getSiteUrl(),
-    title: "Oleksii Holub's Blog",
-    description:
-      'Oleksii Holub (@tyrrrz) is a software developer, open-source maintainer, tech blogger and conference speaker',
-    link: getSiteUrl('/blog'),
-    image: getSiteUrl('/logo.png'),
-    copyright: `Copyright (c) 2015-${date.getFullYear()} Oleksii Holub`,
-    updated: date
-  });
-
-  for await (const post of loadBlogPosts()) {
-    feed.addItem({
-      id: getSiteUrl(`/blog/${post.id}`),
-      link: getSiteUrl(`/blog/${post.id}`),
-      date: new Date(post.date),
-      title: post.title,
-      description: post.excerpt
-    });
-  }
-
-  feed.items.sort((a, b) => b.date.getTime() - a.date.getTime());
-
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.rm(filePath, { force: true });
-  await fs.writeFile(filePath, feed.rss2());
 };
