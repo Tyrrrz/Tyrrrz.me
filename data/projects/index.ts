@@ -1,3 +1,5 @@
+import fs from 'fs/promises';
+import path from 'path';
 import fakes from '~/data/projects/fakes';
 import { getGitHubDownloads, getGitHubIssuesAndPRsCount, getGitHubRepos } from '~/data/projects/github';
 import { getNuGetDownloads } from '~/data/projects/nuget';
@@ -77,4 +79,48 @@ export const loadProjectStats = async (): Promise<ProjectStats> => {
   }
 
   return { repos: repoCount, stars, downloads, issuesAndPRs };
+};
+
+export const publishProjectsSvg = async () => {
+  const filePath = path.resolve(process.cwd(), 'public', 'projects.svg');
+
+  const { repos, stars, downloads, issuesAndPRs } = await loadProjectStats();
+
+  const WIDTH = 440;
+  const HEIGHT = 115;
+  const PADDING = 20;
+  const STAT_SPACING = 50;
+  const COLUMN_WIDTH = (WIDTH - 2 * PADDING) / 2;
+
+  const svg =
+    `<svg width="${WIDTH}" height="${HEIGHT}" xmlns="http://www.w3.org/2000/svg">` +
+    `<defs>` +
+    `<linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">` +
+    `<stop offset="0%" style="stop-color:#9333ea;stop-opacity:1" />` +
+    `<stop offset="100%" style="stop-color:#c084fc;stop-opacity:1" />` +
+    `</linearGradient>` +
+    `</defs>` +
+    `<rect width="${WIDTH}" height="${HEIGHT}" fill="#1a1a1a" rx="10" />` +
+    `<g transform="translate(${PADDING}, ${PADDING + 5})">` +
+    `<g>` +
+    `<text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">&#x1F4E6; Repositories</text>` +
+    `<text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">${repos.toLocaleString()}</text>` +
+    `</g>` +
+    `<g transform="translate(${COLUMN_WIDTH}, 0)">` +
+    `<text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">&#x2B50; Stars</text>` +
+    `<text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">${stars.toLocaleString()}</text>` +
+    `</g>` +
+    `<g transform="translate(0, ${STAT_SPACING})">` +
+    `<text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">&#x1F4E5; Downloads</text>` +
+    `<text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">${downloads.toLocaleString()}</text>` +
+    `</g>` +
+    `<g transform="translate(${COLUMN_WIDTH}, ${STAT_SPACING})">` +
+    `<text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">&#x1F516; Issues &amp; PRs</text>` +
+    `<text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">${issuesAndPRs.toLocaleString()}</text>` +
+    `</g>` +
+    `</g>` +
+    `</svg>`;
+
+  await fs.rm(filePath, { force: true });
+  await fs.writeFile(filePath, svg);
 };
