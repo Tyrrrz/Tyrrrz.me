@@ -1,5 +1,6 @@
 import { GetStaticProps, NextPage } from 'next';
 import { ProjectStats, loadProjectStats } from '~/data/projects';
+import { deleteUndefined } from '~/utils/object';
 
 const WIDTH = 440;
 const HEIGHT = 165;
@@ -114,6 +115,10 @@ const ProjectsSvg: NextPage<ProjectStats> = ({
 
 export const getStaticProps: GetStaticProps<ProjectStats> = async () => {
   const stats = await loadProjectStats();
+
+  // Remove undefined values because they cannot be serialized
+  deleteUndefined(stats);
+
   return { props: stats };
 };
 
