@@ -73,7 +73,7 @@ const SubscribeSection: FC = () => {
       <div>
         Want to know when I post a new article? Follow me on{' '}
         <Link href="https://bsky.app/profile/tyrrrz.me">Bluesky</Link> or subscribe to the{' '}
-        <Link href="/blog/rss.xml" external>
+        <Link href="/blog.rss" external>
           RSS Feed
         </Link>
       </div>
@@ -119,7 +119,7 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
         description={post.excerpt}
         imageLayout={post.coverUrl ? 'fill' : 'aside'}
         imageUrl={post.coverUrl}
-        rssUrl="/blog/rss.xml"
+        rssUrl="/blog.rss"
       />
 
       <div className={c('space-y-4')}>

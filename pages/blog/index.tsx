@@ -24,7 +24,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
 
   return (
     <>
-      <Meta title="Blog" rssUrl="/blog/rss.xml" />
+      <Meta title="Blog" rssUrl="/blog.rss" />
 
       <section>
         <Heading>Blog</Heading>
@@ -33,7 +33,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
           I write about software design, architecture, programming languages, and other technical
           topics. Follow me on <Link href="https://bsky.app/profile/tyrrrz.me">Bluesky</Link> or
           subscribe to the{' '}
-          <Link href="/blog/rss.xml" external>
+          <Link href="/blog.rss" external>
             RSS Feed
           </Link>{' '}
           to get notified when I post a new article.

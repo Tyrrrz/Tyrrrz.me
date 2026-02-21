@@ -35,6 +35,12 @@ const config = {
       source: '/blog/return-type-inference',
       destination: '/blog/target-type-inference',
       permanent: true
+    },
+    // Moved blog RSS feed
+    {
+      source: '/blog/rss.xml',
+      destination: '/blog.rss',
+      permanent: true
     }
   ]
 };
