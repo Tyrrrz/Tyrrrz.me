@@ -36,6 +36,14 @@ const config = {
       destination: '/blog/target-type-inference',
       permanent: true
     }
+  ],
+
+  headers: async () => [
+    // Serve statically generated SVG pages with the correct MIME type
+    {
+      source: '/:path*.svg',
+      headers: [{ key: 'Content-Type', value: 'image/svg+xml' }]
+    }
   ]
 };
 
