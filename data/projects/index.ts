@@ -3,6 +3,7 @@ import path from 'path';
 import fakes from '~/data/projects/fakes';
 import { getGitHubDownloads, getGitHubIssuesAndPRsCount, getGitHubRepos } from '~/data/projects/github';
 import { getNuGetDownloads } from '~/data/projects/nuget';
+import { bufferIterable } from '~/utils/async';
 import { isProduction } from '~/utils/env';
 
 export type Project = {
@@ -48,9 +49,10 @@ export const loadProjects = async function* () {
   }
 };
 
-export const publishProjectStats = async (projects: Project[]) => {
+export const publishProjectStats = async () => {
   const filePath = path.resolve(process.cwd(), 'public', 'projects.svg');
 
+  const projects = await bufferIterable(loadProjects());
   const repos = projects.length;
   const stars = projects.reduce((acc, p) => acc + p.stars, 0);
   const downloads = projects.reduce((acc, p) => acc + p.downloads, 0);
