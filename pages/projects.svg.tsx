@@ -8,10 +8,10 @@ const STAT_SPACING = 50;
 const COLUMN_WIDTH = (WIDTH - 2 * PADDING) / 2;
 
 const ProjectsSvg: NextPage<ProjectStats> = ({
-  totalRepos,
-  totalStars,
-  totalDownloads,
-  totalIssuesAndPRs
+  repos,
+  stars,
+  downloads,
+  issuesAndPRs
 }) => {
   return (
     <svg width={WIDTH} height={HEIGHT} xmlns="http://www.w3.org/2000/svg">
@@ -53,14 +53,14 @@ const ProjectsSvg: NextPage<ProjectStats> = ({
             fontWeight="bold"
             fill="#ffffff"
           >
-            {totalRepos.toLocaleString()}
+            {repos.toLocaleString()}
           </text>
         </g>
 
-        {/* Total Stars */}
+        {/* Stars */}
         <g transform={`translate(${COLUMN_WIDTH}, 0)`}>
           <text x="0" y="0" fontFamily="'Segoe UI', Arial, sans-serif" fontSize="14" fill="#9ca3af">
-            ⭐ Total Stars
+            ⭐ Stars
           </text>
           <text
             x="0"
@@ -70,14 +70,14 @@ const ProjectsSvg: NextPage<ProjectStats> = ({
             fontWeight="bold"
             fill="#ffffff"
           >
-            {totalStars.toLocaleString()}
+            {stars.toLocaleString()}
           </text>
         </g>
 
-        {/* Total Downloads */}
+        {/* Downloads */}
         <g transform={`translate(0, ${STAT_SPACING})`}>
           <text x="0" y="0" fontFamily="'Segoe UI', Arial, sans-serif" fontSize="14" fill="#9ca3af">
-            📥 Total Downloads
+            📥 Downloads
           </text>
           <text
             x="0"
@@ -87,7 +87,7 @@ const ProjectsSvg: NextPage<ProjectStats> = ({
             fontWeight="bold"
             fill="#ffffff"
           >
-            {totalDownloads.toLocaleString()}
+            {downloads.toLocaleString()}
           </text>
         </g>
 
@@ -104,7 +104,7 @@ const ProjectsSvg: NextPage<ProjectStats> = ({
             fontWeight="bold"
             fill="#ffffff"
           >
-            {totalIssuesAndPRs.toLocaleString()}
+            {issuesAndPRs.toLocaleString()}
           </text>
         </g>
       </g>

@@ -47,34 +47,34 @@ export const loadProjects = async function* () {
 };
 
 export type ProjectStats = {
-  totalRepos: number;
-  totalStars: number;
-  totalDownloads: number;
-  totalIssuesAndPRs: number;
+  repos: number;
+  stars: number;
+  downloads: number;
+  issuesAndPRs: number;
 };
 
 export const loadProjectStats = async (): Promise<ProjectStats> => {
   // Use fake data in development
   if (!isProduction()) {
     return {
-      totalRepos: 91,
-      totalStars: 16219,
-      totalDownloads: 28500000,
-      totalIssuesAndPRs: 4200
+      repos: 91,
+      stars: 16219,
+      downloads: 28500000,
+      issuesAndPRs: 4200
     };
   }
 
   const repos = await getGitHubRepos();
-  const totalRepos = repos.length;
-  const totalStars = repos.reduce((acc, repo) => acc + (repo.stargazers_count ?? 0), 0);
-  const totalIssuesAndPRs = await getGitHubIssuesAndPRsCount();
+  const repoCount = repos.length;
+  const stars = repos.reduce((acc, repo) => acc + (repo.stargazers_count ?? 0), 0);
+  const issuesAndPRs = await getGitHubIssuesAndPRsCount();
 
   // Downloads from GitHub releases + NuGet, matching the projects page
-  let totalDownloads = 0;
+  let downloads = 0;
   for (const repo of repos) {
-    totalDownloads += await getGitHubDownloads(repo.name);
-    totalDownloads += await getNuGetDownloads(repo.name);
+    downloads += await getGitHubDownloads(repo.name);
+    downloads += await getNuGetDownloads(repo.name);
   }
 
-  return { totalRepos, totalStars, totalDownloads, totalIssuesAndPRs };
+  return { repos: repoCount, stars, downloads, issuesAndPRs };
 };
