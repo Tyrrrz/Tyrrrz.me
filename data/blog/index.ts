@@ -105,7 +105,7 @@ export const publishBlogPostAssets = async (id: string) => {
 };
 
 export const publishBlogFeed = async () => {
-  const filePath = path.resolve(process.cwd(), 'public', 'blog', 'rss.xml');
+  const filePath = path.resolve(process.cwd(), 'public', 'blog.rss');
   const date = new Date();
 
   const feed = new Feed({

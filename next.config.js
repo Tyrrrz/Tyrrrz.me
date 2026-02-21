@@ -35,6 +35,17 @@ const config = {
       source: '/blog/return-type-inference',
       destination: '/blog/target-type-inference',
       permanent: true
+    },
+    // Moved blog RSS feed
+    {
+      source: '/blog/rss.xml',
+      destination: '/blog.rss',
+      permanent: true
+    },
+    {
+      source: '/blog/RSS.xml',
+      destination: '/blog.rss',
+      permanent: true
     }
   ],
 
@@ -43,6 +54,11 @@ const config = {
     {
       source: '/:path*.svg',
       headers: [{ key: 'Content-Type', value: 'image/svg+xml' }]
+    },
+    // Serve RSS feed with the correct MIME type
+    {
+      source: '/:path*.rss',
+      headers: [{ key: 'Content-Type', value: 'application/rss+xml' }]
     }
   ]
 };

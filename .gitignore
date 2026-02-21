@@ -25,3 +25,4 @@ lerna-debug.log*
 
 # blog assets
 /public/blog/
+/public/blog.rss
