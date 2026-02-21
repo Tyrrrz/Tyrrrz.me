@@ -36,9 +36,7 @@ const config = {
       destination: '/blog/target-type-inference',
       permanent: true
     }
-  ],
-
-  headers: async () => []
+  ]
 };
 
 const plugins = [

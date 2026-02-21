@@ -55,7 +55,7 @@ export type ProjectStats = {
   issuesAndPRs: number;
 };
 
-export const loadProjectStats = async (): Promise<ProjectStats> => {
+export const getProjectStats = async (): Promise<ProjectStats> => {
   // Use fake data in development
   if (!isProduction()) {
     return {
@@ -81,10 +81,10 @@ export const loadProjectStats = async (): Promise<ProjectStats> => {
   return { repos: repoCount, stars, downloads, issuesAndPRs };
 };
 
-export const publishProjectsSvg = async () => {
+export const publishProjectStats = async () => {
   const filePath = path.resolve(process.cwd(), 'public', 'projects.svg');
 
-  const { repos, stars, downloads, issuesAndPRs } = await loadProjectStats();
+  const { repos, stars, downloads, issuesAndPRs } = await getProjectStats();
 
   const WIDTH = 440;
   const HEIGHT = 115;
