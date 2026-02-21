@@ -7,7 +7,7 @@ const PADDING = 20;
 const STAT_SPACING = 50;
 const COLUMN_WIDTH = (WIDTH - 2 * PADDING) / 2;
 
-const ProjectsSvg: NextPage<ProjectStats> & { skipLayout: boolean } = ({
+const ProjectsSvg: NextPage<ProjectStats> = ({
   totalRepos,
   totalStars,
   totalDownloads,
@@ -116,8 +116,5 @@ export const getStaticProps: GetStaticProps<ProjectStats> = async () => {
   const stats = await loadProjectStats();
   return { props: stats };
 };
-
-// Skip the site layout — serve raw SVG content only
-ProjectsSvg.skipLayout = true;
 
 export default ProjectsSvg;
