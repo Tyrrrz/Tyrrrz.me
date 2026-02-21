@@ -33,3 +33,14 @@ export const getGitHubDownloads = async (repositoryName: string) => {
     .flatMap((release) => release.assets)
     .reduce((acc, cur) => acc + cur.download_count, 0);
 };
+
+export const getGitHubIssuesAndPRsCount = async () => {
+  const github = createClient();
+
+  const { data } = await github.search.issuesAndPullRequests({
+    q: `user:${OWNER}`,
+    per_page: 1
+  });
+
+  return data.total_count;
+};
