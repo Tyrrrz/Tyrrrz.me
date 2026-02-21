@@ -9,15 +9,15 @@ export default class MyDocument extends Document<MyDocumentProps> {
     const initialProps = await super.getInitialProps(ctx);
     return {
       ...initialProps,
-      isRawResponse: ctx.pathname.endsWith('.svg') || ctx.pathname.endsWith('.xml')
+      isRawResponse: ctx.pathname.endsWith('.svg')
     };
   }
 
   render() {
-    // For raw-response pages (e.g. SVG images, XML feeds), render only the page content
+    // For raw-response pages (e.g. SVG images), render only the page content
     // with no HTML wrapper so the response is the bare element returned by
     // the page component (combined with the Content-Type header set in
-    // next.config.js, this serves as a proper image/SVG or RSS feed).
+    // next.config.js, this serves as a proper image/SVG).
     if (this.props.isRawResponse) {
       return <Main />;
     }

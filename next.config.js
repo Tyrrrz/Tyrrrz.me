@@ -43,11 +43,6 @@ const config = {
     {
       source: '/:path*.svg',
       headers: [{ key: 'Content-Type', value: 'image/svg+xml' }]
-    },
-    // Serve statically generated XML pages with the correct MIME type
-    {
-      source: '/:path*.xml',
-      headers: [{ key: 'Content-Type', value: 'application/rss+xml' }]
     }
   ]
 };
