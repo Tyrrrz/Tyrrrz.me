@@ -1,5 +1,5 @@
 import fakes from '~/data/projects/fakes';
-import { getGitHubDownloads, getGitHubIssuesAndPRsCount, getGitHubRepos } from '~/data/projects/github';
+import { getGitHubDownloads, getGitHubRepos } from '~/data/projects/github';
 import { getNuGetDownloads } from '~/data/projects/nuget';
 import { isProduction } from '~/utils/env';
 
@@ -67,7 +67,7 @@ export const loadProjectStats = async (): Promise<ProjectStats> => {
   const repos = await getGitHubRepos();
   const totalRepos = repos.length;
   const totalStars = repos.reduce((acc, repo) => acc + (repo.stargazers_count ?? 0), 0);
-  const totalIssuesAndPRs = await getGitHubIssuesAndPRsCount();
+  const totalIssuesAndPRs = repos.reduce((acc, repo) => acc + (repo.open_issues_count ?? 0), 0);
 
   // Downloads from GitHub releases + NuGet, matching the projects page
   let totalDownloads = 0;

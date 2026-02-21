@@ -3,14 +3,14 @@ import { getGitHubToken } from '~/utils/env';
 
 const OWNER = 'Tyrrrz';
 
-const createRestClient = () => {
+const createClient = () => {
   return new Octokit({
     auth: getGitHubToken()
   });
 };
 
 export const getGitHubRepos = async () => {
-  const github = createRestClient();
+  const github = createClient();
 
   return await github.paginate(github.repos.listForUser, {
     username: OWNER,
@@ -21,7 +21,7 @@ export const getGitHubRepos = async () => {
 };
 
 export const getGitHubDownloads = async (repositoryName: string) => {
-  const github = createRestClient();
+  const github = createClient();
 
   const releases = await github.paginate(github.repos.listReleases, {
     owner: OWNER,
@@ -32,15 +32,4 @@ export const getGitHubDownloads = async (repositoryName: string) => {
   return releases
     .flatMap((release) => release.assets)
     .reduce((acc, cur) => acc + cur.download_count, 0);
-};
-
-export const getGitHubIssuesAndPRsCount = async () => {
-  const github = createRestClient();
-
-  const { data } = await github.search.issuesAndPullRequests({
-    q: `user:${OWNER}`,
-    per_page: 1
-  });
-
-  return data.total_count;
 };
