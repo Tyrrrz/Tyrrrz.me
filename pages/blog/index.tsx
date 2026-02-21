@@ -8,7 +8,7 @@ import Meta from '~/components/meta';
 import Paragraph from '~/components/paragraph';
 import Timeline from '~/components/timeline';
 import TimelineItem from '~/components/timelineItem';
-import { BlogPostRef, loadBlogPostRefs } from '~/data/blog';
+import { BlogPostRef, loadBlogPostRefs, publishBlogFeed } from '~/data/blog';
 import { groupBy } from '~/utils/array';
 import { bufferIterable } from '~/utils/async';
 import { deleteUndefined } from '~/utils/object';
@@ -84,6 +84,8 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
 };
 
 export const getStaticProps: GetStaticProps<BlogPageProps> = async () => {
+  await publishBlogFeed();
+
   const posts = await bufferIterable(loadBlogPostRefs());
 
   // Remove undefined values because they cannot be serialized

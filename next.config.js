@@ -38,13 +38,7 @@ const config = {
     }
   ],
 
-  headers: async () => [
-    // Serve statically generated SVG pages with the correct MIME type
-    {
-      source: '/:path*.svg',
-      headers: [{ key: 'Content-Type', value: 'image/svg+xml' }]
-    }
-  ]
+  headers: async () => []
 };
 
 const plugins = [
