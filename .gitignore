@@ -25,3 +25,6 @@ lerna-debug.log*
 
 # blog assets
 /public/blog/
+
+# projects assets
+/public/projects.svg
