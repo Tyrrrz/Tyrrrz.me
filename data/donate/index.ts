@@ -45,26 +45,26 @@ export const publishDonationStats = async () => {
   // adjacent string segments into a plain (non-backtick) string.
   const first = top[0]
     ? `<text x="220" y="55" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="800" fill="#F5C542" text-anchor="middle" letter-spacing="1">&#x2B50; ${esc(top[0].name!)}</text>` +
-      `<text x="220" y="72" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af" text-anchor="middle">$${top[0].amount.toFixed(0)}</text>`
+      `<text x="220" y="72" font-family="'Segoe UI', Arial, sans-serif" font-size="17" font-weight="600" fill="#ffffff" text-anchor="middle">$${top[0].amount.toFixed(0)}</text>`
     : '';
 
   const second = top[1]
     ? `<text x="110" y="104" font-family="'Segoe UI', Arial, sans-serif" font-size="22" font-weight="600" fill="#ffffff" text-anchor="middle">&#x1F948; ${esc(top[1].name!)}</text>` +
-      `<text x="110" y="118" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#9ca3af" text-anchor="middle">$${top[1].amount.toFixed(0)}</text>`
+      `<text x="110" y="118" font-family="'Segoe UI', Arial, sans-serif" font-size="15" fill="#d1d5db" text-anchor="middle">$${top[1].amount.toFixed(0)}</text>`
     : '';
 
   const third = top[2]
     ? `<text x="330" y="104" font-family="'Segoe UI', Arial, sans-serif" font-size="22" font-weight="600" fill="#ffffff" text-anchor="middle">&#x1F949; ${esc(top[2].name!)}</text>` +
-      `<text x="330" y="118" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#9ca3af" text-anchor="middle">$${top[2].amount.toFixed(0)}</text>`
+      `<text x="330" y="118" font-family="'Segoe UI', Arial, sans-serif" font-size="15" fill="#d1d5db" text-anchor="middle">$${top[2].amount.toFixed(0)}</text>`
     : '';
 
   const fourth = top[3]
-    ? `<text x="110" y="145" font-family="'Segoe UI', Arial, sans-serif" font-size="18" font-weight="500" fill="#d1d5db" text-anchor="middle">${esc(top[3].name!)}</text>` +
+    ? `<text x="110" y="145" font-family="'Segoe UI', Arial, sans-serif" font-size="18" font-weight="500" fill="#d1d5db" text-anchor="middle">&#x1F49B; ${esc(top[3].name!)}</text>` +
       `<text x="110" y="159" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#9ca3af" text-anchor="middle">$${top[3].amount.toFixed(0)}</text>`
     : '';
 
   const fifth = top[4]
-    ? `<text x="330" y="145" font-family="'Segoe UI', Arial, sans-serif" font-size="18" font-weight="500" fill="#d1d5db" text-anchor="middle">${esc(top[4].name!)}</text>` +
+    ? `<text x="330" y="145" font-family="'Segoe UI', Arial, sans-serif" font-size="18" font-weight="500" fill="#d1d5db" text-anchor="middle">&#x1F49B; ${esc(top[4].name!)}</text>` +
       `<text x="330" y="159" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#9ca3af" text-anchor="middle">$${top[4].amount.toFixed(0)}</text>`
     : '';
 
