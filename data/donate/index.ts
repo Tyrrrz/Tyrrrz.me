@@ -72,12 +72,8 @@ export const publishDonationStats = async () => {
     `<svg width="${WIDTH}" height="${HEIGHT}" xmlns="http://www.w3.org/2000/svg">` +
     `<rect width="${WIDTH}" height="${HEIGHT}" fill="#1a1a1a" rx="10" />` +
     `<rect x="${DIVIDER_X}" y="15" width="1" height="${HEIGHT - 30}" fill="#374151" />` +
-    `<g transform="translate(${PADDING}, ${PADDING + 12})">` +
-    firstBlock +
-    `</g>` +
-    `<g transform="translate(${DIVIDER_X + 15}, 0)">` +
-    restBlock +
-    `</g>` +
+    `<g transform="translate(${PADDING}, ${PADDING + 12})">${firstBlock}</g>` +
+    `<g transform="translate(${DIVIDER_X + 15}, 0)">${restBlock}</g>` +
     `</svg>`;
 
   await fs.rm(filePath, { force: true });
