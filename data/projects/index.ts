@@ -64,7 +64,7 @@ export const publishProjectStats = async () => {
   const issuesAndPRs = isProduction() ? await getGitHubIssuesAndPRsCount() : 4200;
 
   const WIDTH = 440;
-  const HEIGHT = 115;
+  const HEIGHT = 130;
   const PADDING = 20;
   const STAT_SPACING = 50;
   const COLUMN_WIDTH = (WIDTH - 2 * PADDING) / 2;
@@ -78,7 +78,8 @@ export const publishProjectStats = async () => {
     `</linearGradient>` +
     `</defs>` +
     `<rect width="${WIDTH}" height="${HEIGHT}" fill="#1a1a1a" rx="10" />` +
-    `<g transform="translate(${PADDING}, ${PADDING + 5})">` +
+    `<text x="${WIDTH / 2}" y="18" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#9ca3af" text-anchor="middle" letter-spacing="2">PROJECT STATS</text>` +
+    `<g transform="translate(${PADDING}, ${PADDING + 18})">` +
     `<g>` +
     `<text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">&#x1F4E6; Repositories</text>` +
     `<text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">${repos.toLocaleString()}</text>` +

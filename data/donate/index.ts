@@ -35,45 +35,39 @@ export const publishDonationStats = async () => {
     .slice(0, 5);
 
   const WIDTH = 440;
-  const HEIGHT = 115;
-  const PADDING = 20;
-
-  const medals = ['&#x1F947;', '&#x1F948;', '&#x1F949;'];
-  const first = top[0];
-  const rest = top.slice(1);
+  const HEIGHT = 155;
 
   const esc = (s: string) =>
     s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-  const firstBlock = first
-    ? `<text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="24" fill="#ffffff">${medals[0]}</text>` +
-      `<text x="0" y="26" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#9333ea">${esc(first.name!)}</text>` +
-      `<text x="0" y="46" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#9ca3af">$${first.amount.toFixed(0)}</text>`
+  // Each rank is a separate variable so ${...} expressions are embedded in the
+  // SVG template literal chain, preventing the minifier from constant-folding
+  // adjacent string segments into a plain (non-backtick) string.
+  const first = top[0]
+    ? `<text x="220" y="62" font-family="'Segoe UI', Arial, sans-serif" font-size="34" font-weight="800" fill="#F5C542" text-anchor="middle" letter-spacing="1">&#x2B50; ${esc(top[0].name!)}</text>` +
+      `<text x="220" y="82" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#9ca3af" text-anchor="middle">$${top[0].amount.toFixed(0)}</text>`
     : '';
 
-  const restBlock = rest
-    .map((d, i) => {
-      const rank = i + 2;
-      const medal = medals[rank - 1] ?? `#${rank}`;
-      const fontSize = rank <= 3 ? 14 : 12;
-      const fillColor = rank <= 3 ? '#ffffff' : '#d1d5db';
-      const y = PADDING + i * 22;
-      return (
-        `<text x="0" y="${y}" font-family="'Segoe UI', Arial, sans-serif" font-size="${fontSize}" fill="${fillColor}">` +
-        `${medal} ${esc(d.name!)}` +
-        `</text>`
-      );
-    })
-    .join('');
+  const second = top[1]
+    ? `<text x="110" y="113" font-family="'Segoe UI', Arial, sans-serif" font-size="22" font-weight="600" fill="#ffffff" text-anchor="middle">&#x1F948; ${esc(top[1].name!)}</text>`
+    : '';
 
-  const DIVIDER_X = 215;
+  const third = top[2]
+    ? `<text x="330" y="113" font-family="'Segoe UI', Arial, sans-serif" font-size="22" font-weight="600" fill="#ffffff" text-anchor="middle">&#x1F949; ${esc(top[2].name!)}</text>`
+    : '';
+
+  const fourth = top[3]
+    ? `<text x="110" y="143" font-family="'Segoe UI', Arial, sans-serif" font-size="16" font-weight="500" fill="#9ca3af" text-anchor="middle">4. ${esc(top[3].name!)}</text>`
+    : '';
+
+  const fifth = top[4]
+    ? `<text x="330" y="143" font-family="'Segoe UI', Arial, sans-serif" font-size="16" font-weight="500" fill="#9ca3af" text-anchor="middle">5. ${esc(top[4].name!)}</text>`
+    : '';
 
   const svg =
     `<svg width="${WIDTH}" height="${HEIGHT}" xmlns="http://www.w3.org/2000/svg">` +
     `<rect width="${WIDTH}" height="${HEIGHT}" fill="#1a1a1a" rx="10" />` +
-    `<rect x="${DIVIDER_X}" y="15" width="1" height="${HEIGHT - 30}" fill="#374151" />` +
-    `<g transform="translate(${PADDING}, ${PADDING + 12})">${firstBlock}</g>` +
-    `<g transform="translate(${DIVIDER_X + 15}, 0)">${restBlock}</g>` +
+    `<text x="220" y="18" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#9ca3af" text-anchor="middle" letter-spacing="2">TOP DONORS</text>${first}${second}${third}${fourth}${fifth}` +
     `</svg>`;
 
   await fs.rm(filePath, { force: true });
