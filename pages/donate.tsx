@@ -9,7 +9,7 @@ import List from '~/components/list';
 import ListItem from '~/components/listItem';
 import Meta from '~/components/meta';
 import Paragraph from '~/components/paragraph';
-import { Donation, loadDonations } from '~/data/donate';
+import { Donation, loadDonations, publishDonationStats } from '~/data/donate';
 import { bufferIterable } from '~/utils/async';
 import { deleteUndefined } from '~/utils/object';
 
@@ -105,6 +105,8 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
 };
 
 export const getStaticProps: GetStaticProps<DonationPageProps> = async () => {
+  await publishDonationStats();
+
   const donations = await bufferIterable(loadDonations());
 
   // Remove undefined values because they cannot be serialized
