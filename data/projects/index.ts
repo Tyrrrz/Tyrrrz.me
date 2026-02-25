@@ -30,7 +30,7 @@ export const loadProjects = async function* () {
     (repo) => repo.stargazers_count && repo.stargazers_count >= 35
   );
 
-  // Fetch all NPM downloads in a single bulk request to avoid rate-limiting
+  // Fetch all NPM downloads upfront (sequential with delay to respect rate limits)
   const npmDownloads = await getNpmDownloads(repos.map((repo) => repo.name));
 
   for (const repo of repos) {
