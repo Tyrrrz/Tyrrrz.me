@@ -3,7 +3,6 @@ import path from 'path';
 import fakes from '~/data/projects/fakes';
 import { getDockerDownloads } from '~/data/projects/docker';
 import { getGitHubDownloads, getGitHubIssuesAndPRsCount, getGitHubRepos } from '~/data/projects/github';
-import { getNpmDownloads } from '~/data/projects/npm';
 import { getNuGetDownloads } from '~/data/projects/nuget';
 import { bufferIterable } from '~/utils/async';
 import { isProduction } from '~/utils/env';
@@ -34,7 +33,9 @@ export const loadProjects = async function* () {
     const downloads = [
       await getGitHubDownloads(repo.name),
       await getNuGetDownloads(repo.name),
-      await getNpmDownloads(repo.name),
+      // NPM keeps blocking our requests as suspicious.
+      // It's fine to ignore it for now, seeing as we have very few NPM packages.
+      // await getNpmDownloads(repo.name),
       await getDockerDownloads(repo.name)
     ].reduce((acc, cur) => acc + cur, 0);
 
