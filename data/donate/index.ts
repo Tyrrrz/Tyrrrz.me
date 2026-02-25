@@ -47,7 +47,7 @@ export const publishDonationStats = async () => {
 
   const firstBlock = first
     ? `<text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="24" fill="#ffffff">${medals[0]}</text>` +
-      `<text x="0" y="26" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="url(#gradient)">${esc(first.name!)}</text>` +
+      `<text x="0" y="26" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#9333ea">${esc(first.name!)}</text>` +
       `<text x="0" y="46" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#9ca3af">$${first.amount.toFixed(0)}</text>`
     : '';
 
@@ -87,5 +87,5 @@ export const publishDonationStats = async () => {
     `</svg>`;
 
   await fs.rm(filePath, { force: true });
-  await fs.writeFile(filePath, svg);
+  await fs.writeFile(filePath, svg, 'utf8');
 };
