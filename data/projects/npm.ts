@@ -4,15 +4,10 @@ export const getNpmDownloads = async (packageName: string) => {
   const url = `https://api.npmjs.org/downloads/point/${start}:${end}/${packageName.toLowerCase()}`;
   const response = await fetch(url);
 
-  // If the package doesn't exist, return 0 instead of failing
-  if (response.status === 404) {
-    return 0;
-  }
-
+  // If the package doesn't exist, or the request is blocked (e.g. Cloudflare rate-limit),
+  // return 0 instead of failing
   if (!response.ok) {
-    throw new Error(
-      `Request 'GET ${url}' failed. Status: ${response.status}. Body: '${await response.text()}'.`
-    );
+    return 0;
   }
 
   // https://api.npmjs.org/
