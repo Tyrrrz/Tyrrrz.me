@@ -11,3 +11,5 @@ export const bufferIterable = async <T>(
 
   return buffer;
 };
+
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
