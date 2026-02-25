@@ -38,7 +38,7 @@ export const publishDonationStats = async () => {
   const HEIGHT = 115;
   const PADDING = 20;
 
-  const medals = ['🥇', '🥈', '🥉'];
+  const medals = ['&#x1F947;', '&#x1F948;', '&#x1F949;'];
   const first = top[0];
   const rest = top.slice(1);
 
@@ -75,15 +75,13 @@ export const publishDonationStats = async () => {
     `<stop offset="0%" style="stop-color:#9333ea;stop-opacity:1" />` +
     `<stop offset="100%" style="stop-color:#c084fc;stop-opacity:1" />` +
     `</linearGradient>` +
-    `<clipPath id="clip-left"><rect x="0" y="-30" width="${DIVIDER_X - PADDING - 10}" height="${HEIGHT + 30}" /></clipPath>` +
-    `<clipPath id="clip-right"><rect x="0" y="-5" width="${WIDTH - DIVIDER_X - PADDING - 5}" height="${HEIGHT + 5}" /></clipPath>` +
     `</defs>` +
     `<rect width="${WIDTH}" height="${HEIGHT}" fill="#1a1a1a" rx="10" />` +
     `<line x1="${DIVIDER_X}" y1="15" x2="${DIVIDER_X}" y2="${HEIGHT - 15}" stroke="#374151" stroke-width="1" />` +
-    `<g transform="translate(${PADDING}, ${PADDING + 12})" clip-path="url(#clip-left)">` +
+    `<g transform="translate(${PADDING}, ${PADDING + 12})">` +
     firstBlock +
     `</g>` +
-    `<g transform="translate(${DIVIDER_X + 15}, 0)" clip-path="url(#clip-right)">` +
+    `<g transform="translate(${DIVIDER_X + 15}, 0)">` +
     restBlock +
     `</g>` +
     `</svg>`;
