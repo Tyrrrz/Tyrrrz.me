@@ -44,28 +44,28 @@ export const publishDonationStats = async () => {
   // SVG template literal chain, preventing the minifier from constant-folding
   // adjacent string segments into a plain (non-backtick) string.
   const first = top[0]
-    ? `<text x="220" y="72" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="800" fill="#F5C542" text-anchor="middle" letter-spacing="1">&#x2B50; ${esc(top[0].name!)}</text>` +
-      `<text x="220" y="89" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#9ca3af" text-anchor="middle">$${top[0].amount.toFixed(0)}</text>`
+    ? `<text x="220" y="55" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="800" fill="#F5C542" text-anchor="middle" letter-spacing="1">&#x2B50; ${esc(top[0].name!)}</text>` +
+      `<text x="220" y="72" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af" text-anchor="middle">$${top[0].amount.toFixed(0)}</text>`
     : '';
 
   const second = top[1]
-    ? `<text x="110" y="121" font-family="'Segoe UI', Arial, sans-serif" font-size="22" font-weight="600" fill="#ffffff" text-anchor="middle">&#x1F948; ${esc(top[1].name!)}</text>` +
-      `<text x="110" y="135" font-family="'Segoe UI', Arial, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle">$${top[1].amount.toFixed(0)}</text>`
+    ? `<text x="110" y="104" font-family="'Segoe UI', Arial, sans-serif" font-size="22" font-weight="600" fill="#ffffff" text-anchor="middle">&#x1F948; ${esc(top[1].name!)}</text>` +
+      `<text x="110" y="118" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#9ca3af" text-anchor="middle">$${top[1].amount.toFixed(0)}</text>`
     : '';
 
   const third = top[2]
-    ? `<text x="330" y="121" font-family="'Segoe UI', Arial, sans-serif" font-size="22" font-weight="600" fill="#ffffff" text-anchor="middle">&#x1F949; ${esc(top[2].name!)}</text>` +
-      `<text x="330" y="135" font-family="'Segoe UI', Arial, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle">$${top[2].amount.toFixed(0)}</text>`
+    ? `<text x="330" y="104" font-family="'Segoe UI', Arial, sans-serif" font-size="22" font-weight="600" fill="#ffffff" text-anchor="middle">&#x1F949; ${esc(top[2].name!)}</text>` +
+      `<text x="330" y="118" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#9ca3af" text-anchor="middle">$${top[2].amount.toFixed(0)}</text>`
     : '';
 
   const fourth = top[3]
-    ? `<text x="110" y="162" font-family="'Segoe UI', Arial, sans-serif" font-size="16" font-weight="500" fill="#9ca3af" text-anchor="middle">${esc(top[3].name!)}</text>` +
-      `<text x="110" y="175" font-family="'Segoe UI', Arial, sans-serif" font-size="11" fill="#6b7280" text-anchor="middle">$${top[3].amount.toFixed(0)}</text>`
+    ? `<text x="110" y="145" font-family="'Segoe UI', Arial, sans-serif" font-size="18" font-weight="500" fill="#d1d5db" text-anchor="middle">${esc(top[3].name!)}</text>` +
+      `<text x="110" y="159" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#9ca3af" text-anchor="middle">$${top[3].amount.toFixed(0)}</text>`
     : '';
 
   const fifth = top[4]
-    ? `<text x="330" y="162" font-family="'Segoe UI', Arial, sans-serif" font-size="16" font-weight="500" fill="#9ca3af" text-anchor="middle">${esc(top[4].name!)}</text>` +
-      `<text x="330" y="175" font-family="'Segoe UI', Arial, sans-serif" font-size="11" fill="#6b7280" text-anchor="middle">$${top[4].amount.toFixed(0)}</text>`
+    ? `<text x="330" y="145" font-family="'Segoe UI', Arial, sans-serif" font-size="18" font-weight="500" fill="#d1d5db" text-anchor="middle">${esc(top[4].name!)}</text>` +
+      `<text x="330" y="159" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#9ca3af" text-anchor="middle">$${top[4].amount.toFixed(0)}</text>`
     : '';
 
   const svg =
