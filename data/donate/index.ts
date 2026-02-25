@@ -44,7 +44,7 @@ export const publishDonationStats = async () => {
   // SVG template literal chain, preventing the minifier from constant-folding
   // adjacent string segments into a plain (non-backtick) string.
   const first = top[0]
-    ? `<text x="220" y="55" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="800" fill="#F5C542" text-anchor="middle" letter-spacing="1">&#x2B50; ${esc(top[0].name!)}</text>` +
+    ? `<text x="220" y="55" font-family="'Segoe UI', Arial, sans-serif" font-size="24" font-weight="800" fill="#F5C542" text-anchor="middle" letter-spacing="1">&#x2B50; ${esc(top[0].name!)}</text>` +
       `<text x="220" y="72" font-family="'Segoe UI', Arial, sans-serif" font-size="17" font-weight="600" fill="#ffffff" text-anchor="middle">$${top[0].amount.toFixed(0)}</text>`
     : '';
 
