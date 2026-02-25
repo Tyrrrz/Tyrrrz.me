@@ -26,15 +26,18 @@ export const loadProjects = async function* () {
     return;
   }
 
-  for (const repo of await getGitHubRepos()) {
-    if (!repo.stargazers_count || repo.stargazers_count < 35) {
-      continue;
-    }
+  const repos = (await getGitHubRepos()).filter(
+    (repo) => repo.stargazers_count && repo.stargazers_count >= 35
+  );
 
+  // Fetch all NPM downloads in a single bulk request to avoid rate-limiting
+  const npmDownloads = await getNpmDownloads(repos.map((repo) => repo.name));
+
+  for (const repo of repos) {
     const downloads = [
       await getGitHubDownloads(repo.name),
       await getNuGetDownloads(repo.name),
-      await getNpmDownloads(repo.name),
+      npmDownloads[repo.name] ?? 0,
       await getDockerDownloads(repo.name)
     ].reduce((acc, cur) => acc + cur, 0);
 

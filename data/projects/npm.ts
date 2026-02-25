@@ -1,21 +1,32 @@
-export const getNpmDownloads = async (packageName: string) => {
+export const getNpmDownloads = async (packageNames: string[]) => {
+  if (packageNames.length === 0) {
+    return {} as Record<string, number>;
+  }
+
   const start = '2000-01-01';
   const end = new Date().toISOString().split('T')[0];
-  const url = `https://api.npmjs.org/downloads/point/${start}:${end}/${packageName.toLowerCase()}`;
+  const packages = packageNames.map((n) => n.toLowerCase()).join(',');
+  const url = `https://api.npmjs.org/downloads/point/${start}:${end}/${packages}`;
   const response = await fetch(url);
 
-  // If the package doesn't exist, or the request is blocked (e.g. Cloudflare rate-limit),
-  // return 0 instead of failing
+  // If none of the packages exist, return zeros instead of failing
+  if (response.status === 404) {
+    return Object.fromEntries(packageNames.map((name) => [name, 0]));
+  }
+
   if (!response.ok) {
-    return 0;
+    throw new Error(
+      `Request 'GET ${url}' failed. Status: ${response.status}. Body: '${await response.text()}'.`
+    );
   }
 
   // https://api.npmjs.org/
-  type ResponseBody = {
-    downloads: number;
-  };
+  // Bulk response is keyed by package name; null means the package doesn't exist
+  type ResponseBody = Record<string, { downloads: number } | null>;
 
   const body: ResponseBody = await response.json();
 
-  return body.downloads || 0;
+  return Object.fromEntries(
+    packageNames.map((name) => [name, body[name.toLowerCase()]?.downloads ?? 0])
+  );
 };
