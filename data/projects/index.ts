@@ -85,16 +85,16 @@ export const publishProjectStats = async () => {
     `<text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">${repos.toLocaleString()}</text>` +
     `</g>` +
     `<g transform="translate(${COLUMN_WIDTH}, 0)">` +
-    `<text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">&#x2B50; Stars</text>` +
-    `<text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">${stars.toLocaleString()}</text>` +
+    `<text x="${COLUMN_WIDTH}" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af" text-anchor="end">&#x2B50; Stars</text>` +
+    `<text x="${COLUMN_WIDTH}" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff" text-anchor="end">${stars.toLocaleString()}</text>` +
     `</g>` +
     `<g transform="translate(0, ${STAT_SPACING})">` +
     `<text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">&#x1F4E5; Downloads</text>` +
     `<text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">${downloads.toLocaleString()}</text>` +
     `</g>` +
     `<g transform="translate(${COLUMN_WIDTH}, ${STAT_SPACING})">` +
-    `<text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af">&#x1F516; Issues &amp; PRs</text>` +
-    `<text x="0" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">${issuesAndPRs.toLocaleString()}</text>` +
+    `<text x="${COLUMN_WIDTH}" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#9ca3af" text-anchor="end">&#x1F516; Issues &amp; PRs</text>` +
+    `<text x="${COLUMN_WIDTH}" y="20" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff" text-anchor="end">${issuesAndPRs.toLocaleString()}</text>` +
     `</g>` +
     `</g>` +
     `</svg>`;
