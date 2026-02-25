@@ -70,14 +70,8 @@ export const publishDonationStats = async () => {
 
   const svg =
     `<svg width="${WIDTH}" height="${HEIGHT}" xmlns="http://www.w3.org/2000/svg">` +
-    `<defs>` +
-    `<linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">` +
-    `<stop offset="0%" style="stop-color:#9333ea;stop-opacity:1" />` +
-    `<stop offset="100%" style="stop-color:#c084fc;stop-opacity:1" />` +
-    `</linearGradient>` +
-    `</defs>` +
     `<rect width="${WIDTH}" height="${HEIGHT}" fill="#1a1a1a" rx="10" />` +
-    `<line x1="${DIVIDER_X}" y1="15" x2="${DIVIDER_X}" y2="${HEIGHT - 15}" stroke="#374151" stroke-width="1" />` +
+    `<rect x="${DIVIDER_X}" y="15" width="1" height="${HEIGHT - 30}" fill="#374151" />` +
     `<g transform="translate(${PADDING}, ${PADDING + 12})">` +
     firstBlock +
     `</g>` +

@@ -28,3 +28,4 @@ lerna-debug.log*
 
 # projects assets
 /public/projects.svg
+/public/donate.svg
