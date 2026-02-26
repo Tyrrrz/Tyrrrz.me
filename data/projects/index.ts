@@ -64,7 +64,7 @@ export const publishProjectStats = async () => {
   const issuesAndPRs = isProduction() ? await getGitHubIssuesAndPRsCount() : 4200;
 
   const WIDTH = 440;
-  const HEIGHT = 145;
+  const HEIGHT = 190;
   const PADDING = 32;
   const STAT_SPACING = 50;
   const COLUMN_WIDTH = (WIDTH - 2 * PADDING) / 2;
