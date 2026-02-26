@@ -78,7 +78,7 @@ export const publishProjectStats = async () => {
     `</linearGradient>` +
     `</defs>` +
     `<rect width="${WIDTH}" height="${HEIGHT}" fill="#1a1a1a" rx="10" />` +
-    `<text x="${WIDTH / 2}" y="18" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#9ca3af" text-anchor="middle" letter-spacing="2">PROJECT STATS</text>` +
+    `<text x="${WIDTH / 2}" y="24" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#9ca3af" text-anchor="middle" letter-spacing="2">PROJECT STATS</text>` +
     `<g transform="translate(${PADDING}, ${PADDING + 28})">` +
     `<g>` +
     `<text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="16" fill="#9ca3af">&#x1F4E6; Repositories</text>` +
