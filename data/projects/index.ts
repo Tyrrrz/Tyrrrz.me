@@ -65,7 +65,7 @@ export const publishProjectStats = async () => {
 
   const WIDTH = 440;
   const HEIGHT = 145;
-  const PADDING = 20;
+  const PADDING = 32;
   const STAT_SPACING = 50;
   const COLUMN_WIDTH = (WIDTH - 2 * PADDING) / 2;
 
