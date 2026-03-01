@@ -28,7 +28,9 @@ const UkrainePage: NextPage = () => {
           </Link>{' '}
           I woke up to war:{' '}
           <span className={c('font-semibold')}>
-            <Link href="https://war.ukraine.ua">Russian Armed Forces have invaded my country</Link>
+            <Link href="https://en.wikipedia.org/wiki/2022_Russian_invasion_of_Ukraine">
+              Russian Armed Forces have invaded my country
+            </Link>
           </span>
           . Driven by chauvinistic ideals and determination to eradicate the Ukrainian people, this
           act of aggression can only be described as{' '}
@@ -54,22 +56,17 @@ const UkrainePage: NextPage = () => {
         </Paragraph>
 
         <Paragraph>
-          Luckily, we don&apos;t have to endure this fight in solitude and I&apos;m immensely
-          thankful to everyone who supports us! Every bit of help, no matter how big or small,
-          brings us closer to victory.
+          Since early 2026 I have finally left behind my career in software development and joined
+          the Armed Forces of Ukraine. It's not clear when this war will end, but it&apos;s clear
+          that it won&apos;t end by itself.
         </Paragraph>
-      </section>
-
-      <section>
-        <Heading level={2}>How to help financially</Heading>
 
         <Paragraph>
-          When it comes to financial aid, the most effective thing you can do is donate to one of
-          the local non-government charities that supply our defenders with critical equipment —
-          power stations, medical supplies, armored vests, light vehicles, reconnaissance drones,
-          weapon attachments, etc. It&apos;s best to avoid donating to global funds, such as Red
-          Cross or UN Crisis Relief, because they have very limited presence in Ukraine and
-          typically can&apos;t provide the most necessary support.
+          If you are sympathetic to our cause and wish to help, I have compiled a list of funds and
+          organizations that I personally trust and recommend donating to. When it comes to
+          financial aid, it&apos;s best to avoid large global funds, such as Red Cross or UN Crisis
+          Relief, because they have very limited presence in Ukraine and typically can&apos;t
+          provide the most necessary support.
         </Paragraph>
 
         <List>
@@ -109,74 +106,15 @@ const UkrainePage: NextPage = () => {
           </ListItem>
 
           <ListItem>
-            <Link href="https://voices.org.ua/en/donat?source=tyrrrz">
-              <span className={c('font-semibold')}>Voices of Children</span> Foundation
+            <Link href="https://donate.wck.org/give/506339/donation/checkout/donation/checkout?source=tyrrrz">
+              <span className={c('font-semibold')}>World Central Kitchen</span>
             </Link>{' '}
             (humanitarian aid)
           </ListItem>
 
           <ListItem>
-            <Link href="https://u24.gov.ua">Government donation portal</Link> (humanitarian aid)
-          </ListItem>
-
-          <ListItem>
-            <Link href="/donate">Personal donations to me</Link> are also directed to local
-            charities at my own discretion
-          </ListItem>
-        </List>
-      </section>
-
-      <section>
-        <Heading level={2}>Other ways to help</Heading>
-
-        <Paragraph>
-          If you don&apos;t have the means to help financially, there are also other things you can
-          do:
-        </Paragraph>
-
-        <List>
-          <ListItem>
-            Donate unused clothes, medical supplies, tools & equipment to refugee centers or
-            Ukrainian charities
-          </ListItem>
-
-          <ListItem>Reach out to Ukrainian friends or colleagues, offer them help</ListItem>
-
-          <ListItem>
-            <Link href="https://ethicalconsumer.org/ethicalcampaigns/boycotts/should-we-boycott-russia">
-              Avoid physical products made in Russia
-            </Link>{' '}
-            (bar codes starting with <Code>460</Code>-<Code>469</Code>)
-          </ListItem>
-
-          <ListItem>
-            <Link href="https://stand-with-ukraine.pp.ua/Boycott.html">
-              Avoid software products made in Russia
-            </Link>
-          </ListItem>
-
-          <ListItem>
-            Ask your employer to implement sanctions against Russia, or help in other ways
-          </ListItem>
-
-          <ListItem>
-            Ask your politicians to provide stronger support to Ukraine, including heavy weapons
-          </ListItem>
-
-          <ListItem>Join your local protests to empower Ukrainian voices</ListItem>
-
-          <ListItem>Spread the word about the war in your local networks</ListItem>
-
-          <ListItem>
-            <Link href="https://spellingukraine.com">
-              Use the correct transliteration when referring to Ukrainian toponyms
-            </Link>
-          </ListItem>
-
-          <ListItem>
-            <Link href="https://volunteeringukraine.com">
-              Explore volunteering opportunities in Ukraine
-            </Link>
+            <Link href="/donate">Personal donations to me</Link> are directed to support my own
+            needs, including equipment and supplies
           </ListItem>
         </List>
       </section>
