@@ -99,13 +99,6 @@ const UkrainePage: NextPage = () => {
           </ListItem>
 
           <ListItem>
-            <Link href="https://hospitallers.life/needs-hospitallers?source=tyrrrz">
-              <span className={c('font-semibold')}>Hospitallers Battalion</span>
-            </Link>{' '}
-            (medical aid)
-          </ListItem>
-
-          <ListItem>
             <Link href="https://donate.wck.org/give/506339/donation/checkout/donation/checkout?source=tyrrrz">
               <span className={c('font-semibold')}>World Central Kitchen</span>
             </Link>{' '}
