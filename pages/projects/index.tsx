@@ -53,8 +53,14 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
             )}
           >
             {/* Name row: full card width */}
-            <div className={c('text-lg', 'mb-1')}>
-              <Link href={project.url}>{project.name}</Link>
+            <div className={c('text-lg', 'mb-1', 'min-w-0')}>
+              <Link
+                href={project.url}
+                className={c('block', 'overflow-hidden', 'whitespace-nowrap', 'text-ellipsis')}
+                title={project.name}
+              >
+                {project.name}
+              </Link>
             </div>
 
             {/* Middle row: description/status/homepage (left) + logo (right) */}
