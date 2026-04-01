@@ -57,7 +57,7 @@ const UkrainePage: NextPage = () => {
 
         <Paragraph>
           Since early 2026 I have finally left behind my career in software development and joined
-          the Armed Forces of Ukraine. It's not clear when this war will end, but it&apos;s clear
+          the Armed Forces of Ukraine. It&apos;s not clear when this war will end, but it&apos;s clear
           that it won&apos;t end by itself.
         </Paragraph>
 
