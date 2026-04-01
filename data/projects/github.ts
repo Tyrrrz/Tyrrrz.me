@@ -34,6 +34,29 @@ export const getGitHubDownloads = async (repositoryName: string) => {
     .reduce((acc, cur) => acc + cur.download_count, 0);
 };
 
+export const getGitHubLogoUrl = async (repositoryName: string) => {
+  try {
+    const github = createClient();
+
+    const { data } = await github.repos.getContent({
+      owner: OWNER,
+      repo: repositoryName,
+      path: 'favicon.png'
+    });
+
+    if (!Array.isArray(data) && data.type === 'file' && data.download_url) {
+      return data.download_url;
+    }
+  } catch (err) {
+    // Swallow 404 (file doesn't exist); rethrow anything else
+    if ((err as { status?: number }).status !== 404) {
+      throw err;
+    }
+  }
+
+  return undefined;
+};
+
 export const getGitHubIssuesAndPRsCount = async () => {
   const github = createClient();
 
