@@ -52,15 +52,15 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
               'rounded'
             )}
           >
-            {/* Name */}
-            <div className={c('text-lg', 'text-ellipsis', 'overflow-hidden')} title={project.name}>
-              <Link href={project.url}>{project.name}</Link>
-            </div>
-
-            {/* Middle row: description + logo side by side */}
-            <div className={c('flex', 'grow', 'gap-3', 'my-1')}>
-              {/* Description section */}
+            {/* Middle row: name + description + logo side by side */}
+            <div className={c('flex', 'grow', 'gap-3', 'mb-1')}>
+              {/* Text section */}
               <div className={c('grow', 'min-w-0', 'space-y-1')}>
+                {/* Name */}
+                <div className={c('text-lg', 'text-ellipsis', 'overflow-hidden')} title={project.name}>
+                  <Link href={project.url}>{project.name}</Link>
+                </div>
+
                 {project.archived && (
                   <div className={c('font-light')}>
                     <Inline>
