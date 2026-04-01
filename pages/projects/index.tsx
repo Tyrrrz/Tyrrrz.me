@@ -52,67 +52,74 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
               'rounded'
             )}
           >
-            {/* Name */}
-            <div className={c('flex', 'items-center', 'gap-2', 'text-lg', 'overflow-hidden')}>
-              {project.logoUrl && (
-                <Image
-                  src={project.logoUrl}
-                  alt={`${project.name} logo`}
-                  width={24}
-                  height={24}
-                />
-              )}
-              <div className={c('text-ellipsis', 'overflow-hidden')} title={project.name}>
-                <Link href={project.url}>{project.name}</Link>
-              </div>
-            </div>
-
-            {/* Maintenance status */}
-            <div className={c('grow', 'my-1', 'space-y-1')}>
-              {project.archived && (
-                <div className={c('font-light')}>
-                  <Inline>
-                    <FiArchive strokeWidth={1} />
-                    <div>Not maintained</div>
-                  </Inline>
+            <div className={c('flex', 'gap-3')}>
+              {/* Text content */}
+              <div className={c('flex', 'flex-col', 'grow', 'min-w-0')}>
+                {/* Name */}
+                <div className={c('text-lg', 'text-ellipsis', 'overflow-hidden')} title={project.name}>
+                  <Link href={project.url}>{project.name}</Link>
                 </div>
-              )}
 
-              {/* Description */}
-              <div>{project.description}</div>
-
-              {/* Homepage */}
-              {project.homepageUrl && (
-                <div className={c('overflow-hidden')}>
-                  <Inline>
-                    <FiExternalLink strokeWidth={1} />
-                    <div>
-                      <Link href={project.homepageUrl}>{project.homepageUrl}</Link>
+                {/* Maintenance status */}
+                <div className={c('grow', 'my-1', 'space-y-1')}>
+                  {project.archived && (
+                    <div className={c('font-light')}>
+                      <Inline>
+                        <FiArchive strokeWidth={1} />
+                        <div>Not maintained</div>
+                      </Inline>
                     </div>
-                  </Inline>
+                  )}
+
+                  {/* Description */}
+                  <div>{project.description}</div>
+
+                  {/* Homepage */}
+                  {project.homepageUrl && (
+                    <div className={c('overflow-hidden')}>
+                      <Inline>
+                        <FiExternalLink strokeWidth={1} />
+                        <div>
+                          <Link href={project.homepageUrl}>{project.homepageUrl}</Link>
+                        </div>
+                      </Inline>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Misc info */}
-            <div className={c('flex', 'flex-wrap', 'mt-1', 'gap-x-3', 'font-light')}>
-              <Inline>
-                <FiStar className={c('dark:text-yellow-400', 'fill-yellow-400')} strokeWidth={1} />
-                <div>{project.stars.toLocaleString('en-US')}</div>
-              </Inline>
+                {/* Misc info */}
+                <div className={c('flex', 'flex-wrap', 'mt-1', 'gap-x-3', 'font-light')}>
+                  <Inline>
+                    <FiStar className={c('dark:text-yellow-400', 'fill-yellow-400')} strokeWidth={1} />
+                    <div>{project.stars.toLocaleString('en-US')}</div>
+                  </Inline>
 
-              {project.language && (
-                <Inline>
-                  <FiCode strokeWidth={1} />
-                  <div>{project.language}</div>
-                </Inline>
-              )}
+                  {project.language && (
+                    <Inline>
+                      <FiCode strokeWidth={1} />
+                      <div>{project.language}</div>
+                    </Inline>
+                  )}
 
-              {project.downloads > 0 && (
-                <Inline>
-                  <FiDownload strokeWidth={1} />
-                  <div>{project.downloads.toLocaleString('en-US')}</div>
-                </Inline>
+                  {project.downloads > 0 && (
+                    <Inline>
+                      <FiDownload strokeWidth={1} />
+                      <div>{project.downloads.toLocaleString('en-US')}</div>
+                    </Inline>
+                  )}
+                </div>
+              </div>
+
+              {/* Logo */}
+              {project.logoUrl && (
+                <div className={c('flex-shrink-0', 'self-center')}>
+                  <Image
+                    src={project.logoUrl}
+                    alt={`${project.name} logo`}
+                    width={64}
+                    height={64}
+                  />
+                </div>
               )}
             </div>
           </section>
