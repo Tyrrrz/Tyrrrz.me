@@ -57,20 +57,8 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
               <Link href={project.url}>{project.name}</Link>
             </div>
 
-            {/* Middle row: logo (left) + description/status/homepage (right) */}
+            {/* Middle row: description/status/homepage (left) + logo (right) */}
             <div className={c('flex', 'grow', 'gap-3', 'mb-1')}>
-              {/* Logo */}
-              {project.logoUrl && (
-                <div className={c('flex-shrink-0', 'self-start')}>
-                  <Image
-                    src={project.logoUrl}
-                    alt={`${project.name} logo`}
-                    width={64}
-                    height={64}
-                  />
-                </div>
-              )}
-
               {/* Text section */}
               <div className={c('grow', 'min-w-0', 'space-y-1')}>
                 {project.archived && (
@@ -97,6 +85,18 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
                   </div>
                 )}
               </div>
+
+              {/* Logo */}
+              {project.logoUrl && (
+                <div className={c('flex-shrink-0', 'self-start')}>
+                  <Image
+                    src={project.logoUrl}
+                    alt={`${project.name} logo`}
+                    width={64}
+                    height={64}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Misc info */}
