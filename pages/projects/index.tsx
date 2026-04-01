@@ -52,62 +52,38 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
               'rounded'
             )}
           >
-            <div className={c('flex', 'gap-3')}>
-              {/* Text content */}
-              <div className={c('flex', 'flex-col', 'grow', 'min-w-0')}>
-                {/* Name */}
-                <div className={c('text-lg', 'text-ellipsis', 'overflow-hidden')} title={project.name}>
-                  <Link href={project.url}>{project.name}</Link>
-                </div>
+            {/* Name */}
+            <div className={c('text-lg', 'text-ellipsis', 'overflow-hidden')} title={project.name}>
+              <Link href={project.url}>{project.name}</Link>
+            </div>
 
-                {/* Maintenance status */}
-                <div className={c('grow', 'my-1', 'space-y-1')}>
-                  {project.archived && (
-                    <div className={c('font-light')}>
-                      <Inline>
-                        <FiArchive strokeWidth={1} />
-                        <div>Not maintained</div>
-                      </Inline>
-                    </div>
-                  )}
-
-                  {/* Description */}
-                  <div>{project.description}</div>
-
-                  {/* Homepage */}
-                  {project.homepageUrl && (
-                    <div className={c('overflow-hidden')}>
-                      <Inline>
-                        <FiExternalLink strokeWidth={1} />
-                        <div>
-                          <Link href={project.homepageUrl}>{project.homepageUrl}</Link>
-                        </div>
-                      </Inline>
-                    </div>
-                  )}
-                </div>
-
-                {/* Misc info */}
-                <div className={c('flex', 'flex-wrap', 'mt-1', 'gap-x-3', 'font-light')}>
-                  <Inline>
-                    <FiStar className={c('dark:text-yellow-400', 'fill-yellow-400')} strokeWidth={1} />
-                    <div>{project.stars.toLocaleString('en-US')}</div>
-                  </Inline>
-
-                  {project.language && (
+            {/* Middle row: description + logo side by side */}
+            <div className={c('flex', 'grow', 'gap-3', 'my-1')}>
+              {/* Description section */}
+              <div className={c('grow', 'min-w-0', 'space-y-1')}>
+                {project.archived && (
+                  <div className={c('font-light')}>
                     <Inline>
-                      <FiCode strokeWidth={1} />
-                      <div>{project.language}</div>
+                      <FiArchive strokeWidth={1} />
+                      <div>Not maintained</div>
                     </Inline>
-                  )}
+                  </div>
+                )}
 
-                  {project.downloads > 0 && (
+                {/* Description */}
+                <div>{project.description}</div>
+
+                {/* Homepage */}
+                {project.homepageUrl && (
+                  <div className={c('overflow-hidden')}>
                     <Inline>
-                      <FiDownload strokeWidth={1} />
-                      <div>{project.downloads.toLocaleString('en-US')}</div>
+                      <FiExternalLink strokeWidth={1} />
+                      <div>
+                        <Link href={project.homepageUrl}>{project.homepageUrl}</Link>
+                      </div>
                     </Inline>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
 
               {/* Logo */}
@@ -120,6 +96,28 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
                     height={64}
                   />
                 </div>
+              )}
+            </div>
+
+            {/* Misc info */}
+            <div className={c('flex', 'flex-wrap', 'mt-1', 'gap-x-3', 'font-light')}>
+              <Inline>
+                <FiStar className={c('dark:text-yellow-400', 'fill-yellow-400')} strokeWidth={1} />
+                <div>{project.stars.toLocaleString('en-US')}</div>
+              </Inline>
+
+              {project.language && (
+                <Inline>
+                  <FiCode strokeWidth={1} />
+                  <div>{project.language}</div>
+                </Inline>
+              )}
+
+              {project.downloads > 0 && (
+                <Inline>
+                  <FiDownload strokeWidth={1} />
+                  <div>{project.downloads.toLocaleString('en-US')}</div>
+                </Inline>
               )}
             </div>
           </section>
