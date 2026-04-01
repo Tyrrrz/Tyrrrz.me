@@ -57,7 +57,7 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
               {/* Text section */}
               <div className={c('grow', 'min-w-0', 'space-y-1')}>
                 {/* Name */}
-                <div className={c('text-lg', 'text-ellipsis', 'overflow-hidden')} title={project.name}>
+                <div className={c('text-lg')}>
                   <Link href={project.url}>{project.name}</Link>
                 </div>
 
