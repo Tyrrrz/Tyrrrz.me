@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import fakes from '~/data/projects/fakes';
 import { getDockerDownloads } from '~/data/projects/docker';
-import { getGitHubDownloads, getGitHubIssuesAndPRsCount, getGitHubRepos } from '~/data/projects/github';
+import { getGitHubDownloads, getGitHubIssuesAndPRsCount, getGitHubLogoUrl, getGitHubRepos } from '~/data/projects/github';
 import { getNuGetDownloads } from '~/data/projects/nuget';
 import { bufferIterable } from '~/utils/async';
 import { isProduction } from '~/utils/env';
@@ -13,6 +13,7 @@ export type Project = {
   archived: boolean;
   description?: string;
   homepageUrl?: string;
+  logoUrl?: string;
   stars: number;
   downloads: number;
   language?: string;
@@ -45,6 +46,7 @@ export const loadProjects = async function* () {
       archived: repo.archived || false,
       description: repo.description || undefined,
       homepageUrl: repo.homepage || undefined,
+      logoUrl: await getGitHubLogoUrl(repo.name),
       stars: repo.stargazers_count || 0,
       downloads,
       language: repo.language || undefined

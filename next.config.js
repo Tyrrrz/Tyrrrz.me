@@ -9,6 +9,15 @@ const config = {
   // Pulling donations takes a very long time, so we need to make sure we don't time out too early
   staticPageGenerationTimeout: 60 * 60,
 
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'raw.githubusercontent.com'
+      }
+    ]
+  },
+
   env: {
     BUILD_ID: [
       spawnSync('git', ['rev-parse', '--short', 'HEAD']).stdout.toString().trim(),

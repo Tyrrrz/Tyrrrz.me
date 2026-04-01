@@ -2,6 +2,7 @@ import c from 'classnames';
 import { GetStaticProps, NextPage } from 'next';
 import { FiArchive, FiCode, FiDownload, FiExternalLink, FiStar } from 'react-icons/fi';
 import Heading from '~/components/heading';
+import Image from '~/components/image';
 import Inline from '~/components/inline';
 import Link from '~/components/link';
 import Meta from '~/components/meta';
@@ -52,8 +53,18 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
             )}
           >
             {/* Name */}
-            <div className={c('text-lg', 'text-ellipsis', 'overflow-hidden')} title={project.name}>
-              <Link href={project.url}>{project.name}</Link>
+            <div className={c('flex', 'items-center', 'gap-2', 'text-lg', 'overflow-hidden')}>
+              {project.logoUrl && (
+                <Image
+                  src={project.logoUrl}
+                  alt={`${project.name} logo`}
+                  width={24}
+                  height={24}
+                />
+              )}
+              <div className={c('text-ellipsis', 'overflow-hidden')} title={project.name}>
+                <Link href={project.url}>{project.name}</Link>
+              </div>
             </div>
 
             {/* Maintenance status */}
