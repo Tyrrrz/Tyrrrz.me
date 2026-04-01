@@ -88,7 +88,7 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
 
               {/* Logo */}
               {project.logoUrl && (
-                <div className={c('flex-shrink-0', 'self-center')}>
+                <div className={c('flex-shrink-0', 'self-start')}>
                   <Image
                     src={project.logoUrl}
                     alt={`${project.name} logo`}
