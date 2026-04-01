@@ -47,8 +47,11 @@ export const getGitHubLogoUrl = async (repositoryName: string) => {
     if (!Array.isArray(data) && data.type === 'file' && data.download_url) {
       return data.download_url;
     }
-  } catch {
-    // File doesn't exist or couldn't be fetched
+  } catch (err) {
+    // Swallow 404 (file doesn't exist); rethrow anything else
+    if ((err as { status?: number }).status !== 404) {
+      throw err;
+    }
   }
 
   return undefined;
