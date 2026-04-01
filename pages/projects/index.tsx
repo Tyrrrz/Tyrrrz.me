@@ -52,15 +52,27 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
               'rounded'
             )}
           >
-            {/* Middle row: name + description + logo side by side */}
+            {/* Name row: full card width */}
+            <div className={c('text-lg', 'mb-1')}>
+              <Link href={project.url}>{project.name}</Link>
+            </div>
+
+            {/* Middle row: logo (left) + description/status/homepage (right) */}
             <div className={c('flex', 'grow', 'gap-3', 'mb-1')}>
+              {/* Logo */}
+              {project.logoUrl && (
+                <div className={c('flex-shrink-0', 'self-start')}>
+                  <Image
+                    src={project.logoUrl}
+                    alt={`${project.name} logo`}
+                    width={64}
+                    height={64}
+                  />
+                </div>
+              )}
+
               {/* Text section */}
               <div className={c('grow', 'min-w-0', 'space-y-1')}>
-                {/* Name */}
-                <div className={c('text-lg')}>
-                  <Link href={project.url}>{project.name}</Link>
-                </div>
-
                 {project.archived && (
                   <div className={c('font-light')}>
                     <Inline>
@@ -85,18 +97,6 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
                   </div>
                 )}
               </div>
-
-              {/* Logo */}
-              {project.logoUrl && (
-                <div className={c('flex-shrink-0', 'self-start')}>
-                  <Image
-                    src={project.logoUrl}
-                    alt={`${project.name} logo`}
-                    width={64}
-                    height={64}
-                  />
-                </div>
-              )}
             </div>
 
             {/* Misc info */}
