@@ -2,7 +2,12 @@ import fs from 'fs/promises';
 import path from 'path';
 import fakes from '~/data/projects/fakes';
 import { getDockerDownloads } from '~/data/projects/docker';
-import { getGitHubDownloads, getGitHubIssuesAndPRsCount, getGitHubLogoUrl, getGitHubRepos } from '~/data/projects/github';
+import {
+  getGitHubDownloads,
+  getGitHubIssuesAndPRsCount,
+  getGitHubLogoUrl,
+  getGitHubRepos
+} from '~/data/projects/github';
 import { getNuGetDownloads } from '~/data/projects/nuget';
 import { bufferIterable } from '~/utils/async';
 import { isProduction } from '~/utils/env';
@@ -40,13 +45,15 @@ export const loadProjects = async function* () {
       await getDockerDownloads(repo.name)
     ].reduce((acc, cur) => acc + cur, 0);
 
+    const logoUrl = await getGitHubLogoUrl(repo.name);
+
     const project: Project = {
       name: repo.name,
       url: repo.html_url,
       archived: repo.archived || false,
       description: repo.description || undefined,
       homepageUrl: repo.homepage || undefined,
-      logoUrl: await getGitHubLogoUrl(repo.name),
+      logoUrl,
       stars: repo.stargazers_count || 0,
       downloads,
       language: repo.language || undefined

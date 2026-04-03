@@ -6,7 +6,7 @@ const fakes: Project[] = [
     url: 'https://github.com/Tyrrrz/DiscordChatExporter',
     archived: false,
     description: 'Exports Discord chat logs to a file',
-    logoUrl: 'https://raw.githubusercontent.com/Tyrrrz/DiscordChatExporter/master/favicon.png',
+    logoUrl: 'https://raw.githubusercontent.com/Tyrrrz/DiscordChatExporter/prime/favicon.png',
     stars: 4230,
     downloads: 613998,
     language: 'C#'
@@ -16,7 +16,7 @@ const fakes: Project[] = [
     url: 'https://github.com/Tyrrrz/YoutubeDownloader',
     archived: false,
     description: 'Downloads videos and playlists from YouTube',
-    logoUrl: 'https://raw.githubusercontent.com/Tyrrrz/YoutubeDownloader/master/favicon.png',
+    logoUrl: 'https://raw.githubusercontent.com/Tyrrrz/YoutubeDownloader/prime/favicon.png',
     stars: 3156,
     downloads: 290878,
     language: 'C#'
@@ -26,7 +26,7 @@ const fakes: Project[] = [
     url: 'https://github.com/Tyrrrz/LightBulb',
     archived: false,
     description: 'Reduces eye strain by adjusting gamma based on the current time',
-    logoUrl: 'https://raw.githubusercontent.com/Tyrrrz/LightBulb/master/favicon.png',
+    logoUrl: 'https://raw.githubusercontent.com/Tyrrrz/LightBulb/prime/favicon.png',
     stars: 1557,
     downloads: 303322,
     language: 'C#'

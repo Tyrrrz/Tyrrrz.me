@@ -20,12 +20,12 @@ export const getGitHubRepos = async () => {
   });
 };
 
-export const getGitHubDownloads = async (repositoryName: string) => {
+export const getGitHubDownloads = async (repoName: string) => {
   const github = createClient();
 
   const releases = await github.paginate(github.repos.listReleases, {
     owner: OWNER,
-    repo: repositoryName,
+    repo: repoName,
     per_page: 100
   });
 
@@ -34,13 +34,13 @@ export const getGitHubDownloads = async (repositoryName: string) => {
     .reduce((acc, cur) => acc + cur.download_count, 0);
 };
 
-export const getGitHubLogoUrl = async (repositoryName: string) => {
+export const getGitHubLogoUrl = async (repoName: string) => {
   try {
     const github = createClient();
 
     const { data } = await github.repos.getContent({
       owner: OWNER,
-      repo: repositoryName,
+      repo: repoName,
       path: 'favicon.png'
     });
 
