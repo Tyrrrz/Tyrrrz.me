@@ -52,59 +52,34 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
               'rounded'
             )}
           >
-            {/* Name row: full card width */}
-            <div
-              className={c(
-                'text-lg',
-                'mb-1',
-                'min-w-0',
-                'overflow-hidden',
-                'whitespace-nowrap',
-                'text-ellipsis'
-              )}
-              title={project.name}
-            >
+            {/* Name */}
+            <div className={c('text-lg', 'text-ellipsis', 'overflow-hidden')} title={project.name}>
               <Link href={project.url}>{project.name}</Link>
             </div>
 
-            {/* Middle row: description/status/homepage (left) + logo (right) */}
-            <div className={c('flex', 'grow', 'gap-3', 'mb-1')}>
-              {/* Text section */}
-              <div className={c('grow', 'min-w-0', 'space-y-1')}>
-                {project.archived && (
-                  <div className={c('font-light')}>
-                    <Inline>
-                      <FiArchive strokeWidth={1} />
-                      <div>Not maintained</div>
-                    </Inline>
-                  </div>
-                )}
+            <div className={c('grow', 'my-1', 'space-y-1')}>
+              {/* Maintenance status */}
+              {project.archived && (
+                <div className={c('font-light')}>
+                  <Inline>
+                    <FiArchive strokeWidth={1} />
+                    <div>Not maintained</div>
+                  </Inline>
+                </div>
+              )}
 
-                {/* Description */}
-                <div>{project.description}</div>
+              {/* Description */}
+              <div>{project.description}</div>
 
-                {/* Homepage */}
-                {project.homepageUrl && (
-                  <div className={c('overflow-hidden')}>
-                    <Inline>
-                      <FiExternalLink strokeWidth={1} />
-                      <div>
-                        <Link href={project.homepageUrl}>{project.homepageUrl}</Link>
-                      </div>
-                    </Inline>
-                  </div>
-                )}
-              </div>
-
-              {/* Logo */}
-              {project.logoUrl && (
-                <div className={c('flex-shrink-0', 'self-start')}>
-                  <Image
-                    src={project.logoUrl}
-                    alt={`${project.name} logo`}
-                    width={64}
-                    height={64}
-                  />
+              {/* Homepage */}
+              {project.homepageUrl && (
+                <div className={c('overflow-hidden')}>
+                  <Inline>
+                    <FiExternalLink strokeWidth={1} />
+                    <div>
+                      <Link href={project.homepageUrl}>{project.homepageUrl}</Link>
+                    </div>
+                  </Inline>
                 </div>
               )}
             </div>
