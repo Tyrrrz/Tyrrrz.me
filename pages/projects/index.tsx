@@ -38,6 +38,10 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
           <section
             key={i}
             className={c(
+              {
+                'opacity-50': project.archived
+              },
+              'hover:opacity-100',
               'flex',
               'flex-col',
               'p-4',
@@ -63,7 +67,7 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
                 <div className={c('font-light')}>
                   <Inline>
                     <FiArchive strokeWidth={1} />
-                    <div>Not maintained</div>
+                    <div>Archived</div>
                   </Inline>
                 </div>
               )}
@@ -120,7 +124,16 @@ export const getStaticProps: GetStaticProps<ProjectsPageProps> = async () => {
   // Remove undefined values because they cannot be serialized
   deleteUndefined(projects);
 
-  projects.sort((a, b) => b.stars - a.stars);
+  // Sort by archive status and then by stars
+  projects.sort((a, b) => {
+    if (a.archived && !b.archived) {
+      return 1;
+    } else if (!a.archived && b.archived) {
+      return -1;
+    } else {
+      return b.stars - a.stars;
+    }
+  });
 
   return {
     props: {
