@@ -9,10 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
+    permissions:
+      actions: write
+
     steps:
-      - name: Trigger deploy
-        uses: tyrrrz/action-http-request@25f132e48dea89c0f6b7955398270b506e1d51cb # 1.1.4
-        with:
-          url: ${{ secrets.VERCEL_WEBHOOK }}
-          method: POST
-          retry-count: 5
+      - name: Trigger build and deploy
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: gh workflow run main.yml --repo "$GH_REPO"

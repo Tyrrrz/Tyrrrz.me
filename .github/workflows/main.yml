@@ -40,10 +40,10 @@ jobs:
           fi
 
       - name: Verify formatting
-        run: yarn run format --if-present
+        run: yarn format
 
       - name: Perform linting
-        run: yarn run lint --if-present
+        run: yarn lint
 
   build:
     runs-on: ubuntu-latest
