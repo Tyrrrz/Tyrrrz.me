@@ -1,0 +1,13 @@
+---
+import BlogPage from '../../components/pages/BlogPage';
+import Layout from '../../layouts/Layout.astro';
+import { loadBlogPostRefs } from '~/data/blog';
+import { bufferIterable } from '~/utils/async';
+
+const posts = await bufferIterable(loadBlogPostRefs());
+posts.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+---
+
+<Layout title="Blog" rssUrl="/blog.rss">
+  <BlogPage posts={posts} />
+</Layout>

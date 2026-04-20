@@ -1,18 +1,14 @@
 import c from 'classnames';
-import { NextPage } from 'next';
-import Code from '~/components/code';
+import { FC } from 'react';
 import Heading from '~/components/heading';
 import Link from '~/components/link';
 import List from '~/components/list';
 import ListItem from '~/components/listItem';
-import Meta from '~/components/meta';
 import Paragraph from '~/components/paragraph';
 
-const UkrainePage: NextPage = () => {
+const UkrainePage: FC = () => {
   return (
     <>
-      <Meta title="#StandWithUkraine" />
-
       <section>
         <Heading>#StandWithUkraine</Heading>
 
@@ -57,8 +53,8 @@ const UkrainePage: NextPage = () => {
 
         <Paragraph>
           Since early 2026 I have finally left behind my career in software development and joined
-          the Armed Forces of Ukraine. It&apos;s not clear when this war will end, but it&apos;s clear
-          that it won&apos;t end by itself.
+          the Armed Forces of Ukraine. It&apos;s not clear when this war will end, but it&apos;s
+          clear that it won&apos;t end by itself.
         </Paragraph>
 
         <Paragraph>
@@ -74,7 +70,7 @@ const UkrainePage: NextPage = () => {
             <Link href="https://dzygaspaw.com/support?source=tyrrrz">
               <span className={c('font-semibold')}>Dzyga&apos;s Paw</span> Foundation
             </Link>{' '}
-            (defensive & humanitarian aid)
+            (defensive &amp; humanitarian aid)
           </ListItem>
 
           <ListItem>
@@ -88,7 +84,7 @@ const UkrainePage: NextPage = () => {
             <Link href="https://prytulafoundation.org/en/home/support_page">
               <span className={c('font-semibold')}>Serhiy Prytula</span> Foundation
             </Link>{' '}
-            (defensive & humanitarian aid)
+            (defensive &amp; humanitarian aid)
           </ListItem>
 
           <ListItem>

@@ -1,5 +1,4 @@
 import c from 'classnames';
-import NextLink from 'next/link';
 import { FC, PropsWithChildren } from 'react';
 import { isAbsoluteUrl } from '~/utils/url';
 
@@ -15,10 +14,8 @@ const Link: FC<LinkProps> = ({
   external = isAbsoluteUrl(href),
   children
 }) => {
-  const Proxy = external ? 'a' : NextLink;
-
   return (
-    <Proxy
+    <a
       className={c({
         'text-blue-500': variant === 'normal',
         'dark:text-blue-300': variant === 'normal',
@@ -31,7 +28,7 @@ const Link: FC<LinkProps> = ({
       rel="noreferrer"
     >
       {children}
-    </Proxy>
+    </a>
   );
 };
 

@@ -1,0 +1,24 @@
+---
+import ProjectsPage from '../../components/pages/ProjectsPage';
+import Layout from '../../layouts/Layout.astro';
+import { loadProjects, publishProjectStats } from '~/data/projects';
+import { bufferIterable } from '~/utils/async';
+
+await publishProjectStats();
+const projects = await bufferIterable(loadProjects());
+
+// Sort by archive status and then by stars
+projects.sort((a, b) => {
+  if (a.archived && !b.archived) {
+    return 1;
+  } else if (!a.archived && b.archived) {
+    return -1;
+  } else {
+    return b.stars - a.stars;
+  }
+});
+---
+
+<Layout title="Projects">
+  <ProjectsPage projects={projects} />
+</Layout>

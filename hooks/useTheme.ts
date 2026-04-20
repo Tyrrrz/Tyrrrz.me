@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import useLocalState from '~/hooks/useLocalState';
 import useMedia from '~/hooks/useMedia';
 
@@ -22,18 +22,31 @@ const useTheme = () => {
     return null;
   }, [systemPrefersDarkTheme, systemPrefersLightTheme]);
 
+  const theme =
+    userPreferredTheme ||
+    systemPreferredTheme ||
+    // Default to dark to avoid flash banging users
+    'dark';
+
+  // Apply the theme class to <html> so Tailwind dark: variants work
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    } else {
+      document.documentElement.classList.add('light');
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
+
   return useMemo(() => {
     return {
       userPreferredTheme,
       systemPreferredTheme,
-      theme:
-        userPreferredTheme ||
-        systemPreferredTheme ||
-        // Default to dark to avoid flash banging users
-        'dark',
+      theme,
       setTheme: setUserPreferredTheme
     };
-  }, [systemPreferredTheme, userPreferredTheme, setUserPreferredTheme]);
+  }, [systemPreferredTheme, userPreferredTheme, theme, setUserPreferredTheme]);
 };
 
 export default useTheme;

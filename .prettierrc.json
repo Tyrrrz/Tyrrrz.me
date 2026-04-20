@@ -8,5 +8,14 @@
   "singleQuote": true,
   "tabWidth": 2,
   "trailingComma": "none",
-  "quoteProps": "consistent"
+  "quoteProps": "consistent",
+  "plugins": ["prettier-plugin-astro", "prettier-plugin-organize-imports"],
+  "overrides": [
+    {
+      "files": "*.astro",
+      "options": {
+        "parser": "astro"
+      }
+    }
+  ]
 }

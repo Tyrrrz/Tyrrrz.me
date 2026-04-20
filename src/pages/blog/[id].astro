@@ -1,0 +1,29 @@
+---
+import BlogComments from '../../components/BlogComments';
+import BlogPostPage from '../../components/pages/BlogPostPage';
+import Layout from '../../layouts/Layout.astro';
+import { loadBlogPost, loadBlogPostRefs, publishBlogPostAssets } from '~/data/blog';
+
+export async function getStaticPaths() {
+  const ids: string[] = [];
+  for await (const post of loadBlogPostRefs()) {
+    ids.push(post.id);
+  }
+  return ids.map((id) => ({ params: { id } }));
+}
+
+const { id } = Astro.params;
+await publishBlogPostAssets(id);
+const post = await loadBlogPost(id);
+---
+
+<Layout
+  title={post.title}
+  description={post.excerpt}
+  imageLayout={post.coverUrl ? 'fill' : 'aside'}
+  imageUrl={post.coverUrl}
+  rssUrl="/blog.rss"
+>
+  <BlogPostPage post={post} />
+  <BlogComments postTitle={post.title} client:only="react" />
+</Layout>

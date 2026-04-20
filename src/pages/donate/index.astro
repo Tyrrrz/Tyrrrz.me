@@ -1,0 +1,14 @@
+---
+import DonatePage from '../../components/pages/DonatePage';
+import Layout from '../../layouts/Layout.astro';
+import { loadDonations, publishDonationStats } from '~/data/donate';
+import { bufferIterable } from '~/utils/async';
+
+await publishDonationStats();
+const donations = await bufferIterable(loadDonations());
+donations.sort((a, b) => b.amount - a.amount);
+---
+
+<Layout title="Donate">
+  <DonatePage donations={donations} />
+</Layout>

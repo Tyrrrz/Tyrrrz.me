@@ -1,0 +1,10 @@
+---
+import HomePage from '../components/pages/HomePage';
+import Layout from '../layouts/Layout.astro';
+
+const age = new Date(Date.now() - Date.parse('1995-04-28')).getUTCFullYear() - 1970;
+---
+
+<Layout>
+  <HomePage age={age} />
+</Layout>

@@ -1,5 +1,5 @@
 import c from 'classnames';
-import { GetStaticProps, NextPage } from 'next';
+import { FC } from 'react';
 import { FiDollarSign } from 'react-icons/fi';
 import Code from '~/components/code';
 import Heading from '~/components/heading';
@@ -7,21 +7,16 @@ import Inline from '~/components/inline';
 import Link from '~/components/link';
 import List from '~/components/list';
 import ListItem from '~/components/listItem';
-import Meta from '~/components/meta';
 import Paragraph from '~/components/paragraph';
-import { Donation, loadDonations, publishDonationStats } from '~/data/donate';
-import { bufferIterable } from '~/utils/async';
-import { deleteUndefined } from '~/utils/object';
+import { Donation } from '~/data/donate';
 
-type DonationPageProps = {
+type DonatPageProps = {
   donations: Donation[];
 };
 
-const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
+const DonatePage: FC<DonatPageProps> = ({ donations }) => {
   return (
     <>
-      <Meta title="Donate" />
-
       <section>
         <Heading>Donate</Heading>
 
@@ -104,23 +99,4 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
   );
 };
 
-export const getStaticProps: GetStaticProps<DonationPageProps> = async () => {
-  await publishDonationStats();
-
-  const donations = await bufferIterable(loadDonations());
-
-  // Remove undefined values because they cannot be serialized
-  for (const donation of donations) {
-    deleteUndefined(donation);
-  }
-
-  donations.sort((a, b) => b.amount - a.amount);
-
-  return {
-    props: {
-      donations
-    }
-  };
-};
-
-export default DonationPage;
+export default DonatePage;

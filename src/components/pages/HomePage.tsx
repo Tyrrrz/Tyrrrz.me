@@ -1,17 +1,17 @@
 import c from 'classnames';
-import { NextPage } from 'next';
-import { FaGithub, FaBluesky } from 'react-icons/fa6';
+import { FC } from 'react';
+import { FaBluesky, FaGithub } from 'react-icons/fa6';
 import Heading from '~/components/heading';
 import Image from '~/components/image';
 import Link from '~/components/link';
 import Paragraph from '~/components/paragraph';
 import UkraineAlert from '~/components/ukraineAlert';
 
-const now = Date.now();
+type HomePageProps = {
+  age: number;
+};
 
-const HomePage: NextPage = () => {
-  const age = new Date(now - Date.parse('1995-04-28')).getUTCFullYear() - 1970;
-
+const HomePage: FC<HomePageProps> = ({ age }) => {
   const githubStarUrl = 'https://stars.github.com/profiles/tyrrrz';
   const microsoftMvpUrl = 'https://credly.com/badges/04f634b6-189f-4bed-8acb-974541039ef9';
 
@@ -48,10 +48,10 @@ const HomePage: NextPage = () => {
           <Paragraph>
             I&apos;m also an active member of the developer community, a{' '}
             <Link href={githubStarUrl}>GitHub Star</Link> and a{' '}
-            <Link href={microsoftMvpUrl}>Microsoft MVP Alumnus</Link> — I spend most of my free time
-            maintaining a few popular <Link href="/projects">open-source projects</Link>, speaking
-            at various <Link href="/speaking">technical conferences</Link>, or sharing knowledge and
-            experience on <Link href="/blog">my blog</Link>.
+            <Link href={microsoftMvpUrl}>Microsoft MVP Alumnus</Link> — I spend most of my free
+            time maintaining a few popular <Link href="/projects">open-source projects</Link>,
+            speaking at various <Link href="/speaking">technical conferences</Link>, or sharing
+            knowledge and experience on <Link href="/blog">my blog</Link>.
           </Paragraph>
         </div>
       </section>

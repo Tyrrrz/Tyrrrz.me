@@ -2,7 +2,7 @@ import ellipsize from 'ellipsize';
 import { Feed } from 'feed';
 import frontmatter from 'front-matter';
 import fs from 'fs/promises';
-import markdownToTxt from 'markdown-to-txt';
+import { markdownToTxt } from 'markdown-to-txt';
 import path from 'path';
 import readingTime from 'reading-time';
 import { getSiteUrl } from '~/utils/env';

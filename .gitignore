@@ -12,16 +12,9 @@ yarn-error.log*
 lerna-debug.log*
 *.tsbuildinfo
 
-# next.js
-/.next/
-/build/
-/next-env.d.ts
-
-# next-pwa
-/public/fallback-*.js*
-/public/workbox-*.js*
-/public/sw.js*
-/public/worker-*.js*
+# astro
+/.astro/
+/dist/
 
 # blog assets
 /public/blog/

@@ -7,19 +7,11 @@ export const isProduction = () => {
 };
 
 export const getBuildId = () => {
-  const value = process.env.BUILD_ID;
-  if (!value) {
-    throw new Error(`Environment variable 'BUILD_ID' is not defined`);
-  }
-
-  return value;
+  return process.env.BUILD_ID || 'dev';
 };
 
 export const getSiteUrl = (path?: string) => {
-  const value = process.env.SITE_URL;
-  if (!value) {
-    throw new Error(`Environment variable 'SITE_URL' is not defined`);
-  }
+  const value = process.env.SITE_URL || 'https://tyrrrz.me';
 
   if (path) {
     return new URL(path, value).toString();

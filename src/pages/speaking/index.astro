@@ -1,0 +1,13 @@
+---
+import SpeakingPage from '../../components/pages/SpeakingPage';
+import Layout from '../../layouts/Layout.astro';
+import { loadSpeakingEngagements } from '~/data/speaking';
+import { bufferIterable } from '~/utils/async';
+
+const engagements = await bufferIterable(loadSpeakingEngagements());
+engagements.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+---
+
+<Layout title="Speaking">
+  <SpeakingPage engagements={engagements} />
+</Layout>
