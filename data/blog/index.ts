@@ -131,7 +131,16 @@ export const publishBlogFeed = async () => {
 
   feed.items.sort((a, b) => b.date.getTime() - a.date.getTime());
 
+  const feedContent = feed.rss2();
+
+  // Write to /blog.rss (canonical path)
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   await fs.rm(filePath, { force: true });
-  await fs.writeFile(filePath, feed.rss2());
+  await fs.writeFile(filePath, feedContent);
+
+  // Also write to /blog/rss.xml (legacy path)
+  const legacyFilePath = path.resolve(process.cwd(), 'public', 'blog', 'rss.xml');
+  await fs.mkdir(path.dirname(legacyFilePath), { recursive: true });
+  await fs.rm(legacyFilePath, { force: true });
+  await fs.writeFile(legacyFilePath, feedContent);
 };

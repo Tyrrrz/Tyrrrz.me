@@ -5,11 +5,13 @@ const runtimeCaching = require('next-pwa/cache');
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
+  output: 'export',
 
   // Pulling donations takes a very long time, so we need to make sure we don't time out too early
   staticPageGenerationTimeout: 60 * 60,
 
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -26,32 +28,8 @@ const config = {
       .filter(Boolean)
       .join('-'),
 
-    SITE_URL:
-      process.env.SITE_URL ||
-      (process.env.VERCEL_URL && 'https://' + process.env.VERCEL_URL) ||
-      'http://localhost:3000'
-  },
-
-  redirects: async () => [
-    // Old version of the site had a separate page for each project
-    {
-      source: '/projects/:slug',
-      destination: '/projects',
-      permanent: true
-    },
-    // Renamed blog posts
-    {
-      source: '/blog/return-type-inference',
-      destination: '/blog/target-type-inference',
-      permanent: true
-    },
-    // Moved blog RSS feed
-    {
-      source: '/blog/rss.xml',
-      destination: '/blog.rss',
-      permanent: true
-    }
-  ]
+    SITE_URL: process.env.SITE_URL || 'http://localhost:3000'
+  }
 };
 
 const plugins = [
