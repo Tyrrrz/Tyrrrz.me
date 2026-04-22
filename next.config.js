@@ -21,12 +21,14 @@ const config = {
   },
 
   env: {
-    BUILD_ID: [
-      spawnSync('git', ['rev-parse', '--short', 'HEAD']).stdout.toString().trim(),
-      spawnSync('git', ['tag', '--points-at', 'HEAD']).stdout.toString().trim()
-    ]
-      .filter(Boolean)
-      .join('-'),
+    BUILD_ID:
+      process.env.BUILD_ID ||
+      [
+        spawnSync('git', ['rev-parse', '--short', 'HEAD']).stdout.toString().trim(),
+        spawnSync('git', ['tag', '--points-at', 'HEAD']).stdout.toString().trim()
+      ]
+        .filter(Boolean)
+        .join('-'),
 
     SITE_URL: process.env.SITE_URL || 'http://localhost:3000'
   }
