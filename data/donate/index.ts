@@ -37,8 +37,7 @@ export const publishDonationStats = async () => {
   const WIDTH = 440;
   const HEIGHT = 190;
 
-  const esc = (s: string) =>
-    s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
   // Each rank is a separate variable so ${...} expressions are embedded in the
   // SVG template literal chain, preventing the minifier from constant-folding

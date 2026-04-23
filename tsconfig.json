@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "module": "esnext",
     "moduleResolution": "bundler",
     "jsx": "preserve",
@@ -22,9 +18,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "paths": {
-      "~/*": [
-        "./*"
-      ]
+      "~/*": ["./*"]
     },
     "plugins": [
       {
@@ -32,10 +26,6 @@
       }
     ]
   },
-  "include": [
-    "**/*"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["**/*"],
+  "exclude": ["node_modules"]
 }
