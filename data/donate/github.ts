@@ -4,19 +4,21 @@ import { distinctBy } from '~/utils/array';
 import { bufferIterable } from '~/utils/async';
 import { getGitHubToken, getPrivateDonors } from '~/utils/env';
 
+const TOKEN = getGitHubToken();
+
 // Test here:
 // https://docs.github.com/en/graphql/overview/explorer
+const getSponsorActivities = async function* () {
+  if (!TOKEN) {
+    return;
+  }
 
-const createClient = () => {
-  return graphql.defaults({
+  const github = graphql.defaults({
     headers: {
-      authorization: `token ${getGitHubToken()}`
+      authorization: `token ${TOKEN}`
     }
   });
-};
 
-const getSponsorActivities = async function* () {
-  const github = createClient();
   let cursor: string | undefined;
 
   while (true) {

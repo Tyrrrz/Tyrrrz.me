@@ -5,7 +5,6 @@ import fakes from '~/data/donate/fakes';
 import { getGitHubSponsorsDonations } from '~/data/donate/github';
 import { getPatreonDonations } from '~/data/donate/patreon';
 import { bufferIterable } from '~/utils/async';
-import { isProduction } from '~/utils/env';
 
 export type Donation = {
   name?: string;
@@ -14,15 +13,28 @@ export type Donation = {
 };
 
 export const loadDonations = async function* () {
-  // Use fake data in development
-  if (!isProduction()) {
+  let hasYielded = false;
+
+  for await (const donation of getGitHubSponsorsDonations()) {
+    yield donation;
+    hasYielded = true;
+  }
+
+  for await (const donation of getPatreonDonations()) {
+    yield donation;
+    hasYielded = true;
+  }
+
+  for await (const donation of getBuyMeACoffeeDonations()) {
+    yield donation;
+    hasYielded = true;
+  }
+
+  // If no donations fetched, yield fake data (probably due to missing tokens)
+  if (!hasYielded) {
     yield* fakes;
     return;
   }
-
-  yield* getGitHubSponsorsDonations();
-  yield* getPatreonDonations();
-  yield* getBuyMeACoffeeDonations();
 };
 
 export const publishDonationStats = async () => {

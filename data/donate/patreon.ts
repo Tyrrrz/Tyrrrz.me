@@ -2,9 +2,14 @@ import { Donation } from '~/data/donate';
 import { getPatreonToken, getPrivateDonors } from '~/utils/env';
 import { formatUrlWithQuery } from '~/utils/url';
 
-const getCampaigns = async function* () {
-  let cursor = '';
+const TOKEN = getPatreonToken();
 
+const getCampaigns = async function* () {
+  if (!TOKEN) {
+    return;
+  }
+
+  let cursor = '';
   while (true) {
     // The 'www' part is essential 😒
     const url = formatUrlWithQuery('https://www.patreon.com/api/oauth2/v2/campaigns', {
@@ -13,7 +18,7 @@ const getCampaigns = async function* () {
 
     const response = await fetch(url, {
       headers: {
-        authorization: `Bearer ${getPatreonToken()}`
+        authorization: `Bearer ${TOKEN}`
       }
     });
 
@@ -38,7 +43,6 @@ const getCampaigns = async function* () {
     };
 
     const body: ResponseBody = await response.json();
-
     yield* body.data;
 
     if (!body.meta.pagination.cursors?.next) {
@@ -50,8 +54,11 @@ const getCampaigns = async function* () {
 };
 
 const getPledges = async function* (campaignId: string) {
-  let cursor = '';
+  if (!TOKEN) {
+    return;
+  }
 
+  let cursor = '';
   while (true) {
     // The 'www' part is essential 😒
     const url = formatUrlWithQuery(
@@ -64,7 +71,7 @@ const getPledges = async function* (campaignId: string) {
 
     const response = await fetch(url, {
       headers: {
-        authorization: `Bearer ${getPatreonToken()}`
+        authorization: `Bearer ${TOKEN}`
       }
     });
 
@@ -93,7 +100,6 @@ const getPledges = async function* (campaignId: string) {
     };
 
     const body: ResponseBody = await response.json();
-
     yield* body.data;
 
     if (!body.meta.pagination.cursors?.next) {

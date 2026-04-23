@@ -17,11 +17,6 @@ const config = {
         hostname: 'raw.githubusercontent.com'
       }
     ]
-  },
-
-  env: {
-    BUILD_ID: process.env.BUILD_ID,
-    SITE_URL: process.env.SITE_URL || 'http://localhost:3000'
   }
 };
 

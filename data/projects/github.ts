@@ -1,16 +1,17 @@
 import { Octokit } from '@octokit/rest';
 import { getGitHubToken } from '~/utils/env';
 
+const TOKEN = getGitHubToken();
 const OWNER = 'Tyrrrz';
 
-const createClient = () => {
-  return new Octokit({
-    auth: getGitHubToken()
-  });
-};
-
 export const getGitHubRepos = async () => {
-  const github = createClient();
+  if (!TOKEN) {
+    return [];
+  }
+
+  const github = new Octokit({
+    auth: TOKEN
+  });
 
   return await github.paginate(github.repos.listForUser, {
     username: OWNER,
@@ -21,7 +22,13 @@ export const getGitHubRepos = async () => {
 };
 
 export const getGitHubDownloads = async (repoName: string) => {
-  const github = createClient();
+  if (!TOKEN) {
+    return 0;
+  }
+
+  const github = new Octokit({
+    auth: TOKEN
+  });
 
   const releases = await github.paginate(github.repos.listReleases, {
     owner: OWNER,
@@ -35,8 +42,14 @@ export const getGitHubDownloads = async (repoName: string) => {
 };
 
 export const getGitHubLogoUrl = async (repoName: string) => {
+  if (!TOKEN) {
+    return undefined;
+  }
+
   try {
-    const github = createClient();
+    const github = new Octokit({
+      auth: TOKEN
+    });
 
     const { data } = await github.repos.getContent({
       owner: OWNER,
@@ -58,7 +71,13 @@ export const getGitHubLogoUrl = async (repoName: string) => {
 };
 
 export const getGitHubIssuesAndPRsCount = async () => {
-  const github = createClient();
+  if (!TOKEN) {
+    return 0;
+  }
+
+  const github = new Octokit({
+    auth: TOKEN
+  });
 
   const { data } = await github.search.issuesAndPullRequests({
     q: `user:${OWNER}`,
