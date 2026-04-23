@@ -25,12 +25,7 @@ export type Project = {
 };
 
 export const loadProjects = async function* () {
-  // Use fake data in development
-  if (!isProduction()) {
-    yield* fakes;
-    return;
-  }
-
+  let hasYielded = false;
   for (const repo of await getGitHubRepos()) {
     if (!repo.stargazers_count || repo.stargazers_count < 35) {
       continue;
@@ -60,6 +55,12 @@ export const loadProjects = async function* () {
     };
 
     yield project;
+    hasYielded = true;
+  }
+
+  // If no projects fetched, yield fake data (probably missing tokens)
+  if (!hasYielded) {
+    yield* fakes;
   }
 };
 
