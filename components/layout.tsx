@@ -179,7 +179,7 @@ const Header: FC = () => {
       <div className={c('sm:hidden', 'overflow-hidden')}>
         <nav
           className={c(
-            { '-mt-[100%]': !isMobileNavVisible },
+            { 'mt-[-100%]': !isMobileNavVisible },
             'p-2',
             'border-b-2',
             'border-neutral-100',
