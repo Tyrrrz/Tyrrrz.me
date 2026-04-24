@@ -17,6 +17,12 @@ const config = {
         hostname: 'raw.githubusercontent.com'
       }
     ]
+  },
+
+  // Expose environment variables to the client
+  env: {
+    BUILD_ID: process.env.BUILD_ID,
+    SITE_URL: process.env.SITE_URL
   }
 };
 
