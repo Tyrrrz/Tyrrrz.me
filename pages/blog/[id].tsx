@@ -1,5 +1,4 @@
 import Giscus from "@giscus/react";
-import { clsx } from "clsx";
 import { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import { FC } from "react";
 import { FiCalendar, FiClock } from "react-icons/fi";
@@ -29,8 +28,8 @@ const CoverSection: FC<BlogPostPageProps> = ({ post }) => {
   }
 
   return (
-    <section className={clsx("border", "p-4", "border-purple-500", "rounded", "bg-purple-100")}>
-      <div className={clsx("w-fit", "mx-auto")}>
+    <section className="rounded border border-purple-500 bg-purple-100 p-4">
+      <div className="mx-auto w-fit">
         <Image src={post.coverUrl} width={800} height={450} alt="Cover image" priority />
       </div>
     </section>
@@ -67,8 +66,8 @@ const UkraineSection: FC = () => {
 
 const SubscribeSection: FC = () => {
   return (
-    <section className={clsx("p-4", "border", "border-purple-500", "rounded", "space-y-1")}>
-      <div className={clsx("font-semibold")}>🔔 Subscribe for more</div>
+    <section className="space-y-1 rounded border border-purple-500 p-4">
+      <div className="font-semibold">🔔 Subscribe for more</div>
 
       <div>
         Want to know when I post a new article? Follow me on{" "}
@@ -122,18 +121,18 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
         rssUrl="/blog.rss"
       />
 
-      <div className={clsx("space-y-4")}>
+      <div className="space-y-4">
         <section>
           {/* Title */}
           <Heading>
-            <span className={clsx("font-mono", "text-neutral-400")}>
+            <span className="font-mono text-neutral-400">
               <Link href="/blog">‥</Link>/
             </span>
             <span>{post.title}</span>
           </Heading>
 
           {/* Misc info */}
-          <div className={clsx("flex", "flex-wrap", "-mt-2", "gap-x-3", "font-light")}>
+          <div className="-mt-2 flex flex-wrap gap-x-3 font-light">
             <Inline>
               <FiCalendar strokeWidth={1} />
               <div>

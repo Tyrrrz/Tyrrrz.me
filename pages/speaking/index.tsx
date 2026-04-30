@@ -1,4 +1,3 @@
-import { clsx } from "clsx";
 import { GetStaticProps, NextPage } from "next";
 import { FiCalendar, FiMapPin, FiMessageCircle, FiMic, FiRadio, FiTool } from "react-icons/fi";
 import Heading from "~/components/heading";
@@ -37,17 +36,17 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
         </Paragraph>
       </section>
 
-      <section className={clsx("mt-8", "space-y-6")}>
+      <section className="mt-8 space-y-6">
         {engagementsByYear.map(({ key: year, items }, i) => (
           <section key={i}>
             <Heading level={2}>{year}</Heading>
 
-            <div className={clsx("ml-4")}>
+            <div className="ml-4">
               <Timeline>
                 {items.map((engagement, i) => (
                   <TimelineItem key={i}>
                     {/* Title */}
-                    <div className={clsx("text-lg")}>
+                    <div className="text-lg">
                       <Link
                         href={
                           engagement.recordingUrl ||
@@ -61,7 +60,7 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
                     </div>
 
                     {/* Misc info */}
-                    <div className={clsx("flex", "flex-wrap", "gap-x-3", "font-light")}>
+                    <div className="flex flex-wrap gap-x-3 font-light">
                       <Inline>
                         <FiCalendar strokeWidth={1} />
                         <div>
@@ -79,7 +78,7 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
                           workshop: <FiTool strokeWidth={1} />,
                           podcast: <FiRadio strokeWidth={1} />,
                         }[engagement.kind] || <FiMic strokeWidth={1} />}
-                        <div className={clsx("capitalize")}>{engagement.kind}</div>
+                        <div className="capitalize">{engagement.kind}</div>
                       </Inline>
 
                       <Inline>
@@ -91,7 +90,7 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
 
                       <Inline>
                         <FiMessageCircle strokeWidth={1} />
-                        <div className={clsx("capitalize")}>{engagement.language}</div>
+                        <div className="capitalize">{engagement.language}</div>
                       </Inline>
                     </div>
                   </TimelineItem>

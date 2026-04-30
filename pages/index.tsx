@@ -1,4 +1,3 @@
-import { clsx } from "clsx";
 import { NextPage } from "next";
 import { FaBluesky, FaGithub } from "react-icons/fa6";
 import Heading from "~/components/heading";
@@ -17,22 +16,13 @@ const HomePage: NextPage = () => {
 
   return (
     <>
-      <section
-        className={clsx(
-          "flex",
-          "flex-col",
-          "md:flex-row-reverse",
-          "items-center",
-          "md:items-start",
-          "gap-6",
-        )}
-      >
-        <div className={clsx("flex-none", "w-48", "md:w-56", "md:mt-12")}>
+      <section className="flex flex-col items-center gap-6 md:flex-row-reverse md:items-start">
+        <div className="w-48 flex-none md:mt-12 md:w-56">
           <Image src="/logo-trans.png" alt="picture" priority />
         </div>
 
         <div>
-          <div className={clsx("text-center", "md:text-left")}>
+          <div className="text-center md:text-left">
             <Heading>👋 Hello!</Heading>
           </div>
           <Paragraph>
@@ -56,20 +46,20 @@ const HomePage: NextPage = () => {
         </div>
       </section>
 
-      <section className={clsx("my-2")}>
+      <section className="my-2">
         <UkraineAlert />
       </section>
 
-      <div className={clsx("my-8", "h-1", "rounded", "bg-purple-500")} />
+      <div className="my-8 h-1 rounded bg-purple-500" />
 
-      <section className={clsx("flex", "justify-center", "gap-3", "text-2xl", "font-light")}>
+      <section className="flex justify-center gap-3 text-2xl font-light">
         <Link variant="discreet" href="https://github.com/Tyrrrz">
-          <div className={clsx("px-2")}>
+          <div className="px-2">
             <FaGithub strokeWidth={1} />
           </div>
         </Link>
         <Link variant="discreet" href="https://bsky.app/profile/tyrrrz.me">
-          <div className={clsx("px-2")}>
+          <div className="px-2">
             <FaBluesky strokeWidth={1} />
           </div>
         </Link>
