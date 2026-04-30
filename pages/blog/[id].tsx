@@ -11,7 +11,7 @@ import Markdown from "~/components/markdown";
 import Meta from "~/components/meta";
 import UkraineAlert from "~/components/ukraineAlert";
 import { BlogPost, loadBlogPost, loadBlogPostRefs, publishBlogPostAssets } from "~/data/blog";
-import useTheme from "~/hooks/useTheme";
+import { useTheme } from "~/hooks/useTheme";
 import { deleteUndefined } from "~/utils/object";
 import { isAbsoluteUrl } from "~/utils/url";
 
