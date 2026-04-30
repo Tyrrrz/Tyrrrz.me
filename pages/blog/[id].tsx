@@ -1,19 +1,19 @@
-import Giscus from '@giscus/react';
-import c from 'classnames';
-import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
-import { FC } from 'react';
-import { FiCalendar, FiClock } from 'react-icons/fi';
-import Heading from '~/components/heading';
-import Image from '~/components/image';
-import Inline from '~/components/inline';
-import Link from '~/components/link';
-import Markdown from '~/components/markdown';
-import Meta from '~/components/meta';
-import UkraineAlert from '~/components/ukraineAlert';
-import { BlogPost, loadBlogPost, loadBlogPostRefs, publishBlogPostAssets } from '~/data/blog';
-import useTheme from '~/hooks/useTheme';
-import { deleteUndefined } from '~/utils/object';
-import { isAbsoluteUrl } from '~/utils/url';
+import Giscus from "@giscus/react";
+import { clsx } from "clsx";
+import { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import { FC } from "react";
+import { FiCalendar, FiClock } from "react-icons/fi";
+import Heading from "~/components/heading";
+import Image from "~/components/image";
+import Inline from "~/components/inline";
+import Link from "~/components/link";
+import Markdown from "~/components/markdown";
+import Meta from "~/components/meta";
+import UkraineAlert from "~/components/ukraineAlert";
+import { BlogPost, loadBlogPost, loadBlogPostRefs, publishBlogPostAssets } from "~/data/blog";
+import useTheme from "~/hooks/useTheme";
+import { deleteUndefined } from "~/utils/object";
+import { isAbsoluteUrl } from "~/utils/url";
 
 type BlogPostPageProps = {
   post: BlogPost;
@@ -29,8 +29,8 @@ const CoverSection: FC<BlogPostPageProps> = ({ post }) => {
   }
 
   return (
-    <section className={c('p-4', 'border', 'border-purple-500', 'rounded', 'bg-purple-100')}>
-      <div className={c('w-fit', 'mx-auto')}>
+    <section className={clsx("border", "p-4", "border-purple-500", "rounded", "bg-purple-100")}>
+      <div className={clsx("w-fit", "mx-auto")}>
         <Image src={post.coverUrl} width={800} height={450} alt="Cover image" priority />
       </div>
     </section>
@@ -45,7 +45,7 @@ const ArticleSection: FC<BlogPostPageProps> = ({ post }) => {
           source={post.source}
           // Transform local-relative URLs to site-relative URLs
           transformUrl={(url: string) => {
-            if (isAbsoluteUrl(url) || url.startsWith('/')) {
+            if (isAbsoluteUrl(url) || url.startsWith("/")) {
               return url;
             }
 
@@ -67,12 +67,12 @@ const UkraineSection: FC = () => {
 
 const SubscribeSection: FC = () => {
   return (
-    <section className={c('p-4', 'border', 'border-purple-500', 'rounded', 'space-y-1')}>
-      <div className={c('font-semibold')}>🔔 Subscribe for more</div>
+    <section className={clsx("p-4", "border", "border-purple-500", "rounded", "space-y-1")}>
+      <div className={clsx("font-semibold")}>🔔 Subscribe for more</div>
 
       <div>
-        Want to know when I post a new article? Follow me on{' '}
-        <Link href="https://bsky.app/profile/tyrrrz.me">Bluesky</Link> or subscribe to the{' '}
+        Want to know when I post a new article? Follow me on{" "}
+        <Link href="https://bsky.app/profile/tyrrrz.me">Bluesky</Link> or subscribe to the{" "}
         <Link href="/blog.rss" external>
           RSS Feed
         </Link>
@@ -98,11 +98,11 @@ const CommentSection: FC<BlogPostPageProps> = ({ post }) => {
         emitMetadata="0"
         inputPosition="top"
         theme={
-          userPreferredTheme === 'dark'
-            ? 'dark'
-            : userPreferredTheme === 'light'
-              ? 'light'
-              : 'preferred_color_scheme'
+          userPreferredTheme === "dark"
+            ? "dark"
+            : userPreferredTheme === "light"
+              ? "light"
+              : "preferred_color_scheme"
         }
         lang="en"
         loading="lazy"
@@ -117,30 +117,30 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
       <Meta
         title={post.title}
         description={post.excerpt}
-        imageLayout={post.coverUrl ? 'fill' : 'aside'}
+        imageLayout={post.coverUrl ? "fill" : "aside"}
         imageUrl={post.coverUrl}
         rssUrl="/blog.rss"
       />
 
-      <div className={c('space-y-4')}>
+      <div className={clsx("space-y-4")}>
         <section>
           {/* Title */}
           <Heading>
-            <span className={c('font-mono', 'text-neutral-400')}>
+            <span className={clsx("font-mono", "text-neutral-400")}>
               <Link href="/blog">‥</Link>/
             </span>
             <span>{post.title}</span>
           </Heading>
 
           {/* Misc info */}
-          <div className={c('flex', 'flex-wrap', '-mt-2', 'gap-x-3', 'font-light')}>
+          <div className={clsx("flex", "flex-wrap", "-mt-2", "gap-x-3", "font-light")}>
             <Inline>
               <FiCalendar strokeWidth={1} />
               <div>
-                {new Date(post.date).toLocaleDateString('en-US', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric'
+                {new Date(post.date).toLocaleDateString("en-US", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
                 })}
               </div>
             </Inline>
@@ -171,16 +171,16 @@ export const getStaticPaths: GetStaticPaths<BlogPostPageParams> = async () => {
 
   return {
     paths: ids.map((id) => ({ params: { id } })),
-    fallback: false
+    fallback: false,
   };
 };
 
 export const getStaticProps: GetStaticProps<BlogPostPageProps, BlogPostPageParams> = async ({
-  params
+  params,
 }) => {
   const { id } = params || {};
   if (!id) {
-    throw new Error('Missing blog post ID');
+    throw new Error("Missing blog post ID");
   }
 
   await publishBlogPostAssets(id);
@@ -191,8 +191,8 @@ export const getStaticProps: GetStaticProps<BlogPostPageProps, BlogPostPageParam
 
   return {
     props: {
-      post
-    }
+      post,
+    },
   };
 };
 

@@ -1,6 +1,6 @@
 ---
-title: 'Simulating Target-Type Inference in C#'
-date: '2020-03-10'
+title: "Simulating Target-Type Inference in C#"
+date: "2020-03-10"
 ---
 
 Above everything else in software development, I really enjoy building frameworks that enable other developers to create something cool. Sometimes, when chasing that perfect design I have in mind, I find myself coming up with weird hacks that push the C# language to the limit.
@@ -333,9 +333,9 @@ For example, imagine we were using our result type in the following scenario:
 ```csharp
 public interface ITranslationService
 {
-    Task<bool> IsLanguageSupportedAsync(string language);
+    Task<bool> IsLanguageSupportedAsynclsx(string language);
 
-    Task<string> TranslateAsync(string text, string targetLanguage);
+    Task<string> TranslateAsynclsx(string text, string targetLanguage);
 }
 
 public class Translator
@@ -347,12 +347,12 @@ public class Translator
         _translationService = translationService;
     }
 
-    public async Task<Result<string, string>> TranslateAsync(string text, string language)
+    public async Task<Result<string, string>> TranslateAsynclsx(string text, string language)
     {
-        if (!await _translationService.IsLanguageSupportedAsync(language))
+        if (!await _translationService.IsLanguageSupportedAsynclsx(language))
             return Result.Error($"Language {language} is not supported");
 
-        var translated = await _translationService.TranslateAsync(text, language);
+        var translated = await _translationService.TranslateAsynclsx(text, language);
         return Result.Ok(translated);
     }
 }
@@ -439,12 +439,12 @@ public class Translator
         _translationService = translationService;
     }
 
-    public async Task<Result<string, string>> TranslateAsync(string text, string language)
+    public async Task<Result<string, string>> TranslateAsynclsx(string text, string language)
     {
-        if (!await _translationService.IsLanguageSupportedAsync(language))
+        if (!await _translationService.IsLanguageSupportedAsynclsx(language))
             return Result.Error($"Language {language} is not supported");
 
-        var translated = await _translationService.TranslateAsync(text, language);
+        var translated = await _translationService.TranslateAsynclsx(text, language);
         return Result.Ok(translated);
     }
 }

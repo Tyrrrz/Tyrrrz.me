@@ -14,7 +14,7 @@
   "dependencies": {
     "@giscus/react": "^3.1.0",
     "@vercel/analytics": "^2.0.1",
-    "classnames": "^2.5.1",
+    "clsx": "^2.1.1",
     "html-react-parser": "^6.0.1",
     "minimatch": "^10.2.5",
     "next": "^15.5.4",
@@ -35,7 +35,6 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/react-syntax-highlighter": "^15.5.13",
-    "autoprefixer": "^10.5.0",
     "ellipsize": "^0.7.0",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.4",
@@ -45,6 +44,7 @@
     "postcss": "^8.5.11",
     "prettier": "^3.8.3",
     "prettier-plugin-organize-imports": "^4.3.0",
+    "prettier-plugin-tailwindcss": "^0.8.0",
     "reading-time": "^1.5.0",
     "tailwindcss": "^4.0.3",
     "typescript": "^6.0.3"

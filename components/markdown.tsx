@@ -1,16 +1,15 @@
-import c from 'classnames';
-import { FC } from 'react';
-import ReactMarkdown from 'react-markdown';
-import Code from '~/components/code';
-import Heading from '~/components/heading';
-import Image from '~/components/image';
-import Link from '~/components/link';
-import List from '~/components/list';
-import Paragraph from '~/components/paragraph';
-import Pre from '~/components/pre';
-import Quote from '~/components/quote';
-import Syntax from '~/components/syntax';
-import { slugify } from '~/utils/url';
+import { FC } from "react";
+import ReactMarkdown from "react-markdown";
+import Code from "~/components/code";
+import Heading from "~/components/heading";
+import Image from "~/components/image";
+import Link from "~/components/link";
+import List from "~/components/list";
+import Paragraph from "~/components/paragraph";
+import Pre from "~/components/pre";
+import Quote from "~/components/quote";
+import Syntax from "~/components/syntax";
+import { slugify } from "~/utils/url";
 
 type MarkdownProps = {
   source: string;
@@ -24,7 +23,7 @@ const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
       components={{
         h1: ({ node, children }) => {
           const id =
-            node?.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
+            node?.children?.[0]?.type === "text" ? slugify(node.children[0].value) : undefined;
 
           return (
             <Heading id={id} level={1}>
@@ -34,7 +33,7 @@ const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
         },
         h2: ({ node, children }) => {
           const id =
-            node?.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
+            node?.children?.[0]?.type === "text" ? slugify(node.children[0].value) : undefined;
 
           return (
             <Heading id={id} level={2}>
@@ -44,7 +43,7 @@ const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
         },
         h3: ({ node, children }) => {
           const id =
-            node?.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
+            node?.children?.[0]?.type === "text" ? slugify(node.children[0].value) : undefined;
 
           return (
             <Heading id={id} level={3}>
@@ -54,7 +53,7 @@ const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
         },
         h4: ({ node, children }) => {
           const id =
-            node?.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
+            node?.children?.[0]?.type === "text" ? slugify(node.children[0].value) : undefined;
 
           return (
             <Heading id={id} level={4}>
@@ -64,7 +63,7 @@ const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
         },
         h5: ({ node, children }) => {
           const id =
-            node?.children?.[0]?.type === 'text' ? slugify(node.children[0].value) : undefined;
+            node?.children?.[0]?.type === "text" ? slugify(node.children[0].value) : undefined;
 
           return (
             <Heading id={id} level={5}>
@@ -73,16 +72,16 @@ const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
           );
         },
         a: ({ href, children }) => {
-          return <Link href={href || '#'}>{children}</Link>;
+          return <Link href={href || "#"}>{children}</Link>;
         },
         p: ({ children }) => {
           return <Paragraph>{children}</Paragraph>;
         },
         strong: ({ children }) => {
-          return <span className={c('font-semibold')}>{children}</span>;
+          return <span className="font-semibold">{children}</span>;
         },
         em: ({ children }) => {
-          return <span className={c('italic')}>{children}</span>;
+          return <span className="italic">{children}</span>;
         },
         ul: ({ children }) => {
           return <List variant="unordered">{children}</List>;
@@ -97,8 +96,8 @@ const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
         img: ({ src, alt }) => {
           return (
             <Image
-              src={typeof src === 'string' ? src : src ? URL.createObjectURL(src) : ''}
-              alt={alt || ''}
+              src={typeof src === "string" ? src : src ? URL.createObjectURL(src) : ""}
+              alt={alt || ""}
             />
           );
         },
@@ -111,17 +110,17 @@ const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
             node &&
             node.children.length === 1 &&
             node.children[0] &&
-            node.children[0].type === 'element' &&
-            node.children[0].tagName === 'code' &&
+            node.children[0].type === "element" &&
+            node.children[0].tagName === "code" &&
             node.children[0].children.length === 1 &&
             node.children[0].children[0] &&
-            node.children[0].children[0].type === 'text'
+            node.children[0].children[0].type === "text"
           ) {
             const source = node.children[0].children[0].value;
 
             const className =
-              typeof node.children[0].properties?.className === 'object'
-                ? node.children[0].properties.className?.join(' ')
+              typeof node.children[0].properties?.className === "object"
+                ? node.children[0].properties.className?.join(" ")
                 : String(node.children[0].properties?.className);
 
             const language = className && /language-(\w+)/iu.exec(className)?.[1];
@@ -138,19 +137,9 @@ const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
         },
         hr: () => {
           return (
-            <hr
-              className={c(
-                'w-3/4',
-                'mx-auto',
-                'my-4',
-                'border',
-                'border-neutral-100',
-                'dark:border-neutral-800',
-                'rounded'
-              )}
-            />
+            <hr className="mx-auto my-4 w-3/4 rounded border border-neutral-100 dark:border-neutral-800" />
           );
-        }
+        },
       }}
     >
       {source}

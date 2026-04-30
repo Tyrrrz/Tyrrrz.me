@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title>Oleksii Holub's Blog</title>
+        <link>http://localhost:3000/blog</link>
+        <description>Oleksii Holub (@tyrrrz) is a software developer, open-source maintainer, tech blogger and conference speaker</description>
+        <lastBuildDate>Thu, 30 Apr 2026 14:36:51 GMT</lastBuildDate>
+        <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
+        <generator>https://github.com/jpmonette/feed</generator>
+        <image>
+            <title>Oleksii Holub's Blog</title>
+            <url>http://localhost:3000/logo.png</url>
+            <link>http://localhost:3000/blog</link>
+        </image>
+        <copyright>Copyright (c) 2015-2026 Oleksii Holub</copyright>
+        <item>
+            <title><![CDATA[Reverse-Engineering YouTube: Revisited]]></title>
+            <link>http://localhost:3000/blog/reverse-engineering-youtube-revisited</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/reverse-engineering-youtube-revisited</guid>
+            <pubDate>Sat, 04 Feb 2023 00:00:00 GMT</pubDate>
+            <description><![CDATA[Back in 2017 I wrote an article in which I attempted to explain how YouTube works under the hood, how it serves streams to the client, and also how you can exploit that knowledge to download videos from the site. The primary goal of that write-up was to…]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Monadic Comprehension Syntax via LINQ in C#]]></title>
+            <link>http://localhost:3000/blog/monadic-comprehension-via-linq</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/monadic-comprehension-via-linq</guid>
+            <pubDate>Tue, 01 Jun 2021 00:00:00 GMT</pubDate>
+            <description><![CDATA[If you ask a C# developer to list the reasons why they enjoy working with the language, they will most likely put LINQ somewhere at the top. LINQ is an extremely convenient set of language tools that provide ways to query and transform data sequences of…]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Fluent Generics in C#]]></title>
+            <link>http://localhost:3000/blog/fluent-generics</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/fluent-generics</guid>
+            <pubDate>Tue, 17 Nov 2020 00:00:00 GMT</pubDate>
+            <description><![CDATA[Generic programming is a powerful feature available in many statically typed languages. It offers a way to write code that seamlessly operates against many different types, by targeting the features they share rather than the types themselves. This…]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Prefer Fakes Over Mocks]]></title>
+            <link>http://localhost:3000/blog/fakes-over-mocks</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/fakes-over-mocks</guid>
+            <pubDate>Tue, 13 Oct 2020 00:00:00 GMT</pubDate>
+            <description><![CDATA[The primary purpose of software testing is to detect any potential defects in a program before it reaches its intended consumers. This is typically achieved by establishing functional requirements which define supported user interactions as well as…]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Pure-Impure Segregation Principle]]></title>
+            <link>http://localhost:3000/blog/pure-impure-segregation-principle</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/pure-impure-segregation-principle</guid>
+            <pubDate>Mon, 24 Aug 2020 00:00:00 GMT</pubDate>
+            <description><![CDATA[Two months ago I published an article detailing why I think that Unit Testing is Overrated, which seemed to resonate quite a lot with readers, prompting very involved and interesting discussions. And although most commenters mainly shared their personal…]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Unit Testing is Overrated]]></title>
+            <link>http://localhost:3000/blog/unit-testing-is-overrated</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/unit-testing-is-overrated</guid>
+            <pubDate>Tue, 07 Jul 2020 00:00:00 GMT</pubDate>
+            <description><![CDATA[The importance of testing in modern software development is really hard to overstate. Delivering a successful product is not something you do once and forget about, but is rather a continuous and recurring process. With every line of code that changes,…]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Simulating Target-Type Inference in C#]]></title>
+            <link>http://localhost:3000/blog/target-type-inference</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/target-type-inference</guid>
+            <pubDate>Tue, 10 Mar 2020 00:00:00 GMT</pubDate>
+            <description><![CDATA[Above everything else in software development, I really enjoy building frameworks that enable other developers to create something cool. Sometimes, when chasing that perfect design I have in mind, I find myself coming up with weird hacks that push the C#…]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Working with Expression Trees in C#]]></title>
+            <link>http://localhost:3000/blog/expression-trees</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/expression-trees</guid>
+            <pubDate>Mon, 17 Feb 2020 00:00:00 GMT</pubDate>
+            <description><![CDATA[Expression trees is an obscure, although very interesting feature in .NET. Most people probably think of it as something synonymous with object-relational mapping frameworks, but despite being its most common use case, it's not the only one. There are a…]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Parsing in F# with FParsec]]></title>
+            <link>http://localhost:3000/blog/parsing-with-fparsec</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/parsing-with-fparsec</guid>
+            <pubDate>Sat, 04 Jan 2020 00:00:00 GMT</pubDate>
+            <description><![CDATA[Two months ago I wrote an article about Monadic Parser Combinators in C# and how you can use this approach to express complex recursive grammar. To extend this topic a bit, I also wanted to show how the same approach can be applied in a functional-first…]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Monadic Parser Combinators in C#]]></title>
+            <link>http://localhost:3000/blog/monadic-parser-combinators</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/monadic-parser-combinators</guid>
+            <pubDate>Sun, 10 Nov 2019 00:00:00 GMT</pubDate>
+            <description><![CDATA[A while ago I had to implement proper markdown parsing in DiscordChatExporter so that I could replace the brittle regular expressions I had been using. I had no idea how to approach this problem, so I spent days researching into this, eventually learning…]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Creative Use of Extension Methods in C#]]></title>
+            <link>http://localhost:3000/blog/creative-use-of-extension-methods</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/creative-use-of-extension-methods</guid>
+            <pubDate>Sat, 26 Jan 2019 00:00:00 GMT</pubDate>
+            <description><![CDATA[I'm sure that everyone with at least some background in C# is aware of extension methods — a nice feature that lets developers extend existing types with new methods.
+
+This is extremely convenient in case you want to add functionality to types that you…]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Reverse-Engineering YouTube]]></title>
+            <link>http://localhost:3000/blog/reverse-engineering-youtube</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/reverse-engineering-youtube</guid>
+            <pubDate>Fri, 15 Dec 2017 00:00:00 GMT</pubDate>
+            <description><![CDATA[Almost a year ago, I started developing YoutubeExplode, a library that scrapes information on YouTube videos and lets you download them. Originally, my main motivation for developing it was simply to gain experience, as the task involved a lot of research…]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Custom WndProc Handlers in WPF]]></title>
+            <link>http://localhost:3000/blog/wndproc-in-wpf</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/wndproc-in-wpf</guid>
+            <pubDate>Thu, 02 Feb 2017 00:00:00 GMT</pubDate>
+            <description><![CDATA[WndProc is a callback function that takes care of system messages sent from the operating system. Unlike WinForms, in WPF, it's not directly exposed to you as it's hidden beneath the framework's layer of abstraction.
+
+There are times, however, when you…]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Hotkey Editor Control in WPF]]></title>
+            <link>http://localhost:3000/blog/hotkey-editor-control-in-wpf</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/hotkey-editor-control-in-wpf</guid>
+            <pubDate>Thu, 02 Feb 2017 00:00:00 GMT</pubDate>
+            <description><![CDATA[GUI applications sometimes offer a way for users to configure hotkeys, typically using a textbox that records a combination of keys pressed inside it. Such control doesn't come out of the box in WPF, but we can implement it ourselves.
+
+Hotkey class
+
+WPF…]]></description>
+        </item>
+        <item>
+            <title><![CDATA[WPF ListBox SelectedItems TwoWay Binding]]></title>
+            <link>http://localhost:3000/blog/wpf-listbox-selecteditems-twoway-binding</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/wpf-listbox-selecteditems-twoway-binding</guid>
+            <pubDate>Tue, 01 Nov 2016 00:00:00 GMT</pubDate>
+            <description><![CDATA[For some unclear reasons, WPF's ListBox control does not allow two-way binding on the SelectedItems property the way it does with SelectedItem. This could have been very useful when using multi-select to bind the whole list of selected items to the view…]]></description>
+        </item>
+        <item>
+            <title><![CDATA[WPF TreeView SelectedItem TwoWay Binding]]></title>
+            <link>http://localhost:3000/blog/wpf-treeview-selecteditem-twoway-binding</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/wpf-treeview-selecteditem-twoway-binding</guid>
+            <pubDate>Sun, 30 Oct 2016 00:00:00 GMT</pubDate>
+            <description><![CDATA[The longer I work with WPF, the more I notice how many things it's missing. Recently I realized that TreeView.SelectedItem property is read-only and unbindable. I think there's no point explaining why binding SelectedItem would be useful, so there should…]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Conditional Content Presenting via WPF ContentPresenter]]></title>
+            <link>http://localhost:3000/blog/conditional-content-presenting-via-wpf-contentpresenter</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/conditional-content-presenting-via-wpf-contentpresenter</guid>
+            <pubDate>Fri, 28 Oct 2016 00:00:00 GMT</pubDate>
+            <description><![CDATA[Sometimes you may find yourself facing a problem of having to switch between multiple presentations based on some condition. For example, you may want to display the same list of items differently depending on whether multi-select is enabled or not.
+
+The…]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Parsing Steam Market]]></title>
+            <link>http://localhost:3000/blog/parsing-steam-market</link>
+            <guid isPermaLink="false">http://localhost:3000/blog/parsing-steam-market</guid>
+            <pubDate>Sat, 26 Sep 2015 00:00:00 GMT</pubDate>
+            <description><![CDATA[At some point, I was contracted to make a WordPress plugin that displays some basic information on an item from Steam Market. It had to show its name, image and the current lowest price.
+
+I was initially hoping that there would be some sort of API for…]]></description>
+        </item>
+    </channel>
+</rss>

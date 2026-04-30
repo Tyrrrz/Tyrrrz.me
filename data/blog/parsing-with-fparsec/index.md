@@ -1,6 +1,6 @@
 ---
-title: 'Parsing in F# with FParsec'
-date: '2020-01-04'
+title: "Parsing in F# with FParsec"
+date: "2020-01-04"
 ---
 
 Two months ago I wrote an article about [Monadic Parser Combinators in C#](/blog/monadic-parser-combinators) and how you can use this approach to express complex recursive grammar. To extend this topic a bit, I also wanted to show how the same approach can be applied in a functional-first language such as F#.

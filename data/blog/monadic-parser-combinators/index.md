@@ -1,6 +1,6 @@
 ---
-title: 'Monadic Parser Combinators in C#'
-date: '2019-11-10'
+title: "Monadic Parser Combinators in C#"
+date: "2019-11-10"
 ---
 
 A while ago I had to implement proper markdown parsing in [DiscordChatExporter](https://github.com/Tyrrrz/DiscordChatExporter) so that I could replace the brittle regular expressions I had been using. I had no idea how to approach this problem, so I spent days researching into this, eventually learning about parser combinators. This concept introduced me to a whole new paradigm of writing parsers that actually makes it a fun and enjoyable experience.
