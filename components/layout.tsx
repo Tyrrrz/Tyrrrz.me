@@ -6,9 +6,9 @@ import FadeIn from "react-fade-in";
 import { FiMenu, FiMoon, FiSun } from "react-icons/fi";
 import Link from "~/components/link";
 import Meta from "~/components/meta";
-import useDebounce from "~/hooks/useDebounce";
-import useRouterStatus from "~/hooks/useRouterStatus";
-import useTheme from "~/hooks/useTheme";
+import { useDebounce } from "~/hooks/useDebounce";
+import { useRouterStatus } from "~/hooks/useRouterStatus";
+import { useTheme } from "~/hooks/useTheme";
 
 const Loader: FC = () => {
   // Only show the loading indicator if the navigation takes a while.
