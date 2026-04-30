@@ -188,7 +188,7 @@ const Page: FC<PropsWithChildren> = ({ children }) => {
   const { theme } = useTheme();
 
   return (
-    <div className={clsx({ dark: theme === "dark", light: theme === "light" })}>
+    <div className={theme}>
       <div className="flex min-h-screen flex-col dark:bg-neutral-900 dark:text-neutral-200">
         <Loader />
         <div className="container mx-auto max-w-4xl">

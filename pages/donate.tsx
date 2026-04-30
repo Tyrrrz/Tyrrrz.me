@@ -71,10 +71,9 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
               </div>
 
               <div
-                className={clsx(
-                  { "font-semibold": !!donation.name },
-                  "overflow-hidden text-ellipsis",
-                )}
+                className={clsx("overflow-hidden text-ellipsis", {
+                  "font-semibold": !!donation.name,
+                })}
                 title={donation.name}
               >
                 {donation.name || "Anonymous"}

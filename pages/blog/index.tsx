@@ -1,4 +1,3 @@
-import { clsx } from "clsx";
 import { GetStaticProps, NextPage } from "next";
 import { FiCalendar, FiClock } from "react-icons/fi";
 import Heading from "~/components/heading";
@@ -40,22 +39,22 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
         </Paragraph>
       </section>
 
-      <section className={clsx("mt-8", "space-y-6")}>
+      <section className="mt-8 space-y-6">
         {postsByYear.map(({ key: year, items }, i) => (
           <section key={i}>
             <Heading level={2}>{year}</Heading>
 
-            <div className={clsx("ml-4")}>
+            <div className="ml-4">
               <Timeline>
                 {items.map((post, i) => (
                   <TimelineItem key={i}>
                     {/* Title */}
-                    <div className={clsx("text-lg")}>
+                    <div className="text-lg">
                       <Link href={`/blog/${post.id}`}>{post.title}</Link>
                     </div>
 
                     {/* Misc info */}
-                    <div className={clsx("flex", "flex-wrap", "gap-x-3", "font-light")}>
+                    <div className="flex flex-wrap gap-x-3 font-light">
                       <Inline>
                         <FiCalendar strokeWidth={1} />
                         <div>

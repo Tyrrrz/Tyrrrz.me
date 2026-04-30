@@ -30,50 +30,28 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
         </Paragraph>
       </section>
 
-      <section
-        className={clsx(
-          "grid",
-          "sm:grid-cols-1",
-          "md:grid-cols-2",
-          "lg:grid-cols-3",
-          "mt-8",
-          "gap-3",
-        )}
-      >
+      <section className="mt-8 grid gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {projects.map((project, i) => (
           <section
             key={i}
-            className={clsx(
-              {
-                "opacity-50": project.archived,
-              },
-              "hover:opacity-100",
-              "flex",
-              "flex-col",
-              "p-4",
-              "border",
-              {
-                "border-purple-500": project.stars >= 1000,
-                "border-purple-300": project.stars >= 100 && project.stars < 1000,
-                "dark:border-purple-700": project.stars >= 100 && project.stars < 1000,
-                "border-purple-100": project.stars < 100,
-                "dark:border-purple-900": project.stars < 100,
-              },
-              "rounded",
-            )}
+            className={clsx("flex flex-col rounded border p-4 hover:opacity-100", {
+              "opacity-50": project.archived,
+              "border-purple-500": project.stars >= 1000,
+              "border-purple-300": project.stars >= 100 && project.stars < 1000,
+              "dark:border-purple-700": project.stars >= 100 && project.stars < 1000,
+              "border-purple-100": project.stars < 100,
+              "dark:border-purple-900": project.stars < 100,
+            })}
           >
             {/* Name */}
-            <div
-              className={clsx("text-lg", "text-ellipsis", "overflow-hidden")}
-              title={project.name}
-            >
+            <div className="overflow-hidden text-lg text-ellipsis" title={project.name}>
               <Link href={project.url}>{project.name}</Link>
             </div>
 
-            <div className={clsx("grow", "my-1", "space-y-1")}>
+            <div className="my-1 grow space-y-1">
               {/* Maintenance status */}
               {project.archived && (
-                <div className={clsx("font-light")}>
+                <div className="font-light">
                   <Inline>
                     <FiArchive strokeWidth={1} />
                     <div>Archived</div>
@@ -86,7 +64,7 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
 
               {/* Homepage */}
               {project.homepageUrl && (
-                <div className={clsx("overflow-hidden")}>
+                <div className="overflow-hidden">
                   <Inline>
                     <FiExternalLink strokeWidth={1} />
                     <div>
@@ -98,12 +76,9 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
             </div>
 
             {/* Misc info */}
-            <div className={clsx("flex", "flex-wrap", "mt-1", "gap-x-3", "font-light")}>
+            <div className="mt-1 flex flex-wrap gap-x-3 font-light">
               <Inline>
-                <FiStar
-                  className={clsx("dark:text-yellow-400", "fill-yellow-400")}
-                  strokeWidth={1}
-                />
+                <FiStar className="fill-yellow-400 dark:text-yellow-400" strokeWidth={1} />
                 <div>{project.stars.toLocaleString("en-US")}</div>
               </Inline>
 
