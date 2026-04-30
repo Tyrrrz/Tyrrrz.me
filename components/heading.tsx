@@ -1,7 +1,7 @@
-import c from 'classnames';
-import { FC, PropsWithChildren } from 'react';
-import { FiLink } from 'react-icons/fi';
-import Link from '~/components/link';
+import { clsx } from "clsx";
+import { FC, PropsWithChildren } from "react";
+import { FiLink } from "react-icons/fi";
+import Link from "~/components/link";
 
 type HeadingProps = PropsWithChildren<{
   id?: string;
@@ -14,24 +14,19 @@ const Heading: FC<HeadingProps> = ({ id, level = 1, children }) => {
   return (
     <Proxy
       id={id}
-      className={c(
-        'group',
-        'my-4',
-        {
-          'text-3xl': level === 1,
-          'text-2xl': level === 2,
-          'text-xl': level === 3,
-          'text-lg': level === 4
-        },
-        'font-semibold'
-      )}
+      className={clsx("group my-4 font-semibold", {
+        "text-3xl": level === 1,
+        "text-2xl": level === 2,
+        "text-xl": level === 3,
+        "text-lg": level === 4,
+      })}
     >
-      <span className={c({ 'mr-2': !!id })}>{children}</span>
+      <span className={clsx({ "mr-2": !!id })}>{children}</span>
 
       {id && (
-        <span className={c('sm:invisible', 'group-hover:visible', 'text-base')}>
+        <span className="text-base group-hover:visible sm:invisible">
           <Link href={`#${id}`}>
-            <FiLink className={c('inline', 'align-baseline')} />
+            <FiLink className="inline align-baseline" />
           </Link>
         </span>
       )}

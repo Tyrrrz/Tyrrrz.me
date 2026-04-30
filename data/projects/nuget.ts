@@ -9,7 +9,7 @@ export const getNuGetDownloads = async (packageId: string) => {
 
   if (!response.ok) {
     throw new Error(
-      `Request 'GET ${url}' failed. Status: ${response.status}. Body: '${await response.text()}'.`
+      `Request 'GET ${url}' failed. Status: ${response.status}. Body: '${await response.text()}'.`,
     );
   }
 

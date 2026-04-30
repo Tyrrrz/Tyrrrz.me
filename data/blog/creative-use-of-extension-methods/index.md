@@ -1,6 +1,6 @@
 ---
-title: 'Creative Use of Extension Methods in C#'
-date: '2019-01-26'
+title: "Creative Use of Extension Methods in C#"
+date: "2019-01-26"
 ---
 
 I'm sure that everyone with at least some background in C# is aware of extension methods — a nice feature that lets developers extend existing types with new methods.

@@ -3,13 +3,13 @@ export const getEnvironment = () => {
 };
 
 export const isProduction = () => {
-  return getEnvironment() === 'production';
+  return getEnvironment() === "production";
 };
 
 export const getBuildId = () => process.env.BUILD_ID;
 
 export const getSiteUrl = (path?: string) => {
-  const value = process.env.SITE_URL || 'http://localhost:3000';
+  const value = process.env.SITE_URL || "http://localhost:3000";
 
   if (path) {
     return new URL(path, value).toString();
@@ -27,4 +27,4 @@ export const getPatreonToken = () => process.env.PATREON_TOKEN;
 // https://developers.buymeacoffee.com/dashboard
 export const getBuyMeACoffeeToken = () => process.env.BUYMEACOFFEE_TOKEN;
 
-export const getPrivateDonors = () => process.env.PRIVATE_DONORS?.split(',') ?? [];
+export const getPrivateDonors = () => process.env.PRIVATE_DONORS?.split(",") ?? [];

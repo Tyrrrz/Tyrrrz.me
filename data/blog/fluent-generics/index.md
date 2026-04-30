@@ -1,6 +1,6 @@
 ---
-title: 'Fluent Generics in C#'
-date: '2020-11-17'
+title: "Fluent Generics in C#"
+date: "2020-11-17"
 ---
 
 Generic programming is a powerful feature available in many statically typed languages. It offers a way to write code that seamlessly operates against many different types, by targeting the features they share rather than the types themselves. This provides the means for building flexible and reusable components without having to sacrifice type safety or introduce unnecessary duplication.
@@ -67,14 +67,14 @@ Such a type can be modeled using the following signature:
 public abstract class Endpoint<TReq, TRes> : EndpointBase
 {
     // This method gets called by the framework
-    public abstract Task<ActionResult<TRes>> ExecuteAsync(
+    public abstract Task<ActionResult<TRes>> ExecuteAsynclsx(
         TReq request,
         CancellationToken cancellationToken = default
     );
 }
 ```
 
-Here we have a basic generic class that takes a type argument corresponding to the request it's meant to receive and another type argument that specifies the response format it's expected to provide. This class also defines the `ExecuteAsync(...)` method which the user will need to override to implement the logic relevant to a particular endpoint.
+Here we have a basic generic class that takes a type argument corresponding to the request it's meant to receive and another type argument that specifies the response format it's expected to provide. This class also defines the `ExecuteAsynclsx(...)` method which the user will need to override to implement the logic relevant to a particular endpoint.
 
 We can use this as the foundation to build our route handlers like so:
 
@@ -93,11 +93,11 @@ public class SignInResponse
 public class SignInEndpoint : Endpoint<SignInRequest, SignInResponse>
 {
     [HttpPost("auth/signin")]
-    public override async Task<ActionResult<SignInResponse>> ExecuteAsync(
+    public override async Task<ActionResult<SignInResponse>> ExecuteAsynclsx(
         SignInRequest request,
         CancellationToken cancellationToken = default)
     {
-        var user = await Database.GetUserAsync(request.Username);
+        var user = await Database.GetUserAsynclsx(request.Username);
 
         if (!user.CheckPassword(request.Password))
         {
@@ -122,7 +122,7 @@ In order to properly accommodate endpoints like that, we could try to extend our
 // Endpoint that expects a typed request and provides a typed response
 public abstract class Endpoint<TReq, TRes> : EndpointBase
 {
-    public abstract Task<ActionResult<TRes>> ExecuteAsync(
+    public abstract Task<ActionResult<TRes>> ExecuteAsynclsx(
         TReq request,
         CancellationToken cancellationToken = default
     );
@@ -131,7 +131,7 @@ public abstract class Endpoint<TReq, TRes> : EndpointBase
 // Endpoint that expects a typed request but does not provide a typed response (*)
 public abstract class Endpoint<TReq> : EndpointBase
 {
-    public abstract Task<ActionResult> ExecuteAsync(
+    public abstract Task<ActionResult> ExecuteAsynclsx(
         TReq request,
         CancellationToken cancellationToken = default
     );
@@ -140,7 +140,7 @@ public abstract class Endpoint<TReq> : EndpointBase
 // Endpoint that does not expect a typed request but provides a typed response (*)
 public abstract class Endpoint<TRes> : EndpointBase
 {
-    public abstract Task<ActionResult<TRes>> ExecuteAsync(
+    public abstract Task<ActionResult<TRes>> ExecuteAsynclsx(
         CancellationToken cancellationToken = default
     );
 }
@@ -148,7 +148,7 @@ public abstract class Endpoint<TRes> : EndpointBase
 // Endpoint that neither expects a typed request nor provides a typed response
 public abstract class Endpoint : EndpointBase
 {
-    public abstract Task<ActionResult> ExecuteAsync(
+    public abstract Task<ActionResult> ExecuteAsynclsx(
         CancellationToken cancellationToken = default
     );
 }
@@ -161,7 +161,7 @@ Just like with the `RunCommand(...)` method earlier in the article, there are a 
 ```csharp
 public abstract class Endpoint<TReq, TRes> : EndpointBase
 {
-    public abstract Task<ActionResult<TRes>> ExecuteAsync(
+    public abstract Task<ActionResult<TRes>> ExecuteAsynclsx(
         TReq request,
         CancellationToken cancellationToken = default
     );
@@ -169,7 +169,7 @@ public abstract class Endpoint<TReq, TRes> : EndpointBase
 
 public abstract class EndpointWithoutResponse<TReq> : EndpointBase
 {
-    public abstract Task<ActionResult> ExecuteAsync(
+    public abstract Task<ActionResult> ExecuteAsynclsx(
         TReq request,
         CancellationToken cancellationToken = default
     );
@@ -177,14 +177,14 @@ public abstract class EndpointWithoutResponse<TReq> : EndpointBase
 
 public abstract class EndpointWithoutRequest<TRes> : EndpointBase
 {
-    public abstract Task<ActionResult<TRes>> ExecuteAsync(
+    public abstract Task<ActionResult<TRes>> ExecuteAsynclsx(
         CancellationToken cancellationToken = default
     );
 }
 
 public abstract class Endpoint : EndpointBase
 {
-    public abstract Task<ActionResult> ExecuteAsync(
+    public abstract Task<ActionResult> ExecuteAsynclsx(
         CancellationToken cancellationToken = default
     );
 }
@@ -203,7 +203,7 @@ public static class Endpoint
     {
         public abstract class WithResponse<TRes>
         {
-            public abstract Task<ActionResult<TRes>> ExecuteAsync(
+            public abstract Task<ActionResult<TRes>> ExecuteAsynclsx(
                 TReq request,
                 CancellationToken cancellationToken = default
             );
@@ -211,7 +211,7 @@ public static class Endpoint
 
         public abstract class WithoutResponse
         {
-            public abstract Task<ActionResult> ExecuteAsync(
+            public abstract Task<ActionResult> ExecuteAsynclsx(
                 TReq request,
                 CancellationToken cancellationToken = default
             );
@@ -222,14 +222,14 @@ public static class Endpoint
     {
         public abstract class WithResponse<TRes>
         {
-            public abstract Task<ActionResult<TRes>> ExecuteAsync(
+            public abstract Task<ActionResult<TRes>> ExecuteAsynclsx(
                 CancellationToken cancellationToken = default
             );
         }
 
         public abstract class WithoutResponse
         {
-            public abstract Task<ActionResult> ExecuteAsync(
+            public abstract Task<ActionResult> ExecuteAsynclsx(
                 CancellationToken cancellationToken = default
             );
         }
@@ -239,7 +239,7 @@ public static class Endpoint
 
 The above design retains the original four types from earlier, but organizes them in a hierarchical structure rather than a flat one. This is possible to achieve because C# allows type definitions to be nested within each other, even if they are generic.
 
-In fact, **types contained within generics are special because they also gain access to the type arguments specified on their parent**. It lets us put `WithResponse<TRes>` inside `WithRequest<TReq>` and use both `TReq` and `TRes` to define the inner `ExecuteAsync(...)` method.
+In fact, **types contained within generics are special because they also gain access to the type arguments specified on their parent**. It lets us put `WithResponse<TRes>` inside `WithRequest<TReq>` and use both `TReq` and `TRes` to define the inner `ExecuteAsynclsx(...)` method.
 
 Functionally, the approach shown above and the one from earlier are identical. However, the unconventional structure employed here completely eliminates all discoverability issues, while still offering the same level of flexibility.
 
@@ -267,7 +267,7 @@ public class SignInEndpoint : Endpoint
     .WithResponse<SignInResponse>
 {
     [HttpPost("auth/signin")]
-    public override async Task<ActionResult<SignInResponse>> ExecuteAsync(
+    public override async Task<ActionResult<SignInResponse>> ExecuteAsynclsx(
         SignInRequest request,
         CancellationToken cancellationToken = default)
     {

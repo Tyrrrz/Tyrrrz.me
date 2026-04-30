@@ -1,16 +1,16 @@
-import fs from 'fs/promises';
-import path from 'path';
-import fakes from '~/data/projects/fakes';
-import { getDockerDownloads } from '~/data/projects/docker';
+import fs from "fs/promises";
+import path from "path";
+import { getDockerDownloads } from "~/data/projects/docker";
+import fakes from "~/data/projects/fakes";
 import {
   getGitHubDownloads,
   getGitHubIssuesAndPRsCount,
   getGitHubLogoUrl,
-  getGitHubRepos
-} from '~/data/projects/github';
-import { getNuGetDownloads } from '~/data/projects/nuget';
-import { bufferIterable } from '~/utils/async';
-import { isProduction } from '~/utils/env';
+  getGitHubRepos,
+} from "~/data/projects/github";
+import { getNuGetDownloads } from "~/data/projects/nuget";
+import { bufferIterable } from "~/utils/async";
+import { isProduction } from "~/utils/env";
 
 export type Project = {
   name: string;
@@ -37,7 +37,7 @@ export const loadProjects = async function* () {
       // NPM keeps blocking our requests as suspicious.
       // It's fine to ignore it for now, seeing as we have very few NPM packages.
       // await getNpmDownloads(repo.name),
-      await getDockerDownloads(repo.name)
+      await getDockerDownloads(repo.name),
     ].reduce((acc, cur) => acc + cur, 0);
 
     const logoUrl = await getGitHubLogoUrl(repo.name);
@@ -51,7 +51,7 @@ export const loadProjects = async function* () {
       logoUrl,
       stars: repo.stargazers_count || 0,
       downloads,
-      language: repo.language || undefined
+      language: repo.language || undefined,
     };
 
     yield project;
@@ -65,7 +65,7 @@ export const loadProjects = async function* () {
 };
 
 export const publishProjectStats = async () => {
-  const filePath = path.resolve(process.cwd(), 'public', 'projects.svg');
+  const filePath = path.resolve(process.cwd(), "public", "projects.svg");
 
   const projects = await bufferIterable(loadProjects());
   const repos = projects.length;

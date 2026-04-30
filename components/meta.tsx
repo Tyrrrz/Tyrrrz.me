@@ -1,32 +1,32 @@
-import Head from 'next/head';
-import { FC } from 'react';
-import { getBuildId, getSiteUrl } from '~/utils/env';
+import Head from "next/head";
+import { FC } from "react";
+import { getBuildId, getSiteUrl } from "~/utils/env";
 
 type MetaProps = {
   title?: string;
   description?: string;
   keywords?: string[];
   imageUrl?: string;
-  imageLayout?: 'aside' | 'fill';
+  imageLayout?: "aside" | "fill";
   rssUrl?: string;
 };
 
 const Meta: FC<MetaProps> = ({ title, description, keywords, imageUrl, imageLayout, rssUrl }) => {
-  const siteName = 'Oleksii Holub';
+  const siteName = "Oleksii Holub";
 
   const buildId = getBuildId();
 
-  const actualTitle = title ? title + ' • ' + siteName : siteName;
+  const actualTitle = title ? title + " • " + siteName : siteName;
 
   const actualDescription =
     description ||
-    'Oleksii Holub (@tyrrrz) is a software developer, open-source maintainer, tech blogger and conference speaker';
+    "Oleksii Holub (@tyrrrz) is a software developer, open-source maintainer, tech blogger and conference speaker";
 
-  const actualKeywords = keywords?.join(',') || '';
+  const actualKeywords = keywords?.join(",") || "";
 
-  const actualImageUrl = getSiteUrl(imageUrl || '/logo.png');
+  const actualImageUrl = getSiteUrl(imageUrl || "/logo.png");
 
-  const actualImageLayout = imageLayout || 'aside';
+  const actualImageLayout = imageLayout || "aside";
 
   const actualRssUrl = rssUrl && getSiteUrl(rssUrl);
 
@@ -57,7 +57,7 @@ const Meta: FC<MetaProps> = ({ title, description, keywords, imageUrl, imageLayo
       <meta
         key="twitter:card"
         name="twitter:card"
-        content={actualImageLayout === 'fill' ? 'summary_large_image' : 'summary'}
+        content={actualImageLayout === "fill" ? "summary_large_image" : "summary"}
       />
 
       <link

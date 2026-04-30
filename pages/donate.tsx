@@ -1,17 +1,16 @@
-import c from 'classnames';
-import { GetStaticProps, NextPage } from 'next';
-import { FiDollarSign } from 'react-icons/fi';
-import Code from '~/components/code';
-import Heading from '~/components/heading';
-import Inline from '~/components/inline';
-import Link from '~/components/link';
-import List from '~/components/list';
-import ListItem from '~/components/listItem';
-import Meta from '~/components/meta';
-import Paragraph from '~/components/paragraph';
-import { Donation, loadDonations, publishDonationStats } from '~/data/donate';
-import { bufferIterable } from '~/utils/async';
-import { deleteUndefined } from '~/utils/object';
+import { clsx } from "clsx";
+import { GetStaticProps, NextPage } from "next";
+import { FiDollarSign } from "react-icons/fi";
+import Heading from "~/components/heading";
+import Inline from "~/components/inline";
+import Link from "~/components/link";
+import List from "~/components/list";
+import ListItem from "~/components/listItem";
+import Meta from "~/components/meta";
+import Paragraph from "~/components/paragraph";
+import { Donation, loadDonations, publishDonationStats } from "~/data/donate";
+import { bufferIterable } from "~/utils/async";
+import { deleteUndefined } from "~/utils/object";
 
 type DonationPageProps = {
   donations: Donation[];
@@ -32,9 +31,9 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
 
         <List>
           <ListItem>
-            <span className={c('font-semibold')}>
+            <span className="font-semibold">
               <Link href="https://github.com/sponsors/Tyrrrz">GitHub Sponsors</Link>
-            </span>{' '}
+            </span>{" "}
             (one-time or recurring)
           </ListItem>
 
@@ -43,7 +42,7 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
           </ListItem>
 
           <ListItem>
-            <span className={c('line-through')}>Buy Me A Coffee</span> (not supported anymore)
+            <span className="line-through">Buy Me A Coffee</span> (not supported anymore)
           </ListItem>
         </List>
       </section>
@@ -52,33 +51,19 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
       <section>
         <Heading level={2}>Top donors</Heading>
 
-        <div
-          className={c(
-            'grid',
-            'sm:grid-cols-2',
-            'md:grid-cols-3',
-            'lg:grid-cols-4',
-            'xl:grid-cols-5',
-            'gap-3'
-          )}
-        >
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {donations.map((donation, i) => (
             <section
               key={i}
-              className={c(
-                'p-4',
-                'border',
-                {
-                  'border-purple-500': donation.amount >= 100,
-                  'border-purple-300': donation.amount >= 25 && donation.amount < 100,
-                  'dark:border-purple-700': donation.amount >= 25 && donation.amount < 100,
-                  'border-purple-100': donation.amount < 25,
-                  'dark:border-purple-900': donation.amount < 25
-                },
-                'rounded'
-              )}
+              className={clsx("rounded border p-4", {
+                "border-purple-500": donation.amount >= 100,
+                "border-purple-300": donation.amount >= 25 && donation.amount < 100,
+                "dark:border-purple-700": donation.amount >= 25 && donation.amount < 100,
+                "border-purple-100": donation.amount < 25,
+                "dark:border-purple-900": donation.amount < 25,
+              })}
             >
-              <div className={c('text-lg')}>
+              <div className="text-lg">
                 <Inline>
                   <FiDollarSign strokeWidth={1} />
                   <div>{donation.amount.toFixed(0)}</div>
@@ -86,16 +71,15 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
               </div>
 
               <div
-                className={c(
-                  { 'font-semibold': !!donation.name },
-                  'text-ellipsis',
-                  'overflow-hidden'
+                className={clsx(
+                  { "font-semibold": !!donation.name },
+                  "overflow-hidden text-ellipsis",
                 )}
                 title={donation.name}
               >
-                {donation.name || 'Anonymous'}
+                {donation.name || "Anonymous"}
               </div>
-              <div className={c('font-light')}>{donation.platform}</div>
+              <div className="font-light">{donation.platform}</div>
             </section>
           ))}
         </div>
@@ -118,8 +102,8 @@ export const getStaticProps: GetStaticProps<DonationPageProps> = async () => {
 
   return {
     props: {
-      donations
-    }
+      donations,
+    },
   };
 };
 

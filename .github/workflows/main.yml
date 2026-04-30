@@ -10,7 +10,7 @@ on:
       - prime
   schedule:
     # Rebuild nightly to refresh dynamic data (project stats, donation info, etc.)
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
 
 jobs:
   format:

@@ -1,6 +1,6 @@
 ---
-title: 'Prefer Fakes Over Mocks'
-date: '2020-10-13'
+title: "Prefer Fakes Over Mocks"
+date: "2020-10-13"
 ---
 
 The primary purpose of software testing is to detect any potential defects in a program before it reaches its intended consumers. This is typically achieved by establishing functional requirements which define supported user interactions as well as expected outcomes, and then validating them using (automated) tests.
@@ -38,13 +38,13 @@ Let's take a look at how all of this works in practice. As an example, imagine t
 ```csharp
 public interface IBlobStorage
 {
-    Task<Stream> ReadFileAsync(string fileName);
+    Task<Stream> ReadFileAsynclsx(string fileName);
 
-    Task DownloadFileAsync(string fileName, string outputFilePath);
+    Task DownloadFileAsynclsx(string fileName, string outputFilePath);
 
-    Task UploadFileAsync(string fileName, Stream stream);
+    Task UploadFileAsynclsx(string fileName, Stream stream);
 
-    Task UploadManyFilesAsync(IReadOnlyDictionary<string, Stream> fileNameStreamMap);
+    Task UploadManyFilesAsynclsx(IReadOnlyDictionary<string, Stream> fileNameStreamMap);
 }
 ```
 
@@ -63,24 +63,24 @@ public class DocumentManager
     private static string GetFileName(string documentName) =>
         $"docs/{documentName}";
 
-    public async Task<string> GetDocumentAsync(string documentName)
+    public async Task<string> GetDocumentAsynclsx(string documentName)
     {
         var fileName = GetFileName(documentName);
 
-        await using var stream = await _storage.ReadFileAsync(fileName);
+        await using var stream = await _storage.ReadFileAsynclsx(fileName);
         using var streamReader = new StreamReader(stream);
 
-        return await streamReader.ReadToEndAsync();
+        return await streamReader.ReadToEndAsynclsx();
     }
 
-    public async Task SaveDocumentAsync(string documentName, string content)
+    public async Task SaveDocumentAsynclsx(string documentName, string content)
     {
         var fileName = GetFileName(documentName);
 
         var data = Encoding.UTF8.GetBytes(content);
         await using var stream = new MemoryStream(data);
 
-        await _storage.UploadFileAsync(fileName, stream);
+        await _storage.UploadFileAsynclsx(fileName, stream);
     }
 }
 ```
@@ -101,13 +101,13 @@ public async Task I_can_get_the_content_of_an_existing_document()
     var blobStorage = Mock.Of<IBlobStorage>();
 
     Mock.Get(blobStorage)
-        .Setup(bs => bs.ReadFileAsync("docs/test.txt"))
-        .ReturnsAsync(documentStream);
+        .Setup(bs => bs.ReadFileAsynclsx("docs/test.txt"))
+        .ReturnsAsynclsx(documentStream);
 
     var documentManager = new DocumentManager(blobStorage);
 
     // Act
-    var content = await documentManager.GetDocumentAsync("test.txt");
+    var content = await documentManager.GetDocumentAsynclsx("test.txt");
 
     // Assert
     content.Should().Be("hello");
@@ -121,30 +121,30 @@ public async Task I_can_update_the_content_of_a_document()
     var documentManager = new DocumentManager(blobStorage);
 
     // Act
-    await documentManager.SaveDocumentAsync("test.txt", "hello");
+    await documentManager.SaveDocumentAsynclsx("test.txt", "hello");
 
     // Assert
-    Mock.Get(blobStorage).Verify(bs => bs.UploadFileAsync(
+    Mock.Get(blobStorage).Verify(bs => bs.UploadFileAsynclsx(
         "docs/test.txt",
         It.Is<Stream>(s => /* stream verification */)
     ));
 }
 ```
 
-In the above code snippet, the first test attempts to verify that the consumer can retrieve a document, given it already exists in the storage. To facilitate this precondition, we configure the mock in such way that it returns a hard-coded byte stream when `ReadFileAsync(...)` is called with the expected file name.
+In the above code snippet, the first test attempts to verify that the consumer can retrieve a document, given it already exists in the storage. To facilitate this precondition, we configure the mock in such way that it returns a hard-coded byte stream when `ReadFileAsynclsx(...)` is called with the expected file name.
 
 However, in doing so, we are inadvertently making a few very strong assumptions about how `DocumentManager` works under the hood. Namely, we assume that:
 
-- Calling `GetDocumentAsync(...)` in turn calls `ReadFileAsync(...)`
+- Calling `GetDocumentAsynclsx(...)` in turn calls `ReadFileAsynclsx(...)`
 - File name is formed by pre-pending `docs/` to the name of the document
 
-These specifics may be true now, but they can easily change in the future. For example, it's not a stretch to imagine that we may decide to store files under a different path or replace the call to `ReadFileAsync(...)` with `DownloadFileAsync(...)`, as a means to preemptively cache files.
+These specifics may be true now, but they can easily change in the future. For example, it's not a stretch to imagine that we may decide to store files under a different path or replace the call to `ReadFileAsynclsx(...)` with `DownloadFileAsynclsx(...)`, as a means to preemptively cache files.
 
 In both cases, the changes in the implementation won't be observable from the user's perspective as the surface-level behavior will remain the same. However, because the test we wrote relies on internal details of the system, it will start failing, indicating that there's an error in our code, when in reality there isn't.
 
-The second scenario works a bit differently, but also suffers from the same issue. To verify that a document is correctly persisted in the storage when it gets saved, it checks that a call to `UploadFileAsync(...)` takes place in the process.
+The second scenario works a bit differently, but also suffers from the same issue. To verify that a document is correctly persisted in the storage when it gets saved, it checks that a call to `UploadFileAsynclsx(...)` takes place in the process.
 
-Again, it's not hard to imagine a situation where the underlying implementation can change in way that breaks this test. For example, we may decide to optimize the behavior slightly by not uploading the documents straight away, but instead sending them in batches using `UploadManyFilesAsync(...)`.
+Again, it's not hard to imagine a situation where the underlying implementation can change in way that breaks this test. For example, we may decide to optimize the behavior slightly by not uploading the documents straight away, but instead sending them in batches using `UploadManyFilesAsynclsx(...)`.
 
 An experienced mocking practitioner might argue that some of these shortcomings can be mitigated if we configure our mocks to be less strict. In this instance, we can modify the test so that it expects a call to any of the upload methods rather than a specific one, while also not checking the arguments at all:
 
@@ -157,12 +157,12 @@ public async Task I_can_update_the_content_of_a_document()
 
     var blobStorage = Mock.Of<IBlobStorage>();
 
-    Mock.Get(blobStorage).Setup(bs => bs.UploadFileAsync(
+    Mock.Get(blobStorage).Setup(bs => bs.UploadFileAsynclsx(
         It.IsAny<string>(), // any argument -> OK
         It.IsAny<Stream>()  // any argument -> OK
     )).Callback(() => eitherUploadMethodCalled = true);
 
-    Mock.Get(blobStorage).Setup(bs => bs.UploadManyFilesAsync(
+    Mock.Get(blobStorage).Setup(bs => bs.UploadManyFilesAsynclsx(
         // any argument -> OK
         It.IsAny<IReadOnlyDictionary<string, Stream>>()
     )).Callback(() => eitherUploadMethodCalled = true);
@@ -170,7 +170,7 @@ public async Task I_can_update_the_content_of_a_document()
     var documentManager = new DocumentManager(blobStorage);
 
     // Act
-    await documentManager.SaveDocumentAsync("test.txt", "hello");
+    await documentManager.SaveDocumentAsynclsx("test.txt", "hello");
 
     // Assert
     eitherUploadMethodCalled.Should().BeTrue();
@@ -205,7 +205,7 @@ public class FakeBlobStorage : IBlobStorage
     private readonly Dictionary<string, byte[]> _files =
         new Dictionary<string, byte[]>(StringComparer.Ordinal);
 
-    public Task<Stream> ReadFileAsync(string fileName)
+    public Task<Stream> ReadFileAsynclsx(string fileName)
     {
         var data = _files[fileName];
         var stream = new MemoryStream(data);
@@ -213,42 +213,42 @@ public class FakeBlobStorage : IBlobStorage
         return Task.FromResult<Stream>(stream);
     }
 
-    public async Task DownloadFileAsync(string fileName, string outputFilePath)
+    public async Task DownloadFileAsynclsx(string fileName, string outputFilePath)
     {
-        await using var input = await ReadFileAsync(fileName);
+        await using var input = await ReadFileAsynclsx(fileName);
         await using var output = File.Create(outputFilePath);
 
-        await input.CopyToAsync(output);
+        await input.CopyToAsynclsx(output);
     }
 
-    public async Task UploadFileAsync(string fileName, Stream stream)
+    public async Task UploadFileAsynclsx(string fileName, Stream stream)
     {
         await using var buffer = new MemoryStream();
-        await stream.CopyToAsync(buffer);
+        await stream.CopyToAsynclsx(buffer);
 
         var data = buffer.ToArray();
         _files[fileName] = data;
     }
 
-    public async Task UploadManyFilesAsync(IReadOnlyDictionary<string, Stream> fileNameStreamMap)
+    public async Task UploadManyFilesAsynclsx(IReadOnlyDictionary<string, Stream> fileNameStreamMap)
     {
         foreach (var (fileName, stream) in fileNameStreamMap)
         {
-            await UploadFileAsync(fileName, stream);
+            await UploadFileAsynclsx(fileName, stream);
         }
     }
 }
 ```
 
-As seen above, our fake blob storage uses a hash map to keep track of uploaded files and their content. For the more high-level operations such as `DownloadFileAsync(...)` and `UploadManyFilesAsync(...)`, the real implementation may be using some optimized routines, but here we are just composing existing functionality.
+As seen above, our fake blob storage uses a hash map to keep track of uploaded files and their content. For the more high-level operations such as `DownloadFileAsynclsx(...)` and `UploadManyFilesAsynclsx(...)`, the real implementation may be using some optimized routines, but here we are just composing existing functionality.
 
 Note that the above implementation doesn't make any assumptions about how it's going to be used in tests. Instead, it provides what can effectively be a drop-in replacement for the actual blob storage component in our system.
 
 Because of that, it's also important that the fake replicates the behavior of the real dependency as closely as possible. This means that we might have to consider various nuances like:
 
 - Whether the file names are treated as case-sensitive
-- Whether `ReadFileAsync(...)` throws on a non-existing file or returns an empty stream
-- Whether `UploadFileAsync(...)` throws on an existing file or just overwrites it
+- Whether `ReadFileAsynclsx(...)` throws on a non-existing file or returns an empty stream
+- Whether `UploadFileAsynclsx(...)` throws on an existing file or just overwrites it
 
 Not getting these aspects right doesn't invalidate the implementation altogether, but can make it less valuable in specific edge-case scenarios. At the end of the day, even when using fakes, we won't be able to gain the same level of confidence as we would by testing in a real environment, which is why proper end-to-end testing is still necessary.
 
@@ -270,10 +270,10 @@ public async Task I_can_get_the_content_of_an_existing_document()
         new byte[] {0x68, 0x65, 0x6c, 0x6c, 0x6f}
     );
 
-    await blobStorage.UploadFileAsync("docs/test.txt", documentStream);
+    await blobStorage.UploadFileAsynclsx("docs/test.txt", documentStream);
 
     // Act
-    var content = await documentManager.GetDocumentAsync("test.txt");
+    var content = await documentManager.GetDocumentAsynclsx("test.txt");
 
     // Assert
     content.Should().Be("hello");
@@ -282,7 +282,7 @@ public async Task I_can_get_the_content_of_an_existing_document()
 
 Here we take an existing test and rather than configure a mock to return a pre-configured response, we create a fake blob storage and fill it with data directly. This way we don't need to assume that retrieving a document should call a certain method, but instead just rely on the completeness of the behavior provided by our fake.
 
-However, despite being able to eliminate most of the assumptions, we didn't get rid of all of them. Namely, our test still expects that calling `GetDocumentAsync(...)` should look for the file inside the `docs/` namespace, as that's where we're uploading it in the arrange phase.
+However, despite being able to eliminate most of the assumptions, we didn't get rid of all of them. Namely, our test still expects that calling `GetDocumentAsynclsx(...)` should look for the file inside the `docs/` namespace, as that's where we're uploading it in the arrange phase.
 
 This problem stems from the fact that we are yet again relying on how `DocumentManager` interacts with `IBlobStorage`, but this time it's not caused by the test double but by the design of the test itself. To avoid it, we need to adapt the scenario so that it revolves around the external behavior of the system and not the relationship with its dependencies.
 
@@ -296,10 +296,10 @@ public async Task I_can_get_the_content_of_a_previously_saved_document()
     var blobStorage = new FakeBlobStorage();
     var documentManager = new DocumentManager(blobStorage);
 
-    await documentManager.SaveDocumentAsync("test.txt", "hello");
+    await documentManager.SaveDocumentAsynclsx("test.txt", "hello");
 
     // Act
-    var content = await documentManager.GetDocumentAsync("test.txt");
+    var content = await documentManager.GetDocumentAsynclsx("test.txt");
 
     // Assert
     content.Should().Be("hello");
@@ -333,10 +333,10 @@ public async Task Previously_uploaded_file_can_be_retrieved()
 
     var fileData = new byte[] {0x68, 0x65, 0x6c, 0x6c, 0x6f};
     await using var fileStream = new MemoryStream(fileData);
-    await blobStorage.UploadFileAsync("test.txt", fileStream);
+    await blobStorage.UploadFileAsynclsx("test.txt", fileStream);
 
     // Act
-    await using var actualFileStream = await blobStorage.ReadFileAsync("test.txt");
+    await using var actualFileStream = await blobStorage.ReadFileAsynclsx("test.txt");
     var actualFileData = actualFileStream.ToArray();
 
     // Assert
@@ -350,7 +350,7 @@ public async Task Trying_to_retrieve_non_existing_file_throws()
     var blobStorage = new FakeBlobStorage();
 
     // Act & assert
-    await Assert.ThrowsAnyAsync<Exception>(() => blobStorage.ReadFileAsync("test.txt"));
+    await Assert.ThrowsAnyAsync<Exception>(() => blobStorage.ReadFileAsynclsx("test.txt"));
 }
 
 [Fact]
@@ -362,14 +362,14 @@ public async Task File_names_are_case_sensitive()
     await using var fileStream1 = new MemoryStream(new byte[] {1, 2, 3});
     await using var fileStream2 = new MemoryStream(new byte[] {4, 5, 6});
 
-    await blobStorage.UploadFileAsync("test.txt", fileStream1);
-    await blobStorage.UploadFileAsync("TEST.txt", fileStream2);
+    await blobStorage.UploadFileAsynclsx("test.txt", fileStream1);
+    await blobStorage.UploadFileAsynclsx("TEST.txt", fileStream2);
 
     // Act
-    await using var actualFileStream1 = await blobStorage.ReadFileAsync("test.txt");
+    await using var actualFileStream1 = await blobStorage.ReadFileAsynclsx("test.txt");
     var actualFileData1 = actualFileStream1.ToArray();
 
-    await using var actualFileStream2 = await blobStorage.ReadFileAsync("TEST.txt");
+    await using var actualFileStream2 = await blobStorage.ReadFileAsynclsx("TEST.txt");
     var actualFileData2 = actualFileStream2.ToArray();
 
     // Assert

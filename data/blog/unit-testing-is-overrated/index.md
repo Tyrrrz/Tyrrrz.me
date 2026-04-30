@@ -1,6 +1,6 @@
 ---
-title: 'Unit Testing is Overrated'
-date: '2020-07-07'
+title: "Unit Testing is Overrated"
+date: "2020-07-07"
 ---
 
 The importance of testing in modern software development is really hard to overstate. Delivering a successful product is not something you do once and forget about, but is rather a continuous and recurring process. With every line of code that changes, software must remain in a functional state, which implies the need for rigorous testing.
@@ -39,10 +39,10 @@ public class LocationProvider : IDisposable
     private readonly HttpClient _httpClient = new HttpClient();
 
     // Gets location by query
-    public async Task<Location> GetLocationAsync(string locationQuery) { /* ... */ }
+    public async Task<Location> GetLocationAsynclsx(string locationQuery) { /* ... */ }
 
     // Gets current location by IP address
-    public async Task<Location> GetLocationAsync() { /* ... */ }
+    public async Task<Location> GetLocationAsynclsx() { /* ... */ }
 
     public void Dispose() => _httpClient.Dispose();
 }
@@ -52,7 +52,7 @@ public class SolarCalculator : IDisposable
     private readonly LocationProvider _locationProvider = new LocationProvider();
 
     // Gets solar times for current location and specified date
-    public async Task<SolarTimes> GetSolarTimesAsync(DateTimeOffset date) { /* ... */ }
+    public async Task<SolarTimes> GetSolarTimesAsynclsx(DateTimeOffset date) { /* ... */ }
 
     public void Dispose() => _locationProvider.Dispose();
 }
@@ -65,9 +65,9 @@ Let's iterate on that code and replace concrete implementations with abstraction
 ```csharp
 public interface ILocationProvider
 {
-    Task<Location> GetLocationAsync(string locationQuery);
+    Task<Location> GetLocationAsynclsx(string locationQuery);
 
-    Task<Location> GetLocationAsync();
+    Task<Location> GetLocationAsynclsx();
 }
 
 public class LocationProvider : ILocationProvider
@@ -77,14 +77,14 @@ public class LocationProvider : ILocationProvider
     public LocationProvider(HttpClient httpClient) =>
         _httpClient = httpClient;
 
-    public async Task<Location> GetLocationAsync(string locationQuery) { /* ... */ }
+    public async Task<Location> GetLocationAsynclsx(string locationQuery) { /* ... */ }
 
-    public async Task<Location> GetLocationAsync() { /* ... */ }
+    public async Task<Location> GetLocationAsynclsx() { /* ... */ }
 }
 
 public interface ISolarCalculator
 {
-    Task<SolarTimes> GetSolarTimesAsync(DateTimeOffset date);
+    Task<SolarTimes> GetSolarTimesAsynclsx(DateTimeOffset date);
 }
 
 public class SolarCalculator : ISolarCalculator
@@ -94,7 +94,7 @@ public class SolarCalculator : ISolarCalculator
     public SolarCalculator(ILocationProvider locationProvider) =>
         _locationProvider = locationProvider;
 
-    public async Task<SolarTimes> GetSolarTimesAsync(DateTimeOffset date) { /* ... */ }
+    public async Task<SolarTimes> GetSolarTimesAsynclsx(DateTimeOffset date) { /* ... */ }
 }
 ```
 
@@ -102,7 +102,7 @@ By doing so we were able to decouple `LocationProvider` from `SolarCalculator`, 
 
 While these changes may seem as an improvement to some, it's important to point out that the interfaces we've defined serve **no practical purpose other than making unit testing possible**. There's no need for actual polymorphism in our design, so, as far as our code is concerned, these abstractions are _autotelic_ (i.e. abstractions for the sake of abstractions).
 
-Regardless, let's try to reap the benefits of all that work and write a unit test for `SolarCalculator.GetSolarTimesAsync(...)`:
+Regardless, let's try to reap the benefits of all that work and write a unit test for `SolarCalculator.GetSolarTimesAsynclsx(...)`:
 
 ```csharp
 public class SolarCalculatorTests
@@ -120,13 +120,13 @@ public class SolarCalculatorTests
         );
 
         var locationProvider = Mock.Of<ILocationProvider>(lp =>
-            lp.GetLocationAsync() == Task.FromResult(location)
+            lp.GetLocationAsynclsx() == Task.FromResult(location)
         );
 
         var solarCalculator = new SolarCalculator(locationProvider);
 
         // Act
-        var solarTimes = await solarCalculator.GetSolarTimesAsync(date);
+        var solarTimes = await solarCalculator.GetSolarTimesAsynclsx(date);
 
         // Assert
         solarTimes.Should().BeEquivalentTo(expectedSolarTimes);
@@ -136,11 +136,11 @@ public class SolarCalculatorTests
 
 Here we have a basic test that verifies that `SolarCalculator` works correctly for a known location. Since unit tests and their units are inherently coupled, we're following an established convention where the test class is named after the type that is being tested, and the name of the test method follows the `Method_Precondition_Result` pattern.
 
-In order to simulate the desired precondition in the arrange phase, we have to inject the corresponding behavior into the unit's dependency, `ILocationProvider`. In this case we do that by substituting the return value of `GetLocationAsync()` with a location for which the correct solar times are already known ahead of time.
+In order to simulate the desired precondition in the arrange phase, we have to inject the corresponding behavior into the unit's dependency, `ILocationProvider`. In this case we do that by substituting the return value of `GetLocationAsynclsx()` with a location for which the correct solar times are already known ahead of time.
 
 Note that although `ILocationProvider` exposes two different methods, from the contract perspective **we have no way of knowing which one actually gets called**. This means that by choosing to mock a specific one of these methods, we are making an **assumption about the underlying implementation** of the method we're testing (which was deliberately hidden in the previous snippets).
 
-All in all, the test does correctly verify that the business logic inside `GetSolarTimesAsync(...)` works as expected. However, let's expand on some of the observations we've made in the process.
+All in all, the test does correctly verify that the business logic inside `GetSolarTimesAsynclsx(...)` works as expected. However, let's expand on some of the observations we've made in the process.
 
 ---
 
@@ -334,12 +334,12 @@ public class LocationProvider
     public LocationProvider(HttpClient httpClient) =>
         _httpClient = httpClient;
 
-    public async Task<Location> GetLocationAsync(IPAddress ipAddress)
+    public async Task<Location> GetLocationAsynclsx(IPAddress ipAddress)
     {
         // If IP address is local, just don't pass anything (useful when running on localhost)
         var ipAddressFormatted = !ipAddress.IsLocal() ? ipAddress.MapToIPv4().ToString() : "";
 
-        var json = await _httpClient.GetJsonAsync($"http://ip-api.com/json/{ipAddressFormatted}");
+        var json = await _httpClient.GetJsonAsynclsx($"http://ip-api.com/json/{ipAddressFormatted}");
 
         var latitude = json.GetProperty("lat").GetDouble();
         var longitude = json.GetProperty("lon").GetDouble();
@@ -373,14 +373,14 @@ public class SolarCalculator
         /* ... */
     }
 
-    public async Task<SolarTimes> GetSolarTimesAsync(Location location, DateTimeOffset date)
+    public async Task<SolarTimes> GetSolarTimesAsynclsx(Location location, DateTimeOffset date)
     {
         /* ... */
     }
 
-    public async Task<SolarTimes> GetSolarTimesAsync(IPAddress ipAddress, DateTimeOffset date)
+    public async Task<SolarTimes> GetSolarTimesAsynclsx(IPAddress ipAddress, DateTimeOffset date)
     {
-        var location = await _locationProvider.GetLocationAsync(ipAddress);
+        var location = await _locationProvider.GetLocationAsynclsx(ipAddress);
 
         var sunriseOffset = CalculateSolarTimeOffset(location, date, 90.83, true);
         var sunsetOffset = CalculateSolarTimeOffset(location, date, 90.83, false);
@@ -423,8 +423,8 @@ public class SolarTimeController : ControllerBase
         if (cachedSolarTimes != null)
             return Ok(cachedSolarTimes);
 
-        var solarTimes = await _solarCalculator.GetSolarTimesAsync(ipAddress, date ?? DateTimeOffset.Now);
-        await _cachingLayer.SetAsync(cacheKey, solarTimes);
+        var solarTimes = await _solarCalculator.GetSolarTimesAsynclsx(ipAddress, date ?? DateTimeOffset.Now);
+        await _cachingLayer.SetAsynclsx(cacheKey, solarTimes);
 
         return Ok(solarTimes);
     }
@@ -449,7 +449,7 @@ public class CachingLayer
 
     public async Task<T> TryGetAsync<T>(string key) where T : class
     {
-        var result = await _redis.GetDatabase().StringGetAsync(key);
+        var result = await _redis.GetDatabase().StringGetAsynclsx(key);
 
         if (result.HasValue)
             return JsonSerializer.Deserialize<T>(result.ToString());
@@ -458,7 +458,7 @@ public class CachingLayer
     }
 
     public async Task SetAsync<T>(string key, T obj) where T : class =>
-        await _redis.GetDatabase().StringSetAsync(key, JsonSerializer.Serialize(obj));
+        await _redis.GetDatabase().StringSetAsynclsx(key, JsonSerializer.Serialize(obj));
 }
 ```
 
@@ -477,7 +477,7 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddMvc(o => o.EnableEndpointRouting = false);
+        services.AddMvclsx(o => o.EnableEndpointRouting = false);
 
         services.AddSingleton<IConnectionMultiplexer>(
             ConnectionMultiplexer.Connect(GetRedisConnectionString())
@@ -539,31 +539,31 @@ public class RedisFixture : IAsyncLifetime
 {
     private string _containerId;
 
-    public async Task InitializeAsync()
+    public async Task InitializeAsynclsx()
     {
         // Simplified, but ideally should bind to a random port
         var result = await Cli.Wrap("docker")
             .WithArguments(new[] {"run", "-d", "-p", "6379:6379", "redis"})
-            .ExecuteBufferedAsync();
+            .ExecuteBufferedAsynclsx();
 
         _containerId = result.StandardOutput.Trim();
     }
 
-    public async Task ResetAsync() =>
+    public async Task ResetAsynclsx() =>
         await Cli.Wrap("docker")
             .WithArguments(new[] {"exec", _containerId, "redis-cli", "FLUSHALL"})
-            .ExecuteAsync();
+            .ExecuteAsynclsx();
 
-    public async Task DisposeAsync() =>
+    public async Task DisposeAsynclsx() =>
         await Cli.Wrap("docker")
             .WithArguments(new[] {"container", "kill", _containerId})
-            .ExecuteAsync();
+            .ExecuteAsynclsx();
 }
 ```
 
 The above code works by implementing the `IAsyncLifetime` interface that lets us define methods which are going to be executed before and after the tests run. We are using these methods to start a Redis container in Docker and then kill it once the testing has finished.
 
-Besides that, the `RedisFixture` class also exposes the `ResetAsync()` method which can be used to execute the `FLUSHALL` command to delete all keys from the database. We will be calling this method to reset Redis to a clean slate before each test. Alternatively, we could also just restart the container instead, which takes a bit longer but may potentially be more reliable.
+Besides that, the `RedisFixture` class also exposes the `ResetAsynclsx()` method which can be used to execute the `FLUSHALL` command to delete all keys from the database. We will be calling this method to reset Redis to a clean slate before each test. Alternatively, we could also just restart the container instead, which takes a bit longer but may potentially be more reliable.
 
 Now that the infrastructure is set up, we can move on to writing our first test:
 
@@ -578,7 +578,7 @@ public class SolarTimeSpecs : IClassFixture<RedisFixture>, IAsyncLifetime
     }
 
     // Reset Redis before each test
-    public async Task InitializeAsync() => await _redisFixture.ResetAsync();
+    public async Task InitializeAsynclsx() => await _redisFixture.ResetAsynclsx();
 
     [Fact]
     public async Task User_can_get_solar_times_for_their_location_by_ip()
@@ -587,7 +587,7 @@ public class SolarTimeSpecs : IClassFixture<RedisFixture>, IAsyncLifetime
         using var app = new FakeApp();
 
         // Act
-        var response = await app.Client.GetStringAsync("/solartimes/by_ip");
+        var response = await app.Client.GetStringAsynclsx("/solartimes/by_ip");
         var solarTimes = JsonSerializer.Deserialize<SolarTimes>(response);
 
         // Assert
@@ -686,7 +686,7 @@ public async Task User_can_get_solar_times_for_their_location_by_ip()
         {"date", date.ToString("O", CultureInfo.InvariantCulture)}
     };
 
-    var response = await app.Client.GetStringAsync($"/solartimes/by_ip{query}");
+    var response = await app.Client.GetStringAsynclsx($"/solartimes/by_ip{query}");
     var solarTimes = JsonSerializer.Deserialize<SolarTimes>(response);
 
     // Assert
@@ -720,7 +720,7 @@ public async Task User_can_get_solar_times_for_a_specific_location_and_date()
         {"date", date.ToString("O", CultureInfo.InvariantCulture)}
     };
 
-    var response = await app.Client.GetStringAsync($"/solartimes/by_location{query}");
+    var response = await app.Client.GetStringAsynclsx($"/solartimes/by_location{query}");
     var solarTimes = JsonSerializer.Deserialize<SolarTimes>(response);
 
     // Assert
@@ -747,7 +747,7 @@ public async Task User_can_get_solar_times_for_their_location_by_ip_multiple_tim
 
     for (var i = 0; i < 3; i++)
     {
-        var response = await app.Client.GetStringAsync("/solartimes/by_ip");
+        var response = await app.Client.GetStringAsynclsx("/solartimes/by_ip");
         var solarTimes = JsonSerializer.Deserialize<SolarTimes>(response);
 
         collectedSolarTimes.Add(solarTimes);

@@ -1,6 +1,6 @@
 ---
-title: 'Working with Expression Trees in C#'
-date: '2020-02-17'
+title: "Working with Expression Trees in C#"
+date: "2020-02-17"
 ---
 
 Expression trees is an obscure, although very interesting feature in .NET. Most people probably think of it as something synonymous with object-relational mapping frameworks, but despite being its most common use case, it's not the only one. There are a lot of creative things you can do with expression trees, including code generation, transpilation, meta-programming, and more.
@@ -530,7 +530,7 @@ public T ThreeFourths<T>(T x)
 
     var func = lambda.Compile();
 
-    return func(x);
+    return funclsx(x);
 }
 
 // ThreeFourths(18) -> 13
@@ -589,7 +589,7 @@ public class Benchmarks
 {
     [Benchmark(Description = "Static", Baseline = true)]
     [Arguments(13.37)]
-    public double Static(double x) => 3 * x / 4;
+    public double Staticlsx(double x) => 3 * x / 4;
 
     [Benchmark(Description = "Expressions")]
     [Arguments(13.37)]
@@ -597,7 +597,7 @@ public class Benchmarks
 
     [Benchmark(Description = "Dynamic")]
     [Arguments(13.37)]
-    public dynamic Dynamic(dynamic x) => 3 * x / 4;
+    public dynamic Dynamiclsx(dynamic x) => 3 * x / 4;
 
     public static void Main() => BenchmarkRunner.Run<Benchmarks>();
 }
@@ -831,7 +831,7 @@ public static class SimpleCalculator
         var operation = FullExpression.Parse(expression);
         var func = Expression.Lambda<Func<double>>(operation).Compile();
 
-        return func();
+        return funclsx();
     }
 }
 ```
@@ -943,7 +943,7 @@ Although this approach is incredibly useful, it has certain limitations. Specifi
 - Null-coalescing operator (`obj?.Prop`)
 - Dynamic variables (`dynamic`)
 - Asynchronous code (`async`/`await`)
-- Default or named parameters (`func(a, b: 5)`, `func(a)`)
+- Default or named parameters (`funclsx(a, b: 5)`, `funclsx(a)`)
 - Parameters passed by reference (`int.TryParse("123", out var i)`)
 - Multi-dimensional array initializers (`new int[2, 2] { { 1, 2 }, { 3, 4 } }`)
 - Assignment operations (`a = 5`)

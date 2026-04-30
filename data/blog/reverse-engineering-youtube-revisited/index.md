@@ -1,6 +1,6 @@
 ---
-title: 'Reverse-Engineering YouTube: Revisited'
-date: '2023-02-04'
+title: "Reverse-Engineering YouTube: Revisited"
+date: "2023-02-04"
 ---
 
 Back in 2017 I wrote [an article](/blog/reverse-engineering-youtube) in which I attempted to explain how YouTube works under the hood, how it serves streams to the client, and also how you can exploit that knowledge to download videos from the site. The primary goal of that write-up was to share what I learned while working on [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) — a .NET library that provides a structured abstraction layer over YouTube's internal API.
@@ -221,7 +221,7 @@ Normally, when running in the browser, the deciphering process is performed by t
 To do that, you need to first identify the latest version of the player, which can be done by querying the `/iframe_api` endpoint. It's the same endpoint that YouTube uses for embedding videos on third-party websites, and it returns a script file that looks like this:
 
 ```javascript
-var scriptUrl = 'https://www.youtube.com/s/player/4248d311/www-widgetapi.vflset/www-widgetapi.js';
+var scriptUrl = "https://www.youtube.com/s/player/4248d311/www-widgetapi.vflset/www-widgetapi.js";
 
 /* ... omitted ~40 lines of irrelevant code ... */
 ```
@@ -237,12 +237,12 @@ Even though the source file is a massive blob of minified, unreadable JavaScript
 ```javascript
 // Prettified for readability
 fta = function (a) {
-  a = a.split('');
+  a = a.split("");
   hD.mL(a, 79);
   hD.L5(a, 2);
   hD.mL(a, 24);
   hD.L5(a, 3);
-  return a.join('');
+  return a.join("");
 };
 ```
 
@@ -264,7 +264,7 @@ var hD = {
   // Reverse transform
   mL: function (a) {
     a.reverse();
-  }
+  },
 };
 ```
 
@@ -290,13 +290,13 @@ To identify a particular implementation of the cipher, YouTube does not rely on 
 var v = {
   splay: !1,
   lactMilliseconds: c.LACT.toString(),
-  playerHeightPixels: Math.trunc(c.P_H),
-  playerWidthPixels: Math.trunc(c.P_W),
-  vis: Math.trunc(c.VIS),
+  playerHeightPixels: Math.trunclsx(c.P_H),
+  playerWidthPixels: Math.trunclsx(c.P_W),
+  vis: Math.trunclsx(c.VIS),
   // Seed for the cipher algorithm:
   signatureTimestamp: 19369,
   // -----------------------------
-  autonavState: MDa(a.player.V())
+  autonavState: MDa(a.player.V()),
 };
 ```
 

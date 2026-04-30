@@ -1,94 +1,94 @@
-import { Donation } from '~/data/donate';
+import { Donation } from "~/data/donate";
 
 const fakes: Donation[] = [
   {
-    name: '96-LB',
+    name: "96-LB",
     amount: 10,
-    platform: 'GitHub Sponsors'
+    platform: "GitHub Sponsors",
   },
   {
-    name: 'JetBrains',
+    name: "JetBrains",
     amount: 300,
-    platform: 'GitHub Sponsors'
+    platform: "GitHub Sponsors",
   },
   {
-    name: 'Simon Cropp',
+    name: "Simon Cropp",
     amount: 97.85,
-    platform: 'Patreon'
+    platform: "Patreon",
   },
   {
-    name: 'KillerGoldFisch',
+    name: "KillerGoldFisch",
     amount: 32.42,
-    platform: 'Patreon'
+    platform: "Patreon",
   },
   {
-    name: 'Greg Engle',
+    name: "Greg Engle",
     amount: 125,
-    platform: 'Patreon'
+    platform: "Patreon",
   },
   {
-    name: 'A dude',
+    name: "A dude",
     amount: 133.9,
-    platform: 'Patreon'
+    platform: "Patreon",
   },
   {
-    name: 'Dominic Maas',
+    name: "Dominic Maas",
     amount: 120,
-    platform: 'Patreon'
+    platform: "Patreon",
   },
   {
-    name: 'Mark Ledwich',
+    name: "Mark Ledwich",
     amount: 100,
-    platform: 'Patreon'
+    platform: "Patreon",
   },
   {
-    name: 'Peter Wesselius',
+    name: "Peter Wesselius",
     amount: 480,
-    platform: 'Patreon'
+    platform: "Patreon",
   },
   {
-    name: 'Thomas Sobieck',
+    name: "Thomas Sobieck",
     amount: 60,
-    platform: 'Patreon'
+    platform: "Patreon",
   },
   {
-    name: 'Peter W',
+    name: "Peter W",
     amount: 60,
-    platform: 'BuyMeACoffee'
+    platform: "BuyMeACoffee",
   },
   {
-    name: 'ACPWinitiate',
+    name: "ACPWinitiate",
     amount: 40,
-    platform: 'BuyMeACoffee'
+    platform: "BuyMeACoffee",
   },
   {
-    name: 'Rich Burgess',
+    name: "Rich Burgess",
     amount: 15,
-    platform: 'BuyMeACoffee'
+    platform: "BuyMeACoffee",
   },
   {
-    name: 'eggeggss',
+    name: "eggeggss",
     amount: 15,
-    platform: 'BuyMeACoffee'
+    platform: "BuyMeACoffee",
   },
   {
     amount: 9,
-    platform: 'BuyMeACoffee'
+    platform: "BuyMeACoffee",
   },
   {
-    name: 'Angelos Tsiflas',
+    name: "Angelos Tsiflas",
     amount: 6,
-    platform: 'BuyMeACoffee'
+    platform: "BuyMeACoffee",
   },
   {
-    name: 'Filip Navara',
+    name: "Filip Navara",
     amount: 20,
-    platform: 'BuyMeACoffee'
+    platform: "BuyMeACoffee",
   },
   {
     amount: 210,
-    platform: 'BuyMeACoffee'
-  }
+    platform: "BuyMeACoffee",
+  },
 ];
 
 export default fakes;
