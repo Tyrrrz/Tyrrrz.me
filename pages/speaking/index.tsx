@@ -1,17 +1,17 @@
-import c from 'classnames';
-import { GetStaticProps, NextPage } from 'next';
-import { FiCalendar, FiMapPin, FiMessageCircle, FiMic, FiRadio, FiTool } from 'react-icons/fi';
-import Heading from '~/components/heading';
-import Inline from '~/components/inline';
-import Link from '~/components/link';
-import Meta from '~/components/meta';
-import Paragraph from '~/components/paragraph';
-import Timeline from '~/components/timeline';
-import TimelineItem from '~/components/timelineItem';
-import { SpeakingEngagement, loadSpeakingEngagements } from '~/data/speaking';
-import { groupBy } from '~/utils/array';
-import { bufferIterable } from '~/utils/async';
-import { deleteUndefined } from '~/utils/object';
+import { clsx } from "clsx";
+import { GetStaticProps, NextPage } from "next";
+import { FiCalendar, FiMapPin, FiMessageCircle, FiMic, FiRadio, FiTool } from "react-icons/fi";
+import Heading from "~/components/heading";
+import Inline from "~/components/inline";
+import Link from "~/components/link";
+import Meta from "~/components/meta";
+import Paragraph from "~/components/paragraph";
+import Timeline from "~/components/timeline";
+import TimelineItem from "~/components/timelineItem";
+import { SpeakingEngagement, loadSpeakingEngagements } from "~/data/speaking";
+import { groupBy } from "~/utils/array";
+import { bufferIterable } from "~/utils/async";
+import { deleteUndefined } from "~/utils/object";
 
 type SpeakingPageProps = {
   engagements: SpeakingEngagement[];
@@ -19,7 +19,7 @@ type SpeakingPageProps = {
 
 const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
   const engagementsByYear = groupBy(engagements, (engagement) =>
-    new Date(engagement.date).getFullYear()
+    new Date(engagement.date).getFullYear(),
   ).sort((a, b) => b.key - a.key);
 
   return (
@@ -32,28 +32,28 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
         <Paragraph>
           These are all the speaking engagements I&apos;ve had in the past, or plan to have in the
           future. Where available, follow the links to see the video recordings. If you want me to
-          speak at your event, please contact me on{' '}
+          speak at your event, please contact me on{" "}
           <Link href="https://bsky.app/profile/tyrrrz.me">Bluesky</Link>.
         </Paragraph>
       </section>
 
-      <section className={c('mt-8', 'space-y-6')}>
+      <section className={clsx("mt-8", "space-y-6")}>
         {engagementsByYear.map(({ key: year, items }, i) => (
           <section key={i}>
             <Heading level={2}>{year}</Heading>
 
-            <div className={c('ml-4')}>
+            <div className={clsx("ml-4")}>
               <Timeline>
                 {items.map((engagement, i) => (
                   <TimelineItem key={i}>
                     {/* Title */}
-                    <div className={c('text-lg')}>
+                    <div className={clsx("text-lg")}>
                       <Link
                         href={
                           engagement.recordingUrl ||
                           engagement.presentationUrl ||
                           engagement.eventUrl ||
-                          '#'
+                          "#"
                         }
                       >
                         {engagement.title}
@@ -61,14 +61,14 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
                     </div>
 
                     {/* Misc info */}
-                    <div className={c('flex', 'flex-wrap', 'gap-x-3', 'font-light')}>
+                    <div className={clsx("flex", "flex-wrap", "gap-x-3", "font-light")}>
                       <Inline>
                         <FiCalendar strokeWidth={1} />
                         <div>
-                          {new Date(engagement.date).toLocaleDateString('en-US', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric'
+                          {new Date(engagement.date).toLocaleDateString("en-US", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
                           })}
                         </div>
                       </Inline>
@@ -77,21 +77,21 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
                         {{
                           talk: <FiMic strokeWidth={1} />,
                           workshop: <FiTool strokeWidth={1} />,
-                          podcast: <FiRadio strokeWidth={1} />
+                          podcast: <FiRadio strokeWidth={1} />,
                         }[engagement.kind] || <FiMic strokeWidth={1} />}
-                        <div className={c('capitalize')}>{engagement.kind}</div>
+                        <div className={clsx("capitalize")}>{engagement.kind}</div>
                       </Inline>
 
                       <Inline>
                         <FiMapPin strokeWidth={1} />
                         <div>
-                          <Link href={engagement.eventUrl || '#'}>{engagement.event}</Link>
+                          <Link href={engagement.eventUrl || "#"}>{engagement.event}</Link>
                         </div>
                       </Inline>
 
                       <Inline>
                         <FiMessageCircle strokeWidth={1} />
-                        <div className={c('capitalize')}>{engagement.language}</div>
+                        <div className={clsx("capitalize")}>{engagement.language}</div>
                       </Inline>
                     </div>
                   </TimelineItem>
@@ -115,8 +115,8 @@ export const getStaticProps: GetStaticProps<SpeakingPageProps> = async () => {
 
   return {
     props: {
-      engagements
-    }
+      engagements,
+    },
   };
 };
 

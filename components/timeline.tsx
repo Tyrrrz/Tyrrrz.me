@@ -1,13 +1,10 @@
-import c from 'classnames';
-import { FC, PropsWithChildren } from 'react';
+import { FC, PropsWithChildren } from "react";
 
 type TimelineProps = PropsWithChildren;
 
 const Timeline: FC<TimelineProps> = ({ children }) => {
   return (
-    <ul className={c('border-l-[2px]', 'border-purple-300', 'dark:border-purple-700', 'space-y-2')}>
-      {children}
-    </ul>
+    <ul className="space-y-2 border-l-2 border-purple-300 dark:border-purple-700">{children}</ul>
   );
 };
 

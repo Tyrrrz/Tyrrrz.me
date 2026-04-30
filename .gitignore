@@ -15,6 +15,7 @@ lerna-debug.log*
 # next.js
 /.next/
 /build/
+/out/
 /next-env.d.ts
 
 # next-pwa
@@ -23,9 +24,8 @@ lerna-debug.log*
 /public/sw.js*
 /public/worker-*.js*
 
-# blog assets
+# generated assets
 /public/blog/
-
-# projects assets
+/public/blog.rss
 /public/projects.svg
 /public/donate.svg

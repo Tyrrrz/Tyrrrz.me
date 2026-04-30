@@ -1,8 +1,8 @@
-import { graphql } from '@octokit/graphql';
-import { Donation } from '~/data/donate';
-import { distinctBy } from '~/utils/array';
-import { bufferIterable } from '~/utils/async';
-import { getGitHubToken, getPrivateDonors } from '~/utils/env';
+import { graphql } from "@octokit/graphql";
+import { Donation } from "~/data/donate";
+import { distinctBy } from "~/utils/array";
+import { bufferIterable } from "~/utils/async";
+import { getGitHubToken, getPrivateDonors } from "~/utils/env";
 
 const TOKEN = getGitHubToken();
 
@@ -15,8 +15,8 @@ const getSponsorActivities = async function* () {
 
   const github = graphql.defaults({
     headers: {
-      authorization: `token ${TOKEN}`
-    }
+      authorization: `token ${TOKEN}`,
+    },
   });
 
   let cursor: string | undefined;
@@ -31,18 +31,18 @@ const getSponsorActivities = async function* () {
           };
           nodes: {
             action:
-              | 'NEW_SPONSORSHIP'
-              | 'CANCELLED_SPONSORSHIP'
-              | 'TIER_CHANGE'
-              | 'REFUND'
-              | 'PENDING_CHANGE'
-              | 'SPONSOR_MATCH_DISABLED';
+              | "NEW_SPONSORSHIP"
+              | "CANCELLED_SPONSORSHIP"
+              | "TIER_CHANGE"
+              | "REFUND"
+              | "PENDING_CHANGE"
+              | "SPONSOR_MATCH_DISABLED";
             timestamp: string;
             sponsor: {
               login: string;
               name: string;
               sponsorshipForViewerAsSponsorable?: {
-                privacyLevel: 'PUBLIC' | 'PRIVATE';
+                privacyLevel: "PUBLIC" | "PRIVATE";
               };
             };
             sponsorsTier: {
@@ -90,7 +90,7 @@ const getSponsorActivities = async function* () {
           }
         }
       }`,
-      { cursor }
+      { cursor },
     );
 
     yield* data.viewer.sponsorsActivities.nodes;
@@ -110,7 +110,7 @@ export const getGitHubSponsorsDonations = async function* () {
 
   const sponsors = distinctBy(
     activities.map((activity) => activity.sponsor),
-    (sponsor) => sponsor.login
+    (sponsor) => sponsor.login,
   );
 
   for (const sponsor of sponsors) {
@@ -118,9 +118,9 @@ export const getGitHubSponsorsDonations = async function* () {
     const oneTimeTotal = activities
       .filter(
         (activity) =>
-          activity.action === 'NEW_SPONSORSHIP' &&
+          activity.action === "NEW_SPONSORSHIP" &&
           activity.sponsor.login === sponsor.login &&
-          activity.sponsorsTier.isOneTime
+          activity.sponsorsTier.isOneTime,
       )
       .reduce((acc, activity) => acc + activity.sponsorsTier.monthlyPriceInCents / 100, 0);
 
@@ -128,21 +128,21 @@ export const getGitHubSponsorsDonations = async function* () {
     const monthlyTotal = activities
       .filter(
         (activity) =>
-          (activity.action === 'NEW_SPONSORSHIP' || activity.action === 'TIER_CHANGE') &&
+          (activity.action === "NEW_SPONSORSHIP" || activity.action === "TIER_CHANGE") &&
           activity.sponsor.login === sponsor.login &&
-          !activity.sponsorsTier.isOneTime
+          !activity.sponsorsTier.isOneTime,
       )
       .map((activity) => {
         const periodStart = new Date(activity.timestamp);
 
         const periodEndActivity = activities.find(
           (otherActivity) =>
-            (otherActivity.action === 'CANCELLED_SPONSORSHIP' ||
-              otherActivity.action === 'NEW_SPONSORSHIP' ||
-              otherActivity.action === 'TIER_CHANGE') &&
+            (otherActivity.action === "CANCELLED_SPONSORSHIP" ||
+              otherActivity.action === "NEW_SPONSORSHIP" ||
+              otherActivity.action === "TIER_CHANGE") &&
             otherActivity.sponsor.login === sponsor.login &&
             !otherActivity.sponsorsTier.isOneTime &&
-            new Date(otherActivity.timestamp) > periodStart
+            new Date(otherActivity.timestamp) > periodStart,
         );
 
         const periodEnd = periodEndActivity ? new Date(periodEndActivity.timestamp) : new Date();
@@ -160,11 +160,11 @@ export const getGitHubSponsorsDonations = async function* () {
       getPrivateDonors().includes(sponsor.login) ||
       getPrivateDonors().includes(sponsor.name) ||
       !!activities
-        .filter((activity) => activity.action === 'NEW_SPONSORSHIP')
+        .filter((activity) => activity.action === "NEW_SPONSORSHIP")
         .filter((activity) => activity.sponsor.login === sponsor.login)
         .map(
           (activity) =>
-            activity.sponsor.sponsorshipForViewerAsSponsorable?.privacyLevel === 'PRIVATE'
+            activity.sponsor.sponsorshipForViewerAsSponsorable?.privacyLevel === "PRIVATE",
         )
         .at(-1);
 
@@ -174,7 +174,7 @@ export const getGitHubSponsorsDonations = async function* () {
     const donation: Donation = {
       name: !isPrivate ? name : undefined,
       amount,
-      platform: 'GitHub Sponsors'
+      platform: "GitHub Sponsors",
     };
 
     yield donation;

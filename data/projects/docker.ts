@@ -1,4 +1,4 @@
-const OWNER = 'tyrrrz';
+const OWNER = "tyrrrz";
 
 export const getDockerDownloads = async (repositoryName: string) => {
   const url = `https://hub.docker.com/v2/repositories/${OWNER}/${repositoryName.toLowerCase()}`;
@@ -11,7 +11,7 @@ export const getDockerDownloads = async (repositoryName: string) => {
 
   if (!response.ok) {
     throw new Error(
-      `Request 'GET ${url}' failed. Status: ${response.status}. Body: '${await response.text()}'.`
+      `Request 'GET ${url}' failed. Status: ${response.status}. Body: '${await response.text()}'.`,
     );
   }
 

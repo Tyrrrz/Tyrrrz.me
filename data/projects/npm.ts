@@ -1,8 +1,8 @@
-import { sleep } from '~/utils/async';
+import { sleep } from "~/utils/async";
 
 export const getNpmDownloads = async (packageName: string) => {
-  const start = '2010-01-01';
-  const end = new Date().toISOString().split('T')[0];
+  const start = "2010-01-01";
+  const end = new Date().toISOString().split("T")[0];
   const url = `https://api.npmjs.org/downloads/point/${start}:${end}/${packageName.toLowerCase()}`;
   const response = await fetch(url);
 
@@ -13,7 +13,7 @@ export const getNpmDownloads = async (packageName: string) => {
 
   if (!response.ok) {
     throw new Error(
-      `Request 'GET ${url}' failed. Status: ${response.status}. Body: '${await response.text()}'.`
+      `Request 'GET ${url}' failed. Status: ${response.status}. Body: '${await response.text()}'.`,
     );
   }
 

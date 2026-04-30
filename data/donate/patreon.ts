@@ -1,6 +1,6 @@
-import { Donation } from '~/data/donate';
-import { getPatreonToken, getPrivateDonors } from '~/utils/env';
-import { formatUrlWithQuery } from '~/utils/url';
+import { Donation } from "~/data/donate";
+import { getPatreonToken, getPrivateDonors } from "~/utils/env";
+import { formatUrlWithQuery } from "~/utils/url";
 
 const TOKEN = getPatreonToken();
 
@@ -9,22 +9,22 @@ const getCampaigns = async function* () {
     return;
   }
 
-  let cursor = '';
+  let cursor = "";
   while (true) {
     // The 'www' part is essential 😒
-    const url = formatUrlWithQuery('https://www.patreon.com/api/oauth2/v2/campaigns', {
-      'page[cursor]': cursor
+    const url = formatUrlWithQuery("https://www.patreon.com/api/oauth2/v2/campaigns", {
+      "page[cursor]": cursor,
     });
 
     const response = await fetch(url, {
       headers: {
-        authorization: `Bearer ${TOKEN}`
-      }
+        authorization: `Bearer ${TOKEN}`,
+      },
     });
 
     if (!response.ok) {
       throw new Error(
-        `Request 'GET ${url}' failed. Status: ${response.status}. Body: '${await response.text()}'.`
+        `Request 'GET ${url}' failed. Status: ${response.status}. Body: '${await response.text()}'.`,
       );
     }
 
@@ -58,26 +58,26 @@ const getPledges = async function* (campaignId: string) {
     return;
   }
 
-  let cursor = '';
+  let cursor = "";
   while (true) {
     // The 'www' part is essential 😒
     const url = formatUrlWithQuery(
       `https://www.patreon.com/api/oauth2/v2/campaigns/${campaignId}/members`,
       {
-        'page[cursor]': cursor,
-        'fields[member]': 'full_name,lifetime_support_cents'
-      }
+        "page[cursor]": cursor,
+        "fields[member]": "full_name,lifetime_support_cents",
+      },
     );
 
     const response = await fetch(url, {
       headers: {
-        authorization: `Bearer ${TOKEN}`
-      }
+        authorization: `Bearer ${TOKEN}`,
+      },
     });
 
     if (!response.ok) {
       throw new Error(
-        `Request 'GET ${url}' failed. Status: ${response.status}. Body: '${await response.text()}'.`
+        `Request 'GET ${url}' failed. Status: ${response.status}. Body: '${await response.text()}'.`,
       );
     }
 
@@ -125,7 +125,7 @@ export const getPatreonDonations = async function* () {
       const donation: Donation = {
         name: !isPrivate ? name : undefined,
         amount,
-        platform: 'Patreon'
+        platform: "Patreon",
       };
 
       yield donation;

@@ -1,6 +1,6 @@
 ---
-title: 'Pure-Impure Segregation Principle'
-date: '2020-08-24'
+title: "Pure-Impure Segregation Principle"
+date: "2020-08-24"
 ---
 
 Two months ago I published an article detailing why I think that [Unit Testing is Overrated](/blog/unit-testing-is-overrated), which seemed to resonate quite a lot with readers, prompting very involved and interesting discussions. And although most commenters mainly shared their personal experiences, a few have also voiced criticism of the way some arguments were presented.
@@ -125,7 +125,7 @@ public class LocationProvider
 
     /* ... */
 
-    public async Task<Location> GetLocationAsync(IPAddress ipAddress)
+    public async Task<Location> GetLocationAsynclsx(IPAddress ipAddress)
     {
         // Pure
         var ipAddressFormatted = !ipAddress.IsLocal()
@@ -133,7 +133,7 @@ public class LocationProvider
             : "";
 
         // Impure
-        var json = await _httpClient.GetJsonAsync($"http://ip-api.com/json/{ipAddressFormatted}");
+        var json = await _httpClient.GetJsonAsynclsx($"http://ip-api.com/json/{ipAddressFormatted}");
 
         // Pure
         var latitude = json.GetProperty("lat").GetDouble();
@@ -159,10 +159,10 @@ public class SolarCalculator
         /* Pure (implementation omitted) */
     }
 
-    public async Task<SolarTimes> GetSolarTimesAsync(IPAddress ipAddress, DateTimeOffset date)
+    public async Task<SolarTimes> GetSolarTimesAsynclsx(IPAddress ipAddress, DateTimeOffset date)
     {
         // Impure
-        var location = await _locationProvider.GetLocationAsync(ipAddress);
+        var location = await _locationProvider.GetLocationAsynclsx(ipAddress);
 
         // Pure
         var sunrise = CalculateSunrise(location, date);
@@ -183,7 +183,7 @@ public class SolarTimeController : ControllerBase
     public async Task<IActionResult> GetSolarTimesByIp(DateTimeOffset? date)
     {
         // Impure
-        var result = await _solarCalculator.GetSolarTimesAsync(
+        var result = await _solarCalculator.GetSolarTimesAsynclsx(
             HttpContext.Connection.RemoteIpAddress,
             date ?? DateTimeOffset.Now
         );
@@ -209,7 +209,7 @@ This is a very typical scenario for traditionally designed object-oriented softw
 
 If we consider this relationship from a standpoint of purity, we'll also notice that the entire call chain is impure. And while for `LocationProvider` it makes sense because it performs non-deterministic I/O, the `SolarCalculator` is impure only due to its dependency on the former.
 
-That design is not ideal, because we lose out on the benefits of pure functions without really getting anything in return. Now if we wanted to, for example, test `SolarCalculator.GetSolarTimesAsync(...)` in isolation, we would only be able to do so with the help of an autotelic abstraction and a test double, which is not desirable.
+That design is not ideal, because we lose out on the benefits of pure functions without really getting anything in return. Now if we wanted to, for example, test `SolarCalculator.GetSolarTimesAsynclsx(...)` in isolation, we would only be able to do so with the help of an autotelic abstraction and a test double, which is not desirable.
 
 This issue could've been avoided if we architected our code with the pure-impure segregation principle in mind. Let's see how we can refactor our classes to push the impurities out of `SolarCalculator`:
 
@@ -243,7 +243,7 @@ public class SolarTimesController
     public async Task<IActionResult> GetSolarTimesByIp(DateTimeOffset? date)
     {
         // Impure
-        var location = await _locationProvider.GetLocationAsync(
+        var location = await _locationProvider.GetLocationAsynclsx(
             HttpContext.Connection.RemoteIpAddress
         );
 
@@ -289,7 +289,7 @@ public class RecommendationsProvider
 
     /* ... */
 
-    public async Task<IReadOnlyList<Song>> GetRecommendationsAsync(string userName)
+    public async Task<IReadOnlyList<Song>> GetRecommendationsAsynclsx(string userName)
     {
         // 1. Get user's own top scrobbles
         // 2. Get other users who listened to the same songs
@@ -297,7 +297,7 @@ public class RecommendationsProvider
         // 4. Aggregate the songs into recommendations
 
         // Impure
-        var scrobbles = await _songService.GetTopScrobblesAsync(userName);
+        var scrobbles = await _songService.GetTopScrobblesAsynclsx(userName);
 
         // Pure
         var scrobblesSnapshot = scrobbles
@@ -310,7 +310,7 @@ public class RecommendationsProvider
         {
             // Impure
             var otherListeners = await _songService
-                .GetTopListenersAsync(scrobble.Song.Id);
+                .GetTopListenersAsynclsx(scrobble.Song.Id);
 
             // Pure
             var otherListenersSnapshot = otherListeners
@@ -323,7 +323,7 @@ public class RecommendationsProvider
             {
                 // Impure
                 var otherScrobbles = await _songService
-                    .GetTopScrobblesAsync(otherListener.UserName);
+                    .GetTopScrobblesAsynclsx(otherListener.UserName);
 
                 // Pure
                 var otherScrobblesSnapshot = otherScrobbles
@@ -353,7 +353,7 @@ The above algorithm works by retrieving the user's most listened songs, finding 
 
 It's quite clear that this function would benefit greatly from being pure, seeing how much business logic is encapsulated within it. Unfortunately, the technique we relied upon earlier won't work here.
 
-In order to fully isolate `GetRecommendationsAsync(...)` from its impure dependencies, we would have to somehow supply the function with an entire list of songs, users, and their scrobbles upfront. If we assume that we're dealing with data on millions of users, it's obvious that this would be completely impractical and likely even impossible.
+In order to fully isolate `GetRecommendationsAsynclsx(...)` from its impure dependencies, we would have to somehow supply the function with an entire list of songs, users, and their scrobbles upfront. If we assume that we're dealing with data on millions of users, it's obvious that this would be completely impractical and likely even impossible.
 
 A seemingly simple way we could try to work around this problem is to split the function into smaller pieces, each handling one of the four stages of the algorithm separately:
 
@@ -395,10 +395,10 @@ public class RecommendationsProvider
             .Take(200)
             .ToArray();
 
-    public async Task<IReadOnlyList<Song>> GetRecommendationsAsync(string userName)
+    public async Task<IReadOnlyList<Song>> GetRecommendationsAsynclsx(string userName)
     {
         // Impure
-        var scrobbles = await _songService.GetTopScrobblesAsync(userName);
+        var scrobbles = await _songService.GetTopScrobblesAsynclsx(userName);
 
         // Pure
         var songIds = HandleOwnScrobbles(scrobbles);
@@ -408,7 +408,7 @@ public class RecommendationsProvider
         {
             // Impure
             var otherListeners = await _songService
-                .GetTopListenersAsync(songId);
+                .GetTopListenersAsynclsx(songId);
 
             // Pure
             var otherUserNames = HandleOtherListeners(otherListeners);
@@ -417,7 +417,7 @@ public class RecommendationsProvider
             {
                 // Impure
                 var otherScrobbles = await _songService
-                    .GetTopScrobblesAsync(otherListener.UserName);
+                    .GetTopScrobblesAsynclsx(otherListener.UserName);
 
                 // Pure
                 var songsToRecommend = HandleOtherScrobbles(otherScrobbles);
@@ -432,7 +432,7 @@ public class RecommendationsProvider
 }
 ```
 
-By extracting all the pure code out of `GetRecommendationsAsync(...)`, we can now write unit tests that verify that the intermediate stages of the algorithm work as intended. On the surface, it looks as though we managed to achieve exactly what we wanted.
+By extracting all the pure code out of `GetRecommendationsAsynclsx(...)`, we can now write unit tests that verify that the intermediate stages of the algorithm work as intended. On the surface, it looks as though we managed to achieve exactly what we wanted.
 
 However, instead of having one cohesive element to reason about, we ended up with multiple fragments, each having no meaning or value of their own. While unit testing of individual parts may have become easier, the benefit is very questionable, as it provides no confidence in the correctness of the algorithm as a whole.
 

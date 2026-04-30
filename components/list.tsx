@@ -1,25 +1,20 @@
-import c from 'classnames';
-import { FC, PropsWithChildren } from 'react';
+import { clsx } from "clsx";
+import { FC, PropsWithChildren } from "react";
 
 type ListProps = PropsWithChildren<{
-  variant?: 'unordered' | 'ordered';
+  variant?: "unordered" | "ordered";
   start?: number;
 }>;
 
-const List: FC<ListProps> = ({ variant = 'unordered', start = 1, children }) => {
-  const Proxy = variant === 'unordered' ? 'ul' : 'ol';
+const List: FC<ListProps> = ({ variant = "unordered", start = 1, children }) => {
+  const Proxy = variant === "unordered" ? "ul" : "ol";
 
   return (
     <Proxy
-      className={c(
-        'ml-8',
-        'my-4',
-        {
-          'list-disc': variant === 'unordered',
-          'list-decimal': variant === 'ordered'
-        },
-        'list-outside'
-      )}
+      className={clsx("my-4 ml-8 list-outside", {
+        "list-disc": variant === "unordered",
+        "list-decimal": variant === "ordered",
+      })}
       start={start}
     >
       {children}

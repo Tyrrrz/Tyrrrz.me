@@ -1,6 +1,6 @@
 ---
-title: 'WPF ListBox SelectedItems TwoWay Binding'
-date: '2016-11-01'
+title: "WPF ListBox SelectedItems TwoWay Binding"
+date: "2016-11-01"
 ---
 
 For some unclear reasons, WPF's `ListBox` control does not allow two-way binding on the `SelectedItems` property the way it does with `SelectedItem`. This could have been very useful when using multi-select to bind the whole list of selected items to the view model.

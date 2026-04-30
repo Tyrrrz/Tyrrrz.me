@@ -1,10 +1,10 @@
-const PWA = require('next-pwa');
-const runtimeCaching = require('next-pwa/cache');
+const PWA = require("next-pwa");
+const runtimeCaching = require("next-pwa/cache");
 
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
-  output: 'export',
+  output: "export",
 
   // Pulling donations takes a very long time, so we need to make sure we don't time out too early
   staticPageGenerationTimeout: 60 * 60,
@@ -13,25 +13,25 @@ const config = {
     unoptimized: true,
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'raw.githubusercontent.com'
-      }
-    ]
+        protocol: "https",
+        hostname: "raw.githubusercontent.com",
+      },
+    ],
   },
 
   // Expose environment variables to the client
   env: {
     BUILD_ID: process.env.BUILD_ID,
-    SITE_URL: process.env.SITE_URL
-  }
+    SITE_URL: process.env.SITE_URL,
+  },
 };
 
 const plugins = [
   PWA({
-    dest: 'public',
-    disable: process.env.NODE_ENV === 'development',
-    runtimeCaching
-  })
+    dest: "public",
+    disable: process.env.NODE_ENV === "development",
+    runtimeCaching,
+  }),
 ];
 
 module.exports = () => {

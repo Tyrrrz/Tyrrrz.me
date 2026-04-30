@@ -1,8 +1,8 @@
-import { Octokit } from '@octokit/rest';
-import { getGitHubToken } from '~/utils/env';
+import { Octokit } from "@octokit/rest";
+import { getGitHubToken } from "~/utils/env";
 
 const TOKEN = getGitHubToken();
-const OWNER = 'Tyrrrz';
+const OWNER = "Tyrrrz";
 
 export const getGitHubRepos = async () => {
   if (!TOKEN) {
@@ -10,14 +10,14 @@ export const getGitHubRepos = async () => {
   }
 
   const github = new Octokit({
-    auth: TOKEN
+    auth: TOKEN,
   });
 
   return await github.paginate(github.repos.listForUser, {
     username: OWNER,
-    type: 'owner',
+    type: "owner",
     per_page: 100,
-    sort: 'pushed'
+    sort: "pushed",
   });
 };
 
@@ -27,13 +27,13 @@ export const getGitHubDownloads = async (repoName: string) => {
   }
 
   const github = new Octokit({
-    auth: TOKEN
+    auth: TOKEN,
   });
 
   const releases = await github.paginate(github.repos.listReleases, {
     owner: OWNER,
     repo: repoName,
-    per_page: 100
+    per_page: 100,
   });
 
   return releases
@@ -48,16 +48,16 @@ export const getGitHubLogoUrl = async (repoName: string) => {
 
   try {
     const github = new Octokit({
-      auth: TOKEN
+      auth: TOKEN,
     });
 
     const { data } = await github.repos.getContent({
       owner: OWNER,
       repo: repoName,
-      path: 'favicon.png'
+      path: "favicon.png",
     });
 
-    if (!Array.isArray(data) && data.type === 'file' && data.download_url) {
+    if (!Array.isArray(data) && data.type === "file" && data.download_url) {
       return data.download_url;
     }
   } catch (err) {
@@ -76,12 +76,12 @@ export const getGitHubIssuesAndPRsCount = async () => {
   }
 
   const github = new Octokit({
-    auth: TOKEN
+    auth: TOKEN,
   });
 
   const { data } = await github.search.issuesAndPullRequests({
     q: `user:${OWNER}`,
-    per_page: 1
+    per_page: 1,
   });
 
   return data.total_count;

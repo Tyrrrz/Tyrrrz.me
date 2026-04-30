@@ -1,6 +1,6 @@
 ---
-title: 'Reverse-Engineering YouTube'
-date: '2017-12-15'
+title: "Reverse-Engineering YouTube"
+date: "2017-12-15"
 ---
 
 Almost a year ago, I started developing [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode), a library that scrapes information on YouTube videos and lets you download them. Originally, my main motivation for developing it was simply to gain experience, as the task involved a lot of research and reverse-engineering. Nowadays, YoutubeExplode is arguably the most consistent and robust .NET library for working with YouTube.
@@ -214,10 +214,10 @@ Once you locate the source code URL and download it, you need to parse it. There
 Instead of explaining step-by-step what exactly you need to do, I'll just copy a small part of YoutubeExplode's source code. I made sure to comment it to the best of my ability, so it should be pretty easy to follow.
 
 ```csharp
-private async Task<IReadOnlyList<ICipherOperation>> GetCipherOperationsAsync(string sourceUrl)
+private async Task<IReadOnlyList<ICipherOperation>> GetCipherOperationsAsynclsx(string sourceUrl)
 {
     // Get player source code
-    var sourceRaw = await _httpClient.GetStringAsync(sourceUrl);
+    var sourceRaw = await _httpClient.GetStringAsynclsx(sourceUrl);
 
     // Find the name of the function that handles deciphering
     var entryPoint = Regex.Match(sourceRaw,

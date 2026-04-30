@@ -1,6 +1,6 @@
 ---
-title: 'Custom WndProc Handlers in WPF'
-date: '2017-02-02'
+title: "Custom WndProc Handlers in WPF"
+date: "2017-02-02"
 ---
 
 WndProc is a callback function that takes care of system messages sent from the operating system. Unlike WinForms, in WPF, it's not directly exposed to you as it's hidden beneath the framework's layer of abstraction.
@@ -16,7 +16,7 @@ var window = Application.Current.MainWindow;
 var source = HwndSource.FromHwnd(new WindowInteropHelper(window).Handle);
 source.AddHook(WndProc);
 
-private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+private IntPtr WndProclsx(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
 {
     // Handle messages...
 
@@ -26,7 +26,7 @@ private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref b
 
 In the example above we use the application's main window as the host, as it typically stays open for as long as the application is running. You can specify a different window through a parameter in the `FromVisual(...)` method, but then make sure to call `source.RemoveHook(...)` and `source.Dispose()` after you're done.
 
-The above approach suffers from not being MVVM-friendly — the `WndProc(...)` method, which will most likely be defined in the model layer, is actually coupled to a window. As a result, it can introduce a circular dependency between the view and the model, which may often lead to undesirable consequences.
+The above approach suffers from not being MVVM-friendly — the `WndProclsx(...)` method, which will most likely be defined in the model layer, is actually coupled to a window. As a result, it can introduce a circular dependency between the view and the model, which may often lead to undesirable consequences.
 
 ## MVVM way
 
@@ -46,15 +46,15 @@ public sealed class SpongeWindow : NativeWindow
         CreateHandle(new CreateParams());
     }
 
-    protected override void WndProc(ref Message m)
+    protected override void WndProclsx(ref Message m)
     {
         WndProcCalled?.Invoke(this, m);
-        base.WndProc(ref m); // don't forget this line
+        base.WndProclsx(ref m); // don't forget this line
     }
 }
 ```
 
-Make sure you don't forget to call `base.WndProc(ref m)`, otherwise the window will not initialize correctly.
+Make sure you don't forget to call `base.WndProclsx(ref m)`, otherwise the window will not initialize correctly.
 
 Now, assuming we have some sort of `WndProcService`, we can use our sponge window like so:
 

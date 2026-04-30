@@ -1,24 +1,12 @@
-import c from 'classnames';
-import { FC, PropsWithChildren } from 'react';
+import { FC, PropsWithChildren } from "react";
 
 type TimelineItemProps = PropsWithChildren;
 
 const TimelineItem: FC<TimelineItemProps> = ({ children }) => {
   return (
-    <li className={c('relative')}>
-      <div
-        className={c(
-          'absolute',
-          'w-[8px]',
-          'h-[8px]',
-          '-left-[5px]',
-          'top-2',
-          'md:top-3',
-          'rounded-full',
-          'bg-purple-500'
-        )}
-      />
-      <div className={c('ml-4')}>{children}</div>
+    <li className="relative">
+      <div className="absolute top-2 -left-[5px] h-[8px] w-[8px] rounded-full bg-purple-500 md:top-3" />
+      <div className="ml-4">{children}</div>
     </li>
   );
 };
