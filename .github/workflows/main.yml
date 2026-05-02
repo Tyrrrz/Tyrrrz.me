@@ -37,7 +37,7 @@ jobs:
         run: yarn run format:check
 
       - name: Perform linting
-        run: yarn run link:check
+        run: yarn run lint:check
 
   pack:
     runs-on: ubuntu-latest
