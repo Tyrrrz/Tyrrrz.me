@@ -6,6 +6,8 @@ const config = {
   reactStrictMode: true,
   output: "export",
 
+  basePath: process.env.SITE_URL ? new URL(process.env.SITE_URL).pathname.replace(/\/$/, "") : "",
+
   // Pulling donations takes a very long time, so we need to make sure we don't time out too early
   staticPageGenerationTimeout: 60 * 60,
 
