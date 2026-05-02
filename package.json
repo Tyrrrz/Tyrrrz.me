@@ -41,7 +41,7 @@
     "feed": "^5.2.1",
     "front-matter": "^4.0.2",
     "markdown-to-txt": "^2.0.1",
-    "postcss": "^8.5.11",
+    "postcss": "^8.5.12",
     "prettier": "^3.8.3",
     "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-tailwindcss": "^0.8.0",
