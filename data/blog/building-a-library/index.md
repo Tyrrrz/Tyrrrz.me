@@ -1,6 +1,6 @@
 ---
-title: 'Building a Library in .NET: The Quiet Parts'
-date: '2024-10-28'
+title: "Building a Library in .NET: The Quiet Parts"
+date: "2024-10-28"
 ---
 
 Developing a library involves a lot of moving pieces, and not all of them are just about writing code. Beyond the functionality of the library itself, you also have to consider many operational concerns, such as how it is built, tested, and released — and how those processes should be automated in an efficient and reliable way. These aspects may not be as prominent on the surface, but they still have significant implications both on your own productivity as the author, as well as the experience of the library's consumers.
@@ -304,9 +304,7 @@ Finally, we get to the **`<GenerateDocumentationFile>`** property, which we enab
 
 Throughout this article, there were a few mentions of a concept called [_polyfill_](<https://en.wikipedia.org/wiki/Polyfill_(programming)>) — a general programming technique that allows developers to replicate the behavior of newer platform APIs on older targets that don't support them natively. When building libraries, this technique is particularly useful as it allows us to leverage modern framework and compiler features without sacrificing compatibility.
 
-Polyfills are authored and applied differently depending on the programming language and its capabilities. For example, in JavaScript — where the term originated — they are implemented as standalone scripts that patch the environment or specific object prototypes to add missing functionality at run time. By contrast, C#'s statically typed and compiled nature rules out that style of polyfilling, but the concept itself remains applicable through other approaches.
-
-In practice, polyfills in C# fall into two main categories:
+Polyfills are authored and applied differently depending on the programming language and its capabilities. For example, in JavaScript — where the term originated — they are implemented as standalone scripts that patch the environment or specific object prototypes to add missing functionality at run time. By contrast, C#'s statically typed and compiled nature rules out that style of polyfilling, but the concept itself remains applicable through the following approaches:
 
 - **Type polyfills**, which re-implement missing built-in types from scratch, mimicking their original behavior as closely as possible. These polyfills are placed in the same namespaces as the official types to ensure they are picked up correctly by the compiler when the native definitions are not available. Suitable when the desired types are completely missing from the target framework.
 - **Member polyfills**, which rely on [extension members](https://learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/extension-methods) to shim missing methods, properties, or operators on existing built-in types. These extensions are usually placed in the global namespace to make them immediately accessible on every applicable type, effectively simulating intrinsic members. Suitable when the desired types exist, but lack certain members from later frameworks.
@@ -572,9 +570,9 @@ Generally speaking, the official compatibility packages should be your first cho
 
 Being official, however, also means that their scope is rather conservative — they tend to focus on user-facing areas of the framework, while leaving out many specialized and compiler-facing types, including those that power various language features. Additionally, they don't provide any member polyfills, as that requires relying on somewhat unconventional techniques, like the global extension trick we've seen earlier.
 
-This naturally brings us to the second solution: community polyfill libraries, such as [PolySharp](https://github.com/Sergio0694/PolySharp), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolyShim](https://github.com/Tyrrrz/PolyShim). All these projects were born out of individual efforts to plug the gaps left by Microsoft's compatibility packages, gradually evolving into comprehensive collections of shims and backports for a wide spectrum of different APIs.
+This naturally brings us to the second solution: community polyfill libraries, such as [PolySharp](https://github.com/Sergio0694/PolySharp), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolyShim](https://github.com/Tyrrrz/PolyShim). All these projects were born out of independent efforts to plug the gaps left by Microsoft's compatibility packages, gradually evolving into comprehensive collections of shims and backports for a wide spectrum of different APIs.
 
-As community-driven projects, these libraries are not constrained by corporate support policies, which lets them be more thorough and aggressive in their coverage. Here you will find polyfills for nullable reference types, records, init-only properties, `Index`, `Range`, `ValueTuple<...>`, `ArrayPool<T>`, `Span<T>`, `Memory<T>`, `IEnumerable<T>.Chunk(...)`, `Stream.ReadExactly(...)`, `Environment.ProcessPath`, `Random.Shared`, and pretty much everything in between.
+As community-driven projects, these libraries are not constrained by corporate support policies, which lets them be more thorough and aggressive in their coverage. Here you will find polyfills for nullable reference types, records, init-only properties, `Index`, `Range`, `ValueTuple<...>`, `ValueTask<T>`, `ArrayPool<T>`, `Span<T>`, `Memory<T>`, `IEnumerable<T>.Chunk(...)`, `Stream.ReadExactly(...)`, `Environment.ProcessPath`, `Random.Shared`, and pretty much everything in between.
 
 Unlike the `System.*` and `Microsoft.Bcl.*` packages, they are also distributed as static dependencies, providing polyfills through source code rather than pre-compiled assemblies. This approach effectively mimics hand-rolled implementations, allowing them to ship all polyfills as a single package, use `internal` visibility by default, reduce maintenance overhead, and leverage conditional compilation to filter out unnecessary code automatically.
 
@@ -614,7 +612,7 @@ While the choice between these community libraries largely comes down to API cov
     -->
     <PackageReference
       Include="PolyShim"
-      Version="2.5.0"
+      Version="2.11.0"
       PrivateAssets="all"
     />
   </ItemGroup>
@@ -686,7 +684,68 @@ That said, polyfills are not an ultimate solution to the compatibility problem �
 
 ## Code formatting
 
-CSharpier, dotnet format
+Most code gets read way more often than it's written, so it's important to consider readability as one of the core optimization goals. This is no less true for a library than it is for any other type of software, but because code formatting isn't something most .NET developers think much about, I felt it deserved its own section in this article.
+
+.NET tooling provides a built-in code formatter that can be invoked through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is highly configurable, allowing you to define your own coding style preferences and enforce them consistently across the entire codebase.
+
+It supports a wide range of formatting options — from basic indentation and spacing rules to more complex C#-specific conventions, such as the placement of braces, the use of expression-bodied members, etc. By defining these preferences in a `.editorconfig` file at the root of your repository, you can ensure that every contributor adheres to the same coding style, regardless of their individual IDE settings.
+
+That said, this extensive configurability is also what drives most people away from using `dotnet format` in their solutions. Most people would rather write code than spend hours bike-shedding over line widths and bracket placements, because inevitably, where there are many options, there will be disagreements.
+
+This is why I personally prefer to use [CSharpier](https://github.com/belav/csharpier) instead. It takes inspiration from JavaScript's [Prettier](https://github.com/prettier/prettier) and builds upon the idea that most developers don't care which formatting style is used, as long as it's consistent and doesn't require manual intervention. As such, CSharpier offers (almost) no configuration options and works out of the box.
+
+You can use CSharpier as a command-line tool or through one of its many IDE extensions, but I think it shines the most when integrated directly into your MSBuild pipeline. To do that, let's add `CSharpier.MSBuild` as a development dependency in our projects:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- ... -->
+
+  <ItemGroup>
+    <PackageReference Include="CSharpier.MSBuild" Version="1.2.6" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>
+```
+
+Integrated this way, CSharpier becomes part of the project's MSBuild pipeline and runs automatically whenever the project is built. In Debug builds, it reformats the files in place, while in Release it switches to verification mode and checks that everything is already formatted correctly. In effect, this keeps the codebase in a deterministic state: the same semantics always produce the same source text, sans the trivia.
+
+With this setup in place, formatting effectively becomes a non-concern during local development. You can write code however you find most convenient, without paying too much attention to spacing, line breaks, or indentation, and simply let the formatter normalize the result the next time you build the project. In practice, this means that the shape of the code is no longer something you actively manage, but rather a byproduct of the tooling.
+
+For example, you might start off with a method that looks like this:
+
+```csharp
+public static string GetSlug( string title ){
+    if (string.IsNullOrWhiteSpace(title))
+    { throw new ArgumentException("Title cannot be empty.", nameof(title)); }
+
+    return string.Join("-",
+      title.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(part => part.ToLowerInvariant())
+    );
+}
+```
+
+After a build, it will be reformatted automatically into something like this:
+
+```csharp
+public static string GetSlug(string title)
+{
+    if (string.IsNullOrWhiteSpace(title))
+        throw new ArgumentException("Title cannot be empty.", nameof(title));
+
+    return string.Join(
+        "-",
+        title.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Select(part => part.ToLowerInvariant())
+    );
+}
+```
+
+The exact formatting choices are not particularly important here. What matters is that the output is consistent, predictable, and no longer subject to individual preference. As long as the code is valid, the formatter will take care of making it look the way it's supposed to look.
+
+This becomes especially useful when you're working in a team or accepting external contributions in an open-source project. In those scenarios, formatting stops being a convention that contributors are expected to remember and manually follow, and instead turns into an implicit contract that their tooling fulfills automatically. That, in turn, reduces noise in pull requests, avoids pointless style discussions, and helps keep code reviews focused on the actual substance of the change.
+
+More broadly, this is also a small example of a recurring theme in library development: if a repetitive quality-related task can be automated, it probably should be. And once formatting is taken care of, the next obvious step is to automate the rest of the development loop as well — namely building and testing.
 
 ## Workflow automation: building & testing
 
@@ -713,7 +772,9 @@ Since we're already using GitHub to host our code repository, we can leverage it
 
 GitHub Actions workflows are conceptually based around events — so you can listen to specific types of events that indicate that something happened in the repository, and then run a series of commands in response to that event. While it's completely free for open-source projects, it also comes with a generous monthly allowance of free minutes for private repositories as well.
 
-For a typical testing workflow, it is standard to run dotnet test on every push to the repository, as well as on every pull request. To that end, you can create a workflow file that looks something like this:
+### Basic testing workflow
+
+For a typical testing workflow, it is standard to run `dotnet test` on every push to the repository, as well as on every pull request. To that end, you can create a workflow file that looks something like this:
 
 ```yml
 # Friendly name of the workflow
@@ -741,6 +802,10 @@ jobs:
       - run: dotnet test --configuration Release
 ```
 
+Just like that, we have a basic CI workflow that will run `dotnet test` on every push and pull request. Once this file is committed to the repository, GitHub will automatically detect it and start running the workflow each time the corresponding events occur.
+
+GitHub-hosted runners already come with a lot of common developer tooling preinstalled, including .NET itself. Still, it makes sense to specify the SDK versions explicitly, if only to make the workflow more reproducible and its expectations more obvious:
+
 ```yml
 name: main
 
@@ -764,6 +829,8 @@ jobs:
 
       - run: dotnet test --configuration Release
 ```
+
+If your library uses platform-specific APIs, shells out to operating system tools, or otherwise behaves differently depending on the underlying platform, it's also a good idea to run the tests on multiple operating systems. GitHub Actions makes this particularly easy through a job matrix, which expands a single job definition into multiple parallel runs with different arguments:
 
 ```yml
 name: main
@@ -797,7 +864,9 @@ jobs:
       - - run: dotnet test --configuration Release
 ```
 
-Reporting test results
+### Reporting test results
+
+So far, this works fine, but raw `dotnet test` output is not particularly pleasant to navigate in workflow logs. GitHub Actions also doesn't provide any built-in functionality to parse .NET test results and display them in a more accessible way, so if you want a nicer reporting experience, you need to bring in a third-party solution.
 
 - https://github.com/dorny/test-reporter
 - https://github.com/Tyrrrz/GitHubActionsTestLogger
@@ -840,10 +909,14 @@ jobs:
         if: success() || failure()
         with:
           name: Test results
-          path: '**/*.trx'
+          path: "**/*.trx"
           reporter: dotnet-trx
           fail-on-error: true
 ```
+
+This works quite well, but there is one important caveat to keep in mind: `dorny/test-reporter` relies on GitHub's Check API to render its reports. That API requires permissions that are not always available, particularly when the workflow is triggered by an outside contributor through a pull request.
+
+One way to work around this limitation is to split the testing and reporting parts of the pipeline into separate workflows. The first workflow runs the tests and uploads the TRX files as artifacts, while the second one listens for completion of the former and publishes the results with a token that has the required permissions:
 
 ![Test results using dorny/test-reporter](dorny-test-results.png)
 
@@ -883,7 +956,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: '**/*.trx'
+          path: "**/*.trx"
 ```
 
 ```yml
@@ -908,10 +981,12 @@ jobs:
         with:
           name: Test results
           artifact: test-results
-          path: '**/*.trx'
+          path: "**/*.trx"
           reporter: dotnet-trx
           fail-on-error: true
 ```
+
+Although effective, using two separate workflows for testing and reporting is a bit clunky. If you prefer to keep everything in a single file, an alternative is to rely on [GitHubActionsTestLogger](https://github.com/Tyrrrz/GitHubActionsTestLogger), which reports test results through GitHub Actions' Job Summary API and does not require elevated permissions:
 
 GitHub Actions Test Logger:
 
@@ -949,7 +1024,11 @@ jobs:
 
 ![Test results using Tyrrrz/GitHubActionsTestLogger](ghatl-test-results.png)
 
-Coverage
+### Code coverage
+
+Pass and fail status is only part of the picture. It's also useful to know which parts of the codebase are actually being exercised, which branches are never reached, and where additional tests may be warranted.
+
+On the .NET side, the most popular tool for collecting that data is [Coverlet](https://github.com/coverlet-coverage/coverlet), which integrates directly into the `dotnet test` pipeline and comes preinstalled in most new test project templates. Once the reports are generated, you'll also want somewhere convenient to view them, which is where a service like [Codecov](https://codecov.io/) comes in:
 
 ```yml
 name: main
@@ -991,7 +1070,13 @@ jobs:
 
 ![Code coverage using codecov/codecov-action](codecov-graph.png)
 
-## Security considerations
+With this in place, each CI job will upload its own report and Codecov will merge them automatically into a single view. The percentage itself is not the most important part here; the real value comes from being able to inspect coverage by directory, file, and even individual line.
+
+### Security considerations
+
+GitHub Actions is generally secure, but workflows still deserve the same kind of scrutiny as the rest of your supply chain. Every third-party action you use is effectively code that runs inside your build environment, so it's worth being deliberate about both permissions and provenance.
+
+When it comes to permissions, the easiest win is to scope them down to the minimum a given job actually needs. For the testing workflow we've built so far, `contents: read` is sufficient:
 
 ```yml
 jobs:
@@ -1040,6 +1125,8 @@ jobs:
       - uses: codecov/codecov-action@v3
 ```
 
+This helps reduce the blast radius of a compromised action, but it doesn't eliminate the risk entirely. Tags can be retargeted and upstream actions can change over time, so after reviewing an action and deciding to trust it, the safest way to reference it is by commit hash instead of a floating tag:
+
 ```yml
 name: main
 
@@ -1079,7 +1166,57 @@ jobs:
       - uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
 ```
 
+With that in place, the testing workflow is reasonably locked down: it runs with read-only repository access and depends on exact revisions of the third-party actions it uses.
+
+### Dependency updates
+
+One aspect of automation that's easy to overlook is dependency maintenance. Once your repository starts relying on a handful of NuGet packages and GitHub Actions, keeping them current by hand becomes tedious. This is especially true if you pin actions by commit hash, as recommended above, because even small upstream updates now require deliberate edits.
+
+The two most popular tools for this are Dependabot and Renovate. Renovate is arguably more powerful and configurable, particularly for large monorepos or repositories with unusual update policies. That said, for a typical GitHub-hosted library, I generally prefer Dependabot. It's built directly into GitHub, requires very little setup, understands both NuGet packages and GitHub Actions, and fits naturally into the same pull-request-based workflow we already use for everything else.
+
+For example, this is roughly the kind of config I use in my own repositories:
+
+```yml
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
+    labels:
+      - enhancement
+    groups:
+      actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: nuget
+    directory: "/"
+    schedule:
+      interval: monthly
+    labels:
+      - enhancement
+    groups:
+      nuget:
+        patterns:
+          - "*"
+```
+
+This tells Dependabot to scan the repository root once a month for outdated GitHub Actions revisions and NuGet packages. Instead of opening one pull request per dependency, it groups all action updates into a single `actions` PR and all package updates into a single `nuget` PR, which keeps the noise manageable. The `enhancement` label is also applied automatically, making these pull requests easier to filter and categorize downstream.
+
+In practice, this is usually enough for a library repository. You stay reasonably up to date without being peppered with constant maintenance churn, and every proposed update still goes through the same CI validation before you merge it.
+
+If you outgrow this model later, switching to Renovate is always an option. But for most library repositories, I think Dependabot hits a very good balance between capability and friction, which is why it's the option I normally reach for first.
+
 ## Releasing workflow
+
+Once the testing workflow is in place, the next step is to automate delivery as well. In practice, that means packaging the library projects into NuGet artifacts, publishing them to the appropriate feeds, and tying that process back into the same pipeline that already builds and validates the code.
+
+### Basic release workflow
+
+If you run `dotnet pack` from the root of the repository, the SDK will package all projects in the solution that opt into packing via `<IsPackable>true</IsPackable>`. This keeps the release command pleasantly simple, since test and sample projects are automatically ignored.
+
+There are also a few CI-specific MSBuild properties worth passing during packaging, for example to bypass the formatter and produce more complete source-linked symbols:
 
 ```
           -p:CSharpier_Bypass=true
@@ -1089,7 +1226,11 @@ jobs:
           -p:DebugType=embedded
 ```
 
-Don't resolve `<ContinuousIntegrationBuild>` in the props files directly.
+These options are also a good example of why I prefer to pass certain properties in the workflow rather than hard-coding them in the project file. `CSharpier_Bypass` is useful on CI when formatting is already being verified elsewhere, but making it the default would obviously defeat the point during local development. The remaining flags are primarily concerned with producing deterministic, source-linked release artifacts: `ContinuousIntegrationBuild` enables CI-specific build behavior, `PublishRepositoryUrl` and `EmbedUntrackedSources` feed Source Link, and `DebugType=embedded` keeps the associated symbols self-contained.
+
+All of this makes perfect sense when packing official artifacts on CI, but there is little reason to impose it on every local build or test run. More broadly, different jobs often need slightly different property sets, so keeping these flags at the workflow layer helps preserve a cleaner separation between inner-loop development and actual release production.
+
+To start off, extend the workflow with a new `pack` job. Since packaging is platform-agnostic, Ubuntu-based runners are usually the best default here, being both fast and inexpensive:
 
 ```yml
 name: main
@@ -1124,6 +1265,12 @@ jobs:
       - run: dotnet pack --configuration Release
 ```
 
+As it stands, this job will run on every push alongside the existing `test` job and verify that all packable projects build into valid `nupkg` files. That alone is useful, but there is not much value in producing packages if you do nothing with them afterward.
+
+To improve on that, you can either publish the packages directly from the `pack` job or keep deployment separate. I generally prefer the latter, as it keeps each job focused and makes failures easier to reason about.
+
+In order to pass the produced `nupkg` files between jobs, use GitHub Actions artifacts. They let you expose selected files from one job and download them later in another, while also giving you a convenient way to inspect the build outputs from the workflow UI:
+
 ```yml
 name: main
 
@@ -1156,10 +1303,14 @@ jobs:
       - uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
         with:
           name: packages
-          path: '**/*.nupkg'
+          path: "**/*.nupkg"
 ```
 
 ![artifacts](artifacts.png)
+
+With this enhancement, the `pack` job will now produce an artifact named `packages`, containing all the NuGet packages created by the workflow. Besides enabling the deployment step, this can also be handy when you want to inspect the generated packages manually.
+
+With the artifact in place, the actual publication logic can live in a dedicated `deploy` job. This job downloads the packages, waits for both `test` and `pack` to complete successfully, and only runs when a new tag is pushed:
 
 ```yml
 name: main
@@ -1192,7 +1343,7 @@ jobs:
       - uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
         with:
           name: packages
-          path: '**/*.nupkg'
+          path: "**/*.nupkg"
 
   deploy:
     # Only run this job when a new tag is pushed to the repository
@@ -1229,6 +1380,32 @@ jobs:
 
 ![secrets](secrets.png)
 
+At this stage, the workflow will publish tagged releases to NuGet using an API key stored as a repository secret. Keeping `deploy` separate from `pack` might seem like a small detail, but it has a few practical benefits: each job remains narrow in scope, deployment can be retried independently, permissions can be managed more precisely, and the produced packages remain available as artifacts regardless of whether publication succeeds.
+
+### Splitting workflows into multiple jobs
+
+More generally, splitting a CI/CD pipeline into multiple jobs is mostly a trade-off between clarity and shared state.
+
+Benefits:
+
+- Jobs that don't depend on each other can run in parallel, which can reduce the overall workflow time.
+- Smaller, isolated jobs are easier to understand, review, and maintain.
+- GitHub Actions lets you retry failed jobs individually, but not failed steps.
+- Each job can have its own runner, permissions, logs, and summary, which makes failures easier to isolate and security easier to scope.
+
+Downsides:
+
+- Sharing state between jobs is cumbersome and usually means pushing files through artifacts.
+- If the jobs cannot be parallelized, the workflow may actually end up slower because each job pays its own runner startup and setup costs.
+- Some work is hard to avoid repeating, such as `checkout`, .NET installation, restore, and other environment setup steps.
+- Caching can reduce some of that repetition, but in practice it is not always reliable enough to design the whole workflow around it.
+
+This is also why I generally don't bother trying to promote raw `dotnet build` outputs through the entire pipeline. In theory, it sounds efficient to build once and reuse everything later, but in practice the `test` and `pack` stages often need different project properties, different runtime environments, or different expectations around outputs. Once those differences enter the picture, trying to reuse the same build products usually ends up being more trouble than it is worth.
+
+### Versioning and pre-releases
+
+So far, this takes care of packaging and publishing, but there is still the question of versioning. The most straightforward approach is to treat the `<Version>` property as the source of truth and update it manually whenever you prepare a release:
+
 ```xml
 <Project>
 
@@ -1241,6 +1418,10 @@ jobs:
 
 </Project>
 ```
+
+This works well enough, but it does mean the version is effectively maintained in two places: the project file and the git tag that triggers the release. That duplication is easy to get wrong, particularly if you ship often.
+
+An alternative is to flip the model around and use the git tag as the only source of truth. In that setup, the project file keeps a placeholder version for local development, while the actual package version is injected during `dotnet pack` via `${{ github.ref_name }}`:
 
 ```yml
 name: main
@@ -1278,12 +1459,31 @@ jobs:
       - uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
         with:
           name: packages
-          path: '**/*.nupkg'
+          path: "**/*.nupkg"
 
   deploy:
     # Deploy job remains unchanged, but is omitted for brevity
     # ...
 ```
+
+With this approach, creating a stable release becomes as simple as pushing a new tag. The produced packages will automatically inherit the same version number, without requiring any other edits.
+
+Pre-releases complicate things slightly, because on ordinary commits there is no tag from which to derive the version. Broadly speaking, I find that there are two practical strategies worth considering here: publish preview builds on demand, or publish them continuously on every commit.
+
+The first option is a manually triggered preview workflow, usually powered by `workflow_dispatch`. In that setup, you invoke the workflow explicitly and provide the intended package version as an input:
+
+```yml
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Package version to publish
+        required: true
+```
+
+This is a good middle ground when you want pre-releases to be deliberate, relatively infrequent, and easy to reason about. For example, you might use it to publish `1.2.3-preview.1` to a private feed for external testers without creating a proper stable tag.
+
+The other end of the spectrum is to generate a preview package on every commit. In that case, the simplest approach is to fall back to a synthetic version that incorporates the current commit hash:
 
 ```yml
 name: main
@@ -1321,7 +1521,7 @@ jobs:
       - uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
         with:
           name: packages
-          path: '**/*.nupkg'
+          path: "**/*.nupkg"
 
   # Deploy on all commits this time, not just tags
   deploy:
@@ -1348,6 +1548,10 @@ jobs:
           --source https://api.nuget.org/v3/index.json
           --api-key ${{ secrets.NUGET_API_KEY }}
 ```
+
+This gives every CI build a unique, traceable version number while leaving the stable release path unchanged. That said, I would generally avoid publishing every one of these builds to NuGet.org itself; a private feed is usually a better fit for high-volume pre-releases.
+
+To account for that, you can publish tagged releases to NuGet.org, while also publishing preview builds to a private feed such as GitHub Packages or MyGet. The example below uses GitHub Packages:
 
 ```yml
 name: main
@@ -1398,11 +1602,19 @@ jobs:
           --api-key ${{ secrets.GITHUB_TOKEN }}
 ```
 
+### Automated changelog
+
+Another aspect of the release process that's easy to overlook is documenting what actually changed. The traditional approach is to maintain a `CHANGELOG.md` file by hand, which is perfectly reasonable, but if you already funnel meaningful changes through pull requests, GitHub's auto-generated release notes are often good enough and much less effort to maintain.
+
+The simplest version of this is still manual: create a release on GitHub for the tag you just pushed and let GitHub generate the notes for you:
+
 ![release notes](release-notes.png)
 
 ```console
 $ gh release create 1.2.3 --repo my/repo --generate-notes
 ```
+
+If you'd rather avoid that manual step, the same process can be automated through the GitHub CLI, which is already available on GitHub-hosted runners. All we need to do is extend the `deploy` job with one more step:
 
 ```yml
 name: main
@@ -1462,10 +1674,37 @@ jobs:
           --verify-tag
 ```
 
-## Changelog
+With that in place, each tagged release can publish the packages, create a GitHub release, and attach both the artifacts and auto-generated release notes in one go. It does assume that meaningful changes are captured through pull requests, but if that's already how you work, it's a very low-friction way to keep release history discoverable.
 
-## GitHub issue forms
+If you want a bit more control over those notes, GitHub also lets you customize them through a `.github/release.yml` file. This is particularly useful for keeping dependency maintenance out of the human-facing changelog. For example, because Dependabot pull requests are usually just routine version bumps, I prefer to exclude them entirely:
+
+```yml
+changelog:
+  exclude:
+    authors:
+      - dependabot
+      - dependabot[bot]
+
+  categories:
+    - title: Enhancements
+      labels:
+        - enhancement
+
+    - title: Bugs
+      labels:
+        - bug
+
+    - title: Other
+      labels:
+        - "*"
+```
+
+This config does two things. First, it maps pull requests into release note categories based on their labels, which makes the generated notes easier to scan. Second, it filters out Dependabot-authored changes, preventing the changelog from being padded with dependency bumps that are useful in commit history but rarely interesting to end users.
+
+At that point, the release process is more or less complete: new versions can be packaged, published, and documented with very little manual involvement. And once all of that machinery is in place, the day-to-day work of maintaining the library becomes a lot less about operational overhead and a lot more about the library itself.
 
 ## Summary
 
-You can reference [`https://github.com/Tyrrrz/MyLibrary`](https://github.com/Tyrrrz/MyLibrary) to see the complete solution that we have built throughout this article. You can also use it a repository template to quickly bootstrap your own library project.
+Between the testing and releasing workflows, we now have a fairly complete automation setup for a .NET library. The exact details will naturally vary depending on your project, but the general idea stays the same: build and test on every change, keep dependencies current, package deterministically, publish through a deliberate release flow, and automate the repetitive parts wherever practical.
+
+You can reference [`https://github.com/Tyrrrz/MyLibrary`](https://github.com/Tyrrrz/MyLibrary) to see the complete solution that we have built throughout this article. You can also use it as a repository template to quickly bootstrap your own library project.
