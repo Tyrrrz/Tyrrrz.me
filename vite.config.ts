@@ -1,7 +1,6 @@
 import path from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import { VitePWA } from "vite-plugin-pwa";
 import type { Plugin } from "vite";
 
 function virtualJsonPlugin(
@@ -101,7 +100,8 @@ export default defineConfig(async () => {
         "virtual:blog",
         "virtual:blog",
         () =>
-          `export const blogPosts = ${blogPostsJson};\nexport const blogPostRefs = ${blogPostRefsJson};`,
+          `export const blogPosts = ${blogPostsJson};\n` +
+          `export const blogPostRefs = ${blogPostRefsJson};`,
       ),
       virtualJsonPlugin(
         "virtual:projects",
@@ -118,13 +118,6 @@ export default defineConfig(async () => {
         "virtual:speaking",
         () => `export const engagements = ${engagementsJson};`,
       ),
-      VitePWA({
-        registerType: "autoUpdate",
-        manifest: false, // Use the existing public/manifest.json
-        workbox: {
-          globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest}"],
-        },
-      }),
     ],
     resolve: {
       alias: {

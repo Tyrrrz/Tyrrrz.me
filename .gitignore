@@ -12,9 +12,6 @@ yarn-error.log*
 lerna-debug.log*
 *.tsbuildinfo
 
-# next.js
-/next-env.d.ts
-
 # vite / vite-react-ssg
 /dist/
 /.vite-react-ssg-temp/

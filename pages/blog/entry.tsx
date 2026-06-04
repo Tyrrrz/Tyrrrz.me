@@ -11,7 +11,6 @@ import Meta from "~/components/meta";
 import UkraineAlert from "~/components/ukraineAlert";
 import type { BlogPost } from "~/data/blog";
 import { useTheme } from "~/hooks/useTheme";
-import { deleteUndefined } from "~/utils/object";
 import { isAbsoluteUrl } from "~/utils/url";
 import { blogPosts } from "virtual:blog";
 
@@ -115,9 +114,6 @@ const BlogPostPage: FC = () => {
   if (!post) {
     return null;
   }
-
-  // Remove undefined values (defensive)
-  deleteUndefined(post);
 
   return (
     <>
