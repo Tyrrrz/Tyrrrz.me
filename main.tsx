@@ -41,10 +41,6 @@ const routes: RouteRecord[] = [
         lazy: () => import("./pages/ukraine").then((m) => ({ Component: m.default })),
       },
       {
-        path: "404",
-        lazy: () => import("./pages/404").then((m) => ({ Component: m.default })),
-      },
-      {
         path: "*",
         lazy: () => import("./pages/404").then((m) => ({ Component: m.default })),
       },
