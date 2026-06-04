@@ -17,7 +17,6 @@ function virtualJsonPlugin(
 
 export default defineConfig(async () => {
   const { bufferIterable } = await import("./utils/async.js");
-  const { deleteUndefined } = await import("./utils/object.js");
 
   // Blog data
   let blogPostsJson = "[]";
@@ -28,7 +27,6 @@ export default defineConfig(async () => {
     );
     await publishBlogFeed();
     const posts = await bufferIterable(loadBlogPosts());
-    deleteUndefined(posts);
     posts.sort(
       (a: { date: string }, b: { date: string }) => Date.parse(b.date) - Date.parse(a.date),
     );
@@ -49,7 +47,6 @@ export default defineConfig(async () => {
     const { loadProjects, publishProjectStats } = await import("./data/projects/index.js");
     await publishProjectStats();
     const projects = await bufferIterable(loadProjects());
-    deleteUndefined(projects);
     projects.sort(
       (
         a: { archived: boolean; stars: number },
@@ -71,7 +68,6 @@ export default defineConfig(async () => {
     const { loadDonations, publishDonationStats } = await import("./data/donate/index.js");
     await publishDonationStats();
     const donations = await bufferIterable(loadDonations());
-    deleteUndefined(donations);
     donations.sort((a: { amount: number }, b: { amount: number }) => b.amount - a.amount);
     donationsJson = JSON.stringify(donations);
   } catch (error) {
@@ -83,7 +79,6 @@ export default defineConfig(async () => {
   try {
     const { loadSpeakingEngagements } = await import("./data/speaking/index.js");
     const engagements = await bufferIterable(loadSpeakingEngagements());
-    deleteUndefined(engagements);
     engagements.sort(
       (a: { date: string }, b: { date: string }) => Date.parse(b.date) - Date.parse(a.date),
     );
