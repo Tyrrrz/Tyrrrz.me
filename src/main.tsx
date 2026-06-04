@@ -48,4 +48,4 @@ const routes: RouteRecord[] = [
   },
 ];
 
-export const createApp = ViteReactSSG({ routes });
+export const createRoot = ViteReactSSG({ routes });
