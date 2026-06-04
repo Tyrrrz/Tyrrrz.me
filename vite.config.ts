@@ -2,12 +2,12 @@ import react from "@vitejs/plugin-react";
 import type { Plugin } from "vite";
 import { defineConfig } from "vite";
 
-const virtualJsonPlugin = (name: string, virtualId: string, getCode: () => string) => {
-  const resolvedId = `\0${virtualId}`;
+const virtualJsonPlugin = (id: string, getCode: () => string) => {
+  const resolvedId = `\0${id}`;
   const plugin: Plugin = {
-    name,
-    resolveId: (id) => (id === virtualId ? resolvedId : null),
-    load: (id) => (id === resolvedId ? getCode() : undefined),
+    name: id,
+    resolveId: (importId) => (importId === id ? resolvedId : null),
+    load: (loadId) => (loadId === resolvedId ? getCode() : undefined),
   };
   return plugin;
 };
@@ -38,7 +38,6 @@ const createBlogPlugin = async () => {
 
   return virtualJsonPlugin(
     "virtual:blog",
-    "virtual:blog",
     () =>
       `export const blogPosts = ${blogPostsJson};\n` +
       `export const blogPostRefs = ${blogPostRefsJson};`,
@@ -67,7 +66,6 @@ const createProjectsPlugin = async () => {
 
   return virtualJsonPlugin(
     "virtual:projects",
-    "virtual:projects",
     () => `export const projects = ${projectsJson};`,
   );
 };
@@ -87,7 +85,6 @@ const createDonationsPlugin = async () => {
   }
 
   return virtualJsonPlugin(
-    "virtual:donations",
     "virtual:donations",
     () => `export const donations = ${donationsJson};`,
   );
@@ -109,7 +106,6 @@ const createSpeakingPlugin = async () => {
   }
 
   return virtualJsonPlugin(
-    "virtual:speaking",
     "virtual:speaking",
     () => `export const engagements = ${engagementsJson};`,
   );
