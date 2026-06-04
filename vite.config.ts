@@ -12,10 +12,9 @@ const virtualJsonPlugin = (name: string, virtualId: string, getCode: () => strin
   return plugin;
 };
 
-export default defineConfig(async () => {
+const createBlogPlugin = async () => {
   const { bufferIterable } = await import("./utils/async.js");
 
-  // Blog data
   let blogPostsJson = "[]";
   let blogPostRefsJson = "[]";
   try {
@@ -37,7 +36,18 @@ export default defineConfig(async () => {
     console.warn("[virtual:blog] Failed to load blog data:", (error as Error).message);
   }
 
-  // Projects data
+  return virtualJsonPlugin(
+    "virtual:blog",
+    "virtual:blog",
+    () =>
+      `export const blogPosts = ${blogPostsJson};\n` +
+      `export const blogPostRefs = ${blogPostRefsJson};`,
+  );
+};
+
+const createProjectsPlugin = async () => {
+  const { bufferIterable } = await import("./utils/async.js");
+
   let projectsJson = "[]";
   try {
     const { loadProjects, publishProjectStats } = await import("./data/projects/index.js");
@@ -55,7 +65,16 @@ export default defineConfig(async () => {
     console.warn("[virtual:projects] Failed to load projects data:", (error as Error).message);
   }
 
-  // Donations data
+  return virtualJsonPlugin(
+    "virtual:projects",
+    "virtual:projects",
+    () => `export const projects = ${projectsJson};`,
+  );
+};
+
+const createDonationsPlugin = async () => {
+  const { bufferIterable } = await import("./utils/async.js");
+
   let donationsJson = "[]";
   try {
     const { loadDonations, publishDonationStats } = await import("./data/donate/index.js");
@@ -67,7 +86,16 @@ export default defineConfig(async () => {
     console.warn("[virtual:donations] Failed to load donations data:", (error as Error).message);
   }
 
-  // Speaking data
+  return virtualJsonPlugin(
+    "virtual:donations",
+    "virtual:donations",
+    () => `export const donations = ${donationsJson};`,
+  );
+};
+
+const createSpeakingPlugin = async () => {
+  const { bufferIterable } = await import("./utils/async.js");
+
   let engagementsJson = "[]";
   try {
     const { loadSpeakingEngagements } = await import("./data/speaking/index.js");
@@ -80,31 +108,21 @@ export default defineConfig(async () => {
     console.warn("[virtual:speaking] Failed to load speaking data:", (error as Error).message);
   }
 
+  return virtualJsonPlugin(
+    "virtual:speaking",
+    "virtual:speaking",
+    () => `export const engagements = ${engagementsJson};`,
+  );
+};
+
+export default defineConfig(async () => {
   return {
     plugins: [
       react(),
-      virtualJsonPlugin(
-        "virtual:blog",
-        "virtual:blog",
-        () =>
-          `export const blogPosts = ${blogPostsJson};\n` +
-          `export const blogPostRefs = ${blogPostRefsJson};`,
-      ),
-      virtualJsonPlugin(
-        "virtual:projects",
-        "virtual:projects",
-        () => `export const projects = ${projectsJson};`,
-      ),
-      virtualJsonPlugin(
-        "virtual:donations",
-        "virtual:donations",
-        () => `export const donations = ${donationsJson};`,
-      ),
-      virtualJsonPlugin(
-        "virtual:speaking",
-        "virtual:speaking",
-        () => `export const engagements = ${engagementsJson};`,
-      ),
+      await createBlogPlugin(),
+      await createProjectsPlugin(),
+      await createDonationsPlugin(),
+      await createSpeakingPlugin(),
     ],
     define: {
       "process.env.BUILD_ID": JSON.stringify(process.env["BUILD_ID"] || ""),
