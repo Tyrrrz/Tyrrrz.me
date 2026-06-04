@@ -2,14 +2,15 @@ import react from "@vitejs/plugin-react";
 import type { Plugin } from "vite";
 import { defineConfig } from "vite";
 
-function virtualJsonPlugin(name: string, virtualId: string, getCode: () => string): Plugin {
+const virtualJsonPlugin = (name: string, virtualId: string, getCode: () => string) => {
   const resolvedId = `\0${virtualId}`;
-  return {
+  const plugin: Plugin = {
     name,
     resolveId: (id) => (id === virtualId ? resolvedId : null),
     load: (id) => (id === resolvedId ? getCode() : undefined),
   };
-}
+  return plugin;
+};
 
 export default defineConfig(async () => {
   const { bufferIterable } = await import("./utils/async.js");
