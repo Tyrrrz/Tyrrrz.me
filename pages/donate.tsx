@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import { GetStaticProps, NextPage } from "next";
+import { FC } from "react";
 import { FiDollarSign } from "react-icons/fi";
 import Heading from "~/components/heading";
 import Inline from "~/components/inline";
@@ -8,15 +8,9 @@ import List from "~/components/list";
 import ListItem from "~/components/listItem";
 import Meta from "~/components/meta";
 import Paragraph from "~/components/paragraph";
-import { Donation, loadDonations, publishDonationStats } from "~/data/donate";
-import { bufferIterable } from "~/utils/async";
-import { deleteUndefined } from "~/utils/object";
+import { donations } from "virtual:donations";
 
-type DonationPageProps = {
-  donations: Donation[];
-};
-
-const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
+const DonationPage: FC = () => {
   return (
     <>
       <Meta title="Donate" />
@@ -85,25 +79,6 @@ const DonationPage: NextPage<DonationPageProps> = ({ donations }) => {
       </section>
     </>
   );
-};
-
-export const getStaticProps: GetStaticProps<DonationPageProps> = async () => {
-  await publishDonationStats();
-
-  const donations = await bufferIterable(loadDonations());
-
-  // Remove undefined values because they cannot be serialized
-  for (const donation of donations) {
-    deleteUndefined(donation);
-  }
-
-  donations.sort((a, b) => b.amount - a.amount);
-
-  return {
-    props: {
-      donations,
-    },
-  };
 };
 
 export default DonationPage;

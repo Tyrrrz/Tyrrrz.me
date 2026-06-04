@@ -1,16 +1,16 @@
 import fs from "fs/promises";
 import path from "path";
-import { getDockerDownloads } from "~/data/projects/docker";
-import fakes from "~/data/projects/fakes";
+import { getDockerDownloads } from "./docker";
+import fakes from "./fakes";
 import {
   getGitHubDownloads,
   getGitHubIssuesAndPRsCount,
   getGitHubLogoUrl,
   getGitHubRepos,
-} from "~/data/projects/github";
-import { getNuGetDownloads } from "~/data/projects/nuget";
-import { bufferIterable } from "~/utils/async";
-import { isProduction } from "~/utils/env";
+} from "./github";
+import { getNuGetDownloads } from "./nuget";
+import { bufferIterable } from "../../utils/async";
+import { isProduction } from "../../utils/env";
 
 export type Project = {
   name: string;

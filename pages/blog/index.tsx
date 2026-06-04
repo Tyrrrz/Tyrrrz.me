@@ -1,4 +1,4 @@
-import { GetStaticProps, NextPage } from "next";
+import { FC } from "react";
 import { FiCalendar, FiClock } from "react-icons/fi";
 import Heading from "~/components/heading";
 import Inline from "~/components/inline";
@@ -7,16 +7,12 @@ import Meta from "~/components/meta";
 import Paragraph from "~/components/paragraph";
 import Timeline from "~/components/timeline";
 import TimelineItem from "~/components/timelineItem";
-import { BlogPostRef, loadBlogPostRefs, publishBlogFeed } from "~/data/blog";
+import type { BlogPostRef } from "~/data/blog";
 import { groupBy } from "~/utils/array";
-import { bufferIterable } from "~/utils/async";
-import { deleteUndefined } from "~/utils/object";
+import { blogPostRefs } from "virtual:blog";
 
-type BlogPageProps = {
-  posts: BlogPostRef[];
-};
-
-const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
+const BlogPage: FC = () => {
+  const posts = blogPostRefs;
   const postsByYear = groupBy(posts, (post) => new Date(post.date).getFullYear()).sort(
     (a, b) => b.key - a.key,
   );
@@ -80,23 +76,6 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
       </section>
     </>
   );
-};
-
-export const getStaticProps: GetStaticProps<BlogPageProps> = async () => {
-  await publishBlogFeed();
-
-  const posts = await bufferIterable(loadBlogPostRefs());
-
-  // Remove undefined values because they cannot be serialized
-  deleteUndefined(posts);
-
-  posts.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
-
-  return {
-    props: {
-      posts,
-    },
-  };
 };
 
 export default BlogPage;

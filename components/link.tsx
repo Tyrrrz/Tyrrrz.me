@@ -1,6 +1,6 @@
 import { clsx } from "clsx";
-import NextLink from "next/link";
 import { FC, PropsWithChildren } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import { isAbsoluteUrl } from "~/utils/url";
 
 type LinkProps = PropsWithChildren<{
@@ -15,7 +15,7 @@ const Link: FC<LinkProps> = ({
   external = isAbsoluteUrl(href),
   children,
 }) => {
-  const Proxy = external ? "a" : NextLink;
+  const Proxy = external ? "a" : RouterLink;
 
   return (
     <Proxy

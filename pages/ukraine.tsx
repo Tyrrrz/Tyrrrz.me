@@ -1,4 +1,4 @@
-import { NextPage } from "next";
+import { FC } from "react";
 import Heading from "~/components/heading";
 import Link from "~/components/link";
 import List from "~/components/list";
@@ -6,7 +6,7 @@ import ListItem from "~/components/listItem";
 import Meta from "~/components/meta";
 import Paragraph from "~/components/paragraph";
 
-const UkrainePage: NextPage = () => {
+const UkrainePage: FC = () => {
   return (
     <>
       <Meta title="#StandWithUkraine" />

@@ -1,7 +1,7 @@
 import Giscus from "@giscus/react";
-import { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import { FC } from "react";
 import { FiCalendar, FiClock } from "react-icons/fi";
+import { useParams } from "react-router-dom";
 import Heading from "~/components/heading";
 import Image from "~/components/image";
 import Inline from "~/components/inline";
@@ -9,17 +9,14 @@ import Link from "~/components/link";
 import Markdown from "~/components/markdown";
 import Meta from "~/components/meta";
 import UkraineAlert from "~/components/ukraineAlert";
-import { BlogPost, loadBlogPost, loadBlogPostRefs, publishBlogPostAssets } from "~/data/blog";
+import type { BlogPost } from "~/data/blog";
 import { useTheme } from "~/hooks/useTheme";
 import { deleteUndefined } from "~/utils/object";
 import { isAbsoluteUrl } from "~/utils/url";
+import { blogPosts } from "virtual:blog";
 
 type BlogPostPageProps = {
   post: BlogPost;
-};
-
-type BlogPostPageParams = {
-  id: string;
 };
 
 const CoverSection: FC<BlogPostPageProps> = ({ post }) => {
@@ -110,7 +107,18 @@ const CommentSection: FC<BlogPostPageProps> = ({ post }) => {
   );
 };
 
-const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
+const BlogPostPage: FC = () => {
+  const { id } = useParams<{ id: string }>();
+
+  const post = blogPosts.find((p) => p.id === id);
+
+  if (!post) {
+    return null;
+  }
+
+  // Remove undefined values (defensive)
+  deleteUndefined(post);
+
   return (
     <>
       <Meta
@@ -160,39 +168,6 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
       </div>
     </>
   );
-};
-
-export const getStaticPaths: GetStaticPaths<BlogPostPageParams> = async () => {
-  const ids: string[] = [];
-  for await (const post of loadBlogPostRefs()) {
-    ids.push(post.id);
-  }
-
-  return {
-    paths: ids.map((id) => ({ params: { id } })),
-    fallback: false,
-  };
-};
-
-export const getStaticProps: GetStaticProps<BlogPostPageProps, BlogPostPageParams> = async ({
-  params,
-}) => {
-  const { id } = params || {};
-  if (!id) {
-    throw new Error("Missing blog post ID");
-  }
-
-  await publishBlogPostAssets(id);
-  const post = await loadBlogPost(id);
-
-  // Remove undefined values because they cannot be serialized
-  deleteUndefined(post);
-
-  return {
-    props: {
-      post,
-    },
-  };
 };
 
 export default BlogPostPage;

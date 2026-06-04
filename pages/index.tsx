@@ -1,4 +1,4 @@
-import { NextPage } from "next";
+import { FC } from "react";
 import { FaBluesky, FaGithub } from "react-icons/fa6";
 import Heading from "~/components/heading";
 import Image from "~/components/image";
@@ -8,7 +8,7 @@ import UkraineAlert from "~/components/ukraineAlert";
 
 const now = Date.now();
 
-const HomePage: NextPage = () => {
+const HomePage: FC = () => {
   const age = new Date(now - Date.parse("1995-04-28")).getUTCFullYear() - 1970;
 
   const githubStarUrl = "https://stars.github.com/profiles/tyrrrz";

@@ -1,8 +1,8 @@
 import { clsx } from "clsx";
-import { useRouter } from "next/router";
-import { FC, PropsWithChildren, useEffect, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import FadeIn from "react-fade-in";
 import { FiMenu, FiMoon, FiSun } from "react-icons/fi";
+import { Outlet, useLocation } from "react-router-dom";
 import Link from "~/components/link";
 import Meta from "~/components/meta";
 import { useDebounce } from "~/hooks/useDebounce";
@@ -52,8 +52,8 @@ type NavLinkProps = PropsWithChildren<{
 }>;
 
 const NavLink: FC<NavLinkProps> = ({ href, children }) => {
-  const router = useRouter();
-  const isActive = router.route === href || router.route.startsWith(href + "/");
+  const location = useLocation();
+  const isActive = location.pathname === href || location.pathname.startsWith(href + "/");
 
   return (
     <div
@@ -96,21 +96,13 @@ const Header: FC = () => {
     [],
   );
 
-  const router = useRouter();
+  const router = useLocation();
   const [isMobileNavVisible, setIsMobileNavVisible] = useState(false);
 
   // Hide the mobile nav when the page changes
   useEffect(() => {
-    const onChange = () => {
-      setIsMobileNavVisible(false);
-    };
-
-    router.events.on("routeChangeStart", onChange);
-
-    return () => {
-      router.events.off("routeChangeStart", onChange);
-    };
-  }, [router.events]);
+    setIsMobileNavVisible(false);
+  }, [router.pathname]);
 
   return (
     <header>
@@ -171,19 +163,21 @@ const Header: FC = () => {
   );
 };
 
-const Main: FC<PropsWithChildren> = ({ children }) => {
+const Main: FC = () => {
   // Below is a hack to re-initialize the fade when the page changes
-  const router = useRouter();
-  const fadeKey = useMemo(() => router.pathname, [router.pathname]);
+  const location = useLocation();
+  const fadeKey = useMemo(() => location.pathname, [location.pathname]);
 
   return (
     <main className="mx-4 mt-6 mb-20">
-      <FadeIn key={fadeKey}>{children}</FadeIn>
+      <FadeIn key={fadeKey}>
+        <Outlet />
+      </FadeIn>
     </main>
   );
 };
 
-const Page: FC<PropsWithChildren> = ({ children }) => {
+const Page: FC = () => {
   const { theme } = useTheme();
 
   return (
@@ -192,20 +186,18 @@ const Page: FC<PropsWithChildren> = ({ children }) => {
         <Loader />
         <div className="container mx-auto max-w-4xl">
           <Header />
-          <Main>{children}</Main>
+          <Main />
         </div>
       </div>
     </div>
   );
 };
 
-type LayoutProps = PropsWithChildren;
-
-const Layout: FC<LayoutProps> = ({ children }) => {
+const Layout: FC = () => {
   return (
     <>
       <Meta />
-      <Page>{children}</Page>
+      <Page />
     </>
   );
 };

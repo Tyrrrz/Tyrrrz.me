@@ -1,4 +1,4 @@
-import { Project } from "~/data/projects";
+import { Project } from "./index";
 
 const fakes: Project[] = [
   {

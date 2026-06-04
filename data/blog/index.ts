@@ -5,7 +5,7 @@ import fs from "fs/promises";
 import markdownToTxt from "markdown-to-txt";
 import path from "path";
 import readingTime from "reading-time";
-import { getSiteUrl } from "~/utils/env";
+import { getSiteUrl } from "../../utils/env";
 
 export type BlogPost = {
   id: string;
