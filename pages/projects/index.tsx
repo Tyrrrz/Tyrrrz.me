@@ -1,12 +1,12 @@
 import { clsx } from "clsx";
 import { FC } from "react";
 import { FiArchive, FiCode, FiDownload, FiExternalLink, FiStar } from "react-icons/fi";
-import Heading from "~/components/heading";
-import Inline from "~/components/inline";
-import Link from "~/components/link";
-import Meta from "~/components/meta";
-import Paragraph from "~/components/paragraph";
-import type { Project } from "~/data/projects";
+import Heading from "../../components/heading";
+import Inline from "../../components/inline";
+import Link from "../../components/link";
+import Meta from "../../components/meta";
+import Paragraph from "../../components/paragraph";
+import type { Project } from "../../data/projects";
 import { projects } from "virtual:projects";
 
 const ProjectsPage: FC = () => {

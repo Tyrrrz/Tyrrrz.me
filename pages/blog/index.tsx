@@ -1,14 +1,14 @@
 import { FC } from "react";
 import { FiCalendar, FiClock } from "react-icons/fi";
-import Heading from "~/components/heading";
-import Inline from "~/components/inline";
-import Link from "~/components/link";
-import Meta from "~/components/meta";
-import Paragraph from "~/components/paragraph";
-import Timeline from "~/components/timeline";
-import TimelineItem from "~/components/timelineItem";
-import type { BlogPostRef } from "~/data/blog";
-import { groupBy } from "~/utils/array";
+import Heading from "../../components/heading";
+import Inline from "../../components/inline";
+import Link from "../../components/link";
+import Meta from "../../components/meta";
+import Paragraph from "../../components/paragraph";
+import Timeline from "../../components/timeline";
+import TimelineItem from "../../components/timelineItem";
+import type { BlogPostRef } from "../../data/blog";
+import { groupBy } from "../../utils/array";
 import { blogPostRefs } from "virtual:blog";
 
 const BlogPage: FC = () => {

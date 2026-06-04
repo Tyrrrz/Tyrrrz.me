@@ -1,7 +1,7 @@
 import { FC } from "react";
-import Heading from "~/components/heading";
-import Meta from "~/components/meta";
-import Paragraph from "~/components/paragraph";
+import Heading from "../components/heading";
+import Meta from "../components/meta";
+import Paragraph from "../components/paragraph";
 
 const NotFoundPage: FC = () => {
   return (

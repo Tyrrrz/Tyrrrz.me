@@ -1,13 +1,13 @@
 import { clsx } from "clsx";
 import { FC } from "react";
 import { FiDollarSign } from "react-icons/fi";
-import Heading from "~/components/heading";
-import Inline from "~/components/inline";
-import Link from "~/components/link";
-import List from "~/components/list";
-import ListItem from "~/components/listItem";
-import Meta from "~/components/meta";
-import Paragraph from "~/components/paragraph";
+import Heading from "../components/heading";
+import Inline from "../components/inline";
+import Link from "../components/link";
+import List from "../components/list";
+import ListItem from "../components/listItem";
+import Meta from "../components/meta";
+import Paragraph from "../components/paragraph";
 import { donations } from "virtual:donations";
 
 const DonationPage: FC = () => {

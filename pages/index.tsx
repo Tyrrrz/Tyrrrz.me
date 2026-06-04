@@ -1,10 +1,10 @@
 import { FC } from "react";
 import { FaBluesky, FaGithub } from "react-icons/fa6";
-import Heading from "~/components/heading";
-import Image from "~/components/image";
-import Link from "~/components/link";
-import Paragraph from "~/components/paragraph";
-import UkraineAlert from "~/components/ukraineAlert";
+import Heading from "../components/heading";
+import Image from "../components/image";
+import Link from "../components/link";
+import Paragraph from "../components/paragraph";
+import UkraineAlert from "../components/ukraineAlert";
 
 const now = Date.now();
 

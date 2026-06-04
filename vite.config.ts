@@ -1,4 +1,3 @@
-import path from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import type { Plugin } from "vite";
@@ -119,11 +118,6 @@ export default defineConfig(async () => {
         () => `export const engagements = ${engagementsJson};`,
       ),
     ],
-    resolve: {
-      alias: {
-        "~": path.resolve(__dirname, "."),
-      },
-    },
     define: {
       "process.env.BUILD_ID": JSON.stringify(process.env["BUILD_ID"] || ""),
       "process.env.SITE_URL": JSON.stringify(process.env["SITE_URL"] || "http://localhost:3000"),

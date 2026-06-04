@@ -1,6 +1,6 @@
 import { Head } from "vite-react-ssg";
 import { FC } from "react";
-import { getBuildId, getSiteUrl } from "~/utils/env";
+import { getBuildId, getSiteUrl } from "../utils/env";
 
 type MetaProps = {
   title?: string;

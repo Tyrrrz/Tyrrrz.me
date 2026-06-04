@@ -1,13 +1,13 @@
 import { FC } from "react";
 import { FiCalendar, FiMapPin, FiMessageCircle, FiMic, FiRadio, FiTool } from "react-icons/fi";
-import Heading from "~/components/heading";
-import Inline from "~/components/inline";
-import Link from "~/components/link";
-import Meta from "~/components/meta";
-import Paragraph from "~/components/paragraph";
-import Timeline from "~/components/timeline";
-import TimelineItem from "~/components/timelineItem";
-import { groupBy } from "~/utils/array";
+import Heading from "../../components/heading";
+import Inline from "../../components/inline";
+import Link from "../../components/link";
+import Meta from "../../components/meta";
+import Paragraph from "../../components/paragraph";
+import Timeline from "../../components/timeline";
+import TimelineItem from "../../components/timelineItem";
+import { groupBy } from "../../utils/array";
 import { engagements } from "virtual:speaking";
 
 const SpeakingPage: FC = () => {

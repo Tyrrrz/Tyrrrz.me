@@ -2,16 +2,16 @@ import Giscus from "@giscus/react";
 import { FC } from "react";
 import { FiCalendar, FiClock } from "react-icons/fi";
 import { useParams } from "react-router-dom";
-import Heading from "~/components/heading";
-import Image from "~/components/image";
-import Inline from "~/components/inline";
-import Link from "~/components/link";
-import Markdown from "~/components/markdown";
-import Meta from "~/components/meta";
-import UkraineAlert from "~/components/ukraineAlert";
-import type { BlogPost } from "~/data/blog";
-import { useTheme } from "~/hooks/useTheme";
-import { isAbsoluteUrl } from "~/utils/url";
+import Heading from "../../components/heading";
+import Image from "../../components/image";
+import Inline from "../../components/inline";
+import Link from "../../components/link";
+import Markdown from "../../components/markdown";
+import Meta from "../../components/meta";
+import UkraineAlert from "../../components/ukraineAlert";
+import type { BlogPost } from "../../data/blog";
+import { useTheme } from "../../hooks/useTheme";
+import { isAbsoluteUrl } from "../../utils/url";
 import { blogPosts } from "virtual:blog";
 
 type BlogPostPageProps = {
