@@ -1,8 +1,8 @@
 import { graphql } from "@octokit/graphql";
-import { Donation } from "./index";
 import { distinctBy } from "../../utils/array";
 import { bufferIterable } from "../../utils/async";
 import { getGitHubToken, getPrivateDonors } from "../../utils/env";
+import { Donation } from "./index";
 
 const TOKEN = getGitHubToken();
 

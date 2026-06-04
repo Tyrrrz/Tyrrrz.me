@@ -2,6 +2,7 @@ import Giscus from "@giscus/react";
 import { FC } from "react";
 import { FiCalendar, FiClock } from "react-icons/fi";
 import { useParams } from "react-router-dom";
+import { blogPosts } from "virtual:blog";
 import Heading from "../../components/heading";
 import Image from "../../components/image";
 import Inline from "../../components/inline";
@@ -12,7 +13,6 @@ import UkraineAlert from "../../components/ukraineAlert";
 import type { BlogPost } from "../../data/blog";
 import { useTheme } from "../../hooks/useTheme";
 import { isAbsoluteUrl } from "../../utils/url";
-import { blogPosts } from "virtual:blog";
 
 type BlogPostPageProps = {
   post: BlogPost;

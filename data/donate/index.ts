@@ -1,10 +1,10 @@
 import fs from "fs/promises";
 import path from "path";
+import { bufferIterable } from "../../utils/async";
 import { getBuyMeACoffeeDonations } from "./buymeacoffee";
 import fakes from "./fakes";
 import { getGitHubSponsorsDonations } from "./github";
 import { getPatreonDonations } from "./patreon";
-import { bufferIterable } from "../../utils/async";
 
 export type Donation = {
   name?: string;

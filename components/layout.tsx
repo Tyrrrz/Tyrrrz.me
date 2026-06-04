@@ -3,11 +3,11 @@ import { FC, PropsWithChildren, useEffect, useMemo, useState } from "react";
 import FadeIn from "react-fade-in";
 import { FiMenu, FiMoon, FiSun } from "react-icons/fi";
 import { Outlet, useLocation } from "react-router-dom";
-import Link from "./link";
-import Meta from "./meta";
 import { useDebounce } from "../hooks/useDebounce";
 import { useRouterStatus } from "../hooks/useRouterStatus";
 import { useTheme } from "../hooks/useTheme";
+import Link from "./link";
+import Meta from "./meta";
 
 const Loader: FC = () => {
   // Only show the loading indicator if the navigation takes a while.

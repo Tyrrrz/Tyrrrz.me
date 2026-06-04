@@ -1,5 +1,6 @@
 import { FC } from "react";
 import ReactMarkdown from "react-markdown";
+import { slugify } from "../utils/url";
 import Code from "./code";
 import Heading from "./heading";
 import Image from "./image";
@@ -9,7 +10,6 @@ import Paragraph from "./paragraph";
 import Pre from "./pre";
 import Quote from "./quote";
 import Syntax from "./syntax";
-import { slugify } from "../utils/url";
 
 type MarkdownProps = {
   source: string;

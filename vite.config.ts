@@ -1,12 +1,8 @@
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
 import type { Plugin } from "vite";
+import { defineConfig } from "vite";
 
-function virtualJsonPlugin(
-  name: string,
-  virtualId: string,
-  getCode: () => string,
-): Plugin {
+function virtualJsonPlugin(name: string, virtualId: string, getCode: () => string): Plugin {
   const resolvedId = `\0${virtualId}`;
   return {
     name,
@@ -22,9 +18,8 @@ export default defineConfig(async () => {
   let blogPostsJson = "[]";
   let blogPostRefsJson = "[]";
   try {
-    const { loadBlogPosts, publishBlogFeed, publishBlogPostAssets } = await import(
-      "./data/blog/index.js"
-    );
+    const { loadBlogPosts, publishBlogFeed, publishBlogPostAssets } =
+      await import("./data/blog/index.js");
     await publishBlogFeed();
     const posts = await bufferIterable(loadBlogPosts());
     posts.sort(
@@ -48,10 +43,7 @@ export default defineConfig(async () => {
     await publishProjectStats();
     const projects = await bufferIterable(loadProjects());
     projects.sort(
-      (
-        a: { archived: boolean; stars: number },
-        b: { archived: boolean; stars: number },
-      ) => {
+      (a: { archived: boolean; stars: number }, b: { archived: boolean; stars: number }) => {
         if (a.archived && !b.archived) return 1;
         if (!a.archived && b.archived) return -1;
         return b.stars - a.stars;

@@ -1,5 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
+import { bufferIterable } from "../../utils/async";
+import { isProduction } from "../../utils/env";
 import { getDockerDownloads } from "./docker";
 import fakes from "./fakes";
 import {
@@ -9,8 +11,6 @@ import {
   getGitHubRepos,
 } from "./github";
 import { getNuGetDownloads } from "./nuget";
-import { bufferIterable } from "../../utils/async";
-import { isProduction } from "../../utils/env";
 
 export type Project = {
   name: string;
