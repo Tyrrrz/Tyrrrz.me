@@ -15,23 +15,26 @@ const Link: FC<LinkProps> = ({
   external = isAbsoluteUrl(href),
   children,
 }) => {
-  const Proxy = external ? "a" : RouterLink;
+  const className = clsx({
+    "text-blue-500": variant === "normal",
+    "dark:text-blue-300": variant === "normal",
+    "hover:underline": variant === "normal",
+    "hover:text-blue-500": variant === "discreet",
+    "dark:hover:text-blue-300": variant === "discreet",
+  });
+
+  if (external) {
+    return (
+      <a className={className} href={href} target="_blank" rel="noreferrer noopener">
+        {children}
+      </a>
+    );
+  }
 
   return (
-    <Proxy
-      className={clsx({
-        "text-blue-500": variant === "normal",
-        "dark:text-blue-300": variant === "normal",
-        "hover:underline": variant === "normal",
-        "hover:text-blue-500": variant === "discreet",
-        "dark:hover:text-blue-300": variant === "discreet",
-      })}
-      href={href}
-      target={external ? "_blank" : undefined}
-      rel="noreferrer"
-    >
+    <RouterLink className={className} to={href}>
       {children}
-    </Proxy>
+    </RouterLink>
   );
 };
 
