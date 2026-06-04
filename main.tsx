@@ -44,6 +44,10 @@ const routes: RouteRecord[] = [
         path: "404",
         lazy: () => import("./pages/404").then((m) => ({ Component: m.default })),
       },
+      {
+        path: "*",
+        lazy: () => import("./pages/404").then((m) => ({ Component: m.default })),
+      },
     ],
   },
 ];
