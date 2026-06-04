@@ -8,10 +8,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import tseslint from "typescript-eslint";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
 export default defineConfig([
-  includeIgnoreFile(path.resolve(__dirname, ".gitignore")),
+  includeIgnoreFile(path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".gitignore")),
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
