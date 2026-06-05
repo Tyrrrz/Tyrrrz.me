@@ -1,7 +1,7 @@
-import { bufferIterable } from "./utils/async";
 import react from "@vitejs/plugin-react";
 import type { Plugin } from "vite";
 import { defineConfig } from "vite";
+import { bufferIterable } from "./utils/async";
 
 const virtualJsonPlugin = (id: string, getCode: () => string) => {
   const resolvedId = `\0${id}`;
@@ -18,9 +18,7 @@ const createBlogPlugin = async () => {
     await import("./data/blog/index");
   await publishBlogFeed();
   const posts = await bufferIterable(loadBlogPosts());
-  posts.sort(
-    (a: { date: string }, b: { date: string }) => Date.parse(b.date) - Date.parse(a.date),
-  );
+  posts.sort((a: { date: string }, b: { date: string }) => Date.parse(b.date) - Date.parse(a.date));
   for (const post of posts) {
     await publishBlogPostAssets((post as { id: string }).id);
   }
@@ -50,10 +48,7 @@ const createProjectsPlugin = async () => {
   );
   const projectsJson = JSON.stringify(projects);
 
-  return virtualJsonPlugin(
-    "virtual:projects",
-    () => `export const projects = ${projectsJson};`,
-  );
+  return virtualJsonPlugin("virtual:projects", () => `export const projects = ${projectsJson};`);
 };
 
 const createDonationsPlugin = async () => {
@@ -63,10 +58,7 @@ const createDonationsPlugin = async () => {
   donations.sort((a: { amount: number }, b: { amount: number }) => b.amount - a.amount);
   const donationsJson = JSON.stringify(donations);
 
-  return virtualJsonPlugin(
-    "virtual:donations",
-    () => `export const donations = ${donationsJson};`,
-  );
+  return virtualJsonPlugin("virtual:donations", () => `export const donations = ${donationsJson};`);
 };
 
 const createSpeakingPlugin = async () => {
