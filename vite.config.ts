@@ -1,4 +1,4 @@
-import { bufferIterable } from "./utils/async.js";
+import { bufferIterable } from "./utils/async";
 import react from "@vitejs/plugin-react";
 import type { Plugin } from "vite";
 import { defineConfig } from "vite";
@@ -15,7 +15,7 @@ const virtualJsonPlugin = (id: string, getCode: () => string) => {
 
 const createBlogPlugin = async () => {
   const { loadBlogPosts, publishBlogFeed, publishBlogPostAssets } =
-    await import("./data/blog/index.js");
+    await import("./data/blog/index");
   await publishBlogFeed();
   const posts = await bufferIterable(loadBlogPosts());
   posts.sort(
@@ -38,7 +38,7 @@ const createBlogPlugin = async () => {
 };
 
 const createProjectsPlugin = async () => {
-  const { loadProjects, publishProjectStats } = await import("./data/projects/index.js");
+  const { loadProjects, publishProjectStats } = await import("./data/projects/index");
   await publishProjectStats();
   const projects = await bufferIterable(loadProjects());
   projects.sort(
@@ -57,7 +57,7 @@ const createProjectsPlugin = async () => {
 };
 
 const createDonationsPlugin = async () => {
-  const { loadDonations, publishDonationStats } = await import("./data/donate/index.js");
+  const { loadDonations, publishDonationStats } = await import("./data/donate/index");
   await publishDonationStats();
   const donations = await bufferIterable(loadDonations());
   donations.sort((a: { amount: number }, b: { amount: number }) => b.amount - a.amount);
@@ -70,7 +70,7 @@ const createDonationsPlugin = async () => {
 };
 
 const createSpeakingPlugin = async () => {
-  const { loadSpeakingEngagements } = await import("./data/speaking/index.js");
+  const { loadSpeakingEngagements } = await import("./data/speaking/index");
   const engagements = await bufferIterable(loadSpeakingEngagements());
   engagements.sort(
     (a: { date: string }, b: { date: string }) => Date.parse(b.date) - Date.parse(a.date),
