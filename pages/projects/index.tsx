@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import { FC } from "react";
 import { FiArchive, FiCode, FiDownload, FiExternalLink, FiStar } from "react-icons/fi";
-import { projects } from "virtual:projects";
+import { projects as rawProjects } from "virtual:projects";
 import Heading from "../../components/heading";
 import Inline from "../../components/inline";
 import Link from "../../components/link";
@@ -9,6 +9,13 @@ import Meta from "../../components/meta";
 import Paragraph from "../../components/paragraph";
 
 const ProjectsPage: FC = () => {
+  const projects = [...rawProjects].sort((a, b) => {
+    if (a.archived && !b.archived) return 1;
+    if (!a.archived && b.archived) return -1;
+
+    return b.stars - a.stars;
+  });
+
   return (
     <>
       <Meta title="Projects" />

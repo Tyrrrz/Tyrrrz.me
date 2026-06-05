@@ -1,5 +1,6 @@
 import { FC } from "react";
 import { Head } from "vite-react-ssg";
+import { resolvePath } from "../utils/assets";
 
 type ImageProps = {
   src: string;
@@ -10,16 +11,18 @@ type ImageProps = {
 };
 
 const Image: FC<ImageProps> = ({ src, alt, width, height, priority }) => {
+  const actualSrc = resolvePath(src);
+
   return (
     <>
       {priority && (
         <Head>
-          <link rel="preload" as="image" href={src} />
+          <link rel="preload" as="image" href={actualSrc} />
         </Head>
       )}
 
       <img
-        src={src}
+        src={actualSrc}
         alt={alt}
         loading={priority ? "eager" : "lazy"}
         width={width}

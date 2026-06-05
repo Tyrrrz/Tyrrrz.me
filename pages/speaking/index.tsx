@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { FiCalendar, FiMapPin, FiMessageCircle, FiMic, FiRadio, FiTool } from "react-icons/fi";
-import { engagements } from "virtual:speaking";
+import { engagements as rawEngagements } from "virtual:speaking";
 import Heading from "../../components/heading";
 import Inline from "../../components/inline";
 import Link from "../../components/link";
@@ -11,6 +11,8 @@ import TimelineItem from "../../components/timelineItem";
 import { groupBy } from "../../utils/array";
 
 const SpeakingPage: FC = () => {
+  const engagements = [...rawEngagements].sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+
   const engagementsByYear = groupBy(engagements, (engagement) =>
     new Date(engagement.date).getFullYear(),
   ).sort((a, b) => b.key - a.key);

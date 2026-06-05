@@ -1,22 +1,25 @@
+/// <reference types="vite/client" />
+
 declare module "*.css";
 
+interface ImportMetaEnv {
+  readonly SITE_URL: string;
+  readonly BUILD_ID: string;
+}
+
 declare module "virtual:blog" {
-  import type { BlogPost, BlogPostRef } from "./data/blog";
-  export const blogPosts: BlogPost[];
-  export const blogPostRefs: BlogPostRef[];
+  export const blogPosts: import("./data/blog").BlogPost[];
+  export const blogPostRefs: import("./data/blog").BlogPostRef[];
 }
 
 declare module "virtual:projects" {
-  import type { Project } from "./data/projects";
-  export const projects: Project[];
+  export const projects: import("./data/projects").Project[];
 }
 
 declare module "virtual:donations" {
-  import type { Donation } from "./data/donate";
-  export const donations: Donation[];
+  export const donations: import("./data/donate").Donation[];
 }
 
 declare module "virtual:speaking" {
-  import type { SpeakingEngagement } from "./data/speaking";
-  export const engagements: SpeakingEngagement[];
+  export const engagements: import("./data/speaking").SpeakingEngagement[];
 }

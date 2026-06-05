@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import { FC } from "react";
 import { FiDollarSign } from "react-icons/fi";
-import { donations } from "virtual:donations";
+import { donations as rawDonations } from "virtual:donations";
 import Heading from "../components/heading";
 import Inline from "../components/inline";
 import Link from "../components/link";
@@ -11,6 +11,8 @@ import Meta from "../components/meta";
 import Paragraph from "../components/paragraph";
 
 const DonationPage: FC = () => {
+  const donations = [...rawDonations].sort((a, b) => b.amount - a.amount);
+
   return (
     <>
       <Meta title="Donate" />

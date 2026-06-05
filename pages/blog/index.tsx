@@ -9,9 +9,10 @@ import Paragraph from "../../components/paragraph";
 import Timeline from "../../components/timeline";
 import TimelineItem from "../../components/timelineItem";
 import { groupBy } from "../../utils/array";
+import { resolvePath } from "../../utils/assets";
 
 const BlogPage: FC = () => {
-  const posts = blogPostRefs;
+  const posts = [...blogPostRefs].sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
   const postsByYear = groupBy(posts, (post) => new Date(post.date).getFullYear()).sort(
     (a, b) => b.key - a.key,
   );
@@ -27,7 +28,7 @@ const BlogPage: FC = () => {
           I write about software design, architecture, programming languages, and other technical
           topics. Follow me on <Link href="https://bsky.app/profile/tyrrrz.me">Bluesky</Link> or
           subscribe to the{" "}
-          <Link href="/blog.rss" external>
+          <Link href={resolvePath("/blog.rss")} external>
             RSS Feed
           </Link>{" "}
           to get notified when I post a new article.

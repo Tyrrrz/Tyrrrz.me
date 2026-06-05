@@ -1,9 +1,18 @@
 import react from "@vitejs/plugin-react";
 import type { Plugin } from "vite";
 import { defineConfig } from "vite";
+import {
+  loadBlogPostRefs,
+  loadBlogPosts,
+  publishBlogFeed,
+  publishBlogPostAssets,
+} from "./data/blog";
+import { loadDonations, publishDonationStats } from "./data/donate";
+import { loadProjects, publishProjectStats } from "./data/projects";
+import { loadSpeakingEngagements } from "./data/speaking";
 import { bufferIterable } from "./utils/async";
 
-const virtualJsonPlugin = (id: string, getCode: () => string) => {
+const virtualPlugin = (id: string, getCode: () => string) => {
   const resolvedId = `\0${id}`;
   const plugin: Plugin = {
     name: id,
@@ -13,84 +22,88 @@ const virtualJsonPlugin = (id: string, getCode: () => string) => {
   return plugin;
 };
 
-const createBlogPlugin = async () => {
-  const { loadBlogPosts, publishBlogFeed, publishBlogPostAssets } =
-    await import("./data/blog/index");
+const blogPlugin = async () => {
+  // Stateful side-effect: generate the blog RSS feed
   await publishBlogFeed();
-  const posts = await bufferIterable(loadBlogPosts());
-  posts.sort((a: { date: string }, b: { date: string }) => Date.parse(b.date) - Date.parse(a.date));
-  for (const post of posts) {
-    await publishBlogPostAssets((post as { id: string }).id);
-  }
-  const blogPostsJson = JSON.stringify(posts);
-  const blogPostRefsJson = JSON.stringify(
-    posts.map(({ source: _source, ...ref }: { source: unknown }) => ref),
-  );
 
-  return virtualJsonPlugin(
+  const postRefs = await bufferIterable(loadBlogPostRefs());
+  const posts = await bufferIterable(loadBlogPosts());
+
+  // Stateful side-effect: publish blog post assets to the public directory
+  for (const post of postRefs) {
+    await publishBlogPostAssets(post.id);
+  }
+
+  return virtualPlugin(
     "virtual:blog",
     () =>
-      `export const blogPosts = ${blogPostsJson};\n` +
-      `export const blogPostRefs = ${blogPostRefsJson};`,
+      `export const blogPosts = ${JSON.stringify(posts)};\n` +
+      `export const blogPostRefs = ${JSON.stringify(postRefs)};`,
   );
 };
 
-const createProjectsPlugin = async () => {
-  const { loadProjects, publishProjectStats } = await import("./data/projects/index");
+const projectsPlugin = async () => {
+  // Stateful side-effect: generate project stats SVG
   await publishProjectStats();
+
   const projects = await bufferIterable(loadProjects());
-  projects.sort(
-    (a: { archived: boolean; stars: number }, b: { archived: boolean; stars: number }) => {
-      if (a.archived && !b.archived) return 1;
-      if (!a.archived && b.archived) return -1;
-      return b.stars - a.stars;
-    },
-  );
-  const projectsJson = JSON.stringify(projects);
 
-  return virtualJsonPlugin("virtual:projects", () => `export const projects = ${projectsJson};`);
+  return virtualPlugin(
+    "virtual:projects",
+    () => `export const projects = ${JSON.stringify(projects)};`,
+  );
 };
 
-const createDonationsPlugin = async () => {
-  const { loadDonations, publishDonationStats } = await import("./data/donate/index");
+const donationsPlugin = async () => {
+  // Stateful side-effect: generate donation stats SVG
   await publishDonationStats();
+
   const donations = await bufferIterable(loadDonations());
-  donations.sort((a: { amount: number }, b: { amount: number }) => b.amount - a.amount);
-  const donationsJson = JSON.stringify(donations);
 
-  return virtualJsonPlugin("virtual:donations", () => `export const donations = ${donationsJson};`);
+  return virtualPlugin(
+    "virtual:donations",
+    () => `export const donations = ${JSON.stringify(donations)};`,
+  );
 };
 
-const createSpeakingPlugin = async () => {
-  const { loadSpeakingEngagements } = await import("./data/speaking/index");
+const speakingPlugin = async () => {
   const engagements = await bufferIterable(loadSpeakingEngagements());
-  engagements.sort(
-    (a: { date: string }, b: { date: string }) => Date.parse(b.date) - Date.parse(a.date),
-  );
-  const engagementsJson = JSON.stringify(engagements);
 
-  return virtualJsonPlugin(
+  return virtualPlugin(
     "virtual:speaking",
-    () => `export const engagements = ${engagementsJson};`,
+    () => `export const engagements = ${JSON.stringify(engagements)};`,
   );
 };
+
+const siteUrl = process.env.SITE_URL || "http://localhost:3000";
+const base = new URL(siteUrl).pathname.replace(/\/?$/, "/");
 
 export default defineConfig(async () => {
   return {
+    base,
+
     plugins: [
       react(),
-      await createBlogPlugin(),
-      await createProjectsPlugin(),
-      await createDonationsPlugin(),
-      await createSpeakingPlugin(),
+      await blogPlugin(),
+      await projectsPlugin(),
+      await donationsPlugin(),
+      await speakingPlugin(),
     ],
-    define: {
-      "process.env.BUILD_ID": JSON.stringify(process.env["BUILD_ID"] || ""),
-      "process.env.SITE_URL": JSON.stringify(process.env["SITE_URL"] || "http://localhost:3000"),
-    },
+
     build: {
       outDir: "dist",
+      emptyOutDir: true,
     },
+
+    server: {
+      port: 3000,
+    },
+
+    define: {
+      "import.meta.env.SITE_URL": JSON.stringify(siteUrl || "http://localhost:3000"),
+      "import.meta.env.BUILD_ID": JSON.stringify(process.env["BUILD_ID"] || ""),
+    },
+
     ssr: {
       noExternal: ["react-fade-in"],
     },

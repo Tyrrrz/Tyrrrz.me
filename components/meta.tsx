@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { Head } from "vite-react-ssg";
-import { getBuildId, getSiteUrl } from "../utils/env";
+import { resolveAbsoluteUrl, resolvePath } from "../utils/assets";
 
 type MetaProps = {
   title?: string;
@@ -13,8 +13,7 @@ type MetaProps = {
 
 const Meta: FC<MetaProps> = ({ title, description, keywords, imageUrl, imageLayout, rssUrl }) => {
   const siteName = "Oleksii Holub";
-
-  const buildId = getBuildId();
+  const buildId = import.meta.env.BUILD_ID;
 
   const actualTitle = title ? title + " • " + siteName : siteName;
 
@@ -24,11 +23,11 @@ const Meta: FC<MetaProps> = ({ title, description, keywords, imageUrl, imageLayo
 
   const actualKeywords = keywords?.join(",") || "";
 
-  const actualImageUrl = getSiteUrl(imageUrl || "/logo.png");
+  const actualImageUrl = resolveAbsoluteUrl(imageUrl || "/logo.png");
 
   const actualImageLayout = imageLayout || "aside";
 
-  const actualRssUrl = rssUrl && getSiteUrl(rssUrl);
+  const actualRssUrl = rssUrl && resolveAbsoluteUrl(rssUrl);
 
   return (
     <Head>
@@ -36,8 +35,8 @@ const Meta: FC<MetaProps> = ({ title, description, keywords, imageUrl, imageLayo
 
       <title>{actualTitle}</title>
 
-      <link rel="icon" href="/favicon.png" />
-      <link rel="manifest" href="/manifest.json" />
+      <link rel="icon" href={resolvePath("/favicon.png")} />
+      <link rel="manifest" href={resolvePath("/manifest.json")} />
 
       <meta name="application-name" content={siteName} />
       <meta name="build-id" content={buildId} />

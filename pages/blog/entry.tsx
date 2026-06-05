@@ -12,13 +12,12 @@ import Meta from "../../components/meta";
 import UkraineAlert from "../../components/ukraineAlert";
 import type { BlogPost } from "../../data/blog";
 import { useTheme } from "../../hooks/useTheme";
+import { resolvePath } from "../../utils/assets";
 import { isAbsoluteUrl } from "../../utils/url";
 
-type BlogPostPageProps = {
+const CoverSection: FC<{
   post: BlogPost;
-};
-
-const CoverSection: FC<BlogPostPageProps> = ({ post }) => {
+}> = ({ post }) => {
   if (!post.coverUrl) {
     return null;
   }
@@ -32,7 +31,9 @@ const CoverSection: FC<BlogPostPageProps> = ({ post }) => {
   );
 };
 
-const ArticleSection: FC<BlogPostPageProps> = ({ post }) => {
+const ArticleSection: FC<{
+  post: BlogPost;
+}> = ({ post }) => {
   return (
     <section>
       <article>
@@ -44,7 +45,7 @@ const ArticleSection: FC<BlogPostPageProps> = ({ post }) => {
               return url;
             }
 
-            return `/blog/${post.id}/${url}`;
+            return resolvePath(`/blog/${post.id}/${url}`);
           }}
         />
       </article>
@@ -68,7 +69,7 @@ const SubscribeSection: FC = () => {
       <div>
         Want to know when I post a new article? Follow me on{" "}
         <Link href="https://bsky.app/profile/tyrrrz.me">Bluesky</Link> or subscribe to the{" "}
-        <Link href="/blog.rss" external>
+        <Link href={resolvePath("/blog.rss")} external>
           RSS Feed
         </Link>
       </div>
@@ -76,7 +77,9 @@ const SubscribeSection: FC = () => {
   );
 };
 
-const CommentSection: FC<BlogPostPageProps> = ({ post }) => {
+const CommentSection: FC<{
+  post: BlogPost;
+}> = ({ post }) => {
   const { userPreferredTheme } = useTheme();
 
   return (
