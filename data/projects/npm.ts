@@ -1,4 +1,4 @@
-import { sleep } from "~/utils/async";
+import { sleep } from "../../utils/async";
 
 export const getNpmDownloads = async (packageName: string) => {
   const start = "2010-01-01";

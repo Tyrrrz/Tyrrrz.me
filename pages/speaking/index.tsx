@@ -1,22 +1,16 @@
-import { GetStaticProps, NextPage } from "next";
+import { FC } from "react";
 import { FiCalendar, FiMapPin, FiMessageCircle, FiMic, FiRadio, FiTool } from "react-icons/fi";
-import Heading from "~/components/heading";
-import Inline from "~/components/inline";
-import Link from "~/components/link";
-import Meta from "~/components/meta";
-import Paragraph from "~/components/paragraph";
-import Timeline from "~/components/timeline";
-import TimelineItem from "~/components/timelineItem";
-import { SpeakingEngagement, loadSpeakingEngagements } from "~/data/speaking";
-import { groupBy } from "~/utils/array";
-import { bufferIterable } from "~/utils/async";
-import { deleteUndefined } from "~/utils/object";
+import { engagements } from "virtual:speaking";
+import Heading from "../../components/heading";
+import Inline from "../../components/inline";
+import Link from "../../components/link";
+import Meta from "../../components/meta";
+import Paragraph from "../../components/paragraph";
+import Timeline from "../../components/timeline";
+import TimelineItem from "../../components/timelineItem";
+import { groupBy } from "../../utils/array";
 
-type SpeakingPageProps = {
-  engagements: SpeakingEngagement[];
-};
-
-const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
+const SpeakingPage: FC = () => {
   const engagementsByYear = groupBy(engagements, (engagement) =>
     new Date(engagement.date).getFullYear(),
   ).sort((a, b) => b.key - a.key);
@@ -102,21 +96,6 @@ const SpeakingPage: NextPage<SpeakingPageProps> = ({ engagements }) => {
       </section>
     </>
   );
-};
-
-export const getStaticProps: GetStaticProps<SpeakingPageProps> = async () => {
-  const engagements = await bufferIterable(loadSpeakingEngagements());
-
-  // Remove undefined values because they cannot be serialized
-  deleteUndefined(engagements);
-
-  engagements.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
-
-  return {
-    props: {
-      engagements,
-    },
-  };
 };
 
 export default SpeakingPage;

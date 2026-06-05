@@ -1,20 +1,14 @@
 import { clsx } from "clsx";
-import { GetStaticProps, NextPage } from "next";
+import { FC } from "react";
 import { FiArchive, FiCode, FiDownload, FiExternalLink, FiStar } from "react-icons/fi";
-import Heading from "~/components/heading";
-import Inline from "~/components/inline";
-import Link from "~/components/link";
-import Meta from "~/components/meta";
-import Paragraph from "~/components/paragraph";
-import { Project, loadProjects, publishProjectStats } from "~/data/projects";
-import { bufferIterable } from "~/utils/async";
-import { deleteUndefined } from "~/utils/object";
+import { projects } from "virtual:projects";
+import Heading from "../../components/heading";
+import Inline from "../../components/inline";
+import Link from "../../components/link";
+import Meta from "../../components/meta";
+import Paragraph from "../../components/paragraph";
 
-type ProjectsPageProps = {
-  projects: Project[];
-};
-
-const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
+const ProjectsPage: FC = () => {
   return (
     <>
       <Meta title="Projects" />
@@ -101,32 +95,6 @@ const ProjectsPage: NextPage<ProjectsPageProps> = ({ projects }) => {
       </section>
     </>
   );
-};
-
-export const getStaticProps: GetStaticProps<ProjectsPageProps> = async () => {
-  await publishProjectStats();
-
-  const projects = await bufferIterable(loadProjects());
-
-  // Remove undefined values because they cannot be serialized
-  deleteUndefined(projects);
-
-  // Sort by archive status and then by stars
-  projects.sort((a, b) => {
-    if (a.archived && !b.archived) {
-      return 1;
-    } else if (!a.archived && b.archived) {
-      return -1;
-    } else {
-      return b.stars - a.stars;
-    }
-  });
-
-  return {
-    props: {
-      projects,
-    },
-  };
 };
 
 export default ProjectsPage;

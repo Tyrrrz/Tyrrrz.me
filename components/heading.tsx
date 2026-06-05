@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import { FC, PropsWithChildren } from "react";
 import { FiLink } from "react-icons/fi";
-import Link from "~/components/link";
+import Link from "./link";
 
 type HeadingProps = PropsWithChildren<{
   id?: string;

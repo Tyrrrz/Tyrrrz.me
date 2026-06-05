@@ -1,6 +1,6 @@
-import { Donation } from "~/data/donate";
-import { getPatreonToken, getPrivateDonors } from "~/utils/env";
-import { formatUrlWithQuery } from "~/utils/url";
+import { getPatreonToken, getPrivateDonors } from "../../utils/env";
+import { formatUrlWithQuery } from "../../utils/url";
+import { Donation } from "./index";
 
 const TOKEN = getPatreonToken();
 

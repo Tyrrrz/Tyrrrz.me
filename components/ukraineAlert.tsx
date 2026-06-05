@@ -1,5 +1,5 @@
 import { FC } from "react";
-import Link from "~/components/link";
+import Link from "./link";
 
 const UkraineAlert: FC = () => {
   return (

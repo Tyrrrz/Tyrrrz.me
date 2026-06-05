@@ -1,5 +1,5 @@
 import { Octokit } from "@octokit/rest";
-import { getGitHubToken } from "~/utils/env";
+import { getGitHubToken } from "../../utils/env";
 
 const TOKEN = getGitHubToken();
 const OWNER = "Tyrrrz";

@@ -1,4 +1,4 @@
-import { Donation } from "~/data/donate";
+import { Donation } from "./index";
 
 const fakes: Donation[] = [
   {

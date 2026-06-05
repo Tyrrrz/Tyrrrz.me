@@ -12,17 +12,9 @@ yarn-error.log*
 lerna-debug.log*
 *.tsbuildinfo
 
-# next.js
-/.next/
-/build/
-/out/
-/next-env.d.ts
-
-# next-pwa
-/public/fallback-*.js*
-/public/workbox-*.js*
-/public/sw.js*
-/public/worker-*.js*
+# vite / vite-react-ssg
+/dist/
+/.vite-react-ssg-temp/
 
 # generated assets
 /public/blog/

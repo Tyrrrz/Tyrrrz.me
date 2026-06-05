@@ -1,8 +1,41 @@
-import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import { includeIgnoreFile } from "@eslint/compat";
+import js from "@eslint/js";
+import reactPlugin from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
 import { defineConfig } from "eslint/config";
+import globals from "globals";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import tseslint from "typescript-eslint";
 
 export default defineConfig([
+  includeIgnoreFile(path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".gitignore")),
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
   {
-    extends: [...nextCoreWebVitals],
+    plugins: {
+      react: reactPlugin,
+      "react-hooks": reactHooks,
+    },
+    rules: {
+      ...reactPlugin.configs.recommended.rules,
+      ...reactHooks.configs.recommended.rules,
+      "react/react-in-jsx-scope": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { varsIgnorePattern: "^_", argsIgnorePattern: "^_" },
+      ],
+    },
+    settings: {
+      react: {
+        version: "detect",
+      },
+    },
+  },
+  {
+    files: ["*.js", "*.cjs"],
+    languageOptions: {
+      globals: globals.node,
+    },
   },
 ]);

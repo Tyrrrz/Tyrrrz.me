@@ -1,9 +1,9 @@
-import { NextPage } from "next";
-import Heading from "~/components/heading";
-import Meta from "~/components/meta";
-import Paragraph from "~/components/paragraph";
+import { FC } from "react";
+import Heading from "../components/heading";
+import Meta from "../components/meta";
+import Paragraph from "../components/paragraph";
 
-const NotFoundPage: NextPage = () => {
+const NotFoundPage: FC = () => {
   return (
     <>
       <Meta title="Not Found" />
