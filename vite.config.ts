@@ -1,3 +1,4 @@
+import { bufferIterable } from "./utils/async.js";
 import react from "@vitejs/plugin-react";
 import type { Plugin } from "vite";
 import { defineConfig } from "vite";
@@ -13,28 +14,20 @@ const virtualJsonPlugin = (id: string, getCode: () => string) => {
 };
 
 const createBlogPlugin = async () => {
-  const { bufferIterable } = await import("./utils/async.js");
-
-  let blogPostsJson = "[]";
-  let blogPostRefsJson = "[]";
-  try {
-    const { loadBlogPosts, publishBlogFeed, publishBlogPostAssets } =
-      await import("./data/blog/index.js");
-    await publishBlogFeed();
-    const posts = await bufferIterable(loadBlogPosts());
-    posts.sort(
-      (a: { date: string }, b: { date: string }) => Date.parse(b.date) - Date.parse(a.date),
-    );
-    for (const post of posts) {
-      await publishBlogPostAssets((post as { id: string }).id);
-    }
-    blogPostsJson = JSON.stringify(posts);
-    blogPostRefsJson = JSON.stringify(
-      posts.map(({ source: _source, ...ref }: { source: unknown }) => ref),
-    );
-  } catch (error) {
-    console.warn("[virtual:blog] Failed to load blog data:", (error as Error).message);
+  const { loadBlogPosts, publishBlogFeed, publishBlogPostAssets } =
+    await import("./data/blog/index.js");
+  await publishBlogFeed();
+  const posts = await bufferIterable(loadBlogPosts());
+  posts.sort(
+    (a: { date: string }, b: { date: string }) => Date.parse(b.date) - Date.parse(a.date),
+  );
+  for (const post of posts) {
+    await publishBlogPostAssets((post as { id: string }).id);
   }
+  const blogPostsJson = JSON.stringify(posts);
+  const blogPostRefsJson = JSON.stringify(
+    posts.map(({ source: _source, ...ref }: { source: unknown }) => ref),
+  );
 
   return virtualJsonPlugin(
     "virtual:blog",
@@ -45,24 +38,17 @@ const createBlogPlugin = async () => {
 };
 
 const createProjectsPlugin = async () => {
-  const { bufferIterable } = await import("./utils/async.js");
-
-  let projectsJson = "[]";
-  try {
-    const { loadProjects, publishProjectStats } = await import("./data/projects/index.js");
-    await publishProjectStats();
-    const projects = await bufferIterable(loadProjects());
-    projects.sort(
-      (a: { archived: boolean; stars: number }, b: { archived: boolean; stars: number }) => {
-        if (a.archived && !b.archived) return 1;
-        if (!a.archived && b.archived) return -1;
-        return b.stars - a.stars;
-      },
-    );
-    projectsJson = JSON.stringify(projects);
-  } catch (error) {
-    console.warn("[virtual:projects] Failed to load projects data:", (error as Error).message);
-  }
+  const { loadProjects, publishProjectStats } = await import("./data/projects/index.js");
+  await publishProjectStats();
+  const projects = await bufferIterable(loadProjects());
+  projects.sort(
+    (a: { archived: boolean; stars: number }, b: { archived: boolean; stars: number }) => {
+      if (a.archived && !b.archived) return 1;
+      if (!a.archived && b.archived) return -1;
+      return b.stars - a.stars;
+    },
+  );
+  const projectsJson = JSON.stringify(projects);
 
   return virtualJsonPlugin(
     "virtual:projects",
@@ -71,18 +57,11 @@ const createProjectsPlugin = async () => {
 };
 
 const createDonationsPlugin = async () => {
-  const { bufferIterable } = await import("./utils/async.js");
-
-  let donationsJson = "[]";
-  try {
-    const { loadDonations, publishDonationStats } = await import("./data/donate/index.js");
-    await publishDonationStats();
-    const donations = await bufferIterable(loadDonations());
-    donations.sort((a: { amount: number }, b: { amount: number }) => b.amount - a.amount);
-    donationsJson = JSON.stringify(donations);
-  } catch (error) {
-    console.warn("[virtual:donations] Failed to load donations data:", (error as Error).message);
-  }
+  const { loadDonations, publishDonationStats } = await import("./data/donate/index.js");
+  await publishDonationStats();
+  const donations = await bufferIterable(loadDonations());
+  donations.sort((a: { amount: number }, b: { amount: number }) => b.amount - a.amount);
+  const donationsJson = JSON.stringify(donations);
 
   return virtualJsonPlugin(
     "virtual:donations",
@@ -91,19 +70,12 @@ const createDonationsPlugin = async () => {
 };
 
 const createSpeakingPlugin = async () => {
-  const { bufferIterable } = await import("./utils/async.js");
-
-  let engagementsJson = "[]";
-  try {
-    const { loadSpeakingEngagements } = await import("./data/speaking/index.js");
-    const engagements = await bufferIterable(loadSpeakingEngagements());
-    engagements.sort(
-      (a: { date: string }, b: { date: string }) => Date.parse(b.date) - Date.parse(a.date),
-    );
-    engagementsJson = JSON.stringify(engagements);
-  } catch (error) {
-    console.warn("[virtual:speaking] Failed to load speaking data:", (error as Error).message);
-  }
+  const { loadSpeakingEngagements } = await import("./data/speaking/index.js");
+  const engagements = await bufferIterable(loadSpeakingEngagements());
+  engagements.sort(
+    (a: { date: string }, b: { date: string }) => Date.parse(b.date) - Date.parse(a.date),
+  );
+  const engagementsJson = JSON.stringify(engagements);
 
   return virtualJsonPlugin(
     "virtual:speaking",
