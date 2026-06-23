@@ -1,6 +1,6 @@
-import Head from "next/head";
-import NextImage from "next/image";
 import { FC } from "react";
+import { Head } from "vite-react-ssg";
+import { resolvePath } from "../utils/assets";
 
 type ImageProps = {
   src: string;
@@ -11,22 +11,18 @@ type ImageProps = {
 };
 
 const Image: FC<ImageProps> = ({ src, alt, width, height, priority }) => {
-  if (width && height) {
-    return <NextImage src={src} alt={alt} width={width} height={height} priority={priority} />;
-  }
+  const actualSrc = resolvePath(src);
 
-  // NextJS's image component doesn't work with images of unknown size
   return (
     <>
       {priority && (
         <Head>
-          <link key={`preload: ${src}`} rel="preload" as="image" href={src} />
+          <link rel="preload" as="image" href={actualSrc} />
         </Head>
       )}
 
-      {/* eslint-disable-next-line @next/next/no-img-element*/}
       <img
-        src={src}
+        src={actualSrc}
         alt={alt}
         loading={priority ? "eager" : "lazy"}
         width={width}

@@ -1,6 +1,6 @@
-import Head from "next/head";
 import { FC } from "react";
-import { getBuildId, getSiteUrl } from "~/utils/env";
+import { Head } from "vite-react-ssg";
+import { resolveAbsoluteUrl, resolvePath } from "../utils/assets";
 
 type MetaProps = {
   title?: string;
@@ -13,8 +13,7 @@ type MetaProps = {
 
 const Meta: FC<MetaProps> = ({ title, description, keywords, imageUrl, imageLayout, rssUrl }) => {
   const siteName = "Oleksii Holub";
-
-  const buildId = getBuildId();
+  const buildId = import.meta.env.BUILD_ID;
 
   const actualTitle = title ? title + " • " + siteName : siteName;
 
@@ -24,49 +23,44 @@ const Meta: FC<MetaProps> = ({ title, description, keywords, imageUrl, imageLayo
 
   const actualKeywords = keywords?.join(",") || "";
 
-  const actualImageUrl = getSiteUrl(imageUrl || "/logo.png");
+  const actualImageUrl = resolveAbsoluteUrl(imageUrl || "/logo.png");
 
   const actualImageLayout = imageLayout || "aside";
 
-  const actualRssUrl = rssUrl && getSiteUrl(rssUrl);
+  const actualRssUrl = rssUrl && resolveAbsoluteUrl(rssUrl);
 
   return (
     <Head>
-      <meta key="viewport" name="viewport" content="width=device-width, initial-scale=1" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-      <title key="title">{actualTitle}</title>
+      <title>{actualTitle}</title>
 
-      <link key="icon" rel="icon" href="/favicon.png" />
-      <link key="manifest" rel="manifest" href="/manifest.json" />
+      <link rel="icon" href={resolvePath("/favicon.png")} />
+      <link rel="manifest" href={resolvePath("/manifest.json")} />
 
-      <meta key="application-name" name="application-name" content={siteName} />
-      <meta key="build-id" name="build-id" content={buildId} />
-      <meta key="description" name="description" content={actualDescription} />
-      <meta key="keywords" name="keywords" content={actualKeywords} />
-      <meta key="theme-color" name="theme-color" content="#a855f7" />
+      <meta name="application-name" content={siteName} />
+      <meta name="build-id" content={buildId} />
+      <meta name="description" content={actualDescription} />
+      <meta name="keywords" content={actualKeywords} />
+      <meta name="theme-color" content="#a855f7" />
 
-      <meta key="og:type" property="og:type" content="website" />
-      <meta key="og:site_name" property="og:site_name" content={siteName} />
-      <meta key="og:title" property="og:title" content={actualTitle} />
-      <meta key="og:description" property="og:description" content={actualDescription} />
-      <meta key="og:image" property="og:image" content={actualImageUrl} />
+      <meta property="og:type" content="website" />
+      <meta property="og:site_name" content={siteName} />
+      <meta property="og:title" content={actualTitle} />
+      <meta property="og:description" content={actualDescription} />
+      <meta property="og:image" content={actualImageUrl} />
 
-      <meta key="twitter:title" name="twitter:title" content={actualTitle} />
-      <meta key="twitter:site" name="twitter:site" content="@Tyrrrz" />
-      <meta key="twitter:creator" name="twitter:creator" content="@Tyrrrz" />
+      <meta name="twitter:title" content={actualTitle} />
+      <meta name="twitter:site" content="@Tyrrrz" />
+      <meta name="twitter:creator" content="@Tyrrrz" />
       <meta
-        key="twitter:card"
         name="twitter:card"
         content={actualImageLayout === "fill" ? "summary_large_image" : "summary"}
       />
 
-      <link
-        key="alternate"
-        rel="alternate"
-        type="application/rss+xml"
-        title="RSS Feed"
-        href={actualRssUrl}
-      />
+      {actualRssUrl && (
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed" href={actualRssUrl} />
+      )}
     </Head>
   );
 };

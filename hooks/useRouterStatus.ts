@@ -1,33 +1,11 @@
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useNavigation } from "react-router-dom";
 
 export const useRouterStatus = () => {
-  const { events } = useRouter();
-  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+  const { state } = useNavigation();
 
-  useEffect(() => {
-    const onRouteChangeStart = () => {
-      setStatus("loading");
-    };
+  if (state === "loading" || state === "submitting") {
+    return "loading";
+  }
 
-    const onRouteChangeComplete = () => {
-      setStatus("idle");
-    };
-
-    const onRouteChangeError = () => {
-      setStatus("error");
-    };
-
-    events.on("routeChangeStart", onRouteChangeStart);
-    events.on("routeChangeComplete", onRouteChangeComplete);
-    events.on("routeChangeError", onRouteChangeError);
-
-    return () => {
-      events.off("routeChangeStart", onRouteChangeStart);
-      events.off("routeChangeComplete", onRouteChangeComplete);
-      events.off("routeChangeError", onRouteChangeError);
-    };
-  }, [events]);
-
-  return status;
+  return "idle";
 };

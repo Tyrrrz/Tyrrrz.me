@@ -1,22 +1,18 @@
-import { GetStaticProps, NextPage } from "next";
+import { FC } from "react";
 import { FiCalendar, FiClock } from "react-icons/fi";
-import Heading from "~/components/heading";
-import Inline from "~/components/inline";
-import Link from "~/components/link";
-import Meta from "~/components/meta";
-import Paragraph from "~/components/paragraph";
-import Timeline from "~/components/timeline";
-import TimelineItem from "~/components/timelineItem";
-import { BlogPostRef, loadBlogPostRefs, publishBlogFeed } from "~/data/blog";
-import { groupBy } from "~/utils/array";
-import { bufferIterable } from "~/utils/async";
-import { deleteUndefined } from "~/utils/object";
+import { blogPostRefs } from "virtual:blog";
+import Heading from "../../components/heading";
+import Inline from "../../components/inline";
+import Link from "../../components/link";
+import Meta from "../../components/meta";
+import Paragraph from "../../components/paragraph";
+import Timeline from "../../components/timeline";
+import TimelineItem from "../../components/timelineItem";
+import { groupBy } from "../../utils/array";
+import { resolvePath } from "../../utils/assets";
 
-type BlogPageProps = {
-  posts: BlogPostRef[];
-};
-
-const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
+const BlogPage: FC = () => {
+  const posts = [...blogPostRefs].sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
   const postsByYear = groupBy(posts, (post) => new Date(post.date).getFullYear()).sort(
     (a, b) => b.key - a.key,
   );
@@ -32,7 +28,7 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
           I write about software design, architecture, programming languages, and other technical
           topics. Follow me on <Link href="https://bsky.app/profile/tyrrrz.me">Bluesky</Link> or
           subscribe to the{" "}
-          <Link href="/blog.rss" external>
+          <Link href={resolvePath("/blog.rss")} external>
             RSS Feed
           </Link>{" "}
           to get notified when I post a new article.
@@ -80,23 +76,6 @@ const BlogPage: NextPage<BlogPageProps> = ({ posts }) => {
       </section>
     </>
   );
-};
-
-export const getStaticProps: GetStaticProps<BlogPageProps> = async () => {
-  await publishBlogFeed();
-
-  const posts = await bufferIterable(loadBlogPostRefs());
-
-  // Remove undefined values because they cannot be serialized
-  deleteUndefined(posts);
-
-  posts.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
-
-  return {
-    props: {
-      posts,
-    },
-  };
 };
 
 export default BlogPage;

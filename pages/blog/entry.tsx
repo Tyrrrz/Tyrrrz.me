@@ -1,28 +1,23 @@
 import Giscus from "@giscus/react";
-import { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import { FC } from "react";
 import { FiCalendar, FiClock } from "react-icons/fi";
-import Heading from "~/components/heading";
-import Image from "~/components/image";
-import Inline from "~/components/inline";
-import Link from "~/components/link";
-import Markdown from "~/components/markdown";
-import Meta from "~/components/meta";
-import UkraineAlert from "~/components/ukraineAlert";
-import { BlogPost, loadBlogPost, loadBlogPostRefs, publishBlogPostAssets } from "~/data/blog";
-import { useTheme } from "~/hooks/useTheme";
-import { deleteUndefined } from "~/utils/object";
-import { isAbsoluteUrl } from "~/utils/url";
+import { useParams } from "react-router-dom";
+import { blogPosts } from "virtual:blog";
+import Heading from "../../components/heading";
+import Image from "../../components/image";
+import Inline from "../../components/inline";
+import Link from "../../components/link";
+import Markdown from "../../components/markdown";
+import Meta from "../../components/meta";
+import UkraineAlert from "../../components/ukraineAlert";
+import type { BlogPost } from "../../data/blog";
+import { useTheme } from "../../hooks/useTheme";
+import { resolvePath } from "../../utils/assets";
+import { isAbsoluteUrl } from "../../utils/url";
 
-type BlogPostPageProps = {
+const CoverSection: FC<{
   post: BlogPost;
-};
-
-type BlogPostPageParams = {
-  id: string;
-};
-
-const CoverSection: FC<BlogPostPageProps> = ({ post }) => {
+}> = ({ post }) => {
   if (!post.coverUrl) {
     return null;
   }
@@ -36,7 +31,9 @@ const CoverSection: FC<BlogPostPageProps> = ({ post }) => {
   );
 };
 
-const ArticleSection: FC<BlogPostPageProps> = ({ post }) => {
+const ArticleSection: FC<{
+  post: BlogPost;
+}> = ({ post }) => {
   return (
     <section>
       <article>
@@ -48,7 +45,7 @@ const ArticleSection: FC<BlogPostPageProps> = ({ post }) => {
               return url;
             }
 
-            return `/blog/${post.id}/${url}`;
+            return resolvePath(`/blog/${post.id}/${url}`);
           }}
         />
       </article>
@@ -72,7 +69,7 @@ const SubscribeSection: FC = () => {
       <div>
         Want to know when I post a new article? Follow me on{" "}
         <Link href="https://bsky.app/profile/tyrrrz.me">Bluesky</Link> or subscribe to the{" "}
-        <Link href="/blog.rss" external>
+        <Link href={resolvePath("/blog.rss")} external>
           RSS Feed
         </Link>
       </div>
@@ -80,7 +77,9 @@ const SubscribeSection: FC = () => {
   );
 };
 
-const CommentSection: FC<BlogPostPageProps> = ({ post }) => {
+const CommentSection: FC<{
+  post: BlogPost;
+}> = ({ post }) => {
   const { userPreferredTheme } = useTheme();
 
   return (
@@ -110,7 +109,15 @@ const CommentSection: FC<BlogPostPageProps> = ({ post }) => {
   );
 };
 
-const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
+const BlogPostPage: FC = () => {
+  const { id } = useParams<{ id: string }>();
+
+  const post = blogPosts.find((p) => p.id === id);
+
+  if (!post) {
+    return null;
+  }
+
   return (
     <>
       <Meta
@@ -160,39 +167,6 @@ const BlogPostPage: NextPage<BlogPostPageProps> = ({ post }) => {
       </div>
     </>
   );
-};
-
-export const getStaticPaths: GetStaticPaths<BlogPostPageParams> = async () => {
-  const ids: string[] = [];
-  for await (const post of loadBlogPostRefs()) {
-    ids.push(post.id);
-  }
-
-  return {
-    paths: ids.map((id) => ({ params: { id } })),
-    fallback: false,
-  };
-};
-
-export const getStaticProps: GetStaticProps<BlogPostPageProps, BlogPostPageParams> = async ({
-  params,
-}) => {
-  const { id } = params || {};
-  if (!id) {
-    throw new Error("Missing blog post ID");
-  }
-
-  await publishBlogPostAssets(id);
-  const post = await loadBlogPost(id);
-
-  // Remove undefined values because they cannot be serialized
-  deleteUndefined(post);
-
-  return {
-    props: {
-      post,
-    },
-  };
 };
 
 export default BlogPostPage;
