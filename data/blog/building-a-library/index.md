@@ -3,19 +3,19 @@ title: "Building a Library in .NET: The Quiet Parts"
 date: "2024-10-28"
 ---
 
-Developing a library involves a lot of moving pieces, and not all of them are just about writing code. Beyond the functionality of the library itself, you also have to consider many operational concerns, such as how it is built, tested, and released — and how those processes should be automated in an efficient and reliable way. These aspects may not be as prominent on the surface, but they still have significant implications both on your own productivity as the author, as well as the experience of the library's consumers.
+Developing a library involves a lot of moving pieces, and not all of them are just about writing code. Beyond the functionality of the library itself, you also have to consider operational concerns, such as how it is built, tested, and released — and how all these processes can be automated in an efficient and reliable way. These aspects may not be as prominent on the surface, but they still have significant implications for your own productivity as the author, as well as the experience of the library's consumers.
 
 Even in such a mature and opinionated ecosystem as .NET, there is no true one-size-fits-all solution. The tooling landscape — both within the platform and the wider software world — is vast and constantly evolving, so with lots of different knobs to turn and approaches to evaluate, it can be difficult to know where to start.
 
-I have been maintaining [several open-source libraries in .NET](/projects) for over a decade, and through extensive trial and error, I have come to develop a set of practices that I find to be both effective and sustainable. These practices are not necessarily "best" in any absolute sense, but they have worked well for me and my projects, and I believe they can be a good starting point for others as well.
+I have been maintaining [several open-source libraries in .NET](/projects) for over a decade, and through extensive trial and error, I have come to develop a set of practices that I find to be quite effective and sustainable. These practices are not necessarily "best" in any absolute sense, but they have worked well for me and my projects, and I believe they can be a good starting point for many others as well.
 
-In this article, I will outline a typical .NET library setup, covering build settings, productivity extensions, testing and publishing workflows, and the services that help automate and tie everything together. We will go over different strategies, discuss the trade-offs between them, and see how they can be combined to establish a solid foundation for your library project.
+In this article, I will outline my typical .NET library setup, covering build settings, productivity extensions, testing and publishing workflows, and the services that help automate and tie everything together. We will go over different strategies, discuss the trade-offs between them, and see how they can be combined to establish a solid foundation for your library project.
 
-## Scaffolding the project
+## Scaffolding the solution
 
-Much like everything else in life, a .NET project has a beginning — and that beginning is the `dotnet new` command. It's safe to assume that, if you're reading this article, you've probably set up a fair share of .NET solutions and don't need any introduction to the process. However, since we'll be relying on certain expectations about the file structure going forward, let's use this opportunity to establish a common ground.
+Much like everything else in life, a .NET project has a beginning — and that beginning is the `dotnet new` command. It's safe to assume that, if you're reading this article, you've probably set up a fair share of .NET solutions and don't need any introduction to the process. However, since we'll be relying on certain expectations about the file structure going forward, let's use this opportunity to establish common ground.
 
-Generally speaking, there are two main ways to organize a solution in .NET: _the simpler way_ — where all projects are placed in their respective directories in the root of the codebase, and _the more scalable way_ — where projects are further grouped by their type and nested within the corresponding directories (`src/`, `tests/`, `samples/`, etc.). Both approaches are valid and have their place, but since we'll not be focusing on the actual codebase in this article, we'll go with the first option to keep things simple:
+Most .NET codebases follow one of the two organizational patterns: either a _flat layout_, where all projects are placed in their respective directories at the root of the repository, or a _partitioned layout_, where projects are grouped by type into dedicated directories (e.g., `src/`, `tests/`, `samples/`, etc.). While both approaches have their place, since our focus won't be on the code itself, we'll stick to the former for simplicity:
 
 ```
 ├── MyLibrary
@@ -27,30 +27,32 @@ Generally speaking, there are two main ways to organize a solution in .NET: _the
 └── MyLibrary.sln
 ```
 
-Here we have a bare-bones setup, consisting of the `MyLibrary` project that houses the library code, and the `MyLibrary.Tests` project which contains the corresponding automated tests. Both of them are unified within a single solution scope using a file named `MyLibrary.sln`, which provides a centralized entry point for the .NET tooling to discover and manage these projects.
+Here we have a bare-bones setup, consisting of the `MyLibrary` project that houses the library code, and the `MyLibrary.Tests` project which contains the corresponding automated tests. Both are tied together by the `MyLibrary.sln` solution file, which provides a centralized entry point for the .NET tooling to discover and manage them.
 
-To achieve the structure visualized above, you can either create the solution from an IDE of choice, or simply run the following `dotnet` commands in the terminal:
+To achieve the structure visualized above, you can create the solution either by using your preferred IDE or just by running the following `dotnet` commands in the terminal:
 
 ```bash
 dotnet new classlib -n MyLibrary -o MyLibrary
+# Feel free to swap out xunit with nunit, mstest, or whatever you prefer
 dotnet new xunit -n MyLibrary.Tests -o MyLibrary.Tests
 dotnet new sln -n MyLibrary
 dotnet sln add MyLibrary/MyLibrary.csproj MyLibrary.Tests/MyLibrary.Tests.csproj
 ```
 
-Besides that, our solution also needs to be integrated with a version control system and, ideally, a code hosting platform. When it comes to the former, the choice is fairly simple: [Git](https://git-scm.com) is the absolute standard of version control in the software world, and .NET is no exception. However, choosing a platform to host your Git repositories is a bit more nuanced, as there are many viable options available and — if you are planning to use them beyond their basic functionality — they all come with some form of vendor lock-in.
+Beyond that, our solution also needs to be integrated with a version control system and, ideally, a code hosting platform. When it comes to the former, the choice is fairly straightforward: [Git](https://git-scm.com) is the undisputed standard of version control in the software world, and .NET is no exception. However, choosing a platform to host your Git repositories is a bit more nuanced, as there are many viable candidates and they all come with some form of vendor lock-in if you intend to use them beyond their basic functionality.
 
-That said, unless you have a specific reason to use something else, I strongly recommend going with the obvious combination of Git and [GitHub](https://github.com) due to its wide adoption, generous free tier, and rich ecosystem of tools and integrations. This is especially relevant if you are planning to publish your library as an open-source project, as GitHub's large community of developers lends to better discoverability and collaboration opportunities.
+That said, unless you have a specific reason to use something else, I strongly recommend going with the obvious combination of Git and [GitHub](https://github.com) due to its wide adoption, generous free tier, and rich ecosystem of tools and integrations. This is especially relevant if you are planning to publish your library as an open-source project, since GitHub's large community of developers lends itself to better discoverability and collaboration opportunities.
 
-With all that in mind, let's assume we've created a new remote repository over at `https://github.com/Tyrrrz/MyLibrary`. Now we can also initialize the repository locally and synchronize the two together:
+With all that in mind, let's assume we've created a new remote repository over at `https://github.com/Tyrrrz/MyLibrary`. Now we can also initialize one locally and synchronize the two together:
 
 ```bash
 git init
+git branch -M main
 git remote add origin https://github.com/Tyrrrz/MyLibrary.git
 dotnet new gitignore
 ```
 
-This set of commands does a few things: it creates the `.git` directory with all the repository-specific metadata, adds a remote named `origin` pointing to the GitHub repository we've created earlier, and generates a comprehensive [`.gitignore`](https://git-scm.com/docs/gitignore) file tailored for common file and directory patterns used within the .NET ecosystem. Once all the commands are executed, the resulting file structure should look like this:
+This sequence creates the `.git` directory containing repository tracking metadata, sets the default branch to `main`, adds a link to our remote `origin` on GitHub, and generates a comprehensive [`.gitignore`](https://git-scm.com/docs/gitignore) file tailored specifically for .NET solutions. Once all the commands are executed, the resulting layout should look like this:
 
 ```
 ├── .git
@@ -65,7 +67,7 @@ This set of commands does a few things: it creates the `.git` directory with all
 └── MyLibrary.sln
 ```
 
-At this point, we can consider the initial scaffolding of our solution to be complete. Since we don't really care about the inner workings of the library, we will simply assume that its functionality has been fully implemented, and that the associated tests are also in place and running correctly. To close this part off, let's commit our existing codebase and push it to the remote repository:
+At this point, we can consider the initial scaffolding of our solution to be complete. Since we don't really care about the inner workings of the library, we will simply assume that its functionality has been fully implemented, and that the associated tests are also in place and running correctly. To close this part off, let's commit the codebase and push it upstream:
 
 ```bash
 git add .
