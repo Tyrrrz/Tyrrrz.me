@@ -17,14 +17,14 @@ Much like everything else in life, a .NET project has a beginning — and that b
 
 Most .NET codebases follow one of the two organizational patterns: either a _flat layout_, where all projects are placed in their respective directories at the root of the repository, or a _partitioned layout_, where projects are grouped by type into dedicated directories (e.g., `src/`, `tests/`, `samples/`, etc.). While both approaches have their place, since our focus won't be on the code itself, we'll stick to the former for simplicity:
 
-```
-├── MyLibrary
-│   ├── MyLibrary.csproj
-│   └── (...)
-├── MyLibrary.Tests
-│   ├── MyLibrary.Tests.csproj
-│   └── (...)
-└── MyLibrary.sln
+```diff
++ ├── MyLibrary
++ │   ├── MyLibrary.csproj
++ │   └── (...)
++ ├── MyLibrary.Tests
++ │   ├── MyLibrary.Tests.csproj
++ │   └── (...)
++ └── MyLibrary.sln
 ```
 
 Here we have a bare-bones setup, consisting of the `MyLibrary` project that houses the library code, and the `MyLibrary.Tests` project which contains the corresponding automated tests. Both are tied together by the `MyLibrary.sln` solution file, which provides a centralized entry point for the .NET tooling to discover and manage them.
@@ -54,17 +54,17 @@ dotnet new gitignore
 
 This sequence creates the `.git` directory containing repository tracking metadata, sets the default branch to `main`, adds a link to our remote `origin` on GitHub, and generates a comprehensive [`.gitignore`](https://git-scm.com/docs/gitignore) file tailored specifically for .NET solutions. Once all the commands are executed, the resulting layout should look like this:
 
-```
-├── .git
-│   └── (...)
-├── MyLibrary
-│   ├── MyLibrary.csproj
-│   └── (...)
-├── MyLibrary.Tests
-│   ├── MyLibrary.Tests.csproj
-│   └── (...)
-├── .gitignore
-└── MyLibrary.sln
+```diff
++ ├── .git
++ │   └── (...)
+  ├── MyLibrary
+  │   ├── MyLibrary.csproj
+  │   └── (...)
+  ├── MyLibrary.Tests
+  │   ├── MyLibrary.Tests.csproj
+  │   └── (...)
++ ├── .gitignore
+  └── MyLibrary.sln
 ```
 
 At this point, we can consider the initial scaffolding of our solution to be complete. Since we don't really care about the inner workings of the library, we will simply assume that its functionality has been fully implemented, and that the associated tests are also in place and running correctly. To close this part off, let's commit the codebase and push it upstream:
@@ -77,15 +77,15 @@ git push -u origin main
 
 ## Baseline configuration
 
-Any individual .NET project is essentially a (massive) set of instructions that direct the toolchain how to parse, compile, and package the code contained within it. These instructions are inherited through various internal `props` and `targets` files and, for the most part, pose no particular interest to you as the developer. However, there are a few aspects of the build process that you may want to configure — even if solely to establish a set of reasonable defaults.
+Any individual .NET project is essentially a set of instructions that direct the toolchain how to parse, compile, and package the code contained within it. These instructions are inherited through various internal `props` and `targets` files and, for the most part, require no attention during day-to-day development. However, there are a few aspects of the build process that you may want to configure — even if solely to establish a set of reasonable defaults.
 
-I call these defaults the "baseline configuration", as their purpose is not to significantly alter the behavior of the build, but rather to ensure its consistency across unpredictable environments. This can be achieved with the help of the following three optional files:
+I call these defaults the "baseline configuration", as their purpose is not to fundamentally alter the behavior of the build, but rather to ensure its consistency across unpredictable environments. This can be achieved with the help of the following three optional files:
 
 - [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — specifies the version of the .NET SDK that should be used for the solution and optionally instructs how to roll forward to higher versions.
-- [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — configures settings related to the NuGet package manager, including the sources from which it should resolve package dependencies.
-- [`Directory.Build.props`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory) — defines custom MSBuild properties that are automatically applied to all projects in the solution.
+- [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — configures the NuGet package manager, including the sources from which it should resolve dependencies.
+- [`Directory.Build.props`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory) — defines global MSBuild properties that are automatically applied to all projects in the solution.
 
-Before we explore each of these files in detail, let's get started by generating boilerplates for all of them. We can do that by running the following `dotnet new` commands in the root of our solution directory:
+Before we explore each of these files in detail, let's get started by generating the boilerplate for all of them. We can do that by running the following `dotnet new` commands in the root of our solution directory:
 
 ```bash
 dotnet new globaljson
@@ -93,26 +93,44 @@ dotnet new nugetconfig
 dotnet new buildprops
 ```
 
+Resulting in the following layout:
+
+```diff
+  ├── .git
+  │   └── (...)
+  ├── MyLibrary
+  │   ├── MyLibrary.csproj
+  │   └── (...)
+  ├── MyLibrary.Tests
+  │   ├── MyLibrary.Tests.csproj
+  │   └── (...)
+  ├── .gitignore
++ ├── Directory.Build.props
++ ├── global.json
+  ├── MyLibrary.sln
++ └── nuget.config
+```
+
 ### `global.json`
 
-First off, we have the `global.json` file, whose purpose is to declare which version of the .NET SDK the solution is intended to work with. Normally, this information is not encoded in the solution file or anywhere else, so the .NET tooling relies on the default behavior of simply resolving the latest SDK that is available in the environment. This behavior is fine for local development — since you can reasonably guarantee that a compatible version of the SDK is installed on your machine — but it's a good idea to make that requirement explicit to communicate it clearly to other collaborators (and your future self) as well.
+First off, we have the `global.json` file, whose purpose is to declare which version of the .NET SDK the solution is intended to work with. Normally, this requirement is not encoded anywhere in the solution itself, so the .NET tooling defaults to resolving the latest SDK available in the environment. While that strategy works fine for local development — where you can easily guarantee a compatible version is installed on your machine — making the requirement explicit communicates it clearly to other collaborators, automation pipelines, and your future self.
 
-Naturally, in order to be considered compatible, the SDK must provide the capabilities that the codebase depends on, such as access to certain target frameworks, language features, compiler options, and so on. When it comes to the [.NET SDK versioning schema](https://learn.microsoft.com/dotnet/core/versions), these aspects are typically governed by the first two components of the version label (i.e. `10.0.***`), while the rest of the numbers indicate bug fixes and minor improvements (i.e. `*.*.307`). In other words, if a project is written with the C# 14 syntax and targets `net10.0`, you'd need the .NET 10.0 SDK in order to build it — but the exact version is not that important.
+Naturally, to be considered compatible, the SDK must provide the capabilities that the codebase depends on, such as access to certain target frameworks, language features, and compiler options. When it comes to the [.NET SDK versioning schema](https://learn.microsoft.com/dotnet/core/versions), these aspects are typically governed by the first two components of the semantic label (e.g., `11.0.***`), while the remaining digits indicate bug fixes and minor tooling improvements (e.g., `*.*.307`). In other words, if a project relies on C# 15 syntax and targets `net11.0`, you'd need the .NET 11.0 SDK to build it — but the exact patch release is not that important.
 
-When you generate a `global.json` file via `dotnet new`, however, it defaults to the full version of the latest .NET SDK available on your machine. It means that anyone who wants to build the solution will also be required to have that _exact same_ SDK version installed, which is way too restrictive. To fix that, let's modify the file to look like this instead:
+When you generate a `global.json` file via `dotnet new`, however, it defaults to the full version of the latest .NET SDK available on your machine. Given such a configuration, this forces anyone else trying to build the solution to have that _identical_ SDK version installed, which is far too restrictive. To fix this, let's open the file and adjust its matching policy to be more flexible:
 
 ```json
 {
   "sdk": {
-    "version": "10.0.100",
+    "version": "11.0.100",
     "rollForward": "latestFeature"
   }
 }
 ```
 
-At the time of writing, the current iteration of .NET is .NET 10.0, so we set the `version` property to `10.0.100` — the lowest SDK version within the `10.0` band. Together with the `rollForward` option set to `latestFeature`, this effectively creates a rule that allows the solution to be built by any feature or patch version of the .NET 10.0 SDK, but not by an SDK of another major or minor version (e.g. .NET 9.0 or .NET 11.0).
+At the time of writing, the current iteration of .NET is .NET 11.0, so we set the `version` property to `11.0.100` — the lowest SDK version within the `11.0` band. Combined with the `rollForward` option set to `latestFeature`, this effectively creates a rule that allows the solution to be built by any feature or patch release of the .NET 11.0 SDK, but _not_ by any other major or minor version (e.g., .NET 10.0 or .NET 12.0).
 
-The reason for specifically choosing `latestFeature` instead of `latestMinor` or even `latestMajor` is to ensure runtime compatibility for executable projects in the solution, such as tests. Although .NET SDKs are generally backward-compatible between different major and minor versions, each SDK includes its corresponding version of the runtime, which is not. As a result, while a project targeting `net10.0` can still be built with the .NET 11.0 SDK, it can only be executed with the .NET 10.0 runtime — making the matching SDK version more preferable.
+The reason for specifically choosing `latestFeature` instead of `latestMinor` or `latestMajor` is to ensure runtime compatibility for executable projects in the solution, such as tests. Although newer .NET SDKs can still compile code targeting older frameworks, each SDK includes its corresponding version of the runtime, which normally does not roll forward across major boundaries. As a result, a project targeting `net11.0` can still be built with a newer toolchain, but it can only be executed with the .NET 11.0 runtime — thus making the aligned SDK version more preferable.
 
 ### `nuget.config`
 
@@ -252,7 +270,7 @@ Regardless, compatibility is always a compromise and early in the development of
   - If `netstandard2.0`'s API set is too narrow for your library's needs, consider targeting higher versions of the individual implementations that you want to support instead. For example, targeting `net5.0` and `net462` will still cover a decent range of platforms, while giving you access to more modern APIs.
   - Avoid targeting `netstandard2.1`, as it's not supported by .NET Framework and UWP, largely diminishing its usefulness as a compatibility layer.
   - Avoid targeting `netstandard1.x`, as the corresponding implementations are too old and have very limited API sets.
-  - Avoid targeting individual .NET implementations that don't follow the .NET Standard 2.0 specification (e.g. `netcoreapp1.1`, `net45`, `sl5`, etc.), as they are all outdated technologies.
+  - Avoid targeting individual .NET implementations that don't follow the .NET Standard 2.0 specification (e.g., `netcoreapp1.1`, `net45`, `sl5`, etc.), as they are all outdated technologies.
 - **Target intermediate versions if you have framework-dependent code paths**. For example, if your library already targets .NET 10.0 and .NET Standard 2.0, but conditionally relies on certain APIs that were introduced in .NET 5.0, then you should separately target `net5.0` as well to ensure that those code paths are available as early as possible.
   - This is similarly relevant if your library uses polyfills to backport newer APIs to older frameworks. In such cases, you want to also include the frameworks that provide those APIs natively, so that polyfills are only used when necessary.
   - If you prefer to keep things lean, you can limit intermediate targets to only those that are [long-term support (LTS) releases](https://versionsof.net), such as .NET 6.0, .NET 8.0, etc.
