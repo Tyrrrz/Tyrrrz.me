@@ -822,6 +822,27 @@ jobs:
       - run: dotnet test --configuration Release
 ```
 
+Todo:
+
+```diff
+  ├── .git
+  │   └── (...)
++ ├── .github
++ │   └── workflows
++ │       └── main.yml
+  ├── MyLibrary
+  │   ├── MyLibrary.csproj
+  │   └── (...)
+  ├── MyLibrary.Tests
+  │   ├── MyLibrary.Tests.csproj
+  │   └── (...)
+  ├── .gitignore
+  ├── Directory.Build.props
+  ├── global.json
+  ├── MyLibrary.sln
+  └── nuget.config
+```
+
 Just like that, we have a basic CI workflow that will run `dotnet test` on every push and pull request. Once this file is committed to the repository, GitHub will automatically detect it and start running the workflow each time the corresponding events occur.
 
 GitHub-hosted runners already come with a lot of common developer tooling preinstalled, including .NET itself. Still, it makes sense to specify the SDK versions explicitly, if only to make the workflow more reproducible and its expectations more obvious:
