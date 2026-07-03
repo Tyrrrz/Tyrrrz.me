@@ -77,11 +77,11 @@ git push -u origin main
 
 ## Baseline configuration
 
-Any individual .NET project is essentially a set of instructions directing the toolchain how to parse, compile, and package the code within it. These instructions are inherited through various ambient settings, as well as the SDK's internal `props` and `targets` files and, for the most part, require no attention during day-to-day development. However, there are a few aspects of the build process that you may want to configure — even if solely to establish a set of reasonable defaults.
+Any individual .NET project is essentially a set of instructions directing the toolchain how to parse, compile, and package the code within it. These instructions are inherited through various ambient settings, as well as the SDK's internal `props` and `targets` files. Although the specifics of the build process don't require particular attention during day-to-day development, there are a few things that you may want to configure — even if solely to establish a set of reasonable defaults.
 
 I call these defaults the "baseline configuration", as their purpose is not to fundamentally alter the behavior of the build, but rather to ensure its consistency across unpredictable environments. This can be achieved with the help of the following three optional files:
 
-- [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — specifies the version of the .NET SDK that should be used for the solution and optionally instructs how to roll forward to higher versions.
+- [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — pins the .NET SDK to a specific release and optionally instructs how to roll forward to higher versions.
 - [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — configures the NuGet package manager, including the sources from which it should resolve dependencies.
 - [`Directory.Build.props`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory) — defines global MSBuild properties that are automatically applied to all projects in the solution.
 
@@ -93,7 +93,7 @@ dotnet new nugetconfig
 dotnet new buildprops
 ```
 
-Resulting in the following layout:
+Thus, resulting in the following layout:
 
 ```diff
   ├── .git
@@ -113,11 +113,11 @@ Resulting in the following layout:
 
 ### `global.json`
 
-First off, we have the `global.json` file, whose purpose is to declare which version of the .NET SDK the solution is intended to work with. Normally, this requirement is not encoded anywhere in the solution itself, so the .NET tooling defaults to resolving the latest SDK available in the environment. While that strategy works fine for the initial local development, you'll eventually want to make the requirement explicit to communicate it clearly to other collaborators, automation pipelines, and also your future self.
+First off, we have the `global.json` file, whose purpose is to declare which version of the .NET SDK the solution is intended to work with. Normally, this requirement is not encoded anywhere in the solution itself, so the .NET tooling defaults to resolving the latest SDK available in the environment. While that works fine for the initial local development, you'll eventually want to make the SDK requirement explicit to communicate it clearly to other collaborators, automation pipelines, and also your future self.
 
-Naturally, to be considered compatible, the SDK must provide the capabilities that the codebase depends on, such as access to certain target frameworks, language features, and compiler options. When it comes to the [.NET SDK versioning schema](https://learn.microsoft.com/dotnet/core/versions), these aspects are typically governed by the first two components of the semantic label (e.g., `11.0.***`), while the remaining digits indicate bug fixes and minor tooling improvements (e.g., `*.*.307`). For example, if a project relies on C# 15 syntax and targets `net11.0`, you'd need the .NET 11.0 SDK to build it — but the exact patch release is not that important.
+Naturally, to be considered compatible, the SDK must provide the capabilities that the codebase depends on, such as access to certain target frameworks, language features, and compiler options. When it comes to the [.NET SDK versioning schema](https://learn.microsoft.com/dotnet/core/versions), these aspects are typically governed by the first two components of the semantic label (e.g., `11.0.***`), while the remaining digits indicate bug fixes and minor tooling improvements (e.g., `*.*.307`).
 
-When you generate a `global.json` file via `dotnet new`, however, it defaults to the full version of the currently resolved .NET SDK. This configuration forces anyone else trying to build the solution to also have that _identical_ SDK version installed, which is far too restrictive. To fix this, let's open the file and adjust its matching policy to be more flexible:
+When you generate a `global.json` file via `dotnet new`, however, it defaults to the full version of the currently resolved .NET SDK, including its patch release. This configuration forces anyone else trying to build the solution to have the _same exact_ SDK version installed, which is far too restrictive. To fix this, let's open the file and adjust its matching policy to be more flexible:
 
 ```json
 {
@@ -130,7 +130,7 @@ When you generate a `global.json` file via `dotnet new`, however, it defaults to
 
 At the time of writing, the current iteration of .NET is .NET 11.0, so we set the `version` property to `11.0.100` — the lowest SDK version within the `11.0` band. Combined with the `rollForward` option set to `latestFeature`, this effectively creates a rule that allows the solution to be built by any feature or patch release of the .NET 11.0 SDK, but _not_ by any other major or minor version (e.g., .NET 10.0 or .NET 12.0).
 
-The reason for specifically choosing `latestFeature` instead of `latestMinor` or `latestMajor` is to ensure runtime compatibility for executable projects in the solution, such as tests. Although newer .NET SDKs can still compile code targeting older frameworks, each SDK includes its corresponding version of the runtime, which normally does not roll forward across major boundaries. As a result, a project targeting `net11.0` can still be built with a newer toolchain, but it can only be executed with the .NET 11.0 runtime — thus making the aligned SDK version more preferable.
+The reason for specifically choosing `latestFeature` instead of `latestMinor` or `latestMajor` is to ensure runtime compatibility for executable projects in the solution, such as tests. Although newer .NET SDKs can still compile code targeting older frameworks, each SDK includes its corresponding version of the runtime, which normally does not roll forward across major boundaries. As a result, a project targeting `net11.0` can still be built with the .NET 12.0 SDK, but it can only be executed with the .NET 11.0 runtime — thus making the aligned SDK version more preferable.
 
 ### `nuget.config`
 
@@ -156,11 +156,11 @@ The `nuget.config` file generated by `dotnet new` provides a great starting poin
 
 Here we have the `<packageSources>` section that specifies the feeds from which NuGet should fetch dependencies. It's a list-based setting, so we start with the `<clear />` element to remove any previously defined sources, and then add a single item named `nuget` that points to the NuGet.org catalog. Doing so makes sure that all projects in the solution resolve packages from the official registry, regardless of any other sources that may be configured on the machine.
 
-The following `<config>` section is reserved for key-value settings that control various aspects of the NuGet client behavior, and in our case, we use it to set `defaultPushSource` to match the package source defined earlier. Now, when we run the `dotnet nuget push` command to upload our own packages, it will also infer NuGet.org as the target location without requiring any additional arguments.
+The following `<config>` section is reserved for key-value settings that control various aspects of the NuGet client behavior, and in our case, we use it to set `defaultPushSource` to match the package source defined earlier. Now, when we run the `dotnet nuget push` command to upload our own packages, it will also infer NuGet.org as the target location without requiring any additional instructions.
 
 ### `Directory.Build.props`
 
-Finally, we have the `Directory.Build.props` file, which lets us define arbitrary MSBuild properties that should be applied to all projects in the solution. When running the build, the tooling automatically looks for this file (and `Directory.Build.targets`, if available) within the directory hierarchy, and implicitly includes its contents in each project specification. This convention makes `Directory.Build.props` a great place to configure common cross-cutting concerns, such as compiler options, build settings, and various metadata.
+Finally, we have the `Directory.Build.props` file, which lets us define arbitrary MSBuild properties that should be inherited by all projects in the solution. When running the build, the tooling automatically looks for this file (and `Directory.Build.targets`, if available) within the directory hierarchy, and implicitly includes its contents in each project specification. This convention makes `Directory.Build.props` a great place to configure common cross-cutting concerns, such as compiler options, build settings, and various metadata.
 
 The file generated by `dotnet new` makes no assumptions about your intentions, so it simply starts off empty. Here's how I typically set it up for my library projects:
 
@@ -198,7 +198,7 @@ The file generated by `dotnet new` makes no assumptions about your intentions, s
 </Project>
 ```
 
-In the above snippet, we have a few different groups of properties that are used to configure various aspects of the build process. Each group is wrapped in a `<PropertyGroup>` element, which allows us to logically separate the properties based on their purpose. Such structure has no functional benefits, but it helps keep things organized and makes reading and maintaining the file easier.
+In the above snippet, we have a few different groups of properties that are used to configure various aspects of the build process. Each group is wrapped in a `<PropertyGroup>` element, which allows us to logically separate settings based on their purpose. Such structure has no functional benefits, but it helps keep things organized and makes reading and maintaining the file easier.
 
 Starting off with the first group of options, we set the **`<LangVersion>`** property to `latest`, instructing the C# (or F#, VB) compiler to use the most recent stable version of the language. This is contrary to the default behavior, where the language version is instead determined by the target framework of the project, essentially only allowing newer language features when building against frameworks that officially support them.
 
@@ -208,15 +208,15 @@ Therefore, setting the language version explicitly forces the compiler to ignore
 
 Following that, we enable the [**Nullable Reference Types**](https://learn.microsoft.com/dotnet/csharp/nullable-references) feature of the C# compiler (**`<Nullable>`**), as it is a great way to improve the safety of our code and to more accurately advertise the capabilities of our APIs. There are two modes in which this feature can be configured: `annotations`, which instructs the compiler to emit nullability annotations for all types and members that we define; and `enable`, which also produces compiler warnings about related violations during development.
 
-Just like many other language and compiler features, Nullable Reference Types is subject to certain availability constraints as well. In its native form, NRT was introduced with the release of C# 8 and .NET Core 3.0 — and, although it's possible to backport the bits required to annotate our own types, the compiler checks are not going to be very useful when targeting older frameworks that don't provide nullability information themselves.
+Just like many other language and compiler features, Nullable Reference Types is subject to certain availability constraints. In its native form, NRT was introduced with the release of C# 8 and .NET Core 3.0 — and, although it's possible to backport the bits required to annotate our own types, the compiler checks are not going to be very useful when targeting older frameworks that don't provide nullability information themselves.
 
 Because of that, we configure this feature in a conditional way: activating the `annotations` mode as the baseline for all targets, while extending to the `enable` mode for the frameworks that fully support it. This way, our assemblies will always include nullability annotations, but we'll only get warnings about violations in our own code when building against newer frameworks.
 
-Note how the example above relies on the `Condition="..."` attribute to validate framework compatibility. Instead of hard-codding a sequence of separate checks for each specific framework that our projects may target, we can rely on the [`IsTargetFrameworkCompatible(...)`](https://learn.microsoft.com/visualstudio/msbuild/property-functions#msbuild-property-functions) function to establish a version boundary that accounts for different flavors of .NET. In this scenario, NRT will be fully enabled for both .NET Standard 2.1, .NET Core 3.0, as well as any newer implementations of .NET.
+Note how the example above relies on the `Condition="..."` attribute to validate framework compatibility. Instead of hard-codding a sequence of separate checks for each specific framework that our projects may target, we can rely on the [`IsTargetFrameworkCompatible(...)`](https://learn.microsoft.com/visualstudio/msbuild/property-functions#msbuild-property-functions) function to establish a version boundary that accounts for different flavors of .NET. In this scenario, NRT will be fully enabled for .NET Standard 2.1, .NET Core 3.0 (which implements it), as well as any newer version of either.
 
-To round off the first section, we also set the **`<TreatWarningsAsErrors>`** property to `true`, directing the compiler to block the build if any warnings are encountered. In effect, this forces developers to address every potential issue in the codebase — either by fixing it or by explicitly declaring it as non-problematic. Although not required, it's generally a good idea to enable this setting for library projects as they tend to have somewhat higher expectations when it comes to code quality.
+To round off the first section, we also set the **`<TreatWarningsAsErrors>`** property to `true`, directing the compiler to block the build if any warnings are encountered. In effect, this will force us to address every potential issue in the codebase — either by fixing it or by explicitly declaring it as non-problematic. Although not required, it's generally a good idea to enable this setting for library projects as they tend to have somewhat higher expectations when it comes to code quality.
 
-The second group of properties is dedicated to other toolchain options that are not specifically related to the compilation stage. Here, we set the **`<CheckEolTargetFramework>`** property to `false` and **`<SuppressTfmSupportBuildWarnings>`** to `true`, disabling various warnings when building for frameworks that have exited their support lifecycle. As mentioned before, libraries do often need to target older frameworks for compatibility reasons, so these warnings are not particularly useful in our context.
+The second group of properties is dedicated to other toolchain options that are not specifically related to the compilation stage. Here, we set **`<CheckEolTargetFramework>`** to `false` and **`<SuppressTfmSupportBuildWarnings>`** to `true`, disabling various warnings when building for frameworks that have exited their support lifecycle. As mentioned before, libraries do often need to target older frameworks for compatibility reasons, so these warnings are not particularly useful in our context.
 
 Next, we get to the **`<IsPackable>`** property, which controls whether a given project should be included in the packaging process. The default value is `true`, meaning that every project is treated as packable unless specified otherwise. By inverting the default, we establish a more intentional convention where NuGet packages are only created for projects that deliberately opt in.
 
@@ -226,7 +226,7 @@ Finally, we have the third group of properties — these are used to define comm
 
 The remaining fields, including **`<Company>`**, **`<Description>`**, and **`<PackageProjectUrl>`**, are purely informational properties that get surfaced in various places, such as assembly and NuGet package details. The purpose of these fields is to provide context about the package, its author, and where to find more information about it — so make sure to fill them out with accurate values that reflect the identity and nature of your library.
 
-Most importantly, when developing a library, we also need to consider the license under which it will be distributed. The **`<PackageLicenseExpression>`** property allows us to specify a [standard SPDX license identifier](https://spdx.org/licenses) that indicates the terms of use for our package. Here, we set it to `MIT`, arguably the most popular permissive open-source license, but feel free to explore [other options](https://choosealicense.com) as well to find the best fit for your project.
+Most importantly, when developing an open-source project, we also need to consider the license under which it is distributed. The **`<PackageLicenseExpression>`** property allows us to specify a [standard SPDX license identifier](https://spdx.org/licenses) that indicates the terms of use for our package. Here, we set it to `MIT` — arguably the most popular permissive OSS license — but feel free to explore [other options](https://choosealicense.com) as well to find the best fit for your project.
 
 Although all these metadata properties are only relevant to the packable projects in our solution, there is no harm in applying them globally through `Directory.Build.props`. In the scenario that we have multiple NuGet packages that we want to publish from the same repository, this setup allows us to maintain a single source of truth for all metadata, while still being able to override specific fields on a per-project basis if necessary.
 
