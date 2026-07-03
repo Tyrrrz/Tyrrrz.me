@@ -247,22 +247,22 @@ Being the author of a library means you need to be aware of the various developm
 - [Mono](https://mono-project.com) — an older open-source and cross-platform implementation of .NET Framework that was created to seamlessly bring .NET applications to non-Windows systems. Legacy technology as of 2019, with no new major releases planned. Superseded by .NET (Core).
 - [Xamarin](https://dotnet.microsoft.com/apps/xamarin) — a set of tools and libraries built on top of Mono to facilitate mobile application development for iOS and Android. Legacy technology as of 2024, with no new major releases planned. Superseded by .NET MAUI and .NET (Core).
 - [Universal Windows Platform (UWP)](https://learn.microsoft.com/windows/uwp/get-started/universal-application-platform-guide) — a platform for building modern Windows applications that can run across various device types. Based on a subset of .NET Framework (ironically, also called .NET Core, though unrelated), but with its own set of APIs and restrictions. Legacy technology as of 2024, with no new major releases planned. Superseded by WinUI and .NET (Core).
-- [Unity](https://unity.com) — a popular game development engine that uses a customized version of Mono to run C# scripts. As of 2025, Unity does not yet support .NET (Core), making it the only modern technology that still primarily relies on Mono.
+- [Unity](https://unity.com) — a popular game development engine that uses a customized version of Mono to run C# scripts. As of 2026, Unity does not yet support .NET (Core), making it the only modern technology that still primarily relies on Mono.
 - [.NET Standard](https://learn.microsoft.com/dotnet/standard/net-standard) — not an actual implementation, but rather a specification that defines a set of APIs that different .NET implementations can conform to. It was created to facilitate code sharing between different frameworks, but has since become less impactful due to the unification brought by .NET (Core).
 
 In case the earlier remark about convoluted naming conventions wasn't apparent enough, things get a bit more confusing (and mildly comical) when you introduce the corresponding _framework monikers_ into the mix. For example, among the following list of targets, which two do you think belong to the same family: `netcoreapp3.1`, `netcore45`, `net46`, `net5.0`? This is not a trick question, by the way.
 
 Anyway, in order for a library to be referenced by another project, it must be built against a framework that is compatible with the one used by that project. In most cases, it means that both of them need to target the same implementation of .NET, and the library's target version must be equal to or lower than that of the other project.
 
-If the library targets .NET Standard instead of a specific implementation, then the version of that standard must be supported by the project's framework. However, the rules for that are slightly more complex and you need to refer to the [compatibility table](https://dotnet.microsoft.com/platform/dotnet-standard#versions) to determine how the versions align with each other.
+If the library targets .NET Standard instead of a specific implementation, then the version of that standard must be supported by the project's framework. However, the rules for that are slightly more complex and you need to refer to the [compatibility table](https://dotnet.microsoft.com/platform/dotnet-standard#versions) to determine how the versions align in that case.
 
-As you may probably imagine, it's also not enough to just pick a single target framework for your library and call it a day. In order to cover a broad range of clients — and provide the best possible experience across that range — you often need to target multiple frameworks (and/or their versions) simultaneously. This is where [_multi-targeting_](https://learn.microsoft.com/visualstudio/msbuild/net-sdk-multitargeting) comes into play.
+As you may probably imagine, it's also not enough to just pick a single target framework for your library and call it a day. In order to cover a broad range of clients — and provide the best possible experience for all of them — you often need to target multiple frameworks (and/or their versions) simultaneously. This is where [_multi-targeting_](https://learn.microsoft.com/visualstudio/msbuild/net-sdk-multitargeting) comes into play.
 
 With multi-targeting, the .NET SDK works by building the project independently for each of the specified target frameworks, producing separate assemblies in the process. When the library is packed into a NuGet package, these assemblies are then organized in such a way that the consuming project can automatically pick the most appropriate assets based on its own requirements.
 
 Regardless, compatibility is always a compromise and early in the development of your library it may be tricky to gauge how far you should go to support older or niche frameworks. That said, here are a few of my personal recommendations that can help you get started:
 
-- **Always target the latest version of .NET (Core)**. Your library should definitely be compatible with the newest version of .NET (currently `net10.0`) and there is no better way to ensure that than by targeting it directly.
+- **Always target the latest version of .NET (Core)**. Your library should definitely be compatible with the newest version of .NET (currently `net11.0`) and there is no better way to ensure that than by targeting it directly.
   - Additionally, this also provides you with an improved development experience — particularly through built-in analyzers that only work when targeting the latest framework.
 - **Establish a compatibility baseline by targeting .NET Standard 2.0 as well**. By doing so, your library will automatically be supported by a [wide range of relatively modern .NET implementations](https://learn.microsoft.com/dotnet/standard/net-standard?tabs=net-standard-2-0), maximizing your audience without much cherry-picking.
   - This version of the standard offers a good balance between compatibility and API availability, making it a solid lower boundary for most libraries.
@@ -270,27 +270,27 @@ Regardless, compatibility is always a compromise and early in the development of
   - If `netstandard2.0`'s API set is too narrow for your library's needs, consider targeting higher versions of the individual implementations that you want to support instead. For example, targeting `net5.0` and `net462` will still cover a decent range of platforms, while giving you access to more modern APIs.
   - Avoid targeting `netstandard2.1`, as it's not supported by .NET Framework and UWP, largely diminishing its usefulness as a compatibility layer.
   - Avoid targeting `netstandard1.x`, as the corresponding implementations are too old and have very limited API sets.
-  - Avoid targeting individual .NET implementations that don't follow the .NET Standard 2.0 specification (e.g., `netcoreapp1.1`, `net45`, `sl5`, etc.), as they are all outdated technologies.
-- **Target intermediate versions if you have framework-dependent code paths**. For example, if your library already targets .NET 10.0 and .NET Standard 2.0, but conditionally relies on certain APIs that were introduced in .NET 5.0, then you should separately target `net5.0` as well to ensure that those code paths are available as early as possible.
+  - Avoid targeting individual .NET implementations that don't support the .NET Standard 2.0 specification (e.g., `netcoreapp1.1`, `net45`, `sl5`, etc.), as they are all outdated technologies.
+- **Target intermediate versions if you have framework-dependent code paths**. For example, if your library already targets .NET 11.0 and .NET Standard 2.0, but conditionally relies on certain APIs that were introduced in .NET 5.0, then you should separately target `net5.0` as well to ensure that those code paths are available as early as possible.
   - This is similarly relevant if your library uses polyfills to backport newer APIs to older frameworks. In such cases, you want to also include the frameworks that provide those APIs natively, so that polyfills are only used when necessary.
   - If you prefer to keep things lean, you can limit intermediate targets to only those that are [long-term support (LTS) releases](https://versionsof.net), such as .NET 6.0, .NET 8.0, etc.
 - In the worst case, **it's acceptable if your library can only reasonably target .NET (Core) and not other implementations**. Sometimes it's impossible or simply not worth the effort to support legacy frameworks, so it's fine to focus solely on the modern .NET family.
 
-For the `MyLibrary` example, we'll assume that our code is fairly portable and allows us to target both .NET 10.0 and .NET Standard 2.0 without too many issues. Let's now edit the project file (`MyLibrary.csproj`) to reflect that:
+For the `MyLibrary` example, we'll assume that our code is fairly portable and allows us to target both .NET 11.0 and .NET Standard 2.0 without too many issues. Let's now edit the project file (`MyLibrary.csproj`) to reflect that:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net11.0</TargetFrameworks>
   </PropertyGroup>
 
 </Project>
 ```
 
-Here, we use the **`<TargetFrameworks>`** property (note the plural form) to specify a semicolon-separated list of target frameworks that our library should be built for. In this case, we have `netstandard2.0` and `net10.0`, which aligns with the earlier recommendations and provides a good balance between compatibility and modern features.
+Here, we use the **`<TargetFrameworks>`** property (note the plural form) to specify a semicolon-separated list of target frameworks that our library should be built for. In this case, we have `netstandard2.0` and `net11.0`, which aligns with the earlier recommendations and provides a good balance between compatibility and modern features.
 
-If we were to now run the `dotnet build` command on this project, the tooling would create two separate outputs: one at `bin/Debug/netstandard2.0/*` and another at `bin/Debug/net10.0/*`. Each of these directories would contain the compiled assemblies along with any other artifacts relevant to that specific target framework.
+If we were to now run the `dotnet build` command on this project, the tooling would create two separate outputs: one at `bin/Debug/netstandard2.0/*` and another at `bin/Debug/net11.0/*`. Each of these directories would contain the compiled assemblies along with any other artifacts relevant to that specific target framework.
 
 ### Miscellaneous settings
 
@@ -300,7 +300,7 @@ While we took care of the most important aspect of the library configuration by 
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net11.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
