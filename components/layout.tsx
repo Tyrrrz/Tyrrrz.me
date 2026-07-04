@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import { FC, PropsWithChildren, useMemo, useState } from "react";
+import { FC, PropsWithChildren, useEffect, useMemo, useState } from "react";
 import FadeIn from "react-fade-in";
 import { FiMenu, FiMoon, FiSun } from "react-icons/fi";
 import { Outlet, useLocation } from "react-router-dom";

@@ -51,10 +51,6 @@ export const useBrowserState = <T>(storageKind: StorageKind, key: string, initia
     } else {
       isMounted.current = true;
     }
-
-    return () => {
-      isMounted.current = false;
-    };
   }, [storageKind, key, value]);
 
   // Value changed in storage
