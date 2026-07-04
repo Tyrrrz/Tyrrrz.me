@@ -98,7 +98,7 @@ const Header: FC = () => {
 
   const router = useLocation();
   const [mobileNavOpenedAt, setMobileNavOpenedAt] = useState<string | null>(null);
-  const isMobileNavVisible = mobileNavOpenedAt === router.pathname;
+  const isMobileNavVisible = mobileNavOpenedAt === router.key;
 
   return (
     <header>
@@ -133,7 +133,7 @@ const Header: FC = () => {
           {/* Nav button */}
           <button
             className={clsx("sm:hidden", { "text-purple-500": isMobileNavVisible })}
-            onClick={() => setMobileNavOpenedAt(isMobileNavVisible ? null : router.pathname)}
+            onClick={() => setMobileNavOpenedAt(isMobileNavVisible ? null : router.key)}
           >
             <FiMenu />
           </button>
