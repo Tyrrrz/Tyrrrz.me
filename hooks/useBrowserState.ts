@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 type StorageKind = "local" | "session";
 
@@ -38,33 +38,26 @@ const setStorageValue = (storage: Storage, key: string, value: unknown) => {
 };
 
 export const useBrowserState = <T>(storageKind: StorageKind, key: string, initialState: T) => {
-  const isMounted = useRef(false);
-  const [value, setValue] = useState<T>(() => {
+  const subscribe = useCallback((callback: () => void) => {
+    addEventListener("storage", callback);
+    return () => removeEventListener("storage", callback);
+  }, []);
+
+  const getSnapshot = useCallback(() => {
     const item = getStorageValue(getStorage(storageKind), key);
     return item !== null ? (item as T) : initialState;
-  });
+  }, [storageKind, key, initialState]);
 
-  // Value changed by the consumer
-  useEffect(() => {
-    if (isMounted.current) {
-      setStorageValue(getStorage(storageKind), key, value);
-    } else {
-      isMounted.current = true;
-    }
-  }, [storageKind, key, value]);
+  const value = useSyncExternalStore(subscribe, getSnapshot, () => initialState);
 
-  // Value changed in storage
-  useEffect(() => {
-    const onChange = () => {
-      setValue(getStorageValue(getStorage(storageKind), key));
-    };
-
-    addEventListener("storage", onChange);
-
-    return () => {
-      removeEventListener("storage", onChange);
-    };
-  }, [storageKind, key]);
+  const setValue = useCallback(
+    (newValue: T | ((prev: T) => T)) => {
+      const resolved =
+        typeof newValue === "function" ? (newValue as (prev: T) => T)(getSnapshot()) : newValue;
+      setStorageValue(getStorage(storageKind), key, resolved);
+    },
+    [storageKind, key, getSnapshot],
+  );
 
   return [value, setValue] as const;
 };
