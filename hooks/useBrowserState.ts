@@ -39,19 +39,10 @@ const setStorageValue = (storage: Storage, key: string, value: unknown) => {
 
 export const useBrowserState = <T>(storageKind: StorageKind, key: string, initialState: T) => {
   const isMounted = useRef(false);
-  const [value, setValue] = useState<T>(initialState);
-
-  // Initial value from storage
-  useEffect(() => {
+  const [value, setValue] = useState<T>(() => {
     const item = getStorageValue(getStorage(storageKind), key);
-    if (item) {
-      setValue(item);
-    }
-
-    return () => {
-      isMounted.current = false;
-    };
-  }, [storageKind, key]);
+    return item !== null ? (item as T) : initialState;
+  });
 
   // Value changed by the consumer
   useEffect(() => {
@@ -60,6 +51,10 @@ export const useBrowserState = <T>(storageKind: StorageKind, key: string, initia
     } else {
       isMounted.current = true;
     }
+
+    return () => {
+      isMounted.current = false;
+    };
   }, [storageKind, key, value]);
 
   // Value changed in storage

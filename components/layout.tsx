@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import { FC, PropsWithChildren, useEffect, useMemo, useState } from "react";
+import { FC, PropsWithChildren, useMemo, useState } from "react";
 import FadeIn from "react-fade-in";
 import { FiMenu, FiMoon, FiSun } from "react-icons/fi";
 import { Outlet, useLocation } from "react-router-dom";
@@ -97,12 +97,8 @@ const Header: FC = () => {
   );
 
   const router = useLocation();
-  const [isMobileNavVisible, setIsMobileNavVisible] = useState(false);
-
-  // Hide the mobile nav when the page changes
-  useEffect(() => {
-    setIsMobileNavVisible(false);
-  }, [router.pathname]);
+  const [mobileNavOpenedAt, setMobileNavOpenedAt] = useState<string | null>(null);
+  const isMobileNavVisible = mobileNavOpenedAt === router.pathname;
 
   return (
     <header>
@@ -137,7 +133,7 @@ const Header: FC = () => {
           {/* Nav button */}
           <button
             className={clsx("sm:hidden", { "text-purple-500": isMobileNavVisible })}
-            onClick={() => setIsMobileNavVisible((v) => !v)}
+            onClick={() => setMobileNavOpenedAt(isMobileNavVisible ? null : router.pathname)}
           >
             <FiMenu />
           </button>
