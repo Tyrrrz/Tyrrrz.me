@@ -4,10 +4,8 @@ export const useMedia = (query: string) => {
   const subscribe = useCallback(
     (callback: () => void) => {
       const media = window.matchMedia(query);
-      const onChange = () => callback();
-
-      media.addEventListener("change", onChange);
-      return () => media.removeEventListener("change", onChange);
+      media.addEventListener("change", callback);
+      return () => media.removeEventListener("change", callback);
     },
     [query],
   );
