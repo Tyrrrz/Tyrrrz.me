@@ -12,9 +12,5 @@ export const useMedia = (query: string) => {
 
   const getSnapshot = useCallback(() => window.matchMedia(query).matches, [query]);
 
-  return useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    () => false,
-  );
+  return useSyncExternalStore(subscribe, getSnapshot, () => false);
 };
