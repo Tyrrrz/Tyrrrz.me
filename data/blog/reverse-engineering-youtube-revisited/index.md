@@ -91,8 +91,12 @@ After receiving the response, you should find a JSON object that contains the vi
   },
   "streamingData": {
     "expiresInSeconds": "21540",
-    "formats": [/* ... */],
-    "adaptiveFormats": [/* ... */]
+    "formats": [
+      /* ... */
+    ],
+    "adaptiveFormats": [
+      /* ... */
+    ]
   }
   /* ... omitted ~1800 lines of irrelevant data ... */
 }
