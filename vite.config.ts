@@ -1,3 +1,4 @@
+import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import type { Plugin } from "vite";
 import { defineConfig } from "vite";
@@ -84,6 +85,7 @@ export default defineConfig(async () => {
 
     plugins: [
       react(),
+      tailwindcss(),
       await blogPlugin(),
       await projectsPlugin(),
       await donationsPlugin(),
