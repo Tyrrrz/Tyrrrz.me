@@ -136,7 +136,7 @@ const Header: FC = () => {
           {/* Nav button */}
           <button
             className={clsx("sm:hidden", { "text-purple-500": isMobileNavVisible })}
-            onClick={() => setMobileNavOpenedAt(isMobileNavVisible ? null : router.key)}
+            onClick={() => setMobileNavOpenedKey(isMobileNavVisible ? null : router.key)}
           >
             <FiMenu />
           </button>
