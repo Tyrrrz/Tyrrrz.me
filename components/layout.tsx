@@ -2,9 +2,8 @@ import { clsx } from "clsx";
 import { FC, PropsWithChildren, useEffect, useMemo, useState } from "react";
 import FadeIn from "react-fade-in";
 import { FiMenu, FiMoon, FiSun } from "react-icons/fi";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigation } from "react-router-dom";
 import { useDebounce } from "../hooks/useDebounce";
-import { useRouterStatus } from "../hooks/useRouterStatus";
 import { useTheme } from "../hooks/useTheme";
 import Link from "./link";
 import Meta from "./meta";
@@ -12,7 +11,8 @@ import Meta from "./meta";
 const Loader: FC = () => {
   // Only show the loading indicator if the navigation takes a while.
   // This prevents the indicator from flashing during faster navigation.
-  const { value: isVisible } = useDebounce(useRouterStatus() === "loading", 300);
+  const { state } = useNavigation();
+  const { value: isVisible } = useDebounce(state !== "idle", 300);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
