@@ -97,12 +97,11 @@ const Header: FC = () => {
   );
 
   const router = useLocation();
-  const [isMobileNavVisible, setIsMobileNavVisible] = useState(false);
 
-  // Hide the mobile nav when the page changes
-  useEffect(() => {
-    setIsMobileNavVisible(false);
-  }, [router.pathname]);
+  // Bind the nav's open state to the router key, so that navigating away
+  // automatically closes the nav, and going back in history reopens it.
+  const [mobileNavOpenedKey, setMobileNavOpenedKey] = useState<string | null>(null);
+  const isMobileNavVisible = mobileNavOpenedKey === router.key;
 
   return (
     <header>
@@ -137,7 +136,7 @@ const Header: FC = () => {
           {/* Nav button */}
           <button
             className={clsx("sm:hidden", { "text-purple-500": isMobileNavVisible })}
-            onClick={() => setIsMobileNavVisible((v) => !v)}
+            onClick={() => setMobileNavOpenedKey(isMobileNavVisible ? null : router.key)}
           >
             <FiMenu />
           </button>
