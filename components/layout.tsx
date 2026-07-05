@@ -97,6 +97,9 @@ const Header: FC = () => {
   );
 
   const router = useLocation();
+
+  // Bind the nav open state to the router key, so that navigating away
+  // automatically closes the nav, and going back in history reopens it.
   const [mobileNavOpenedAt, setMobileNavOpenedAt] = useState<string | null>(null);
   const isMobileNavVisible = mobileNavOpenedAt === router.key;
 
