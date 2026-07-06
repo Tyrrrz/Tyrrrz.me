@@ -702,6 +702,51 @@ As a library developer, you'll often end up using both the official and communit
 
 That said, polyfills are not an ultimate solution to the compatibility problem — even with the flexibility of extension members, some feature of the language or the runtime cannot be retrofitted in a meaningful and transparent way. As a result, supporting older frameworks is always going to be a trade-off, where the benefits of broader compatibility must be carefully weighed against added complexity, maintenance cost, and long-term impact on the design of your library.
 
+### Strong naming
+
+Strong naming is a mechanism that dates back to the early days of .NET Framework, where assemblies could be assigned a cryptographic identity through a public/private key pair. Its original purpose was to prevent [DLL Hell](https://en.wikipedia.org/wiki/DLL_hell) — a problem where different applications would inadvertently pull in conflicting versions of the same shared library. By embedding a verifiable signature into the assembly identity, the runtime could ensure that only the correct version was loaded from the [Global Assembly Cache (GAC)](https://learn.microsoft.com/dotnet/framework/app-domains/gac), a system-wide shared library store that predated NuGet as the primary distribution mechanism for .NET components.
+
+In the modern .NET ecosystem, the relevance of strong naming has diminished considerably. The GAC is a Windows-only construct with no equivalent in .NET (Core), the runtime no longer enforces strong name verification with the same rigidity it once did, and NuGet has long since superseded the GAC as the standard way to distribute and consume packages. For libraries that only target .NET (Core), strong naming provides very little practical value.
+
+That said, it still matters in certain consumption contexts. The most concrete case is .NET Framework: its loader enforces a rule that a strongly named assembly can only reference other strongly named assemblies, so any downstream consumer running on .NET Framework that tries to use an unsigned library will simply fail to load it. This applies to enterprise codebases, Visual Studio extensions, MSBuild tasks, and any other environment where .NET Framework remains in play — which, as we've established, includes any library targeting .NET Standard 2.0. Beyond that, some corporate security policies mandate strong naming as a blanket requirement for all dependencies, often for historical reasons that no longer map to a concrete technical need, even when .NET Framework is not involved at all.
+
+The conventional way to satisfy this requirement is to generate a public/private key pair using the Windows-only `sn.exe` tool, commit the resulting `.snk` file to the repository, and point the project at it:
+
+```xml
+<PropertyGroup>
+  <AssemblyOriginatorKeyFile>MyLibrary.snk</AssemblyOriginatorKeyFile>
+  <SignAssembly>true</SignAssembly>
+</PropertyGroup>
+```
+
+For open-source projects, committing the key file to the repository is effectively the norm — keeping it private would prevent contributors from building the project locally. This does eliminate any meaningful security guarantees the signature might otherwise offer, but for most library authors that was never the point anyway. The goal is simply to check the "strong named" box, not to establish a cryptographic chain of trust.
+
+[Snek](https://github.com/Tyrrrz/Snek) builds directly on this practice. Rather than making you reach for `sn.exe` and add the two project file properties by hand, it injects a static, publicly known key pair at build time via a source-only NuGet package. Adding it as a private dependency is all that's required:
+
+```xml
+<ItemGroup>
+  <PackageReference Include="Snek" Version="..." PrivateAssets="all" />
+</ItemGroup>
+```
+
+With that reference in place, the assembly is signed transparently at build time and there is nothing else to configure. For most library projects targeting .NET Standard 2.0, this is the easiest way to satisfy strong naming requirements without adding any real maintenance burden.
+
+### Keeping dependencies private
+
+A separate but related concern is what to do when your library depends on a compiled package that you want to keep entirely hidden from consumers. For source-only packages like PolyShim and Snek, marking the reference with `PrivateAssets="all"` is sufficient — the code compiles directly into your assembly and leaves no runtime trace. For packages that produce their own compiled assemblies, however, `PrivateAssets="all"` only removes the dependency from your package's public manifest; the output assembly still carries a runtime reference to the package, which your consumers will also need to install.
+
+The traditional solution to this problem is IL merging — physically combining the dependency's compiled bytecode into your own output assembly at build time, so that the two ship as a single self-contained artifact. The oldest tool for this on .NET is [ILMerge](https://github.com/dotnet/ILMerge), which Microsoft originally developed for their own internal use and later open-sourced. Its modern, more actively maintained alternative is [ILRepack](https://github.com/gluck/il-repack), which supports a broader range of assembly types and integrates more cleanly into the MSBuild pipeline.
+
+Both tools get the job done, but they require non-trivial configuration and can be fragile in the face of certain assembly features, such as resources, mixed-mode assemblies, and strong naming.
+
+[Binternal](https://github.com/SimonCropp/Binternal) offers a more streamlined alternative. Rather than configuring a full merge pipeline manually, it wires up ILRepack under the hood and additionally marks all of the imported types as `internal`, so they cannot accidentally surface through your library's public API. Adding it follows the same source-package pattern:
+
+```xml
+<PackageReference Include="Binternal" PrivateAssets="all" />
+```
+
+Binternal isn't something you'll reach for on every project — most utility dependencies are already covered by source-only packages or the `PrivateAssets="all"` pattern. But in situations where you want to use a compiled library as a pure implementation detail, it provides a clean way to keep your package's dependency footprint intentional and minimal.
+
 ## Code formatting
 
 Most code gets read way more often than it's written, so it's important to consider readability as one of the core optimization goals. This is no less true for a library than it is for any other type of software, but because code formatting isn't something most .NET developers think much about, I felt it deserved its own section in this article.
@@ -822,7 +867,7 @@ jobs:
       - run: dotnet test --configuration Release
 ```
 
-Todo:
+Once this file is committed to the repository, GitHub will automatically detect it and start running the workflow each time the corresponding events occur. Adding it produces the following layout:
 
 ```diff
   ├── .git
@@ -1248,6 +1293,28 @@ This tells Dependabot to scan the repository root once a month for outdated GitH
 In practice, this is usually enough for a library repository. You stay reasonably up to date without being peppered with constant maintenance churn, and every proposed update still goes through the same CI validation before you merge it.
 
 If you outgrow this model later, switching to Renovate is always an option. But for most library repositories, I think Dependabot hits a very good balance between capability and friction, which is why it's the option I normally reach for first.
+
+The configuration file lives at `.github/dependabot.yml`, so after adding it the layout becomes:
+
+```diff
+  ├── .git
+  │   └── (...)
+  ├── .github
++ │   ├── dependabot.yml
+  │   └── workflows
+  │       └── main.yml
+  ├── MyLibrary
+  │   ├── MyLibrary.csproj
+  │   └── (...)
+  ├── MyLibrary.Tests
+  │   ├── MyLibrary.Tests.csproj
+  │   └── (...)
+  ├── .gitignore
+  ├── Directory.Build.props
+  ├── global.json
+  ├── MyLibrary.slnx
+  └── nuget.config
+```
 
 ## Releasing workflow
 
@@ -1741,6 +1808,29 @@ changelog:
 ```
 
 This config does two things. First, it maps pull requests into release note categories based on their labels, which makes the generated notes easier to scan. Second, it filters out Dependabot-authored changes, preventing the changelog from being padded with dependency bumps that are useful in commit history but rarely interesting to end users.
+
+The configuration file lives at `.github/release.yml`, giving us the final layout of the repository:
+
+```diff
+  ├── .git
+  │   └── (...)
+  ├── .github
+  │   ├── dependabot.yml
++ │   ├── release.yml
+  │   └── workflows
+  │       └── main.yml
+  ├── MyLibrary
+  │   ├── MyLibrary.csproj
+  │   └── (...)
+  ├── MyLibrary.Tests
+  │   ├── MyLibrary.Tests.csproj
+  │   └── (...)
+  ├── .gitignore
+  ├── Directory.Build.props
+  ├── global.json
+  ├── MyLibrary.slnx
+  └── nuget.config
+```
 
 At that point, the release process is more or less complete: new versions can be packaged, published, and documented with very little manual involvement. And once all of that machinery is in place, the day-to-day work of maintaining the library becomes a lot less about operational overhead and a lot more about the library itself.
 
