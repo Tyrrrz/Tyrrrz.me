@@ -266,7 +266,7 @@ Regardless, compatibility is always a compromise and early in the development of
   - Additionally, this also provides you with an improved development experience — particularly through built-in analyzers that only work when targeting the latest framework.
 - **Establish a compatibility baseline by targeting .NET Standard 2.0 as well**. By doing so, your library will automatically be supported by a [wide range of relatively modern .NET implementations](https://learn.microsoft.com/dotnet/standard/net-standard?tabs=net-standard-2-0), maximizing your audience without much cherry-picking.
   - This version of the standard offers a good balance between compatibility and API availability, making it a solid lower boundary for most libraries.
-  - Targeting `netstandard2.0` is more or less equivalent to multi-targeting `netcoreapp2.0`, `net461`, and `uap10.0`, which covers .NET (Core), .NET Framework, and UWP, along with related development platforms, such as Mono, Xamarin, and Unity.
+  - Targeting `netstandard2.0` is more or less equivalent to multi-targeting `netcoreapp2.0`, `net461`, and `uap10.0.16299`, which covers .NET (Core), .NET Framework, and UWP, along with related development platforms, such as Mono, Xamarin, and Unity.
   - If `netstandard2.0`'s API set is too narrow for your library's needs, consider targeting higher versions of the individual implementations that you want to support instead. For example, targeting `net5.0` and `net462` will still cover a decent range of platforms, while giving you access to more modern APIs.
   - Avoid targeting `netstandard2.1`, as it's not supported by .NET Framework and UWP, largely diminishing its usefulness as a compatibility layer.
   - Avoid targeting `netstandard1.x`, as the corresponding implementations are too old and have very limited API sets.
@@ -825,7 +825,7 @@ Copyright (c) Microsoft Corporation.  All rights reserved.
 Starting test execution, please wait...
 A total of 1 test files matched the specified pattern.
 
-Passed!  - Failed:     0, Passed:     8, Skipped:     0, Total:     8, Duration: 993 ms - MyLibrary.Tests.dll (net10.0)
+Passed!  - Failed:     0, Passed:     8, Skipped:     0, Total:     8, Duration: 993 ms - MyLibrary.Tests.dll (net11.0)
 Passed!  - Failed:     0, Passed:     8, Skipped:     0, Total:     8, Duration: 913 ms - MyLibrary.Tests.dll (net462)
 ```
 
