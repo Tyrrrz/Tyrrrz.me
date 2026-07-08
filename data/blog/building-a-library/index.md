@@ -273,10 +273,10 @@ Regardless, compatibility is always a compromise and early in the development of
   - Avoid targeting individual .NET implementations that don't support the .NET Standard 2.0 specification (e.g., `netcoreapp1.1`, `net45`, `sl5`, etc.), as they are all outdated technologies.
 - **Target intermediate versions if you have framework-dependent code paths**. For example, if your library already targets .NET 11.0 and .NET Standard 2.0, but conditionally relies on certain APIs that were introduced in .NET 5.0, then you should separately target `net5.0` as well to ensure that those code paths are available as early as possible.
   - This is similarly relevant if your library uses polyfills to backport newer APIs to older frameworks. In such cases, you want to also include the frameworks that provide those APIs natively, so that polyfills are only used when necessary.
-  - If you prefer to keep things lean, you can limit intermediate targets to only those that are [long-term support (LTS) releases](https://versionsof.net), such as .NET 6.0, .NET 8.0, etc.
+  - If you prefer to keep things lean, you can limit intermediate targets to only those that are [long-term support (LTS) releases](https://versionsof.net), such as .NET 8.0, .NET 10.0, etc.
 - In the worst case, **it's acceptable if your library can only reasonably target .NET (Core) and not other implementations**. Sometimes it's impossible or simply not worth the effort to support legacy frameworks, so it's fine to focus solely on the modern .NET family.
 
-For the `MyLibrary` example, we'll assume that our code is fairly portable and allows us to target both .NET 11.0 and .NET Standard 2.0 without too many issues. Let's now edit the project file (`MyLibrary.csproj`) to reflect that:
+For the `MyLibrary` example, we'll assume that our code is fairly portable and allows us to target both .NET 11.0 and .NET Standard 2.0 without much trouble. Let's now edit the project file (`MyLibrary.csproj`) to reflect that:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -290,7 +290,31 @@ For the `MyLibrary` example, we'll assume that our code is fairly portable and a
 
 Here, we use the **`<TargetFrameworks>`** property (note the plural form) to specify a semicolon-separated list of target frameworks that our library should be built for. In this case, we have `netstandard2.0` and `net11.0`, which aligns with the earlier recommendations and provides a good balance between compatibility and modern features.
 
-If we were to now run the `dotnet build` command on this project, the tooling would create two separate outputs: one at `bin/Debug/netstandard2.0/*` and another at `bin/Debug/net11.0/*`. Each of these directories would contain the compiled assemblies along with any other artifacts relevant to that specific target framework.
+If we were to now run the `dotnet build` command on this project, the tooling would create a separate output directory for each target framework, containing the compiled assemblies along with any other relevant artifacts:
+
+```diff
+  ├── .git
+  │   └── (...)
+  ├── MyLibrary
+  │   ├── MyLibrary.csproj
++ │   ├── bin
++ │   │   └── Debug
++ │   │       ├── netstandard2.0
++ │   │       │   ├── MyLibrary.dll
++ │   │       │   └── (...)
++ │   │       └── net11.0
++ │   │           ├── MyLibrary.dll
++ │   │           └── (...)
+  │   └── (...)
+  ├── MyLibrary.Tests
+  │   ├── MyLibrary.Tests.csproj
+  │   └── (...)
+  ├── .gitignore
+  ├── Directory.Build.props
+  ├── global.json
+  ├── MyLibrary.slnx
+  └── nuget.config
+```
 
 ### Miscellaneous settings
 
