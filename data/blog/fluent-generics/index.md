@@ -190,7 +190,7 @@ public abstract class Endpoint : EndpointBase
 }
 ```
 
-This addresses the issue, but results in a rather ugly design. Because half of the types are named differently, the user of the library might have a harder time finding them or even knowing about their existence in the first place. Moreover, if we consider that we may want to add more variants in the future (e.g. non-async handlers in addition to async), it also becomes clear that this approach doesn't scale very well.
+This addresses the issue, but results in a rather ugly design. Because half of the types are named differently, the user of the library might have a harder time finding them or even knowing about their existence in the first place. Moreover, if we consider that we may want to add more variants in the future (e.g., non-async handlers in addition to async), it also becomes clear that this approach doesn't scale very well.
 
 Of course, all the problems above may seem a bit contrived and there might be no reason to attempt to solve them. However, I personally believe that optimizing developer experience is an extremely important aspect of writing library code.
 

@@ -448,12 +448,12 @@ Interestingly, even just by having the header set, the throttling seems to kick 
 
 Here's a recap of all the steps you need to take in order to download a video from YouTube:
 
-1. Get the video ID (e.g. `e_S9VvJM1PI`)
-2. Download the video's embed page (e.g. <https://www.youtube.com/embed/e_S9VvJM1PI>)
-3. Extract the URL of the player's source code (e.g. <https://www.youtube.com/yts/jsbin/player-vflYXLM5n/en_US/base.js>)
-4. Get the `sts` value (e.g. `17488`)
+1. Get the video ID (e.g., `e_S9VvJM1PI`)
+2. Download the video's embed page (e.g., <https://www.youtube.com/embed/e_S9VvJM1PI>)
+3. Extract the URL of the player's source code (e.g., <https://www.youtube.com/yts/jsbin/player-vflYXLM5n/en_US/base.js>)
+4. Get the `sts` value (e.g., `17488`)
 5. Download and parse the player's source code
-6. Request the video metadata (e.g. <https://www.youtube.com/get_video_info?video_id=e_S9VvJM1PI&sts=17488&hl=en>); try with `el=detailpage` if it fails
+6. Request the video metadata (e.g., <https://www.youtube.com/get_video_info?video_id=e_S9VvJM1PI&sts=17488&hl=en>); try with `el=detailpage` if it fails
 7. Parse the URL-encoded metadata and extract information about streams
 8. If they have signatures, use the player's source to decipher them and update the URLs
 9. If there's a reference to a DASH manifest, extract the URL and decipher it if necessary as well

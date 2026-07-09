@@ -327,7 +327,7 @@ As you can see, Sprache already provides `Parse.DecimalInvariant` out of the box
 
 The `Select(...)` method here works quite similarly to LINQ's `Select(...)` — it lazily transforms the underlying value of the container into a different shape. This lets us map raw character sequences into more complex higher-level domain objects.
 
-By the way, the types that have a `Select(...)` operation (or more colloquially known, a _map_ operation) are called _functors_. As you can see, they are not limited to collections (i.e. `IEnumerable<T>`) but can also be containers with a single value, just like our `Parser<T>` here.
+By the way, the types that have a `Select(...)` operation (or more colloquially known, a _map_ operation) are called _functors_. As you can see, they are not limited to collections (i.e., `IEnumerable<T>`) but can also be containers with a single value, just like our `Parser<T>` here.
 
 With that out of the way, let's proceed to `JsonString`:
 
@@ -449,7 +449,7 @@ public abstract class JsonEntity
 }
 ```
 
-That's it, we have a working JSON processor! We can now call `JsonEntity.Parse(...)` on any valid JSON text and transform it into our domain, i.e. a tree of `JsonEntity` objects.
+That's it, we have a working JSON processor! We can now call `JsonEntity.Parse(...)` on any valid JSON text and transform it into our domain, i.e., a tree of `JsonEntity` objects.
 
 ## Wrapping up
 

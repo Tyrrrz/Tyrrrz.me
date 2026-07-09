@@ -474,7 +474,7 @@ paymentId.Match(
 
 Here, just like in the previous examples, LINQ allows us to work directly on the underlying values by skipping layers of containers around it. In the end, the query expression evaluates to a task that represents a chain of composed asynchronous operations with an optional result.
 
-Similarly, if any stage of the pipeline ends up failing (i.e. returning a _none_ option), the execution will terminate early with an error:
+Similarly, if any stage of the pipeline ends up failing (i.e., returning a _none_ option), the execution will terminate early with an error:
 
 ```csharp
 var paymentProcessor = new PaymentProcessor();
