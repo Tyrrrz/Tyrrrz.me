@@ -15,7 +15,7 @@ In this article, I will outline my typical .NET library setup, covering build se
 
 Much like everything else in life, a .NET project has a beginning — and that beginning is the `dotnet new` command. It's safe to assume that, if you're reading this article, you've probably set up a fair share of .NET solutions and don't need any introduction to the process. However, since we'll be relying on certain expectations about the file structure going forward, let's use this opportunity to establish common ground.
 
-Most .NET codebases follow one of the two organizational patterns: either a _flat layout_, where all projects are placed in their respective directories at the root of the repository, or a _partitioned layout_, where projects are grouped by type into dedicated directories (e.g., `src/`, `tests/`, `samples/`, etc.). While both approaches have their place, since our focus won't be on the code itself, we'll stick to the former for simplicity:
+Most .NET codebases follow one of two organizational patterns: either a _flat layout_, where all projects are placed in their respective directories at the root of the repository, or a _nested layout_, where projects are further grouped by type (e.g., `src/`, `tests/`, `samples/`, etc.). Both approaches have their merits, but we'll go with the former for the sake of simplicity:
 
 ```diff
 + ├── MyLibrary
@@ -77,7 +77,7 @@ git push -u origin main
 
 ## Baseline configuration
 
-Any individual .NET project is essentially a set of instructions directing the toolchain how to parse, compile, and package the code within it. These instructions are inherited through various ambient settings, as well as the SDK's internal `props` and `targets` files. Although the specifics of the build process don't require particular attention during day-to-day development, there are a few things that you may want to configure — even if solely to establish a set of reasonable defaults.
+A .NET project is not just a collection of source files — it's also a layered set of instructions that direct the toolchain how to parse, compile, and package them into a consumable artifact. These instructions are inherited through various ambient settings, as well as the SDK's internal `props` and `targets` files. Although the specifics of the build process don't require particular attention during day-to-day development, there are a few things that you may want to configure — even if solely to establish a set of reasonable defaults.
 
 I call these defaults the "baseline configuration", as their purpose is not to fundamentally alter the behavior of the build, but rather to ensure its consistency across unpredictable environments. This can be achieved with the help of the following three optional files:
 
