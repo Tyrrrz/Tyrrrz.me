@@ -15,7 +15,7 @@ In this article, I will outline my typical .NET library setup, covering build se
 
 Much like everything else in life, a .NET project has a beginning — and that beginning is the `dotnet new` command. It's safe to assume that, if you're reading this article, you've probably set up a fair share of .NET solutions and don't need any introduction to the process. However, since we'll be relying on certain expectations about the file structure going forward, let's use this opportunity to establish common ground.
 
-Most .NET codebases follow one of two organizational patterns: either a _flat layout_, where all projects are placed in their respective directories at the root of the repository, or a _nested layout_, where projects are further grouped by type (e.g., `src/`, `tests/`, `samples/`, etc.). Both approaches have their merits, but we'll go with the former for the sake of simplicity:
+Typically, .NET codebases follow either a flat layout with project directories at the solution level, or a nested layout that further divides them into groups like `src/`, `tests/`, and `samples/`. Both will work seamlessly with everything we'll be discussing, so let's go with the former approach for simplicity:
 
 ```diff
 + ├── MyLibrary
@@ -27,7 +27,7 @@ Most .NET codebases follow one of two organizational patterns: either a _flat la
 + └── MyLibrary.slnx
 ```
 
-Here we have a bare-bones setup, consisting of the `MyLibrary` project that houses the library code, and the `MyLibrary.Tests` project which contains the corresponding automated tests. Both are tied together by the `MyLibrary.slnx` solution file, which provides a centralized entry point for the .NET tooling to discover and manage them.
+Here we have a bare-bones setup, consisting of the `MyLibrary` project that houses the library code and the `MyLibrary.Tests` project which contains the corresponding automated tests. Both are tied together by the `MyLibrary.slnx` solution file, providing a centralized entry point for the whole workspace.
 
 To achieve the structure visualized above, you can create the solution either by using your preferred IDE or just by running the following `dotnet` commands in the terminal:
 
@@ -77,7 +77,7 @@ git push -u origin main
 
 ## Baseline configuration
 
-A .NET project is not just a collection of source files — it's also a layered set of instructions that direct the toolchain how to parse, compile, and package them into a consumable artifact. These instructions are inherited through various ambient settings, as well as the SDK's internal `props` and `targets` files. Although the specifics of the build process don't require particular attention during day-to-day development, there are a few things that you may want to configure — even if solely to establish a set of reasonable defaults.
+A .NET project is not just a collection of source files — it's also a layered set of instructions that direct the toolchain how to parse, compile, and package those files into a consumable artifact. These instructions are inherited through various ambient settings, as well as the SDK's internal `props` and `targets` files. Although the specifics of the build process don't require particular attention during day-to-day development, there are a few things that you may want to configure — even if solely to establish a set of reasonable defaults.
 
 I call these defaults the "baseline configuration", as their purpose is not to fundamentally alter the behavior of the build, but rather to ensure its consistency across unpredictable environments. This can be achieved with the help of the following three optional files:
 
@@ -93,7 +93,7 @@ dotnet new nugetconfig
 dotnet new buildprops
 ```
 
-Thus, resulting in the following layout:
+Thus, resulting in the following additions:
 
 ```diff
   ├── .git
@@ -117,7 +117,7 @@ First off, we have the `global.json` file, whose purpose is to declare which ver
 
 Naturally, to be considered compatible, the SDK must provide the capabilities that the codebase depends on, such as access to certain target frameworks, language features, and compiler options. When it comes to the [.NET SDK versioning schema](https://learn.microsoft.com/dotnet/core/versions), these aspects are typically governed by the first two components of the semantic label (e.g., `11.0.***`), while the remaining digits indicate bug fixes and minor tooling improvements (e.g., `*.*.307`).
 
-When you generate a `global.json` file via `dotnet new`, however, it defaults to the full version of the currently resolved .NET SDK, including its patch release. This configuration forces anyone else trying to build the solution to have the _same exact_ SDK version installed, which is far too restrictive. To fix this, let's open the file and adjust its matching policy to be more flexible:
+When you generate a `global.json` file via `dotnet new`, however, it defaults to the full version of the currently resolved .NET SDK, including its patch release. This configuration forces anyone else trying to build the solution to have the _exact same_ SDK version installed, which is far too restrictive. To fix this, let's open the file and adjust its matching policy to be more flexible:
 
 ```json
 {
