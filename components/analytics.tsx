@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 
 declare global {
@@ -9,49 +9,44 @@ declare global {
   }
 }
 
+// No-ops entirely if `GOATCOUNTER_URL` isn't configured (local dev, forks).
 const Analytics: FC = () => {
   const url = import.meta.env.GOATCOUNTER_URL;
   const location = useLocation();
-  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+  const isInitialRender = useRef(true);
 
-  // Inject the GoatCounter script manually (instead of declaratively through
-  // <Head>), so we can reliably detect when it's done loading via its native
-  // `load` event, and only start reporting page views after that.
-  // Automatic on-load tracking is disabled (`no_onload`), since every page
-  // view, including the initial one, is instead reported manually below.
   useEffect(() => {
     if (!url) {
       return;
     }
 
     const script = document.createElement("script");
-    script.src = "https://gc.zgo.at/count.js";
     script.async = true;
+    script.src = "https://gc.zgo.at/count.js";
     script.dataset.goatcounter = url;
-    script.dataset.goatcounterSettings = JSON.stringify({ no_onload: true });
-    script.addEventListener("load", () => setIsScriptLoaded(true));
-
     document.head.appendChild(script);
 
     return () => {
       document.head.removeChild(script);
-      setIsScriptLoaded(false);
     };
-  }, [url]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
-    if (!url || !isScriptLoaded) {
+    if (!url) {
       return;
     }
 
-    // Use window.location instead of the router-relative location, so that
-    // the reported path is consistent regardless of whether the site is
-    // deployed at the root of a domain or under a sub-path (e.g. on GitHub
-    // Pages).
-    window.goatcounter?.count?.({
-      path: window.location.pathname + window.location.search + window.location.hash,
-    });
-  }, [url, isScriptLoaded, location.pathname, location.search, location.hash]);
+    // The initial page view is tracked automatically once the script loads.
+    // Subsequent in-app (SPA) navigations need to be tracked manually, since
+    // they don't trigger a full page (re)load.
+    if (isInitialRender.current) {
+      isInitialRender.current = false;
+      return;
+    }
+
+    window.goatcounter?.count?.({ path: location.pathname });
+  }, [url, location.pathname]);
 
   return null;
 };
