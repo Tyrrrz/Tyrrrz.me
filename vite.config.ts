@@ -104,6 +104,7 @@ export default defineConfig(async () => {
     define: {
       "import.meta.env.SITE_URL": JSON.stringify(siteUrl || "http://localhost:3000"),
       "import.meta.env.BUILD_ID": JSON.stringify(process.env["BUILD_ID"] || ""),
+      "import.meta.env.GOATCOUNTER_URL": JSON.stringify(process.env["GOATCOUNTER_URL"] || ""),
     },
 
     ssr: {
