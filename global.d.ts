@@ -2,12 +2,6 @@
 
 declare module "*.css";
 
-interface Window {
-  goatcounter?: {
-    count?: (options?: { path?: string }) => void;
-  };
-}
-
 interface ImportMetaEnv {
   readonly SITE_URL: string;
   readonly BUILD_ID: string;

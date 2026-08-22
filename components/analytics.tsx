@@ -2,6 +2,14 @@ import { FC, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { Head } from "vite-react-ssg";
 
+declare global {
+  interface Window {
+    goatcounter?: {
+      count?: (options?: { path?: string }) => void;
+    };
+  }
+}
+
 const Analytics: FC = () => {
   const code = import.meta.env.GOATCOUNTER_CODE;
   const location = useLocation();
