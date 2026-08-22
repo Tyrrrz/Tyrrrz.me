@@ -15,24 +15,42 @@ const isStaleAssetError = (error: unknown) => {
 
 const reloadKey = "stale-asset-reload";
 
+// `sessionStorage` is unavailable during server-side rendering and can also
+// throw in some browser contexts (e.g. private browsing with storage blocked).
+const getReloadFlag = () => {
+  try {
+    return sessionStorage.getItem(reloadKey);
+  } catch {
+    return null;
+  }
+};
+
+const setReloadFlag = () => {
+  try {
+    sessionStorage.setItem(reloadKey, "1");
+  } catch {
+    // Ignore: worst case, we might reload more than once
+  }
+};
+
+const clearReloadFlag = () => {
+  try {
+    sessionStorage.removeItem(reloadKey);
+  } catch {
+    // Ignore
+  }
+};
+
 export const lazyImport = <T>(loader: () => Promise<T>) => {
   return async (): Promise<T> => {
     try {
       const result = await loader();
-
-      // Not available during server-side rendering
-      if (typeof sessionStorage !== "undefined") {
-        sessionStorage.removeItem(reloadKey);
-      }
+      clearReloadFlag();
 
       return result;
     } catch (error) {
-      if (
-        typeof window !== "undefined" &&
-        isStaleAssetError(error) &&
-        !sessionStorage.getItem(reloadKey)
-      ) {
-        sessionStorage.setItem(reloadKey, "1");
+      if (typeof window !== "undefined" && isStaleAssetError(error) && !getReloadFlag()) {
+        setReloadFlag();
         window.location.reload();
 
         // Prevent the router from rendering an error while the reload is in progress
