@@ -1,6 +1,5 @@
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Head } from "vite-react-ssg";
 
 declare global {
   interface Window {
@@ -10,56 +9,51 @@ declare global {
   }
 }
 
-// count.js is loaded asynchronously, so `window.goatcounter.count` may not be
-// available yet when a hit needs to be reported (in particular, for the very
-// first page view). Retry for a short while instead of silently dropping it.
-const countWhenReady = (options: { path: string }, attemptsLeft = 20) => {
-  if (window.goatcounter?.count) {
-    window.goatcounter.count(options);
-    return;
-  }
-
-  if (attemptsLeft <= 0) {
-    return;
-  }
-
-  setTimeout(() => countWhenReady(options, attemptsLeft - 1), 100);
-};
-
 const Analytics: FC = () => {
   const url = import.meta.env.GOATCOUNTER_URL;
   const location = useLocation();
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
 
+  // Inject the GoatCounter script manually (instead of declaratively through
+  // <Head>), so we can reliably detect when it's done loading via its native
+  // `load` event, and only start reporting page views after that.
+  // Automatic on-load tracking is disabled (`no_onload`), since every page
+  // view, including the initial one, is instead reported manually below.
   useEffect(() => {
     if (!url) {
       return;
     }
 
-    // Automatic tracking is disabled (see the `no_onload` setting below), so
-    // every page view, including the initial one, is reported manually here.
+    const script = document.createElement("script");
+    script.src = "https://gc.zgo.at/count.js";
+    script.async = true;
+    script.dataset.goatcounter = url;
+    script.dataset.goatcounterSettings = JSON.stringify({ no_onload: true });
+    script.addEventListener("load", () => setIsScriptLoaded(true));
+
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+      setIsScriptLoaded(false);
+    };
+  }, [url]);
+
+  useEffect(() => {
+    if (!url || !isScriptLoaded) {
+      return;
+    }
+
     // Use window.location instead of the router-relative location, so that
     // the reported path is consistent regardless of whether the site is
     // deployed at the root of a domain or under a sub-path (e.g. on GitHub
     // Pages).
-    countWhenReady({
+    window.goatcounter?.count?.({
       path: window.location.pathname + window.location.search + window.location.hash,
     });
-  }, [url, location.pathname, location.search, location.hash]);
+  }, [url, isScriptLoaded, location.pathname, location.search, location.hash]);
 
-  if (!url) {
-    return null;
-  }
-
-  return (
-    <Head>
-      <script
-        data-goatcounter={url}
-        data-goatcounter-settings='{"no_onload": true}'
-        async
-        src="https://gc.zgo.at/count.js"
-      />
-    </Head>
-  );
+  return null;
 };
 
 export default Analytics;
