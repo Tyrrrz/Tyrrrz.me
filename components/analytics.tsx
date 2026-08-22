@@ -1,6 +1,6 @@
-import { FC, useEffect, useRef } from "react";
+import { FC, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Head } from "vite-react-ssg";
+import { resolvePath } from "../utils/assets";
 
 declare global {
   interface Window {
@@ -11,35 +11,37 @@ declare global {
 }
 
 const Analytics: FC = () => {
-  const url = import.meta.env.GOATCOUNTER_URL;
   const location = useLocation();
-  const isInitialRender = useRef(true);
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
 
   useEffect(() => {
-    if (!url) {
+    if (!import.meta.env.GOATCOUNTER_URL) {
       return;
     }
 
-    // The initial page view is tracked automatically once the script loads.
-    // Subsequent in-app (SPA) navigations need to be tracked manually, since
-    // they don't trigger a full page (re)load.
-    if (isInitialRender.current) {
-      isInitialRender.current = false;
+    const script = document.createElement("script");
+    script.async = true;
+    script.src = "https://gc.zgo.at/count.js";
+    script.dataset.goatcounter = import.meta.env.GOATCOUNTER_URL;
+    script.dataset.goatcounterSettings = JSON.stringify({ no_onload: true });
+    script.addEventListener("load", () => setIsScriptLoaded(true));
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+      setIsScriptLoaded(false);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!import.meta.env.GOATCOUNTER_URL || !isScriptLoaded) {
       return;
     }
 
-    window.goatcounter?.count?.({ path: location.pathname });
-  }, [url, location.pathname]);
+    window.goatcounter?.count?.({ path: resolvePath(location.pathname) });
+  }, [isScriptLoaded, location.pathname]);
 
-  if (!url) {
-    return null;
-  }
-
-  return (
-    <Head>
-      <script data-goatcounter={url} async src="https://gc.zgo.at/count.js" />
-    </Head>
-  );
+  return null;
 };
 
 export default Analytics;
