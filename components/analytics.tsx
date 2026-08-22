@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { resolveAbsoluteUrl } from "../utils/assets";
+import { resolvePath } from "../utils/assets";
 
 declare global {
   interface Window {
@@ -38,7 +38,7 @@ const Analytics: FC = () => {
       return;
     }
 
-    window.goatcounter?.count?.({ path: resolveAbsoluteUrl(location.pathname) });
+    window.goatcounter?.count?.({ path: resolvePath(location.pathname) });
   }, [isScriptLoaded, location.pathname]);
 
   return null;
