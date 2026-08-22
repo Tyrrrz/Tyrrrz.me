@@ -28,8 +28,14 @@ const Analytics: FC = () => {
       return;
     }
 
-    window.goatcounter?.count?.({ path: location.pathname });
-  }, [url, location.pathname]);
+    // Use window.location instead of the router-relative location, so that
+    // the reported path matches the one used by the automatic initial hit,
+    // regardless of whether the site is deployed at the root of a domain or
+    // under a sub-path (e.g. on GitHub Pages).
+    window.goatcounter?.count?.({
+      path: window.location.pathname + window.location.search + window.location.hash,
+    });
+  }, [url, location]);
 
   if (!url) {
     return null;
