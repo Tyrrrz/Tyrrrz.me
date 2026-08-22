@@ -9,9 +9,7 @@ declare global {
   }
 }
 
-// No-ops entirely if `GOATCOUNTER_URL` isn't configured (local dev, forks).
 const Analytics: FC = () => {
-  const url = import.meta.env.GOATCOUNTER_URL;
   const location = useLocation();
   const isInitialRender = useRef(true);
 
@@ -23,7 +21,7 @@ const Analytics: FC = () => {
     const script = document.createElement("script");
     script.async = true;
     script.src = "https://gc.zgo.at/count.js";
-    script.dataset.goatcounter = url;
+    script.dataset.goatcounter = import.meta.env.GOATCOUNTER_URL;
     document.head.appendChild(script);
 
     return () => {
