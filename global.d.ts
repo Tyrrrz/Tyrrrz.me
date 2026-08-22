@@ -5,7 +5,7 @@ declare module "*.css";
 interface ImportMetaEnv {
   readonly SITE_URL: string;
   readonly BUILD_ID: string;
-  readonly GOATCOUNTER_CODE: string;
+  readonly GOATCOUNTER_URL: string;
 }
 
 declare module "virtual:blog" {

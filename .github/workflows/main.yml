@@ -68,7 +68,7 @@ jobs:
           BUILD_ID: ${{ github.sha }}
           SITE_URL: ${{ steps.configure-pages.outputs.base_url }}
           GITHUB_TOKEN: ${{ secrets._GITHUB_TOKEN }}
-          GOATCOUNTER_CODE: ${{ secrets.GOATCOUNTER_CODE }}
+          GOATCOUNTER_URL: ${{ secrets.GOATCOUNTER_URL }}
           PATREON_TOKEN: ${{ secrets.PATREON_TOKEN }}
           BUYMEACOFFEE_TOKEN: ${{ secrets.BUYMEACOFFEE_TOKEN }}
           PRIVATE_DONORS: ${{ secrets.PRIVATE_DONORS }}

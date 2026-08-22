@@ -11,12 +11,12 @@ declare global {
 }
 
 const Analytics: FC = () => {
-  const code = import.meta.env.GOATCOUNTER_CODE;
+  const url = import.meta.env.GOATCOUNTER_URL;
   const location = useLocation();
   const isInitialRender = useRef(true);
 
   useEffect(() => {
-    if (!code) {
+    if (!url) {
       return;
     }
 
@@ -29,16 +29,16 @@ const Analytics: FC = () => {
     }
 
     window.goatcounter?.count?.({ path: location.pathname });
-  }, [code, location.pathname]);
+  }, [url, location.pathname]);
 
-  if (!code) {
+  if (!url) {
     return null;
   }
 
   return (
     <Head>
       <script
-        data-goatcounter={`https://${code}.goatcounter.com/count`}
+        data-goatcounter={url}
         async
         src="https://gc.zgo.at/count.js"
       />
