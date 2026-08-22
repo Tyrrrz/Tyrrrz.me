@@ -1,63 +1,21 @@
 // When the site is redeployed, previously built asset files (e.g. JS chunks)
 // get deleted from the server. If a user is still browsing an old version of
 // the site and navigates to a route whose chunk is no longer available,
-// the dynamic import will fail. Instead of showing an error, we detect this
-// case and reload the page once, which picks up the latest deployment.
-const isStaleAssetError = (error: unknown) => {
-  const message = error instanceof Error ? error.message : String(error);
-
-  return (
-    /failed to fetch dynamically imported module/i.test(message) ||
-    /error loading dynamically imported module/i.test(message) ||
-    /importing a module script failed/i.test(message)
-  );
-};
-
-const reloadKey = "stale-asset-reload";
-
-// `sessionStorage` is unavailable during server-side rendering and can also
-// throw in some browser contexts (e.g. private browsing with storage blocked).
-const getReloadFlag = () => {
-  try {
-    return sessionStorage.getItem(reloadKey);
-  } catch {
-    return null;
-  }
-};
-
-const setReloadFlag = () => {
-  try {
-    sessionStorage.setItem(reloadKey, "1");
-  } catch {
-    // Ignore: worst case, we might reload more than once
-  }
-};
-
-const clearReloadFlag = () => {
-  try {
-    sessionStorage.removeItem(reloadKey);
-  } catch {
-    // Ignore
-  }
-};
-
+// the dynamic import will fail (404). Instead of showing an error, we reload
+// the page, which picks up the latest deployment.
 export const lazyImport = <T>(loader: () => Promise<T>) => {
   return async (): Promise<T> => {
     try {
-      const result = await loader();
-      clearReloadFlag();
-
-      return result;
+      return await loader();
     } catch (error) {
-      if (typeof window !== "undefined" && isStaleAssetError(error) && !getReloadFlag()) {
-        setReloadFlag();
-        window.location.reload();
-
-        // Prevent the router from rendering an error while the reload is in progress
-        return new Promise<T>(() => {});
+      if (typeof window === "undefined") {
+        throw error;
       }
 
-      throw error;
+      window.location.reload();
+
+      // Prevent the router from rendering an error while the reload is in progress
+      return new Promise<T>(() => {});
     }
   };
 };
