@@ -37,11 +37,7 @@ const Analytics: FC = () => {
 
   return (
     <Head>
-      <script
-        data-goatcounter={url}
-        async
-        src="https://gc.zgo.at/count.js"
-      />
+      <script data-goatcounter={url} async src="https://gc.zgo.at/count.js" />
     </Head>
   );
 };
