@@ -39,7 +39,7 @@ const Analytics: FC = () => {
     }
 
     window.goatcounter?.count?.({ path: location.pathname });
-  }, [url, isScriptLoaded, location.pathname]);
+  }, [isScriptLoaded, location.pathname]);
 
   return null;
 };
