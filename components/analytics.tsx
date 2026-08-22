@@ -9,36 +9,32 @@ declare global {
   }
 }
 
-// No-ops entirely if `GOATCOUNTER_URL` isn't configured (local dev, forks).
 const Analytics: FC = () => {
-  const url = import.meta.env.GOATCOUNTER_URL;
   const location = useLocation();
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
 
-  // Automatic on-load tracking is disabled (`no_onload`), since every page
-  // view, including the initial one, is instead reported manually below,
-  // once the script has finished loading.
   useEffect(() => {
-    if (!url) {
+    if (!import.meta.env.GOATCOUNTER_URL) {
       return;
     }
 
     const script = document.createElement("script");
     script.async = true;
     script.src = "https://gc.zgo.at/count.js";
-    script.dataset.goatcounter = url;
+    script.dataset.goatcounter = import.meta.env.GOATCOUNTER_URL;
     script.dataset.goatcounterSettings = JSON.stringify({ no_onload: true });
     script.addEventListener("load", () => setIsScriptLoaded(true));
+  
     document.head.appendChild(script);
 
     return () => {
       document.head.removeChild(script);
       setIsScriptLoaded(false);
     };
-  }, [url]);
+  }, []);
 
   useEffect(() => {
-    if (!url || !isScriptLoaded) {
+    if (!import.meta.env.GOATCOUNTER_URL || !isScriptLoaded) {
       return;
     }
 
