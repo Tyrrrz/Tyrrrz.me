@@ -24,7 +24,6 @@ const Analytics: FC = () => {
     script.dataset.goatcounter = import.meta.env.GOATCOUNTER_URL;
     script.dataset.goatcounterSettings = JSON.stringify({ no_onload: true });
     script.addEventListener("load", () => setIsScriptLoaded(true));
-  
     document.head.appendChild(script);
 
     return () => {
