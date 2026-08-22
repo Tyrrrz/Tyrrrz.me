@@ -5,6 +5,7 @@ import { FiMenu, FiMoon, FiSun } from "react-icons/fi";
 import { Outlet, useLocation, useNavigation } from "react-router-dom";
 import { useDebounce } from "../hooks/useDebounce";
 import { useTheme } from "../hooks/useTheme";
+import Analytics from "./analytics";
 import Link from "./link";
 import Meta from "./meta";
 
@@ -196,6 +197,7 @@ const Layout: FC = () => {
   return (
     <>
       <Meta />
+      <Analytics />
       <Page />
     </>
   );
