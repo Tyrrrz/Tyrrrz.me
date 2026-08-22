@@ -17,8 +17,6 @@ const Meta: FC<MetaProps> = ({ title, description, keywords, imageUrl, imageLayo
   const buildId = import.meta.env.BUILD_ID;
   const location = useLocation();
 
-  const canonicalUrl = resolveAbsoluteUrl(location.pathname);
-
   const actualTitle = title ? title + " • " + siteName : siteName;
 
   const actualDescription =
@@ -40,7 +38,7 @@ const Meta: FC<MetaProps> = ({ title, description, keywords, imageUrl, imageLayo
       <title>{actualTitle}</title>
 
       <link rel="icon" href={resolvePath("/favicon.png")} />
-      <link rel="canonical" href={canonicalUrl} />
+      <link rel="canonical" href={resolveAbsoluteUrl(location.pathname)} />
       <link rel="manifest" href={resolvePath("/manifest.json")} />
 
       <meta name="application-name" content={siteName} />
