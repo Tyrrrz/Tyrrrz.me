@@ -1,6 +1,6 @@
 ---
 title: "Building a Library in .NET: The Quiet Parts"
-date: "2024-10-28"
+date: "2026-11-11"
 ---
 
 Developing a library involves a lot of moving pieces, and not all of them are just about writing code. Beyond the functionality of the library itself, you also have to consider operational concerns, such as how it is built, tested, and released — and how all these processes can be automated in an efficient and reliable way. These aspects may not be as prominent on the surface, but they still have significant implications for your own productivity as the author, as well as the experience of the library's consumers.
@@ -13,9 +13,20 @@ In this article, I will outline my typical .NET library setup, covering build se
 
 ## Scaffolding the solution
 
-Much like everything else in life, a .NET project has a beginning — and that beginning is the `dotnet new` command. It's safe to assume that, if you're reading this article, you've probably set up a fair share of .NET solutions and don't need any introduction to the process. However, since we'll be relying on certain expectations about the file structure going forward, let's use this opportunity to establish common ground.
+Much like everything else in life, a .NET codebase has a beginning — and that beginning is the `dotnet new` command. It's safe to assume that, if you're reading this article, you've probably set up a fair share of .NET solutions and don't need any introduction to the process. However, since we'll be relying on certain expectations about the file structure going forward, let's take a moment to establish common ground.
 
-Typically, .NET codebases follow either a flat layout with project directories at the solution level, or a nested layout that further divides them into groups like `src/`, `tests/`, and `samples/`. Both will work seamlessly with everything we'll be discussing, so let's go with the former approach for simplicity:
+For our example, we'll start with a simple setup: a `MyLibrary` project that houses the library code and a `MyLibrary.Tests` project that contains the corresponding automated tests. Both of them will be referenced by a `MyLibrary.slnx` solution file to provide a centralized entry point for the workspace:
+
+```bash
+dotnet new classlib -n MyLibrary -o MyLibrary
+dotnet new xunit -n MyLibrary.Tests -o MyLibrary.Tests
+
+dotnet new sln -n MyLibrary -f slnx
+dotnet sln add MyLibrary/MyLibrary.csproj
+dotnet sln add MyLibrary.Tests/MyLibrary.Tests.csproj
+```
+
+Running the above terminal commands will create two respective project directories and the solution file at the root. The resulting layout should look something like this:
 
 ```diff
 + ├── MyLibrary
@@ -27,23 +38,11 @@ Typically, .NET codebases follow either a flat layout with project directories a
 + └── MyLibrary.slnx
 ```
 
-Here we have a bare-bones setup, consisting of the `MyLibrary` project that houses the library code and the `MyLibrary.Tests` project which contains the corresponding automated tests. Both are tied together by the `MyLibrary.slnx` solution file, providing a centralized entry point for the whole workspace.
+Next, we need to integrate our codebase with a version control system and, ideally, a code hosting platform. The former is fairly straightforward: [Git](https://git-scm.com) is the undisputed standard of version control in the software world, and .NET is no exception. However, choosing a platform to host Git repositories is a more nuanced matter, as there are many viable options and they all impose a degree of vendor lock-in if you intend to use them beyond their most basic functionality.
 
-To achieve the structure visualized above, you can create the solution either by using your preferred IDE or just by running the following `dotnet` commands in the terminal:
+That said, unless you have a specific reason not to, I recommend going with the conventional choice of [GitHub](https://github.com) due to its wide adoption, generous free tier, and rich ecosystem of tools and integrations. This is especially relevant if you are planning to publish your library as an open-source project, since GitHub's large community of developers lends itself to better discoverability and collaboration opportunities.
 
-```bash
-dotnet new classlib -n MyLibrary -o MyLibrary
-# Feel free to swap out xunit with nunit, mstest, or whatever you prefer
-dotnet new xunit -n MyLibrary.Tests -o MyLibrary.Tests
-dotnet new sln -n MyLibrary
-dotnet sln add MyLibrary/MyLibrary.csproj MyLibrary.Tests/MyLibrary.Tests.csproj
-```
-
-Beyond that, our solution also needs to be integrated with a version control system and, ideally, a code hosting platform. When it comes to the former, the choice is fairly straightforward: [Git](https://git-scm.com) is the undisputed standard of version control in the software world, and .NET is no exception. However, choosing a platform to host your Git repositories is a bit more nuanced, as there are many viable candidates and they all come with some form of vendor lock-in if you intend to use them beyond their basic functionality.
-
-That said, unless you have a specific reason to use something else, I strongly recommend going with the obvious combination of Git and [GitHub](https://github.com) due to its wide adoption, generous free tier, and rich ecosystem of tools and integrations. This is especially relevant if you are planning to publish your library as an open-source project, since GitHub's large community of developers lends itself to better discoverability and collaboration opportunities.
-
-With all that in mind, let's assume we've created a new remote repository over at `https://github.com/Tyrrrz/MyLibrary`. Now we can also initialize one locally and synchronize the two together:
+With that in mind, let's assume that we've created an empty repository at [`https://github.com/Tyrrrz/MyLibrary`](https://github.com/Tyrrrz/MyLibrary). We can now initialize a local repository as well and link it to the remote:
 
 ```bash
 git init
@@ -52,7 +51,7 @@ git remote add origin https://github.com/Tyrrrz/MyLibrary.git
 dotnet new gitignore
 ```
 
-This sequence creates the `.git` directory containing repository tracking metadata, sets the default branch to `main`, adds a link to our remote `origin` on GitHub, and generates a comprehensive [`.gitignore`](https://git-scm.com/docs/gitignore) file tailored specifically for .NET solutions. Once all the commands are executed, the resulting layout should look like this:
+This sequence creates the `.git` directory containing repository tracking metadata, sets the default branch to `main`, adds a link to our remote `origin` on GitHub, and generates a comprehensive [`.gitignore`](https://git-scm.com/docs/gitignore) file tailored specifically for .NET solutions. Once all the commands are executed, the file structure should resemble the following:
 
 ```diff
 + ├── .git
