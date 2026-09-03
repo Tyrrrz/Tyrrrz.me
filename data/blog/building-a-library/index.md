@@ -1,5 +1,5 @@
 ---
-title: "Building a Library in .NET: The Quiet Parts"
+title: "The Invisible Parts of Building a Library in .NET"
 date: "2026-11-11"
 ---
 
@@ -76,13 +76,15 @@ git push -u origin main
 
 ## Baseline configuration
 
-A .NET project is not just a collection of source files — it's also a layered set of instructions that direct the toolchain how to parse, compile, and package those files into a consumable artifact. These instructions are inherited through various ambient settings, as well as the SDK's internal `props` and `targets` files. Although the specifics of the build process don't require particular attention during day-to-day development, there are a few things that you may want to configure — even if solely to establish a set of reasonable defaults.
+A .NET project is not just a collection of source files — it's also a layered set of instructions that tell the toolchain how to parse, compile, and package those files into a consumable artifact. Most of these instructions, however, come from outside the project itself, supplied by the SDK's internal `props` and `targets` files, as well as through various ambient settings.
+
+Because much of this machinery is handled automatically, the build process generally just works without requiring much attention during day-to-day development. Still, there are a few things you may want to configure — even if solely to establish a set of reasonable defaults.
 
 I call these defaults the "baseline configuration", as their purpose is not to fundamentally alter the behavior of the build, but rather to ensure its consistency across unpredictable environments. This can be achieved with the help of the following three optional files:
 
-- [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — pins the .NET SDK to a specific release and optionally instructs how to roll forward to higher versions.
+- [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — sets the version of the .NET SDK required for the codebase and optionally instructs how to roll forward to higher versions.
 - [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — configures the NuGet package manager, including the sources from which it should resolve dependencies.
-- [`Directory.Build.props`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory) — defines global MSBuild properties that are automatically applied to all projects in the solution.
+- [`Directory.Build.props`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory) — defines global MSBuild properties that are automatically applied to all projects.
 
 Before we explore each of these files in detail, let's get started by generating the boilerplate for all of them. We can do that by running the following `dotnet new` commands in the root of our solution directory:
 
