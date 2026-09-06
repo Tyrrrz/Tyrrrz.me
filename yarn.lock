@@ -296,18 +296,26 @@
   dependencies:
     giscus "^1.6.0"
 
-"@humanfs/core@^0.19.1":
-  version "0.19.1"
-  resolved "https://registry.npmjs.org/@humanfs/core/-/core-0.19.1.tgz"
-  integrity sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==
+"@humanfs/core@^0.19.2":
+  version "0.19.2"
+  resolved "https://registry.yarnpkg.com/@humanfs/core/-/core-0.19.2.tgz#a8272ca03b2acf492670222b2320b6c421bfde60"
+  integrity sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==
+  dependencies:
+    "@humanfs/types" "^0.15.0"
 
 "@humanfs/node@^0.16.6":
-  version "0.16.7"
-  resolved "https://registry.npmjs.org/@humanfs/node/-/node-0.16.7.tgz"
-  integrity sha512-/zUx+yOsIrG4Y43Eh2peDeKCxlRt/gET6aHfaKpuq267qXdYDFViVHfMaLyygZOnl0kGWxFIgsBy8QFuTLUXEQ==
+  version "0.16.8"
+  resolved "https://registry.yarnpkg.com/@humanfs/node/-/node-0.16.8.tgz#8f800cccc13f4f8cd3116e2d9c0a94939da3e3ed"
+  integrity sha512-gE1eQNZ3R++kTzFUpdGlpmy8kDZD/MLyHqDwqjkVQI0JMdI1D51sy1H958PNXYkM2rAac7e5/CnIKZrHtPh3BQ==
   dependencies:
-    "@humanfs/core" "^0.19.1"
+    "@humanfs/core" "^0.19.2"
+    "@humanfs/types" "^0.15.0"
     "@humanwhocodes/retry" "^0.4.0"
+
+"@humanfs/types@^0.15.0":
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/@humanfs/types/-/types-0.15.0.tgz#f2a09f62012390b2bff3fc6fb248ddec8c09a090"
+  integrity sha512-ZZ1w0aoQkwuUuC7Yf+7sdeaNfqQiiLcSRbfI08oAxqLtpXQr9AIVX7Ay7HLDuiLYAaFPu8oBYNq/QIi9URHJ3Q==
 
 "@humanwhocodes/module-importer@^1.0.1":
   version "1.0.1"
@@ -475,51 +483,6 @@
   version "1.23.4"
   resolved "https://registry.yarnpkg.com/@remix-run/router/-/router-1.23.4.tgz#d2becd2afca4a40c30a659d913b9b0bcc28bced8"
   integrity sha512-q7j5geK7xs3UJSdm9/iytUNclBnLmYx1EnSeCFXHPeutdqgIMeFeHtUZgS3EhlKxdBEAu8OwtJCwmLrEzpSs7Q==
-
-"@rolldown/binding-android-arm64@1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@rolldown/binding-android-arm64/-/binding-android-arm64-1.1.3.tgz#cc6153029c3d9afc9caaae2dc362d899ae94ac4f"
-  integrity sha512-DT6Z3PhvioeHMvxo+xHc3KtqggrI7CCTXCmC2h/5zUlp5jVitv7XEy+9q5/7v8IolhlioawpMo8Kg0EEBy7J0g==
-
-"@rolldown/binding-darwin-arm64@1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@rolldown/binding-darwin-arm64/-/binding-darwin-arm64-1.1.3.tgz#3af681a5d7610340257b3ac7753353b23e884765"
-  integrity sha512-0NwgwsjM7LrsuVnXMK3koTpagBNOhloc/BNjKqZjv4V5zI5r13qx69uVhRx+o5Z0yy4Hzq+lpy7TAgUG/ocvrw==
-
-"@rolldown/binding-darwin-x64@1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@rolldown/binding-darwin-x64/-/binding-darwin-x64-1.1.3.tgz#80ada35e9f35efb7e48a887444ce2052f615d645"
-  integrity sha512-YtiBp4disu6V560loT6PjMdiRaWmVvDNrUunAalbiFx2ggeJwxdAsgZMcoGP17uyAsTwAj5V1niksxlHnVQ1Sw==
-
-"@rolldown/binding-freebsd-x64@1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@rolldown/binding-freebsd-x64/-/binding-freebsd-x64-1.1.3.tgz#65b2bbb82f005f08aeeff0b6d81e19be68360201"
-  integrity sha512-yD3EkEdXk2LypPxnf/kSZHirarsI8gcPzc62SukhR9VJTyvV+F9Q/GxWNuCojc7sXyuVC4DxRGhdDK4X8VSsbw==
-
-"@rolldown/binding-linux-arm-gnueabihf@1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@rolldown/binding-linux-arm-gnueabihf/-/binding-linux-arm-gnueabihf-1.1.3.tgz#7e8d34ad0c7bcfd3baed268e9798571e3888ca71"
-  integrity sha512-c+8vieQbsD7HNAHKIA34w0GJ9FedFFuJGD+7E6vz7Q3uqAIugL5p45fhlsj4UaAsHpcmlqugBWMhA0/j7o0sIg==
-
-"@rolldown/binding-linux-arm64-gnu@1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@rolldown/binding-linux-arm64-gnu/-/binding-linux-arm64-gnu-1.1.3.tgz#52bbf400ff219bda1e56c042160d96deb08bfecc"
-  integrity sha512-50jD0uUwLvur7Zz9LHz17kaAdTPjn5wN93hEgjvmYFRZwiR7ZJYovTd5ipyWJDAnXKvZ+wgc+/Ika6dwSF5OcA==
-
-"@rolldown/binding-linux-arm64-musl@1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@rolldown/binding-linux-arm64-musl/-/binding-linux-arm64-musl-1.1.3.tgz#9e82899186f73329f3d8155fa1618ae2e86ffa2a"
-  integrity sha512-BO9+oPL8K9poZJBfYPsXNtYjPE5uM3qeehT3aFcW4LITOl+iSqhp0abzjR2nWBUNjIZeKXjAEWBZ64WjNoHd6w==
-
-"@rolldown/binding-linux-ppc64-gnu@1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@rolldown/binding-linux-ppc64-gnu/-/binding-linux-ppc64-gnu-1.1.3.tgz#050520177316586ccad816eb466ea11015e17ba7"
-  integrity sha512-f3VpLB1vQ0Eo6ecr/6cekLnvYMFF4YBFoVGkfkvPLq1bAkbAwHYQPZKoAmG6OJyTcxxoC+AvezGx/S1obNC0Mw==
-
-"@rolldown/binding-linux-s390x-gnu@1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@rolldown/binding-linux-s390x-gnu/-/binding-linux-s390x-gnu-1.1.3.tgz#50efa7b20219c6e31235fded0fd3427f36123e5a"
-  integrity sha512-AmurZ26Pqx/RI9N1gzEOCklkKXl927yjfXWUUS0O7Puh8ARM/Ob8qfrD3qnWksScdw6cSrW5PSHE9DyLu7+PtA==
 
 "@rolldown/binding-android-arm64@1.1.3":
   version "1.1.3"
