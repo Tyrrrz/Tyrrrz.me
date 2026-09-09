@@ -76,11 +76,11 @@ git push -u origin main
 
 ## Baseline configuration
 
-A .NET project is not just a collection of source files — it's also a layered set of instructions that tell the toolchain how to parse, compile, and package those files into a consumable artifact. Most of these instructions, however, come from outside the project itself, supplied by the SDK's internal `props` and `targets` files, as well as through various ambient settings.
+A .NET project is more than just a collection of source files — it's also a layered set of instructions that tell the toolchain how to parse, compile, and package those files into a consumable artifact. Most of these instructions, however, are not authored manually in the project itself, but are instead supplied through the SDK's implicit `props` and `targets` imports, as well as via various ambient settings.
 
-Because much of this machinery is handled automatically, the build process generally just works without requiring much attention during day-to-day development. Still, there are a few things you may want to configure — even if solely to establish a set of reasonable defaults.
+Because much of this machinery is handled automatically, the build process generally requires very little tinkering to work correctly. Still, there are a few settings you may want to configure anyway — not necessarily to change how things work, but rather to make the intended behavior explicit and reproducible across unpredictable environments.
 
-I call these defaults the "baseline configuration", as their purpose is not to fundamentally alter the behavior of the build, but rather to ensure its consistency across unpredictable environments. This can be achieved with the help of the following three optional files:
+This sort of baseline configuration can be established with the help of the following three optional files:
 
 - [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — sets the version of the .NET SDK required for the codebase and optionally instructs how to roll forward to higher versions.
 - [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — configures the NuGet package manager, including the sources from which it should resolve dependencies.
