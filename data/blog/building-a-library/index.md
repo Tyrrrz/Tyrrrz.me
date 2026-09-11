@@ -26,7 +26,7 @@ dotnet sln add MyLibrary/MyLibrary.csproj
 dotnet sln add MyLibrary.Tests/MyLibrary.Tests.csproj
 ```
 
-Running the above terminal commands will create two respective project directories and the solution file at the root. The resulting layout should look something like this:
+Running the above terminal commands will create the two project directories and the solution file at the root. The resulting layout should look something like this:
 
 ```diff
 + ├── MyLibrary
@@ -76,17 +76,17 @@ git push -u origin main
 
 ## Baseline configuration
 
-A .NET project is more than just a collection of source files — it's also a layered set of instructions that tell the toolchain how to parse, compile, and package those files into a consumable artifact. Most of these instructions, however, are not authored manually in the project itself, but are instead supplied through the SDK's implicit `props` and `targets` imports, as well as via various ambient settings.
+A .NET project is more than just a collection of source files — it's also a layered set of instructions that tell the toolchain how to parse, compile, and package those files into a consumable artifact. Most of these instructions, however, are not authored manually in the project itself, but are instead supplied through the SDK's implicit `props` and `targets` imports, as well as various ambient settings.
 
 Because much of this machinery is handled automatically, the build process generally requires very little tinkering to work correctly. Still, there are a few settings you may want to configure anyway — not necessarily to change how things work, but rather to make the intended behavior explicit and reproducible across unpredictable environments.
 
-This sort of baseline configuration can be established with the help of the following three optional files:
+This sort of baseline configuration can be established with the help of these optional files:
 
-- [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — sets the version of the .NET SDK required for the codebase and optionally instructs how to roll forward to higher versions.
-- [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — configures the NuGet package manager, including the sources from which it should resolve dependencies.
-- [`Directory.Build.props`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory) — defines global MSBuild properties that are automatically applied to all projects.
+- [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — controls which version of the .NET SDK is resolved by the tooling.
+- [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — configures the NuGet package manager.
+- [`Directory.Build.props`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory) — defines MSBuild properties that are applied globally to all projects.
 
-Before we explore each of these files in detail, let's get started by generating the boilerplate for all of them. We can do that by running the following `dotnet new` commands in the root of our solution directory:
+Before we explore each of these files in greater detail, let's first generate the boilerplate for all of them. We can do that by running the corresponding `dotnet new` commands in the root of our solution directory:
 
 ```bash
 dotnet new globaljson
@@ -94,7 +94,7 @@ dotnet new nugetconfig
 dotnet new buildprops
 ```
 
-Thus, resulting in the following additions:
+In doing so, the project structure is updated with the following additions:
 
 ```diff
   ├── .git
@@ -114,7 +114,7 @@ Thus, resulting in the following additions:
 
 ### `global.json`
 
-First off, we have the `global.json` file, whose purpose is to declare which version of the .NET SDK the solution is intended to work with. Normally, this requirement is not encoded anywhere in the solution itself, so the .NET tooling defaults to resolving the latest SDK available in the environment. While that works fine for the initial local development, you'll eventually want to make the SDK requirement explicit to communicate it clearly to other collaborators, automation pipelines, and also your future self.
+Normally, when you interact with the .NET tooling, it resolves all commands using the latest SDK version available in the environment. During initial development stages, this behavior is both convenient and desirable, but it can introduce inconsistencies when that environment inevitably changes. To prevent that drift, `global.json` lets you make the version requirement explicit, thereby communicating it clearly to other collaborators, automation pipelines, and also your future self.
 
 Naturally, to be considered compatible, the SDK must provide the capabilities that the codebase depends on, such as access to certain target frameworks, language features, and compiler options. When it comes to the [.NET SDK versioning schema](https://learn.microsoft.com/dotnet/core/versions), these aspects are typically governed by the first two components of the semantic label (e.g., `11.0.***`), while the remaining digits indicate bug fixes and minor tooling improvements (e.g., `*.*.307`).
 
