@@ -114,11 +114,13 @@ In doing so, the project structure is updated with the following additions:
 
 ### `global.json`
 
-Normally, when you interact with the .NET tooling, it resolves all commands using the latest SDK version available in the environment. During initial development stages, this behavior is both convenient and desirable, but it can introduce inconsistencies when that environment inevitably changes. To prevent that drift, `global.json` lets you make the version requirement explicit, thereby communicating it clearly to other collaborators, automation pipelines, and also your future self.
+Normally, when you interact with the .NET tooling, it resolves all commands using the latest SDK version available in the environment. This behavior is convenient early on, but it can introduce inconsistencies when the development environment inevitably changes. To prevent that drift, `global.json` lets you make the version requirement explicit, thereby communicating it clearly to other collaborators, automation pipelines, and also your future self.
 
-Naturally, to be considered compatible, the SDK must provide the capabilities that the codebase depends on, such as access to certain target frameworks, language features, and compiler options. When it comes to the [.NET SDK versioning schema](https://learn.microsoft.com/dotnet/core/versions), these aspects are typically governed by the first two components of the semantic label (e.g., `11.0.***`), while the remaining digits indicate bug fixes and minor tooling improvements (e.g., `*.*.307`).
+Choosing the right version of the SDK comes down to ensuring that it provides the capabilities that the codebase depends on, such as access to certain target frameworks, language features, and compiler options. Under the [.NET SDK versioning schema](https://learn.microsoft.com/dotnet/core/versions), these aspects are largely governed by the first two components of the semantic label (e.g., `11.0.***`), while the latter portion distinguishes feature-band and patch releases (e.g., `*.*.307`).
 
-When you generate a `global.json` file via `dotnet new`, however, it defaults to the full version of the currently resolved .NET SDK, including its patch release. This configuration forces anyone else trying to build the solution to have the _exact same_ SDK version installed, which is far too restrictive. To fix this, let's open the file and adjust its matching policy to be more flexible:
+The boilerplate created by `dotnet new`, however, makes no assumptions about the codebase's needs and simply records the full version of the .NET SDK in use at the time — effectively turning a dynamic resolution into a static one. While it improves reproducibility, such a policy can be overly rigid when sharing the repository with other developers who might not have the same version of the SDK installed.
+
+To fix this, let's adjust the file to establish a more flexible ruleset:
 
 ```json
 {
