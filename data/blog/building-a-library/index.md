@@ -116,11 +116,11 @@ In doing so, the project structure is updated with the following additions:
 
 Normally, when you interact with the .NET tooling, it resolves all commands using the latest SDK version available in the environment. This behavior is convenient early on, but it can introduce inconsistencies when the development environment inevitably changes. To prevent that drift, `global.json` lets you make the version requirement explicit, thereby communicating it clearly to other collaborators, automation pipelines, and also your future self.
 
-Choosing the right version of the SDK comes down to ensuring that it provides the capabilities that the codebase depends on, such as access to certain target frameworks, language features, and compiler options. Under the [.NET SDK versioning schema](https://learn.microsoft.com/dotnet/core/versions), these aspects are largely governed by the first two components of the semantic label (e.g., `11.0.***`), while the latter portion distinguishes feature-band and patch releases (e.g., `*.*.307`).
+Choosing the right version of the SDK comes down to ensuring that it provides the capabilities that the codebase depends on, such as access to certain target frameworks, language features, and compiler options. Under the [.NET SDK versioning schema](https://learn.microsoft.com/dotnet/core/versions), these aspects are largely governed by the first two components of the semantic label (e.g., `11.0.***`), while the latter portion distinguishes feature and patch releases (e.g., `*.*.307`).
 
-The boilerplate created by `dotnet new`, however, makes no assumptions about the codebase's needs and simply records the full version of the .NET SDK in use at the time — effectively turning a dynamic resolution into a static one. While it improves reproducibility, such a policy can be overly rigid when sharing the repository with other developers who might not have the same version of the SDK installed.
+The boilerplate created by `dotnet new`, however, makes no assumptions about the codebase's needs and simply records the full version of the .NET SDK in use at the time — effectively turning a dynamic resolution into a static one. While it improves reproducibility, such a policy can also be overly rigid when sharing the repository with other developers who might not have the same version of the SDK installed.
 
-To fix this, let's adjust the file to establish a more flexible ruleset:
+To fix this, we can adjust the file to establish a more flexible ruleset, such as this one:
 
 ```json
 {
@@ -131,9 +131,9 @@ To fix this, let's adjust the file to establish a more flexible ruleset:
 }
 ```
 
-At the time of writing, the current iteration of .NET is .NET 11.0, so we set the `version` property to `11.0.100` — the lowest SDK version within the `11.0` band. Combined with the `rollForward` option set to `latestFeature`, this effectively creates a rule that allows the solution to be built by any feature or patch release of the .NET 11.0 SDK, but _not_ by any other major or minor version (e.g., .NET 10.0 or .NET 12.0).
+At the time of writing, the current iteration of .NET is .NET 11.0, so we set the `version` property to `11.0.100` — the lowest SDK version within the `11.0` line. Combined with the `rollForward` option set to `latestFeature`, this effectively creates a policy that allows the solution to be built by any feature or patch release of the .NET 11.0 SDK, but _not_ by any other major or minor version (e.g., .NET 10.0 or .NET 12.0).
 
-The reason for specifically choosing `latestFeature` instead of `latestMinor` or `latestMajor` is to ensure runtime compatibility for executable projects in the solution, such as tests. Although newer .NET SDKs can still compile code targeting older frameworks, each SDK includes its corresponding version of the runtime, which normally does not roll forward across major boundaries. As a result, a project targeting `net11.0` can still be built with the .NET 12.0 SDK, but it can only be executed with the .NET 11.0 runtime — thus making the aligned SDK version more preferable.
+Of course, you can also choose `latestMinor` or `latestMajor` to adopt even newer releases automatically. That may be appropriate when prioritizing long-term flexibility, but `latestFeature` is a common middle ground: it accepts ongoing fixes and improvements within the selected line, while keeping more significant upgrades a deliberate decision. Generally, this provides a sufficient balance between convenience and stability.
 
 ### `nuget.config`
 
