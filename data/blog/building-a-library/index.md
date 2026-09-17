@@ -82,7 +82,7 @@ Because much of this machinery is handled automatically, the build process gener
 
 This sort of baseline configuration can be established with the help of these optional files:
 
-- [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — controls which version of the .NET SDK is resolved by the tooling.
+- [`global.json`](https://learn.microsoft.com/dotnet/core/tools/global-json) — controls which version of the .NET SDK is used by the tooling.
 - [`nuget.config`](https://learn.microsoft.com/nuget/reference/nuget-config-file) — configures the NuGet package manager.
 - [`Directory.Build.props`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory) — defines MSBuild properties that are applied globally to all projects.
 
@@ -114,9 +114,9 @@ In doing so, the project structure is updated with the following additions:
 
 ### `global.json`
 
-Normally, when you interact with the .NET tooling, it resolves all commands using the latest SDK version available in the environment. This behavior is convenient early on, but it can introduce inconsistencies when the development environment inevitably changes. To prevent that drift, `global.json` lets you make the version requirement explicit, thereby communicating it clearly to other collaborators, automation pipelines, and also your future self.
+Normally, when you interact with the .NET tooling, it resolves all commands using the latest version of the SDK available in the environment. This behavior is convenient early on, but it can introduce inconsistencies when the development environment inevitably changes. To prevent that drift, `global.json` lets you make the version requirement explicit, thereby communicating it clearly to other collaborators, automation pipelines, and also your future self.
 
-Choosing the right version of the SDK comes down to ensuring that it provides the capabilities that the codebase depends on, such as access to certain target frameworks, language features, and compiler options. Under the [.NET SDK versioning schema](https://learn.microsoft.com/dotnet/core/versions), these aspects are largely governed by the first two components of the semantic label (e.g., `11.0.***`), while the latter portion distinguishes feature and patch releases (e.g., `*.*.307`).
+Choosing the right SDK version comes down to ensuring that it provides the capabilities that the codebase depends on, such as access to certain target frameworks, language features, and compiler options. Under the [.NET SDK versioning schema](https://learn.microsoft.com/dotnet/core/versions), these aspects are largely governed by the first two components of the semantic label (e.g., `11.0.***`), while the latter portion distinguishes feature and patch releases (e.g., `*.*.307`).
 
 The boilerplate created by `dotnet new`, however, makes no assumptions about the codebase's needs and simply records the full version of the .NET SDK in use at the time — effectively turning a dynamic resolution into a static one. While it improves reproducibility, such a policy can also be overly rigid when sharing the repository with other developers who might not have the same version of the SDK installed.
 
@@ -133,13 +133,13 @@ To fix this, we can adjust the file to establish a more flexible ruleset, such a
 
 At the time of writing, the current iteration of .NET is .NET 11.0, so we set the `version` property to `11.0.100` — the lowest SDK version within the `11.0` line. Combined with the `rollForward` option set to `latestFeature`, this effectively creates a policy that allows the solution to be built by any feature or patch release of the .NET 11.0 SDK, but _not_ by any other major or minor version (e.g., .NET 10.0 or .NET 12.0).
 
-Of course, you can also choose `latestMinor` or `latestMajor` to adopt even newer releases automatically. That may be appropriate when prioritizing long-term flexibility, but `latestFeature` is a common middle ground: it accepts ongoing fixes and improvements within the selected line, while keeping more significant upgrades a deliberate decision. Generally, this provides a sufficient balance between convenience and stability.
+Of course, you can also choose `latestMinor` or `latestMajor` to adopt even newer releases automatically. That may be appropriate when prioritizing long-term flexibility, but `latestFeature` is a common middle ground: it accepts ongoing fixes and improvements within the selected line, while keeping more significant upgrades a deliberate decision. Generally, this strikes a good balance between convenience and stability.
 
 ### `nuget.config`
 
-Moving along, we also have `nuget.config` — a file that can configure how the NuGet package manager integrates with the build process and, most importantly, the locations it uses to restore and publish packages. By default, NuGet connects to the official [NuGet.org](https://nuget.org) registry, but this may vary between different environments due to user- and machine-specific overrides. To ensure a consistent (and secure) developer experience, we can create a solution-level configuration file that explicitly enforces the intended behavior and prevents other settings from interfering with it.
+Moving along, we also have the `nuget.config` file, which can be used to configure the NuGet client and, most importantly, the locations it uses to restore and publish packages. By default, NuGet connects to the official [NuGet.org](https://nuget.org) registry, but this may vary due to user- and machine-specific overrides. To ensure a consistent (and slightly more secure) developer experience, we can create this file to pin the desired package sources in our codebase, preventing unintended settings from taking effect.
 
-The `nuget.config` file generated by `dotnet new` provides a great starting point: it resets the list of allowed package sources to only include the official registry. This takes care of the package resolution aspect, but since we're working on a library project that we want to publish as a NuGet package as well, it's also useful to set up the default push source too. To do that, let's edit the configuration file like so:
+The `nuget.config` file generated by `dotnet new` provides a great starting point: it resets the list of package sources to only include the official registry. This already takes care of the resolution aspect, but since we're working on a library that will itself be distributed as a package, it's useful to set the default push source as well. To do that, let's edit the configuration file like so:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -157,15 +157,15 @@ The `nuget.config` file generated by `dotnet new` provides a great starting poin
 </configuration>
 ```
 
-Here we have the `<packageSources>` section that specifies the feeds from which NuGet should fetch dependencies. It's a list-based setting, so we start with the `<clear />` element to remove any previously defined sources, and then add a single item named `nuget` that points to the NuGet.org catalog. Doing so makes sure that all projects in the solution resolve packages from the official registry, regardless of any other sources that may be configured on the machine.
+Here we have the `<packageSources>` section that lists the feeds from which NuGet should fetch dependencies. It's an additive setting, so we start with a `<clear />` element to remove any previously defined sources, and then insert a single item named `nuget` that points to NuGet.org. Doing so makes sure that all projects in the solution resolve packages from the official registry, regardless of any other locations that may be configured in the environment.
 
-The following `<config>` section is reserved for key-value settings that control various aspects of the NuGet client behavior, and in our case, we use it to set `defaultPushSource` to match the package source defined earlier. Now, when we run the `dotnet nuget push` command to upload our own packages, it will also infer NuGet.org as the target location without requiring any additional instructions.
+The following `<config>` section is reserved for key-value settings that control various aspects of the NuGet client behavior, and in our case, we use it to set `defaultPushSource` to match the URL specified earlier. Now, when we run the `dotnet nuget push` command to upload our own packages, it will also infer NuGet.org as the destination without requiring any additional instructions.
 
 ### `Directory.Build.props`
 
 Finally, we have the `Directory.Build.props` file, which lets us define arbitrary MSBuild properties that should be inherited by all projects in the solution. When running the build, the tooling automatically looks for this file (and `Directory.Build.targets`, if available) within the directory hierarchy, and implicitly includes its contents in each project specification. This convention makes `Directory.Build.props` a great place to configure common cross-cutting concerns, such as compiler options, build settings, and various metadata.
 
-The file generated by `dotnet new` makes no assumptions about your intentions, so it simply starts off empty. Here's how I typically set it up for my library projects:
+The file generated by `dotnet new` makes no assumptions (rewrite; echoes global.json) about your intentions, so it simply starts off empty. Here's how I typically set it up for my library projects:
 
 ```xml
 <Project>
@@ -192,7 +192,7 @@ The file generated by `dotnet new` makes no assumptions about your intentions, s
     <Copyright>Copyright (C) $(Company)</Copyright>
     <Authors>$(Company)</Authors>
     <Description>Sample library</Description>
-    <PackageTags>space-separated search keyword go in here</PackageTags>
+    <PackageTags>space-separated search keywords go in here</PackageTags>
     <PackageProjectUrl>https://github.com/Tyrrrz/MyLibrary</PackageProjectUrl>
     <PackageReleaseNotes>https://github.com/Tyrrrz/MyLibrary/releases</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
