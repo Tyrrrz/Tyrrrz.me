@@ -269,8 +269,8 @@ Regardless, compatibility is always a compromise, and early in the development o
   - Additionally, this also provides you with an improved development experience — particularly through built-in analyzers that only work when targeting the latest framework.
 - **Establish a compatibility baseline by targeting .NET Standard 2.0 as well**. By doing so, your library will automatically be supported by a [wide range of relatively modern .NET implementations](https://learn.microsoft.com/dotnet/standard/net-standard?tabs=net-standard-2-0), maximizing your audience without much cherry-picking.
   - This version of the standard offers a good balance between compatibility and API availability, making it a solid lower boundary for most libraries.
-  - Targeting `netstandard2.0` is more or less equivalent to multi-targeting `netcoreapp2.0`, `net461`, and `uap10.0.16299`, which covers .NET (Core), .NET Framework, and UWP, along with related development platforms, such as Mono, Xamarin, and Unity.
-  - If `netstandard2.0`'s API set is too narrow for your library's needs, consider targeting higher versions of the individual implementations that you want to support instead. For example, targeting `net5.0` and `net462` will still cover a decent range of platforms, while giving you access to more modern APIs.
+  - Targeting `netstandard2.0` is more or less equivalent to multi-targeting `netcoreapp2.0`, `net461`, and `uap10.0.16299`, which covers .NET (Core), .NET Framework, and UWP, along with their related development platforms, such as Mono, Xamarin, and Unity.
+  - If `netstandard2.0`'s API set is too narrow for your library's needs, consider targeting the individual implementations that you want to support instead. For example, targeting `net5.0` and `net462` will still cover a decent range of platforms, while giving you access to more modern APIs.
   - Avoid targeting `netstandard1.x`, as the corresponding implementations are too old and have very limited API sets.
   - Avoid targeting individual .NET implementations that don't support the .NET Standard 2.0 specification (e.g., `netcoreapp1.1`, `net45`, `sl5`, etc.), as they are all outdated technologies.
 - **Target intermediate versions if you have framework-dependent code paths**. For example, if your library already targets .NET 11.0 and .NET Standard 2.0, but conditionally relies on certain APIs that were introduced in .NET 5.0, then you should separately target `net5.0` as well to ensure that those code paths are available as early as possible.
@@ -290,9 +290,7 @@ For the `MyLibrary` example, we'll assume that our code is fairly portable and a
 </Project>
 ```
 
-Here, we use the **`<TargetFrameworks>`** property (note the plural form) to specify a semicolon-separated list of target frameworks that our library should be built for. In this case, we have `netstandard2.0` and `net11.0`, which aligns with the earlier recommendations and provides a good balance between compatibility and modern features.
-
-If we were to now run the `dotnet build` command on this project, the tooling would create a separate output directory for each target framework, containing the compiled assemblies along with any other relevant artifacts:
+Here, we use the **`<TargetFrameworks>`** property (note the plural form) to specify a semicolon-separated list of frameworks that we want our library to support. When running the build, the SDK will create a separate output directory for each target, placing the compiled assemblies there along with any associated artifacts:
 
 ```diff
   ├── .git
