@@ -174,7 +174,12 @@ Running `dotnet new` earlier created a `Directory.Build.props` file, but left it
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
     <Nullable>annotations</Nullable>
-    <Nullable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1'))">enable</Nullable>
+    <Nullable
+      Condition="$([MSBuild]::IsTargetFrameworkCompatible(
+        '$(TargetFramework)',
+        'netstandard2.1'
+      ))"
+    >enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
@@ -257,7 +262,7 @@ In case the earlier remark about convoluted naming conventions somehow wasn't ap
 
 Anyway, in order for a library to be referenced by another project, it must be built against a framework that is compatible with the one used by that project. In most cases, it means that both of them need to target the same implementation of .NET, and the library's target version must be equal to or lower than that of the consuming project.
 
-If the library targets .NET Standard instead of a specific implementation, then the version of that standard must be supported by the project's framework. However, the rules for that are slightly more complex and you need to refer to the [compatibility table](https://dotnet.microsoft.com/platform/dotnet-standard#versions) to determine how the versions align in that case.
+If the library targets .NET Standard instead of a specific implementation, then the version of that standard must be supported by the project's framework. However, the rules for that are slightly more complex and you need to refer to the [compatibility table](https://dotnet.microsoft.com/platform/dotnet-standard#versions) to determine how the versions align.
 
 As you can probably imagine, it's also not enough to just pick a single target framework for your library and call it a day. In order to cover a broad range of clients — and provide the best possible experience for all of them — you often need to target multiple frameworks (and/or their versions) simultaneously. This is where [_multi-targeting_](https://learn.microsoft.com/visualstudio/msbuild/net-sdk-multitargeting) comes into play.
 
@@ -289,9 +294,9 @@ For the `MyLibrary` example, we'll assume that its code is fairly portable and h
 </Project>
 ```
 
-Here we use the **`<TargetFrameworks>`** property (note the plural form) to specify a semicolon-separated list of frameworks that we want our library to support. In this case, we are targeting `netstandard2.0` and `net11.0`, which aligns with the earlier recommendations and offers a good balance between broad compatibility and access to modern APIs.
+Here we use the **`<TargetFrameworks>`** property (note the plural form) to specify a semicolon-separated list of frameworks that we want our library to support. The combination of `netstandard2.0` and `net11.0` aligns with the earlier recommendations and offers a good balance between broad compatibility and access to modern APIs.
 
-Now, if we run `dotnet build` on our project, the SDK will produce two separate assemblies, placing each in its respective output directory together with its associated artifacts:
+Now, if we run `dotnet build` on our project, the SDK will produce two separate assemblies, placing each in its respective output directory along with any associated artifacts:
 
 ```diff
   ├── .git
@@ -323,7 +328,7 @@ Now, if we run `dotnet build` on our project, the SDK will produce two separate 
 
 ### Miscellaneous settings
 
-While we took care of the most important aspect of the library configuration by defining the target frameworks, there are a few other settings that are worth mentioning as well. Let's expand our project file to include them:
+With the target frameworks in place, the library has its intended compatibility model defined. However, there are a few project-level settings left for us to configure before it's ready for distribution and use. Let's go ahead and update the `MyLibrary.csproj` file to add them:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -331,23 +336,33 @@ While we took care of the most important aspect of the library configuration by 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net6.0;net7.0;net11.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
-    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
-    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+    <IsTrimmable
+      Condition="$([MSBuild]::IsTargetFrameworkCompatible(
+        '$(TargetFramework)',
+        'net6.0'
+      ))"
+    >true</IsTrimmable>
+    <IsAotCompatible
+      Condition="$([MSBuild]::IsTargetFrameworkCompatible(
+        '$(TargetFramework)',
+        'net7.0'
+      ))"
+    >true</IsAotCompatible>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
 </Project>
 ```
 
-In the updated snippet above, we start off by setting **`<IsPackable>`** to `true`, which declares our intent to include this project in the packaging process. As you may recall, the baseline configuration in `Directory.Build.props` established `false` as the default value for this property, so we need to explicitly override it here to make sure that a NuGet package is generated for our library.
+In the snippet above, we start by setting **`<IsPackable>`** to `true`, which declares our intent to include this project in the packaging process. As you may recall, the baseline configuration in `Directory.Build.props` established `false` as the default value for this property, so we must explicitly opt in to produce NuGet packages.
 
-Following that, we also add **`<IsTrimmable>`** and **`<IsAotCompatible>`**, conditionally enabling them both for the supported target frameworks. These properties signal to the .NET toolchain that our library is designed to be compatible with [assembly trimming](https://learn.microsoft.com/dotnet/core/deploying/trimming/prepare-libraries-for-trimming) and [ahead-of-time (AOT) compilation](https://learn.microsoft.com/dotnet/core/deploying/native-aot/#aot-compatibility-analyzers), imposing certain constraints on the code to ensure that it can be safely processed by these optimizations.
+Following that, we also set **`<IsTrimmable>`** and **`<IsAotCompatible>`** to `true`, signaling to the .NET toolchain that our library is designed to be compatible with [assembly trimming](https://learn.microsoft.com/dotnet/core/deploying/trimming/prepare-libraries-for-trimming) and [native ahead-of-time (AOT) compilation](https://learn.microsoft.com/dotnet/core/deploying/native-aot/#aot-compatibility-analyzers). In effect, these properties activate Roslyn analyzers that impose certain restrictions on the code, helping to ensure that the corresponding features can be applied safely.
 
-While not strictly required, these features are becoming increasingly prevalent in the .NET ecosystem, especially in development contexts where performance and binary size are critical. As long as you don't heavily rely on reflection and run-time code generation, you should always enable trimming and AOT compatibility to make your library more versatile and future-proof.
+Although not formally required, support for static build optimizations is rapidly gaining importance in the .NET ecosystem, especially in the development contexts with significant resource constraints, such as embedded and mobile environments. Enforcing compatibility with these optimizations from the outset can therefore make the library usable in a broader range of applications, while avoiding a potential refactoring effort later on.
 
-You may have also noticed that we extended the list of target frameworks too. The above-mentioned optimizations rely on framework annotations that are provided starting with .NET 6.0 and .NET 7.0 respectively, so we included them as intermediate targets to make those features available as early as possible.
+Similar to _Nullable Reference Types_, the flow analyzers for trimming and AOT both rely on framework annotations, but there's no equivalent fallback mode to establish a baseline across all targets. As a result, we enable **`<IsTrimmable>`** and **`<IsAotCompatible>`** only for .NET 6.0+ and .NET 7.0+ respectively — where the necessary annotations are available — and also include `net6.0` and `net7.0` as intermediate targets, so the properties take effect on the earliest eligible frameworks.
 
-Finally, we get to the **`<GenerateDocumentationFile>`** property, which we enable to instruct the build process to produce a documentation file alongside the compiled assemblies. This file contains the [structured XML comments](https://learn.microsoft.com/dotnet/csharp/programming-guide/xmldoc) extracted from the source code and is automatically included in the NuGet package, making them available to consumers directly within their IDEs.
+Finally, we set the **`<GenerateDocumentationFile>`** property to `true` as well, instructing the build process to extract [structured XML comments](https://learn.microsoft.com/dotnet/csharp/programming-guide/xmldoc) from the source code and put them in a dedicated file. This file then gets automatically included in the output NuGet package, providing inline documentation for the consumers of our library right in their IDEs.
 
 ### Polyfills and backports
 
