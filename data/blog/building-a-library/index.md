@@ -362,7 +362,9 @@ Although not formally required, support for static build optimizations is rapidl
 
 Similar to _Nullable Reference Types_, the flow analyzers for trimming and AOT both rely on framework annotations, but there's no equivalent fallback mode to establish a baseline across all targets. As a result, we enable **`<IsTrimmable>`** and **`<IsAotCompatible>`** only for .NET 6.0+ and .NET 7.0+ respectively — where the necessary annotations are available — and also include `net6.0` and `net7.0` as intermediate targets, so the properties take effect on the earliest eligible frameworks.
 
-Finally, we set the **`<GenerateDocumentationFile>`** property to `true` as well, instructing the build process to extract [structured XML comments](https://learn.microsoft.com/dotnet/csharp/programming-guide/xmldoc) from the source code and put them in a dedicated file. This file then gets automatically included in the output NuGet package, providing inline documentation for the consumers of our library right in their IDEs.
+Finally, we set the **`<GenerateDocumentationFile>`** property to `true` as well, instructing the build process to extract [structured XML comments](https://learn.microsoft.com/dotnet/csharp/programming-guide/xmldoc) from the source code and put them in a dedicated file. This file then gets automatically included in the output NuGet package, providing inline documentation for the consumers of the library right in their IDEs.
+
+Enabling this property in turn also causes the compiler to flag public types and members that lack accompanying documentation comments. Since we configured warnings as errors in `Directory.Build.props`, this might produce a lot of noise early in development, so consider temporarily [suppressing `CS1591`](https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-messages/cs1591) until the library is closer to release.
 
 ### Polyfills and backports
 
