@@ -368,16 +368,16 @@ Enabling this property in turn also causes the compiler to flag public types and
 
 ### Polyfills and backports
 
-Throughout this article, there were a few mentions of a concept called [_polyfill_](<https://en.wikipedia.org/wiki/Polyfill_(programming)>) — a general programming technique that allows developers to replicate the behavior of newer platform APIs on older targets that don't support them natively. When building libraries, this technique is particularly useful as it allows us to leverage modern framework and compiler features without sacrificing compatibility.
+Throughout this article, there were a few mentions of a concept called [_polyfill_](<https://en.wikipedia.org/wiki/Polyfill_(programming)>) — a general programming technique that lets developers replicate the behavior of newer platform APIs on older targets that don't support them natively. When building libraries, this technique is particularly useful as it allows us to leverage modern framework and compiler features without sacrificing compatibility.
 
 Polyfills are authored and applied differently depending on the programming language and its capabilities. For example, in JavaScript — where the term originated — they are implemented as standalone scripts that patch the environment or specific object prototypes to add missing functionality at run time. By contrast, C#'s statically typed and compiled nature rules out that style of polyfilling, but the concept itself remains applicable through the following approaches:
 
-- **Type polyfills**, which re-implement missing built-in types from scratch, mimicking their original behavior as closely as possible. These polyfills are placed in the same namespaces as the official types to ensure they are picked up correctly by the compiler when the native definitions are not available. Suitable when the desired types are completely missing from the target framework.
+- **Type polyfills**, which re-implement missing built-in types from scratch, mimicking their original behavior as closely as possible. These polyfills are placed in the same namespaces as the official types so that they are picked up by the compiler when the native definitions are not available. Suitable when the desired types are completely missing from the target framework.
 - **Member polyfills**, which rely on [extension members](https://learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/extension-methods) to shim missing methods, properties, or operators on existing built-in types. These extensions are usually placed in the global namespace to make them immediately accessible on every applicable type, effectively simulating intrinsic members. Suitable when the desired types exist, but lack certain members from later frameworks.
 
 These approaches can be combined with the SDK-provided [_preprocessor symbols_](https://learn.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives#conditional-compilation) to ensure that the polyfills are only included in the project when targeting frameworks that don't have the desired APIs. This way, when the library is built for more modern environments, the native implementations are used instead, avoiding any potential conflicts, performance issues, and dead code.
 
-As an example, let's consider a scenario where we wanted to use the [`System.Index`](https://learn.microsoft.com/dotnet/api/system.index) and [`System.Range`](https://learn.microsoft.com/dotnet/api/system.range) types in our library. Since these types were introduced in .NET Core 3.0, we'd need to add polyfills if we wanted to retain compatibility with the .NET Standard 2.0 target that we've established earlier. Here's how we could leverage the first approach to achieve that:
+As an example, suppose we wanted to use the [`System.Index`](https://learn.microsoft.com/dotnet/api/system.index) and [`System.Range`](https://learn.microsoft.com/dotnet/api/system.range) types in our library. Since they were introduced in .NET Core 3.0, we'd need to backport them if we wanted to retain compatibility with the .NET Standard 2.0 target that we've established earlier. Here's how we could leverage the type-polyfill approach to achieve that:
 
 ```csharp
 // Single out frameworks that don't have the desired API natively
@@ -476,9 +476,9 @@ Second, we ensure that the backported types are defined within the `System` name
 
 Finally, we mark these types as `internal`, constraining their visibility to within the same assembly. Doing so prevents the polyfills from leaking to the consumers of our library, which is important as it could otherwise cause confusion and, in some cases, build errors.
 
-The code itself is pretty much a carbon copy of the official implementation of `Index` and `Range`, with some minor adjustments for simplicity. When it comes to authoring polyfills, our primary goal is to replicate the client-facing behavior of the original APIs — so cutting corners in other areas, such as performance optimizations, edge cases, and documentation, is generally acceptable.
+The code itself is largely based on the official implementations of `Index` and `Range`, with some minor simplifications. When it comes to authoring polyfills, the primary goal is to replicate the client-facing behavior of the original APIs — so it's generally acceptable to cut corners in other areas, such as performance optimizations, internal factoring, and inline documentation.
 
-With the polyfills in place, we can now use the aforementioned types without any concern for compatibility:
+With the polyfills now in place, we can use the aforementioned types without worrying about compatibility:
 
 ```csharp
 using System;
@@ -493,7 +493,7 @@ var range = new Range(
 );
 ```
 
-As an additional benefit, re-defining framework APIs this way also enables related language features that build upon them. In our example, thanks to the above polyfills, we may now use C#'s [index (`^`) and range (`..`) operators](https://learn.microsoft.com/dotnet/csharp/tutorials/ranges-indexes) seamlessly across all target frameworks:
+As an additional benefit, re-defining framework APIs this way also enables related language features that build upon them. In our example, thanks to the above polyfills, we may now use C#'s [index (`^`) and range (`..`) operators](https://learn.microsoft.com/dotnet/csharp/tutorials/ranges-indexes) as well, seamlessly across all target frameworks:
 
 ```csharp
 var str = "Hello world";
@@ -505,7 +505,7 @@ var last = str[^1];
 var part = str[3..^1];
 ```
 
-For an alternative example, let's say we also wanted to use the newer overloads of the [`string.Contains(...)`](https://learn.microsoft.com/dotnet/api/system.string.contains) method that accept a `StringComparison` parameter. These were introduced in .NET Core 2.1, so supporting a .NET Standard 2.0 target requires polyfilling them as well. Since the `string` type itself exists across all frameworks, we only need to polyfill the missing members, which makes this a good fit for the second approach:
+For an alternative example, let's say we also wanted to use the newer overloads of the [`string.Contains(...)`](https://learn.microsoft.com/dotnet/api/system.string.contains) method that accept a `StringComparison` parameter. These were introduced in .NET Core 2.1, so supporting a .NET Standard 2.0 target requires polyfilling them as well. Since the `string` type itself exists across all frameworks, we only need to polyfill the missing members, which makes this a good fit for the member-polyfill approach:
 
 ```csharp
 // Single out frameworks that don't have the desired API natively
@@ -532,9 +532,9 @@ internal static class PolyfillExtensions
 
 Here we define an internal class arbitrarily named `PolyfillExtensions`, which contains two extension methods that mirror the signatures of the original `string.Contains(...)` overloads that we want to backport. The implementations simply delegate to the existing `string.IndexOf(...)` method, which already supports the `StringComparison` parameter.
 
-Similarly to the previous example, we also leverage conditional compilation here to ensure that the polyfills are only included when building for frameworks that lack the required method definitions. Both of these APIs were introduced in the same release, so we can use a single `#if` check for the entire file.
+Similarly to the previous example, we also leverage conditional compilation to ensure that the polyfills are only included when building for frameworks that lack the required method definitions. Both of these APIs were introduced in the same release, so we can use a single `#if` check for the entire file.
 
-Unlike the type shim approach, however, here we omit the `namespace` declaration altogether. Doing so intentionally places the extensions in the global namespace, making them accessible without additional `using` directives. As a result, any existing or future code that calls these overloads will transparently bind to the polyfills when the native implementations are unavailable.
+Unlike the type shim approach, however, we deliberately omit the `namespace` declaration here. Doing so intentionally places the extensions in the global namespace, making them accessible without additional `using` directives. As a result, any existing or future code that calls these overloads will transparently bind to the polyfills when the native implementations are unavailable.
 
 Finally, having defined these polyfills, we can safely use the new `string.Contains(...)` overloads throughout our library code:
 
@@ -561,48 +561,99 @@ With that said, let's imagine that our library needs to leverage `Span<T>`, `Mem
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net10.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
-    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
-    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+    <IsTrimmable
+      Condition="$([MSBuild]::IsTargetFrameworkCompatible(
+        '$(TargetFramework)',
+        'net6.0'
+      ))"
+    >true</IsTrimmable>
+    <IsAotCompatible
+      Condition="$([MSBuild]::IsTargetFrameworkCompatible(
+        '$(TargetFramework)',
+        'net7.0'
+      ))"
+    >true</IsAotCompatible>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <!-- Make sure to update the package versions if copy-pasting! -->
   <ItemGroup>
     <!--
         System.Memory and related types are natively available starting with netstandard2.1 and netcoreapp2.1,
         so we exclude those frameworks from getting this package reference.
-        You may also consider updating the <TargetFrameworks> list to add them as intermediate targets.
      -->
     <PackageReference
       Include="System.Memory"
-      Version="4.6.3"
-      Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) AND
-                 !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1'))"
+      Condition="
+        !$([MSBuild]::IsTargetFrameworkCompatible(
+          '$(TargetFramework)',
+          'netstandard2.1'
+        ))
+        AND
+        !$([MSBuild]::IsTargetFrameworkCompatible(
+          '$(TargetFramework)',
+          'netcoreapp2.1'
+        ))
+      "
     />
 
     <!--
         IAsyncEnumerable and related types are natively available starting with netstandard2.1 and netcoreapp3.0,
         so we exclude those frameworks from getting this package reference.
-        You may also consider updating the <TargetFrameworks> list to add them as intermediate targets.
      -->
     <PackageReference
       Include="Microsoft.Bcl.AsyncInterfaces"
-      Version="1.1.1"
-      Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) AND
-                 !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp3.0'))"
+      Condition="
+        !$([MSBuild]::IsTargetFrameworkCompatible(
+          '$(TargetFramework)',
+          'netstandard2.1'
+        ))
+        AND
+        !$([MSBuild]::IsTargetFrameworkCompatible(
+          '$(TargetFramework)',
+          'netcoreapp3.0'
+        ))
+      "
     />
   </ItemGroup>
 
 </Project>
 ```
 
-Similarly to the conditional compilation pattern from before, here we apply the `Condition="..."` attribute together with the `IsTargetFrameworkCompatible(...)` function to ensure that the compatibility packages only get referenced when required. With the target frameworks we have configured for our library, this means that `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` will be included solely for .NET Standard 2.0 builds.
+Similarly to the conditional-compilation pattern from before, we use the `Condition="..."` attribute to exclude compatibility packages where they're not required. Since `Span` and `Memory` are available natively in .NET Standard 2.1+ and .NET Core 2.1+, and `IAsyncEnumerable<T>` is available natively in .NET Standard 2.1+ and .NET Core 3.0+, the respective boundaries can be expressed via `IsTargetFrameworkCompatible(...)` as illustrated above.
 
-Note that, unlike the hand-rolled polyfills we've explored earlier, the type definitions provided by these packages are inherently public and cannot be restricted in visibility. Because run-time dependencies are transitive in nature, all of the exported types will be surfaced to the library's consumers as well, creating an implicit contract that you need be mindful of.
+Also note that we've added `netstandard2.1` as an intermediate target so that our library can be consumed without extra dependencies on frameworks earlier than `net6.0`. The two other upper thresholds of `netcoreapp2.1` and `netcoreapp3.0` don't need separate targets of their own — the former is too old for us to support, while the latter already implements `netstandard2.1` anyway.
 
-Either way, having established the necessary references, we can now freely access the associated APIs regardless of the target framework:
+To better understand how these conditional references translate into the final NuGet package, we can inspect the its generated `MyLibrary.nuspec` manifest. With the way our library is configured, `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` should only appear as dependencies for the .NET Standard 2.0 target:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>MyLibrary</id>
+    <version>0.0.0-dev</version>
+    <authors>YOUR_NAME_HERE</authors>
+    <description>Sample library</description>
+
+    <!-- Other metadata omitted for brevity -->
+
+    <dependencies>
+      <group targetFramework="net10.0" />
+      <group targetFramework="net6.0" />
+      <group targetFramework="net7.0" />
+      <group targetFramework=".NETStandard2.1" />
+      <!-- This is the only of our targets that requires compatibility packages -->
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="Microsoft.Bcl.AsyncInterfaces" version="1.1.1" exclude="Build,Analyzers" />
+        <dependency id="System.Memory" version="4.6.3" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>
+```
+
+Either way, with the setup complete, we can now freely access the associated APIs regardless of the target framework:
 
 ```csharp
 using System;
@@ -650,25 +701,58 @@ While the choice between these community libraries largely comes down to API cov
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net6.0;net7.0;net10.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
-    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
-    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+    <IsTrimmable
+      Condition="$([MSBuild]::IsTargetFrameworkCompatible(
+        '$(TargetFramework)',
+        'net6.0'
+      ))"
+    >true</IsTrimmable>
+    <IsAotCompatible
+      Condition="$([MSBuild]::IsTargetFrameworkCompatible(
+        '$(TargetFramework)',
+        'net7.0'
+      ))"
+    >true</IsAotCompatible>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <!-- Make sure to update the package versions if copy-pasting! -->
   <ItemGroup>
+    <!--
+        System.Memory and related types are natively available starting with netstandard2.1 and netcoreapp2.1,
+        so we exclude those frameworks from getting this package reference.
+     -->
     <PackageReference
       Include="System.Memory"
-      Version="4.6.3"
-      Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) AND
-                 !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1'))"
+      Condition="
+        !$([MSBuild]::IsTargetFrameworkCompatible(
+          '$(TargetFramework)',
+          'netstandard2.1'
+        ))
+        AND
+        !$([MSBuild]::IsTargetFrameworkCompatible(
+          '$(TargetFramework)',
+          'netcoreapp2.1'
+        ))
+      "
     />
 
+    <!--
+        IAsyncEnumerable and related types are natively available starting with netstandard2.1 and netcoreapp3.0,
+        so we exclude those frameworks from getting this package reference.
+     -->
     <PackageReference
       Include="Microsoft.Bcl.AsyncInterfaces"
-      Version="1.1.1"
-      Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) AND
-                 !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp3.0'))"
+      Condition="
+        !$([MSBuild]::IsTargetFrameworkCompatible(
+          '$(TargetFramework)',
+          'netstandard2.1'
+        ))
+        AND
+        !$([MSBuild]::IsTargetFrameworkCompatible(
+          '$(TargetFramework)',
+          'netcoreapp3.0'
+        ))
+      "
     />
 
     <!--
@@ -676,11 +760,7 @@ While the choice between these community libraries largely comes down to API cov
         Since PolyShim's polyfills are provided as source files, they get compiled into our assembly directly.
         Condition attribute is not necessary here as PolyShim handles framework filtering internally.
     -->
-    <PackageReference
-      Include="PolyShim"
-      Version="2.11.0"
-      PrivateAssets="all"
-    />
+    <PackageReference Include="PolyShim" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>
