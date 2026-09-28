@@ -368,11 +368,11 @@ Enabling this property in turn also causes the compiler to flag public types and
 
 ### Polyfills and backports
 
-Throughout this article, there were a few mentions of a concept called [_polyfill_](<https://en.wikipedia.org/wiki/Polyfill_(programming)>) — a general programming technique that lets developers replicate the behavior of newer platform APIs on older targets that don't support them natively. When building libraries, this technique is particularly useful as it allows us to leverage modern framework and compiler features without sacrificing compatibility.
+Throughout this article, there were a few mentions of a concept called [_polyfill_](<https://en.wikipedia.org/wiki/Polyfill_(programming)>) — a general programming technique for recreating newer platform APIs within the constraints of older targets that don't support them natively. When building libraries, this technique is particularly useful because it lets us treat modern framework and compiler features as a common baseline, while handling compatibility concerns in the background.
 
 Polyfills are authored and applied differently depending on the programming language and its capabilities. For example, in JavaScript — where the term originated — they are implemented as standalone scripts that patch the environment or specific object prototypes to add missing functionality at run time. By contrast, C#'s statically typed and compiled nature rules out that style of polyfilling, but the concept itself remains applicable through the following approaches:
 
-- **Type polyfills**, which re-implement missing built-in types from scratch, mimicking their original behavior as closely as possible. These polyfills are placed in the same namespaces as the official types so that they are picked up by the compiler when the native definitions are not available. Suitable when the desired types are completely missing from the target framework.
+- **Type polyfills**, which re-implement missing built-in types from scratch, mimicking their original behavior as closely as possible. These re-implementations are placed in the same namespaces as the official types so that they are picked up by the compiler when the native definitions are not available. Suitable when the desired types are completely missing from the target framework.
 - **Member polyfills**, which rely on [extension members](https://learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/extension-methods) to shim missing methods, properties, or operators on existing built-in types. These extensions are usually placed in the global namespace to make them immediately accessible on every applicable type, effectively simulating intrinsic members. Suitable when the desired types exist, but lack certain members from later frameworks.
 
 These approaches can be combined with the SDK-provided [_preprocessor symbols_](https://learn.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives#conditional-compilation) to ensure that the polyfills are only included in the project when targeting frameworks that don't have the desired APIs. This way, when the library is built for more modern environments, the native implementations are used instead, avoiding any potential conflicts, performance issues, and dead code.
@@ -534,9 +534,9 @@ Here we define an internal class arbitrarily named `PolyfillExtensions`, which c
 
 Similarly to the previous example, we also leverage conditional compilation to ensure that the polyfills are only included when building for frameworks that lack the required method definitions. Both of these APIs were introduced in the same release, so we can use a single `#if` check for the entire file.
 
-Unlike the type shim approach, however, we deliberately omit the `namespace` declaration here. Doing so intentionally places the extensions in the global namespace, making them accessible without additional `using` directives. As a result, any existing or future code that calls these overloads will transparently bind to the polyfills when the native implementations are unavailable.
+Unlike the type shim approach, however, we deliberately omit the `namespace` declaration here. Doing so intentionally places the extensions in the global namespace, making them accessible without additional `using` directives. As a result, any existing or future code that calls the original overloads will transparently bind to the polyfills when the native implementations are unavailable.
 
-Finally, having defined these polyfills, we can safely use the new `string.Contains(...)` overloads throughout our library code:
+Finally, having defined these polyfills, we can safely use the new `string.Contains(...)` methods throughout our library code:
 
 ```csharp
 var str = "Hello world";
@@ -561,7 +561,7 @@ With that said, let's imagine that our library needs to leverage `Span<T>`, `Mem
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net11.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <IsTrimmable
       Condition="$([MSBuild]::IsTargetFrameworkCompatible(
@@ -580,7 +580,7 @@ With that said, let's imagine that our library needs to leverage `Span<T>`, `Mem
 
   <ItemGroup>
     <!--
-        System.Memory and related types are natively available starting with netstandard2.1 and netcoreapp2.1,
+        Span<T> and Memory<T> are natively available starting with netstandard2.1 and netcoreapp2.1,
         so we exclude those frameworks from getting this package reference.
      -->
     <PackageReference
@@ -599,7 +599,7 @@ With that said, let's imagine that our library needs to leverage `Span<T>`, `Mem
     />
 
     <!--
-        IAsyncEnumerable and related types are natively available starting with netstandard2.1 and netcoreapp3.0,
+        IAsyncEnumerable<T> is natively available starting with netstandard2.1 and netcoreapp3.0,
         so we exclude those frameworks from getting this package reference.
      -->
     <PackageReference
@@ -621,11 +621,11 @@ With that said, let's imagine that our library needs to leverage `Span<T>`, `Mem
 </Project>
 ```
 
-Similarly to the conditional-compilation pattern from before, we use the `Condition="..."` attribute to exclude compatibility packages where they're not required. Since `Span` and `Memory` are available natively in .NET Standard 2.1+ and .NET Core 2.1+, and `IAsyncEnumerable<T>` is available natively in .NET Standard 2.1+ and .NET Core 3.0+, the respective boundaries can be expressed via `IsTargetFrameworkCompatible(...)` as illustrated above.
+Similarly to the conditional-compilation pattern from before, we use the `Condition="..."` attribute to exclude compatibility packages where they're not required. Since `Span<T>` and `Memory<T>` are available natively in .NET Standard 2.1+ and .NET Core 2.1+, and `IAsyncEnumerable<T>` is available natively in .NET Standard 2.1+ and .NET Core 3.0+, the respective boundaries can be expressed via `IsTargetFrameworkCompatible(...)` as illustrated above.
 
-Also note that we've added `netstandard2.1` as an intermediate target so that our library can be consumed without extra dependencies on frameworks earlier than `net6.0`. The two other upper thresholds of `netcoreapp2.1` and `netcoreapp3.0` don't need separate targets of their own — the former is too old for us to support, while the latter already implements `netstandard2.1` anyway.
+Also note that we've added `netstandard2.1` as an intermediate target so that our library can be consumed without extra dependencies on a slightly broader range of frameworks. The two other upper thresholds of `netcoreapp2.1` and `netcoreapp3.0` don't need separate targets of their own — the former has long gone out of support, while the latter already implements `netstandard2.1` anyway.
 
-To better understand how these conditional references translate into the final NuGet package, we can inspect the its generated `MyLibrary.nuspec` manifest. With the way our library is configured, `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` should only appear as dependencies for the .NET Standard 2.0 target:
+To better understand how these conditional references translate into the final NuGet package, we can inspect its generated `MyLibrary.nuspec` manifest. With the way our library is configured, `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` should only appear as dependencies for the .NET Standard 2.0 target:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -639,11 +639,13 @@ To better understand how these conditional references translate into the final N
     <!-- Other metadata omitted for brevity -->
 
     <dependencies>
-      <group targetFramework="net10.0" />
+      <!-- Main target (.NET vCurrent) -->
+      <group targetFramework="net11.0" />
+      <!-- Intermediate targets that provide compatibility breakpoints -->
       <group targetFramework="net6.0" />
       <group targetFramework="net7.0" />
       <group targetFramework=".NETStandard2.1" />
-      <!-- This is the only of our targets that requires compatibility packages -->
+      <!-- Baseline target -->
       <group targetFramework=".NETStandard2.0">
         <dependency id="Microsoft.Bcl.AsyncInterfaces" version="1.1.1" exclude="Build,Analyzers" />
         <dependency id="System.Memory" version="4.6.3" exclude="Build,Analyzers" />
@@ -653,7 +655,7 @@ To better understand how these conditional references translate into the final N
 </package>
 ```
 
-Either way, with the setup complete, we can now freely access the associated APIs regardless of the target framework:
+Either way, with the compatibility packages plugging the gaps, we can now leverage the associated APIs seamlessly from .NET 11.0 down to .NET Standard 2.0:
 
 ```csharp
 using System;
@@ -685,21 +687,19 @@ async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadChunksAsync(Stream stream)
 
 Generally speaking, the official compatibility packages should be your first choice when it comes to backporting common platform APIs. They are well-tested, optimized for performance, and support a wide range of .NET versions, making them a reliable default for most scenarios.
 
-Being official, however, also means that their scope is rather conservative — they tend to focus on user-facing areas of the framework, while leaving out many specialized and compiler-facing types, including those that power various language features. Additionally, they don't provide any member polyfills, as that requires relying on somewhat unconventional techniques, like the global extension trick we've seen earlier.
+Being official, however, also means that their scope is rather conservative — they primarily focus on user-facing areas of the framework and leave out many specialized and low-level types, including those that power language features. Additionally, they don't attempt to provide any member polyfills, as that requires relying on globally scoped extensions, which is somewhat of an unconventional technique.
 
 This naturally brings us to the second solution: community polyfill libraries, such as [PolySharp](https://github.com/Sergio0694/PolySharp), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolyShim](https://github.com/Tyrrrz/PolyShim). All these projects were born out of independent efforts to plug the gaps left by Microsoft's compatibility packages, gradually evolving into comprehensive collections of shims and backports for a wide spectrum of different APIs.
 
-As community-driven projects, these libraries are not constrained by corporate support policies, which lets them be more thorough and aggressive in their coverage. Here you will find polyfills for nullable reference types, records, init-only properties, `Index`, `Range`, `ValueTuple<...>`, `ValueTask<T>`, `ArrayPool<T>`, `Span<T>`, `Memory<T>`, `IEnumerable<T>.Chunk(...)`, `Stream.ReadExactly(...)`, `Environment.ProcessPath`, `Random.Shared`, and pretty much everything in between.
+As community-driven projects, they are not bound by the servicing commitments of Microsoft's offerings, allowing them to be more thorough and aggressive in their coverage. Here you will find polyfills for Nullable Reference Types, Records, `init`-only properties, `Index`, `Range`, `ValueTuple<...>`, `ValueTask<T>`, `ArrayPool<T>`, `Span<T>`, `Memory<T>`, `IEnumerable<T>.Chunk(...)`, `Stream.ReadExactly(...)`, `Environment.ProcessPath`, `Random.Shared`, and almost everything in between.
 
-Unlike the `System.*` and `Microsoft.Bcl.*` packages, they are also distributed as static dependencies, providing polyfills through source code rather than pre-compiled assemblies. This approach effectively mimics hand-rolled implementations, allowing them to ship all polyfills as a single package, use `internal` visibility by default, reduce maintenance overhead, and leverage conditional compilation to filter out unnecessary code automatically.
-
-While the choice between these community libraries largely comes down to API coverage and personal preference, their usage is essentially identical. For our example, let's assume we've chosen to go with PolyShim, adding it as a dependency like so:
+While the choice between these libraries largely comes down to API coverage and personal preference, their usage is essentially identical. For our example, let's assume we've chosen to go with PolyShim, adding it as a dependency like so:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net11.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <IsTrimmable
       Condition="$([MSBuild]::IsTargetFrameworkCompatible(
@@ -717,10 +717,6 @@ While the choice between these community libraries largely comes down to API cov
   </PropertyGroup>
 
   <ItemGroup>
-    <!--
-        System.Memory and related types are natively available starting with netstandard2.1 and netcoreapp2.1,
-        so we exclude those frameworks from getting this package reference.
-     -->
     <PackageReference
       Include="System.Memory"
       Condition="
@@ -736,10 +732,6 @@ While the choice between these community libraries largely comes down to API cov
       "
     />
 
-    <!--
-        IAsyncEnumerable and related types are natively available starting with netstandard2.1 and netcoreapp3.0,
-        so we exclude those frameworks from getting this package reference.
-     -->
     <PackageReference
       Include="Microsoft.Bcl.AsyncInterfaces"
       Condition="
@@ -758,7 +750,7 @@ While the choice between these community libraries largely comes down to API cov
     <!--
         PrivateAssets="all" ensures that PolyShim is not included as a dependency of our own NuGet package.
         Since PolyShim's polyfills are provided as source files, they get compiled into our assembly directly.
-        Condition attribute is not necessary here as PolyShim handles framework filtering internally.
+        Condition attribute is not necessary here as PolyShim uses conditional compilation instead.
     -->
     <PackageReference Include="PolyShim" PrivateAssets="all" />
   </ItemGroup>
@@ -766,11 +758,11 @@ While the choice between these community libraries largely comes down to API cov
 </Project>
 ```
 
-Note that the `PolyShim`'s package reference differs from the previous ones in two important ways. First, no `Condition="..."` attribute is required here, as PolyShim relies on its own preprocessor symbols to include only the polyfills relevant to the current target framework. Second, the dependency is marked with `PrivateAssets="all"`, ensuring that it's only used during compilation and doesn't get transitively imposed on the consumers of our library.
+Note that PolyShim is added differently from the other two packages. First, no `Condition="..."` attribute is required here, as PolyShim relies on its own conditional directives to filter polyfills based on the project's target framework. Second, the reference is marked with `PrivateAssets="all"` to ensure that it doesn't become a transitive dependency for the consumers of our library.
 
-Both of these differences stem from the fact that PolyShim is a source-only package and integrates directly into the project's build pipeline, rather than behaving like a traditional run-time dependency. This allows it to make framework-specific decisions at compile time and remain an internal implementation detail, without influencing dependency graphs or the public surface of our own package.
+Both of these differences stem from the fact that PolyShim is distributed as a source-only package — instead of providing its polyfills through separate assemblies, they are integrated directly into the referencing project's build process. As such, they behave similarly to handwritten implementations, leveraging preprocessor symbols and staying an internal implementation detail.
 
-With everything in place, we immediately gain access to all of PolyShim's polyfills, allowing us to use modern APIs and language features freely:
+On its own, the following code would not compile against every target framework configured for our library. PolyShim, however, makes it work:
 
 ```csharp
 using System;
@@ -782,6 +774,7 @@ public class User
 {
     // Polyfilled feature: init-only properties (introduced in .NET 5.0)
     public string Name { get; init; }
+
     // Polyfilled feature: nullable reference types (introduced in .NET Core 3.0)
     public string? Email { get; init; }
 
@@ -789,6 +782,7 @@ public class User
     {
         // Polyfilled feature: the ThrowIfNull(...) method (introduced in .NET 6.0)
         ArgumentNullException.ThrowIfNull(name);
+
         Name = name;
         Email = email;
     }
@@ -815,6 +809,7 @@ async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadChunksAsync(Stream stream)
     {
         // System.Memory provides the Span<T> and Memory<T> types,
         // while PolyShim adds the missing method overloads, such as the one below.
+        // No need to cast the memory to an array like we did in the previous example.
         var bytesRead = await stream.ReadAsync(buffer.Memory);
         if (bytesRead <= 0)
             yield break;
@@ -827,6 +822,22 @@ async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadChunksAsync(Stream stream)
 As a library developer, you'll often end up using both the official and community polyfill libraries side by side. The `System.*` and `Microsoft.Bcl.*` packages are a natural fit for types that are part of your library's public contract, as they are widely recognized, well-supported, and reasonable to impose on consumers. Community polyfills, on the other hand, are best suited for APIs that are only used internally or for any other bits that are not covered by the official packages.
 
 That said, polyfills are not an ultimate solution to the compatibility problem — even with the flexibility of extension members, some feature of the language or the runtime cannot be retrofitted in a meaningful and transparent way. As a result, supporting older frameworks is always going to be a trade-off, where the benefits of broader compatibility must be carefully weighed against added complexity, maintenance cost, and long-term impact on the design of your library.
+
+### Dependencies as implementation details
+
+A separate but related concern is what to do when your library depends on a compiled package that you want to keep entirely hidden from consumers. For source-only packages like PolyShim and Snek, marking the reference with `PrivateAssets="all"` is sufficient — the code compiles directly into your assembly and leaves no runtime trace. For packages that produce their own compiled assemblies, however, `PrivateAssets="all"` only removes the dependency from your package's public manifest; the output assembly still carries a runtime reference to the package, which your consumers will also need to install.
+
+The traditional solution to this problem is IL merging — physically combining the dependency's compiled bytecode into your own output assembly at build time, so that the two ship as a single self-contained artifact. The oldest tool for this on .NET is [ILMerge](https://github.com/dotnet/ILMerge), which Microsoft originally developed for their own internal use and later open-sourced. Its modern, more actively maintained alternative is [ILRepack](https://github.com/gluck/il-repack), which supports a broader range of assembly types and integrates more cleanly into the MSBuild pipeline.
+
+Both tools get the job done, but they require non-trivial configuration and can be fragile in the face of certain assembly features, such as resources, mixed-mode assemblies, and strong naming.
+
+[Binternal](https://github.com/SimonCropp/Binternal) offers a more streamlined alternative. Rather than configuring a full merge pipeline manually, it wires up ILRepack under the hood and additionally marks all of the imported types as `internal`, so they cannot accidentally surface through your library's public API. Adding it follows the same source-package pattern:
+
+```xml
+<PackageReference Include="Binternal" PrivateAssets="all" />
+```
+
+Binternal isn't something you'll reach for on every project — most utility dependencies are already covered by source-only packages or the `PrivateAssets="all"` pattern. But in situations where you want to use a compiled library as a pure implementation detail, it provides a clean way to keep your package's dependency footprint intentional and minimal.
 
 ### Strong naming
 
@@ -856,22 +867,6 @@ For open-source projects, committing the key file to the repository is effective
 ```
 
 With that reference in place, the assembly is signed transparently at build time and there is nothing else to configure. For most library projects targeting .NET Standard 2.0, this is the easiest way to satisfy strong naming requirements without adding any real maintenance burden.
-
-### Keeping dependencies private
-
-A separate but related concern is what to do when your library depends on a compiled package that you want to keep entirely hidden from consumers. For source-only packages like PolyShim and Snek, marking the reference with `PrivateAssets="all"` is sufficient — the code compiles directly into your assembly and leaves no runtime trace. For packages that produce their own compiled assemblies, however, `PrivateAssets="all"` only removes the dependency from your package's public manifest; the output assembly still carries a runtime reference to the package, which your consumers will also need to install.
-
-The traditional solution to this problem is IL merging — physically combining the dependency's compiled bytecode into your own output assembly at build time, so that the two ship as a single self-contained artifact. The oldest tool for this on .NET is [ILMerge](https://github.com/dotnet/ILMerge), which Microsoft originally developed for their own internal use and later open-sourced. Its modern, more actively maintained alternative is [ILRepack](https://github.com/gluck/il-repack), which supports a broader range of assembly types and integrates more cleanly into the MSBuild pipeline.
-
-Both tools get the job done, but they require non-trivial configuration and can be fragile in the face of certain assembly features, such as resources, mixed-mode assemblies, and strong naming.
-
-[Binternal](https://github.com/SimonCropp/Binternal) offers a more streamlined alternative. Rather than configuring a full merge pipeline manually, it wires up ILRepack under the hood and additionally marks all of the imported types as `internal`, so they cannot accidentally surface through your library's public API. Adding it follows the same source-package pattern:
-
-```xml
-<PackageReference Include="Binternal" PrivateAssets="all" />
-```
-
-Binternal isn't something you'll reach for on every project — most utility dependencies are already covered by source-only packages or the `PrivateAssets="all"` pattern. But in situations where you want to use a compiled library as a pure implementation detail, it provides a clean way to keep your package's dependency footprint intentional and minimal.
 
 ## Code formatting
 
