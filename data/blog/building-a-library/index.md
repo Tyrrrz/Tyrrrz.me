@@ -210,11 +210,11 @@ In the snippet above, we have a few different groups of properties that are used
 
 Starting off with the compiler options, we set the **`<LangVersion>`** property to `latest`, instructing the toolchain to use the most recent stable version of C# (or F#, VB). This is contrary to the default behavior, where the language version is instead determined by the target framework of the project, essentially only allowing newer language features when building against frameworks that officially support them.
 
-The default behavior is a sensible safeguard, seeing as language constructs may sometimes depend on certain runtime capabilities to work correctly. However, library projects, unlike applications, cannot afford to simply target the latest version of .NET — they need to maximize compatibility with their potential consumers and that often involves targeting frameworks that are several versions behind the bleeding edge.
+The default behavior is a sensible safeguard, seeing as language constructs may sometimes depend on certain capabilities provided by the Base Class Library (BCL) to function. However, library projects, unlike applications, cannot afford to simply target the latest version of .NET — they need to maximize compatibility with their potential consumers and that often involves targeting frameworks that are several versions behind the bleeding edge.
 
-Therefore, explicitly setting the language version forces the compiler to ignore the official guidelines and evaluate the availability of each language feature independently from the target framework. Doing so immediately unlocks some of the newest syntax that doesn't have any runtime dependencies, while also allowing other constructs to be manually backported using [polyfills](<https://en.wikipedia.org/wiki/Polyfill_(programming)>).
+Therefore, explicitly setting the language version forces the compiler to ignore the official guidelines and evaluate the availability of each language feature independently from the target framework. Doing so immediately unlocks some of the newest syntactic sugar, while also allowing more complex constructs to be manually backported using [polyfills](<https://en.wikipedia.org/wiki/Polyfill_(programming)>).
 
-Following that, we enable the [**Nullable Reference Types**](https://learn.microsoft.com/dotnet/csharp/nullable-references) feature of the C# compiler (**`<Nullable>`**), as it is a great way to improve the safety of our code and to more accurately advertise the capabilities of our APIs. There are two modes in which this feature can be configured: `annotations`, which instructs the compiler to emit nullability annotations for all types and members that we define; and `enable`, which also produces compiler warnings about related violations during development.
+Following that, we enable the [**Nullable Reference Types**](https://learn.microsoft.com/dotnet/csharp/nullable-references) feature of the C# compiler (**`<Nullable>`**), as it is a great way to improve the safety of our code and to accurately advertise the capabilities of our APIs. There are two modes in which this feature can be configured: `annotations`, which instructs the compiler to emit nullability annotations for all types and members that we define; and `enable`, which also produces compiler warnings about related violations during development.
 
 Just like many other language and compiler features, Nullable Reference Types is subject to certain availability constraints. In its native form, NRT was introduced with the release of C# 8 and .NET Core 3.0 — and, although it's possible to backport the bits required to annotate our own types, the compiler checks are not going to be very useful when targeting frameworks that don't provide nullability information themselves.
 
@@ -366,7 +366,7 @@ Finally, we set the **`<GenerateDocumentationFile>`** property to `true` as well
 
 Enabling this property in turn also causes the compiler to flag public types and members that lack accompanying documentation comments. Since we configured warnings as errors in `Directory.Build.props`, this might produce a lot of noise early in development, so consider temporarily [suppressing `CS1591`](https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-messages/cs1591) until the library is closer to release.
 
-### Polyfills and backports
+### Framework polyfills
 
 Throughout this article, there were a few mentions of a concept called [_polyfill_](<https://en.wikipedia.org/wiki/Polyfill_(programming)>) — a general programming technique for recreating newer platform APIs within the constraints of older targets that don't support them natively. When building libraries, this technique is particularly useful because it lets us treat modern framework and compiler features as a common baseline, while handling compatibility concerns in the background.
 
@@ -625,7 +625,7 @@ Similarly to the conditional-compilation pattern from before, we use the `Condit
 
 Also note that we've added `netstandard2.1` as an intermediate target so that our library can be consumed without extra dependencies on a slightly broader range of frameworks. The two other upper thresholds of `netcoreapp2.1` and `netcoreapp3.0` don't need separate targets of their own — the former has long gone out of support, while the latter already implements `netstandard2.1` anyway.
 
-To better understand how these conditional references translate into the final NuGet package, we can inspect its generated `MyLibrary.nuspec` manifest. With the way our library is configured, `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` should only appear as dependencies for the .NET Standard 2.0 target:
+To better understand how these conditional references translate into the final NuGet package, we can inspect its generated `MyLibrary.nuspec` manifest. With the way our library is configured, `System.Memory` and `Microsoft.Bcl.AsyncInterfaces` should only appear as dependencies for a single target:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -655,7 +655,7 @@ To better understand how these conditional references translate into the final N
 </package>
 ```
 
-Either way, with the compatibility packages plugging the gaps, we can now leverage the associated APIs seamlessly from .NET 11.0 down to .NET Standard 2.0:
+Either way, with the compatibility packages filling in the missing pieces on .NET Standard 2.0, we can now leverage the associated APIs seamlessly on all frameworks:
 
 ```csharp
 using System;
@@ -691,7 +691,7 @@ Being official, however, also means that their scope is rather conservative — 
 
 This naturally brings us to the second solution: community polyfill libraries, such as [PolySharp](https://github.com/Sergio0694/PolySharp), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolyShim](https://github.com/Tyrrrz/PolyShim). All these projects were born out of independent efforts to plug the gaps left by Microsoft's compatibility packages, gradually evolving into comprehensive collections of shims and backports for a wide spectrum of different APIs.
 
-As community-driven projects, they are not bound by the servicing commitments of Microsoft's offerings, allowing them to be more thorough and aggressive in their coverage. Here you will find polyfills for Nullable Reference Types, Records, `init`-only properties, `Index`, `Range`, `ValueTuple<...>`, `ValueTask<T>`, `ArrayPool<T>`, `Span<T>`, `Memory<T>`, `IEnumerable<T>.Chunk(...)`, `Stream.ReadExactly(...)`, `Environment.ProcessPath`, `Random.Shared`, and almost everything in between.
+As community-driven projects, they are not bound by the servicing commitments of Microsoft's offerings, allowing them to be more thorough and aggressive in their coverage. Here you will find polyfills for Nullable Reference Types, Records, `init` Properties, `Index`, `Range`, `ValueTuple<...>`, `ValueTask<T>`, `ArrayPool<T>`, `Span<T>`, `Memory<T>`, `IEnumerable<T>.Chunk(...)`, `Stream.ReadExactly(...)`, `Environment.ProcessPath`, `Random.Shared`, and almost everything in between.
 
 While the choice between these libraries largely comes down to API coverage and personal preference, their usage is essentially identical. For our example, let's assume we've chosen to go with PolyShim, adding it as a dependency like so:
 
@@ -760,7 +760,7 @@ While the choice between these libraries largely comes down to API coverage and 
 
 Note that PolyShim is added differently from the other two packages. First, no `Condition="..."` attribute is required here, as PolyShim relies on its own conditional directives to filter polyfills based on the project's target framework. Second, the reference is marked with `PrivateAssets="all"` to ensure that it doesn't become a transitive dependency for the consumers of our library.
 
-Both of these differences stem from the fact that PolyShim is distributed as a source-only package — instead of providing its polyfills through separate assemblies, they are integrated directly into the referencing project's build process. As such, they behave similarly to handwritten implementations, leveraging preprocessor symbols and staying an internal implementation detail.
+Both of these differences stem from the fact that PolyShim is distributed as a source-only package — instead of providing its polyfills through a precompiled assembly, they are integrated directly into the referencing project's build process. As such, they behave similarly to handwritten polyfills, which allows them to both leverage preprocessor symbols and keep their implementations internal.
 
 On its own, the following code would not compile against every target framework configured for our library. PolyShim, however, makes it work:
 
@@ -772,15 +772,18 @@ using System;
 // Same code works everywhere without any changes.
 public class User
 {
-    // Polyfilled feature: init-only properties (introduced in .NET 5.0)
-    public string Name { get; init; }
+    // Polyfilled feature: Required Members (introduced in C# 11 / .NET 7.0)
+    // Polyfilled feature: init Properties (introduced in C# 9 / .NET 5.0)
+    public required string Name { get; init; }
 
-    // Polyfilled feature: nullable reference types (introduced in .NET Core 3.0)
+    // Polyfilled feature: Nullable Reference Types (introduced in C# 8 / .NET Core 3.0)
     public string? Email { get; init; }
 
+    // Polyfilled feature: SetsRequiredMembers attribute (introduced in .NET 7.0)
+    [SetsRequiredMembers]
     public User(string name, string? email = null)
     {
-        // Polyfilled feature: the ThrowIfNull(...) method (introduced in .NET 6.0)
+        // Polyfilled feature: ThrowIfNull(...) method (introduced in .NET 6.0)
         ArgumentNullException.ThrowIfNull(name);
 
         Name = name;
@@ -789,7 +792,7 @@ public class User
 }
 ```
 
-Beyond just being a collection of polyfills, PolyShim can also adapt its behavior based on the presence of the official compatibility packages. For example, seeing as our project still has a reference to `System.Memory`, PolyShim will disable its own polyfills that define `Span<T>` and `Memory<T>`, but will still provide related member polyfills that complement the package. We can take advantage of that to further simplify our earlier example:
+Beyond just being a collection of polyfills, PolyShim can also adapt its capabilities when referenced alongside the official compatibility packages. For example, since our project uses `System.Memory`, PolyShim will disable its own implementations of `Span<T>` and `Memory<T>`, but will still provide related member polyfills that complement the package. We can take advantage of that to simplify the earlier `ReadChunksAsync(...)` example:
 
 ```csharp
 using System;
@@ -798,8 +801,8 @@ using System.Collections.Generic;
 using System.IO;
 
 // On newer frameworks, this uses the framework-provided types and members.
-// On older frameworks, this uses the polyfilled types from System.Memory and
-// polyfilled members from PolyShim.
+// On older frameworks, this uses the polyfilled types from the compatibility packages,
+// as well as polyfilled members from PolyShim.
 // Same code works everywhere without any changes.
 async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadChunksAsync(Stream stream)
 {
@@ -808,8 +811,8 @@ async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadChunksAsync(Stream stream)
     while (true)
     {
         // System.Memory provides the Span<T> and Memory<T> types,
-        // while PolyShim adds the missing method overloads, such as the one below.
-        // No need to cast the memory to an array like we did in the previous example.
+        // while PolyShim adds the missing Stream method overloads, such as the one below.
+        // No need to copy the memory to an array like we did in the previous example.
         var bytesRead = await stream.ReadAsync(buffer.Memory);
         if (bytesRead <= 0)
             yield break;
@@ -819,9 +822,18 @@ async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadChunksAsync(Stream stream)
 }
 ```
 
-As a library developer, you'll often end up using both the official and community polyfill libraries side by side. The `System.*` and `Microsoft.Bcl.*` packages are a natural fit for types that are part of your library's public contract, as they are widely recognized, well-supported, and reasonable to impose on consumers. Community polyfills, on the other hand, are best suited for APIs that are only used internally or for any other bits that are not covered by the official packages.
+Despite a somewhat overlapping scope, community polyfill packages are not a complete replacement for the official compatibility packages. In fact, you will often find yourself relying on both side by side, leveraging them for their respective strengths:
 
-That said, polyfills are not an ultimate solution to the compatibility problem — even with the flexibility of extension members, some feature of the language or the runtime cannot be retrofitted in a meaningful and transparent way. As a result, supporting older frameworks is always going to be a trade-off, where the benefits of broader compatibility must be carefully weighed against added complexity, maintenance cost, and long-term impact on the design of your library.
+- **Official compatibility packages** (`System.*` and `Microsoft.Bcl.*`) are best suited for backporting types that form your library's public API.
+  - They are well-tested and highly reliable, usually providing one-to-one behavioral parity with native types.
+  - Their transitive nature means that the consumer automatically gets the same compatibility surface without having to reference the packages themselves.
+  - They are widely adopted, making them likely to appear somewhere in the consumer's dependency graph anyway.
+- **Community polyfill packages** (such as PolyShim) are best suited for backporting types and members that are used internally within your library.
+  - They are typically distributed through source-only packages, which keeps them a compile-time dependency that doesn't flow to the consumers.
+  - They often leverage unconventional techniques, such as global extension members, to provide broader compatibility than would otherwise be possible.
+  - They can also be used to decouple support for language and compiler features from the project's target framework.
+
+All that said, despite the flexibility that C# provides, polyfills are not an ultimate solution to the compatibility problem. Some things — such as retroactively modifying type hierarchies (e.g., making `Stream` implement `IAsyncDisposable`) or enabling language features that require explicit runtime support (e.g., [Default Interface Methods](https://learn.microsoft.com/dotnet/csharp/advanced-topics/interface-implementation/default-interface-methods-versions)) — are simply impossible to replicate meaningfully. At the end of the day, supporting older frameworks is always going to be a trade-off, and polyfills can only help offset the cost.
 
 ### Dependencies as implementation details
 
