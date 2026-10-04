@@ -250,11 +250,11 @@ Being the author of a library means you need to be aware of the various developm
 
 - [.NET (Core)](https://dotnet.microsoft.com) — the modern, open-source, and cross-platform implementation of .NET. It started as a limited subset of .NET Framework called .NET Core, but has since evolved into a unified platform that encompasses almost all workloads, dropping the "Core" moniker in the process. New applications are expected to target this implementation going forward.
 - [.NET Framework](https://dotnet.microsoft.com/learn/dotnet/what-is-dotnet-framework) — the original, proprietary, Windows-only implementation of .NET. Legacy technology as of 2019, but still retains a massive user base due to its historical ubiquity.
-- [Silverlight](https://learn.microsoft.com/previous-versions/windows/silverlight) — a proprietary, cross-platform implementation of .NET for the browser. Based on a subset of .NET Framework, with its runtime delivered through a browser plugin. Legacy technology as of 2021, primarily superseded by Blazor.
+- [Silverlight](https://learn.microsoft.com/previous-versions/windows/silverlight) — a proprietary, cross-platform implementation of .NET for the web. Based on a subset of .NET Framework, with its runtime delivered through a browser plugin. Legacy technology as of 2021, primarily superseded by Blazor.
 - [Universal Windows Platform (UWP)](https://learn.microsoft.com/windows/uwp/get-started/universal-application-platform-guide) — a platform for building sandboxed Windows applications for desktop, mobile, console, and other device types. Its earlier iterations were based on a subset of .NET Framework, which happened to also be called .NET Core. Legacy technology as of 2024, primarily superseded by [Windows App SDK](https://learn.microsoft.com/windows/apps/windows-app-sdk).
 - [Mono](https://mono-project.com) — an open-source, cross-platform implementation of .NET Framework, originally created to bring .NET applications to non-Windows systems. It aimed to replicate the .NET Framework API surface in order to serve as a drop-in replacement rather than a separate target. Legacy technology as of 2019, but remains in use by some modern .NET workloads.
 - [.NET Standard](https://learn.microsoft.com/dotnet/standard/net-standard) — not an implementation itself, but a specification that defines a set of APIs to which different .NET implementations can conform. It was created to enable code sharing between frameworks, allowing the same compiled assemblies to execute against .NET (Core), .NET Framework, UWP, and Mono. Although still an important compatibility target, it is not expected to receive new versions.
-- [Xamarin](https://dotnet.microsoft.com/apps/xamarin) — a set of tools and libraries built on top of Mono to facilitate mobile application development for iOS and Android. Legacy technology as of 2024, but retains a sizable user base as its retirement left developers with non-trivial migration paths. Also, some of its modern successors, such as the .NET iOS workload, still rely on Mono.
+- [Xamarin](https://dotnet.microsoft.com/apps/xamarin) — a set of tools and libraries built on top of Mono to facilitate mobile application development for iOS and Android. Legacy technology as of 2024, but retains a sizable user base as its retirement left developers with non-trivial migration paths. Also, some of its modern successors, such as the .NET iOS workload, continue to rely on Mono.
 - [Blazor](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor) — a frontend web framework that lets developers create rich interactive UIs with C#. It can run on the server or in the browser via WebAssembly, the latter of which is currently powered by Mono.
 - [Unity](https://unity.com) — a popular game development engine that runs C# scripts using either a customized implementation of Mono or the IL2CPP backend. Its .NET support is distinct from that of a typical .NET application, so libraries intended for Unity often need special compatibility considerations.
 
@@ -262,7 +262,7 @@ In case the earlier remark about convoluted naming conventions somehow wasn't ap
 
 Anyway, in order for a library to be referenced by another project, it must be built against a framework that is compatible with the one used by that project. In most cases, it means that both of them need to target the same implementation of .NET, and the library's target version must be equal to or lower than that of the consuming project.
 
-If the library targets .NET Standard instead of a specific implementation, then the version of that standard must be supported by the project's framework. However, the rules for that are slightly more complex and you need to refer to the [compatibility table](https://dotnet.microsoft.com/platform/dotnet-standard#versions) to determine how the versions align.
+If the library targets .NET Standard instead of a specific implementation, then the version of that standard must be supported by the project's framework. However, the rules for that are more complex and you need to refer to a [special compatibility table](https://dotnet.microsoft.com/platform/dotnet-standard#versions) to determine how the versions align there.
 
 As you can probably imagine, it's also not enough to just pick a single target framework for your library and call it a day. In order to cover a broad range of clients — and provide the best possible experience for all of them — you often need to target multiple frameworks (and/or their versions) simultaneously. This is where [_multi-targeting_](https://learn.microsoft.com/visualstudio/msbuild/net-sdk-multitargeting) comes into play.
 
@@ -271,16 +271,16 @@ With multi-targeting, the .NET SDK works by building the library independently f
 Ultimately, compatibility is always a compromise, and early in the development of your library it may be tricky to gauge how far you should go to support older or niche frameworks. To help you get started, here are a few of my personal recommendations:
 
 - **Always target the latest version of .NET (Core)**. Your library should definitely be compatible with the newest version of .NET (currently `net11.0`) and there is no better way to ensure that than by targeting it directly.
+  - This guarantees that the consumers on the bleeding edge will get the most optimized assets of your library.
   - Additionally, this also provides you with an improved development experience — particularly through the SDK's built-in analyzers that only work when targeting the latest framework.
 - **Establish a compatibility baseline by targeting .NET Standard 2.0 as well**. By doing so, your library will automatically be supported by a [wide range of relatively modern .NET implementations](https://learn.microsoft.com/dotnet/standard/net-standard?tabs=net-standard-2-0), maximizing your audience without much cherry-picking.
   - .NET Standard 2.0 works with .NET Core 2.0+, .NET Framework 4.6.1+, and UWP 10.0.16299+, as well as specific versions of Mono, Xamarin, and Unity.
   - .NET Standard 2.0 is the most API-rich version of the standard that still supports .NET Framework and UWP, making it a natural lower boundary for most libraries.
-  - If this API set is too narrow for your library's needs, upgrade to .NET Standard 2.1 but also try to target the lowest version of .NET Framework and/or UWP that you can accommodate. For example, targeting `netstandard2.1` and `net471` expands access to more modern APIs while retaining compatibility with .NET Framework.
+  - If this API set is too narrow for your library's needs, consider upgrading to .NET Standard 2.1 but also try to target the lowest version of .NET Framework and/or UWP that you can accommodate. For example, targeting `netstandard2.1` and `net471` expands access to more modern APIs while retaining compatibility with .NET Framework.
   - Avoid targeting older versions of .NET Standard, as their corresponding implementations are too old and significantly restrict the available API surface.
 - **Target intermediate versions if you have framework-dependent code paths**. For example, if your library already targets .NET 11.0 and .NET Standard 2.0, but conditionally relies on certain APIs that were introduced in .NET 9.0, then you should separately target `net9.0` as well to ensure that those code paths are available as early as possible.
   - This is similarly relevant if your library uses polyfills to backport newer APIs to older frameworks. In such cases, you want to also include the frameworks that provide those APIs natively, so that polyfills are only used when necessary.
   - If you prefer to keep things lean, you can limit intermediate targets to only those that are [long-term support (LTS) releases](https://versionsof.net), such as .NET 8.0, .NET 10.0, etc.
-- In the worst case, **it's acceptable if your library can only reasonably target .NET (Core) and not other implementations**. Sometimes it's impossible or simply not worth the effort to support legacy frameworks, so it's fine to focus solely on the modern .NET family.
 
 For the `MyLibrary` example, we'll assume that its code is fairly portable and has modest API requirements. Let's now configure the project's target frameworks to reflect that:
 
@@ -364,18 +364,44 @@ Similar to _Nullable Reference Types_, the flow analyzers for trimming and AOT b
 
 Finally, we set the **`<GenerateDocumentationFile>`** property to `true` as well, instructing the build process to extract [structured XML comments](https://learn.microsoft.com/dotnet/csharp/programming-guide/xmldoc) from the source code and put them in a dedicated file. This file then gets automatically included in the output NuGet package, providing inline documentation for the consumers of the library right in their IDEs.
 
-Enabling this property in turn also causes the compiler to flag public types and members that lack accompanying documentation comments. Since we configured warnings as errors in `Directory.Build.props`, this might produce a lot of noise early in development, so consider temporarily [suppressing `CS1591`](https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-messages/cs1591) until the library is closer to release.
+Enabling this property in turn also causes the compiler to flag public types and members that lack accompanying documentation comments. Since we've configured warnings as errors in `Directory.Build.props`, this might produce a lot of noise early in the development, so you may want to temporarily [suppress `CS1591`](https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-messages/cs1591) until the project is closer to release.
 
 ### Framework polyfills
 
-Throughout this article, there were a few mentions of a concept called [_polyfill_](<https://en.wikipedia.org/wiki/Polyfill_(programming)>) — a general programming technique for recreating newer platform APIs within the constraints of older targets that don't support them natively. When building libraries, this technique is particularly useful because it lets us treat modern framework and compiler features as a common baseline, while handling compatibility concerns in the background.
+As our earlier targeting deliberations illustrated, ensuring broad compatibility for a library involves building it against both newer and older iterations of .NET, which restricts the framework APIs and features that we can access uniformly. This presents a challenge in reconciling two competing goals — taking advantage of modern, convenient and performant capabilities where they are available, while retaining portability across frameworks where they're not.
 
-Polyfills are authored and applied differently depending on the programming language and its capabilities. For example, in JavaScript — where the term originated — they are implemented as standalone scripts that patch the environment or specific object prototypes to add missing functionality at run time. By contrast, C#'s statically typed and compiled nature rules out that style of polyfilling, but the concept itself remains applicable through the following approaches:
+The most straightforward way to address this challenge is by leveraging conditional compilation to accommodate each side of the spectrum via different code paths. C# provides the means for doing that through directives such as [`#if`, `#else`, and `#endif`](https://learn.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives) that can be combined with the SDK-defined [preprocessor symbols](https://learn.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives#conditional-compilation) to determine the current target framework.
+
+For example, consider a relatively common scenario where a program needs to obtain its own process ID. This is trivially achievable using the `Environment.ProcessId` property available since .NET 5.0, but requires instantiating a `Process` object just to retrieve the same value on older platforms:
+
+```csharp
+#if NET5_0_OR_GREATER
+using System;
+#else
+using System.Diagnostics;
+#endif
+
+int GetProcessId()
+{
+#if NET5_0_OR_GREATER
+    return Environment.ProcessId;
+#else
+    using var process = Process.GetCurrentProcess();
+    return process.Id;
+#endif
+}
+```
+
+Even in this basic scenario, it's clear how conditional compilation can interrupt the flow of the code, making the underlying logic harder to follow. It would be preferable if all the compatibility-related concerns could instead be handled in the background, giving the rest of the library a consistent interface to work with, regardless of the target framework.
+
+[_Polyfilling_](<https://en.wikipedia.org/wiki/Polyfill_(programming)>) is a general programming technique that aims to do exactly that: handle compatibility behind the scenes while presenting a consistent interface to the calling code. It works by supplementing the environment with missing functionality, recreated within that environment's capabilities and constraints.
+
+Of course, the ability to do that heavily depends on the programming language and its capabilities. For example, in JavaScript — where the term originated — polyfills are implemented as standalone scripts that patch the environment or specific object prototypes to add missing functionality at run time. By contrast, C#'s statically typed and compiled nature rules out that style of polyfilling, but the concept itself remains applicable through the following approaches:
 
 - **Type polyfills**, which re-implement missing built-in types from scratch, mimicking their original behavior as closely as possible. These re-implementations are placed in the same namespaces as the official types so that they are picked up by the compiler when the native definitions are not available. Suitable when the desired types are completely missing from the target framework.
 - **Member polyfills**, which rely on [extension members](https://learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/extension-methods) to shim missing methods, properties, or operators on existing built-in types. These extensions are usually placed in the global namespace to make them immediately accessible on every applicable type, effectively simulating intrinsic members. Suitable when the desired types exist, but lack certain members from later frameworks.
 
-These approaches can be combined with the SDK-provided [_preprocessor symbols_](https://learn.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives#conditional-compilation) to ensure that the polyfills are only included in the project when targeting frameworks that don't have the desired APIs. This way, when the library is built for more modern environments, the native implementations are used instead, avoiding any potential conflicts, performance issues, and dead code.
+These approaches can be similarly combined with the SDK-provided preprocessor symbols to ensure that the polyfills are only included in the project when targeting frameworks that don't have the desired APIs. This way, when the library is built for more modern environments, the native implementations are used instead, avoiding any potential conflicts, performance issues, and dead code.
 
 As an example, suppose we wanted to use the [`System.Index`](https://learn.microsoft.com/dotnet/api/system.index) and [`System.Range`](https://learn.microsoft.com/dotnet/api/system.range) types in our library. Since they were introduced in .NET Core 3.0, we'd need to backport them if we wanted to retain compatibility with the .NET Standard 2.0 target that we've established earlier. Here's how we could leverage the type-polyfill approach to achieve that:
 
@@ -691,7 +717,7 @@ Being official, however, also means that their scope is rather conservative — 
 
 This naturally brings us to the second solution: community polyfill libraries, such as [PolySharp](https://github.com/Sergio0694/PolySharp), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolyShim](https://github.com/Tyrrrz/PolyShim). All these projects were born out of independent efforts to plug the gaps left by Microsoft's compatibility packages, gradually evolving into comprehensive collections of shims and backports for a wide spectrum of different APIs.
 
-As community-driven projects, they are not bound by the servicing commitments of Microsoft's offerings, allowing them to be more thorough and aggressive in their coverage. Here you will find polyfills for Nullable Reference Types, Records, `init` Properties, `Index`, `Range`, `ValueTuple<...>`, `ValueTask<T>`, `ArrayPool<T>`, `Span<T>`, `Memory<T>`, `IEnumerable<T>.Chunk(...)`, `Stream.ReadExactly(...)`, `Environment.ProcessPath`, `Random.Shared`, and almost everything in between.
+As community-driven projects, they are not bound by the servicing commitments of Microsoft's offerings, allowing them to be more thorough and aggressive in their coverage. Here you will find polyfills for Nullable Reference Types, Record Types, Union Types, `init` Properties, `Index`, `Range`, `ValueTuple<...>`, `ValueTask<T>`, `ArrayPool<T>`, `Span<T>`, `Memory<T>`, `IEnumerable<T>.Chunk(...)`, `Stream.ReadExactly(...)`, `Environment.ProcessPath`, `Random.Shared`, and almost everything in between.
 
 While the choice between these libraries largely comes down to API coverage and personal preference, their usage is essentially identical. For our example, let's assume we've chosen to go with PolyShim, adding it as a dependency like so:
 
@@ -837,27 +863,54 @@ All that said, despite the flexibility that C# provides, polyfills are not an ul
 
 ### Dependencies as implementation details
 
-A separate but related concern is what to do when your library depends on a compiled package that you want to keep entirely hidden from consumers. For source-only packages like PolyShim and Snek, marking the reference with `PrivateAssets="all"` is sufficient — the code compiles directly into your assembly and leaves no runtime trace. For packages that produce their own compiled assemblies, however, `PrivateAssets="all"` only removes the dependency from your package's public manifest; the output assembly still carries a runtime reference to the package, which your consumers will also need to install.
+One useful consequence of PolyShim's source-only packaging is that it can remain entirely an implementation detail of our library. Its code gets compiled into our assembly, its types stay internal, and the package itself doesn't flow to consumers. This raises a broader question: could we achieve the same separation for other dependencies that are only used internally and don't participate in our library's public contract?
 
-The traditional solution to this problem is IL merging — physically combining the dependency's compiled bytecode into your own output assembly at build time, so that the two ship as a single self-contained artifact. The oldest tool for this on .NET is [ILMerge](https://github.com/dotnet/ILMerge), which Microsoft originally developed for their own internal use and later open-sourced. Its modern, more actively maintained alternative is [ILRepack](https://github.com/gluck/il-repack), which supports a broader range of assembly types and integrates more cleanly into the MSBuild pipeline.
+Normally, when a library declares a NuGet dependency, that package becomes part of what the consumer receives. Beyond supplying code that our library needs, it can also expose types and members that the consumer can access transitively, introduce version constraints, and interact with other packages in their dependency graph. These effects may be desirable when the dependency forms part of our public API, but they are less useful when it only supports logic behind the scenes.
 
-Both tools get the job done, but they require non-trivial configuration and can be fragile in the face of certain assembly features, such as resources, mixed-mode assemblies, and strong naming.
+In that sense, keeping a dependency private serves much the same purpose as marking a helper method `internal` instead of `public`: it separates what the library promises to its consumers from how it fulfills that promise. If callers have no reason to interact with a particular dependency, we may prefer not to expose it as part of the package at all.
 
-[Binternal](https://github.com/SimonCropp/Binternal) offers a more streamlined alternative. Rather than configuring a full merge pipeline manually, it wires up ILRepack under the hood and additionally marks all of the imported types as `internal`, so they cannot accidentally surface through your library's public API. Adding it follows the same source-package pattern:
+As we've seen, source-only packages make this relatively straightforward. With compiled dependencies, however, setting `PrivateAssets="all"` is not sufficient. It prevents the package reference from flowing to consumers, but our assembly still references the dependency's assembly at run time. Removing it from the package manifest therefore hides the requirement without actually eliminating it.
 
-```xml
-<PackageReference Include="Binternal" PrivateAssets="all" />
+One established solution is _IL merging_: combining the compiled code and metadata of several assemblies into a single output assembly. Rather than loading the dependency separately, our library then carries its implementation directly. References to the merged types are rewritten accordingly, so ordinary calls continue to work without the original assembly being present.
+
+[ILRepack](https://github.com/gluck/il-repack), a maintained alternative to the now-discontinued [ILMerge](https://github.com/dotnet/ILMerge), provides a command-line tool for this purpose. It takes a primary assembly, followed by the assemblies to incorporate, and produces a merged result. It also supports _internalization_, which hides imported types that aren't required by the primary assembly's public API:
+
+```bash
+dotnet tool install --global dotnet-ilrepack
+ilrepack /internalize /out:MyLibrary.Merged.dll MyLibrary.dll SomeDependency.dll
 ```
 
-Binternal isn't something you'll reach for on every project — most utility dependencies are already covered by source-only packages or the `PrivateAssets="all"` pattern. But in situations where you want to use a compiled library as a pure implementation detail, it provides a clean way to keep your package's dependency footprint intentional and minimal.
+Here, `MyLibrary.dll` is the primary assembly whose public API we want to preserve, while `SomeDependency.dll` supplies the implementation we want to absorb. The `/internalize` option prevents its implementation-only types from becoming public types in the merged assembly. Combined with excluding the original package reference from our NuGet dependency list, this lets us distribute the dependency as part of our implementation rather than as a separate consumer-facing package.
+
+Integrating this process into a library build requires some coordination. We need to select the assemblies to merge, resolve their dependencies, and ensure that packaging picks up the merged output instead of the original one. Multi-targeting adds another consideration, since each target produces a separate assembly that needs to be processed independently.
+
+For a more declarative setup, [Binternal](https://github.com/Tyrrrz/Binternal) wraps ILRepack in an MSBuild extension that lets us internalize individual package or project references. After adding the extension, we can mark a dependency with `Internalize="true"` to have it merged automatically:
+
+```xml
+<ItemGroup>
+  <PackageReference Include="Binternal" PrivateAssets="all" />
+
+  <PackageReference
+    Include="SomeDependency"
+    Internalize="true"
+    PrivateAssets="all"
+  />
+</ItemGroup>
+```
+
+The two attributes on the dependency serve complementary purposes: `Internalize="true"` incorporates its assembly and dependencies into our output, while `PrivateAssets="all"` prevents the original package reference from flowing to consumers. Binternal handles the merging and internalization during the build, avoiding the need to maintain a separate command-line pipeline.
+
+Of course, merging is not appropriate for every dependency. Types that participate in our public contract generally need to retain their original identity, and code that relies on reflection, assembly names, or external resources may require special handling. We also take responsibility for shipping updates to the incorporated code ourselves. For dependencies that are genuinely private implementation details, however, this can be a useful way to keep the library's consumer-facing footprint aligned with its intended API.
 
 ### Strong naming
 
-Strong naming is a mechanism that dates back to the early days of .NET Framework, where assemblies could be assigned a cryptographic identity through a public/private key pair. Its original purpose was to prevent [DLL Hell](https://en.wikipedia.org/wiki/DLL_hell) — a problem where different applications would inadvertently pull in conflicting versions of the same shared library. By embedding a verifiable signature into the assembly identity, the runtime could ensure that only the correct version was loaded from the [Global Assembly Cache (GAC)](https://learn.microsoft.com/dotnet/framework/app-domains/gac), a system-wide shared library store that predated NuGet as the primary distribution mechanism for .NET components.
+Beyond deciding which dependencies to expose, we also need to consider the identity of the assemblies we distribute. One mechanism for this is _strong naming_, which dates back to the early days of .NET Framework and involves signing an assembly with a public/private key pair. The public key becomes part of the assembly's identity alongside its name, version, and culture, helping distinguish libraries that might otherwise have conflicting names.
 
-In the modern .NET ecosystem, the relevance of strong naming has diminished considerably. The GAC is a Windows-only construct with no equivalent in .NET (Core), the runtime no longer enforces strong name verification with the same rigidity it once did, and NuGet has long since superseded the GAC as the standard way to distribute and consume packages. For libraries that only target .NET (Core), strong naming provides very little practical value.
+Strong naming was designed to help address [DLL Hell](https://en.wikipedia.org/wiki/DLL_hell), where applications would encounter conflicting versions of shared libraries. In particular, it allowed assemblies to be installed in the [Global Assembly Cache (GAC)](https://learn.microsoft.com/dotnet/framework/app-domains/gac), a system-wide store that could hold multiple versions side by side and resolve them by their full identities. It was not, however, intended to establish trust in the publisher or guarantee that the code was safe to execute.
 
-That said, it still matters in certain consumption contexts. The most concrete case is .NET Framework: its loader enforces a rule that a strongly named assembly can only reference other strongly named assemblies, so any downstream consumer running on .NET Framework that tries to use an unsigned library will simply fail to load it. This applies to enterprise codebases, Visual Studio extensions, MSBuild tasks, and any other environment where .NET Framework remains in play — which, as we've established, includes any library targeting .NET Standard 2.0. Beyond that, some corporate security policies mandate strong naming as a blanket requirement for all dependencies, often for historical reasons that no longer map to a concrete technical need, even when .NET Framework is not involved at all.
+In the modern .NET ecosystem, the relevance of strong naming has diminished considerably. The GAC has no equivalent in .NET (Core), modern runtimes don't enforce strong-name signatures or strict version matching, and NuGet has superseded the GAC as the standard way to distribute and consume libraries. For libraries that only target .NET (Core), strong naming provides very little practical value.
+
+That said, strong naming still matters when supporting .NET Framework, where a strongly named assembly can only reference other strongly named assemblies. Leaving our library unsigned therefore excludes consumers that rely on this mechanism, even if their target framework is otherwise compatible. This is relevant to our .NET Standard 2.0 target, which allows the library to be used by .NET Framework applications. Some organizations also require strong naming for all dependencies as a matter of policy, regardless of the runtime involved.
 
 The conventional way to satisfy this requirement is to generate a public/private key pair using the Windows-only `sn.exe` tool, commit the resulting `.snk` file to the repository, and point the project at it:
 
@@ -868,17 +921,27 @@ The conventional way to satisfy this requirement is to generate a public/private
 </PropertyGroup>
 ```
 
-For open-source projects, committing the key file to the repository is effectively the norm — keeping it private would prevent contributors from building the project locally. This does eliminate any meaningful security guarantees the signature might otherwise offer, but for most library authors that was never the point anyway. The goal is simply to check the "strong named" box, not to establish a cryptographic chain of trust.
+For open-source libraries, committing the key pair to the repository is a common practice, allowing contributors to modify and rebuild the code without changing its assembly identity. The private key is then no longer secret, but strong naming is being used here for compatibility rather than as proof of publisher authenticity.
 
-[Snek](https://github.com/Tyrrrz/Snek) builds directly on this practice. Rather than making you reach for `sn.exe` and add the two project file properties by hand, it injects a static, publicly known key pair at build time via a source-only NuGet package. Adding it as a private dependency is all that's required:
+[Snek](https://github.com/Tyrrrz/Snek) automates this setup through an MSBuild extension. Instead of requiring us to generate and maintain a key file, it creates a key pair deterministically during the build and configures the assembly signing automatically. Adding it as a private dependency is enough to enable this behavior:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="Snek" Version="..." PrivateAssets="all" />
+  <PackageReference Include="Snek" PrivateAssets="all" />
 </ItemGroup>
 ```
 
-With that reference in place, the assembly is signed transparently at build time and there is nothing else to configure. For most library projects targeting .NET Standard 2.0, this is the easiest way to satisfy strong naming requirements without adding any real maintenance burden.
+By default, the key-generation seed is derived from the project's `PackageId` or `AssemblyName`. We can also set it explicitly through the `<AssemblyOriginatorKeySeed>` property:
+
+```xml
+<PropertyGroup>
+  <AssemblyOriginatorKeySeed>MyLibrary</AssemblyOriginatorKeySeed>
+</PropertyGroup>
+```
+
+Keeping the seed stable preserves the generated key pair across builds. Changing it changes the assembly's strong-name identity, so it should be treated as a compatibility-sensitive decision once the library has been published. The same caution applies when switching an existing library from a manually maintained key or Snek v1's shared key to Snek v2's generated key.
+
+For our multi-targeted library, Snek provides a convenient way to sign all target assemblies consistently without maintaining a separate key file. If we also use IL merging as discussed earlier, the final merged assembly must be signed with the intended key as well, since rewriting an assembly invalidates its original signature.
 
 ## Code formatting
 
