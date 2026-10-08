@@ -1,6 +1,7 @@
 {
   "image": "mcr.microsoft.com/devcontainers/typescript-node",
   "updateRemoteUserUID": false,
+  "postCreateCommand": "npm install --global --allow-scripts=pnpm pnpm@12.10.1 && pnpm install --frozen-lockfile",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -15,12 +16,7 @@
           "source.fixAll.eslint": "explicit"
         },
         "eslint.alwaysShowStatus": true,
-        "eslint.validate": [
-          "javascript",
-          "javascriptreact",
-          "typescript",
-          "typescriptreact"
-        ]
+        "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"]
       }
     }
   }
