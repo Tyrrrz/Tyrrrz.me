@@ -27,17 +27,14 @@ jobs:
       - name: Install NodeJS
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
 
-      - name: Install pnpm
-        run: npm install --global --allow-scripts=pnpm pnpm@12.10.1
-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Verify formatting
-        run: pnpm run format:check
+        run: npm run format:check
 
       - name: Perform linting
-        run: pnpm run lint:check
+        run: npm run lint:check
 
   pack:
     runs-on: ubuntu-latest
@@ -57,11 +54,8 @@ jobs:
       - name: Install NodeJS
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
 
-      - name: Install pnpm
-        run: npm install --global --allow-scripts=pnpm pnpm@12.10.1
-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Build site
         env:
@@ -72,7 +66,7 @@ jobs:
           PATREON_TOKEN: ${{ secrets.PATREON_TOKEN }}
           BUYMEACOFFEE_TOKEN: ${{ secrets.BUYMEACOFFEE_TOKEN }}
           PRIVATE_DONORS: ${{ secrets.PRIVATE_DONORS }}
-        run: pnpm build
+        run: npm run build
 
       - name: Upload GitHub Pages assets
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0

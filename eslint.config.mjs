@@ -17,6 +17,11 @@ export default defineConfig([
       react,
       "react-hooks": reactHooks,
     },
+    settings: {
+      react: {
+        version: "detect",
+      },
+    },
     languageOptions: {
       globals: globals.browser,
     },

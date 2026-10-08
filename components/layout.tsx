@@ -1,6 +1,5 @@
 import { clsx } from "clsx";
 import { FC, PropsWithChildren, useEffect, useMemo, useState } from "react";
-import FadeIn from "react-fade-in";
 import { FiMenu, FiMoon, FiSun } from "react-icons/fi";
 import { Outlet, useLocation, useNavigation } from "react-router-dom";
 import { useDebounce } from "../hooks/useDebounce";
@@ -163,20 +162,6 @@ const Header: FC = () => {
   );
 };
 
-const Main: FC = () => {
-  // Below is a hack to re-initialize the fade when the page changes
-  const location = useLocation();
-  const fadeKey = useMemo(() => location.pathname, [location.pathname]);
-
-  return (
-    <main className="mx-4 mt-6 mb-20">
-      <FadeIn key={fadeKey}>
-        <Outlet />
-      </FadeIn>
-    </main>
-  );
-};
-
 const Page: FC = () => {
   const { theme } = useTheme();
 
@@ -186,7 +171,10 @@ const Page: FC = () => {
         <Loader />
         <div className="container mx-auto max-w-4xl">
           <Header />
-          <Main />
+
+          <main className="mx-4 mt-6 mb-20">
+            <Outlet />
+          </main>
         </div>
       </div>
     </div>

@@ -106,9 +106,5 @@ export default defineConfig(async () => {
       "import.meta.env.BUILD_ID": JSON.stringify(process.env["BUILD_ID"] || ""),
       "import.meta.env.GOATCOUNTER_URL": JSON.stringify(process.env["GOATCOUNTER_URL"] || ""),
     },
-
-    ssr: {
-      noExternal: ["react-fade-in"],
-    },
   };
 });
