@@ -634,10 +634,6 @@ With that said, let's imagine that our library needs to use `Span<T>`, `Memory<T
   </PropertyGroup>
 
   <ItemGroup>
-    <!--
-        Span<T> and Memory<T> are natively available starting with netstandard2.1 and netcoreapp2.1,
-        so we exclude those frameworks from getting this package reference.
-     -->
     <PackageReference
       Include="System.Memory"
       Condition="
@@ -654,10 +650,6 @@ With that said, let's imagine that our library needs to use `Span<T>`, `Memory<T
       Version="4.6.3"
     />
 
-    <!--
-        IAsyncEnumerable<T> is natively available starting with netstandard2.1 and netcoreapp3.0,
-        so we exclude those frameworks from getting this package reference.
-     -->
     <PackageReference
       Include="Microsoft.Bcl.AsyncInterfaces"
       Condition="
@@ -752,9 +744,9 @@ This naturally brings us to the second solution: community polyfill libraries, s
 
 As community-driven projects, they are not bound by the servicing commitments of Microsoft's offerings, allowing them to be more thorough and aggressive in their coverage. Here you will find polyfills for Nullable Reference Types, Record Types, Union Types, `init` Properties, `Index`, `Range`, `ValueTuple<...>`, `ValueTask<T>`, `ArrayPool<T>`, `Span<T>`, `Memory<T>`, `IEnumerable<T>.Chunk(...)`, `Stream.ReadExactly(...)`, `Random.Shared`, and almost everything in between.
 
-These packages also take a different deployment approach — instead of compiling all polyfills into separate assemblies, they inject their raw source code directly into your project at build time. This effectively mimics the hand-rolled polyfill approach we've explored initially, retaining all the associated benefits.
+These packages also take a different deployment route — instead of compiling all polyfills into separate assemblies, they inject their raw source code directly into your project at build time. This effectively mimics the hand-rolled polyfill approach we've explored initially, retaining all the associated benefits.
 
-While the choice between PolySharp, Polyfill, and PolyShim largely comes down to API coverage and personal preference, their usage is relatively similar. For our example, let's assume we've chosen to go with the last of the three, adding it as a dependency like so:
+While the choice between PolySharp, Polyfill, and PolyShim largely comes down to feature support and personal preference, their usage is relatively similar. For our example, let's assume we've chosen to go with the last of the three, adding it as a dependency like so:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -889,7 +881,7 @@ Despite a somewhat overlapping scope, community polyfill packages are not a comp
   - They often leverage unconventional techniques, such as global extension members, to provide broader compatibility than would otherwise be possible.
   - They can also be used to decouple support for language and compiler features from the project's target framework.
 
-All that said, even with the flexibility that C# provides, polyfills are not an ultimate solution to the compatibility problem. Some things — such as retroactively modifying type hierarchies (e.g., making `Stream` implement `IAsyncDisposable`) or enabling language features that require explicit runtime support (e.g., [Default Interface Methods](https://learn.microsoft.com/dotnet/csharp/advanced-topics/interface-implementation/default-interface-methods-versions)) — are simply impossible to replicate meaningfully. At the end of the day, supporting older frameworks is always going to be a trade-off, and polyfills can only help offset that cost but not eliminate it.
+All that said, even with the flexibility that C# provides, polyfills are not an ultimate solution to the compatibility problem. Some things — such as retroactively modifying type hierarchies (e.g., making `Stream` implement `IAsyncDisposable`) or enabling language features that require explicit runtime support (e.g., [Default Interface Methods](https://learn.microsoft.com/dotnet/csharp/advanced-topics/interface-implementation/default-interface-methods-versions)) — are simply impossible to replicate meaningfully. At the end of the day, supporting older frameworks is always going to be a trade-off, and polyfills can only help offset that cost but not fully eliminate it.
 
 ### Dependencies as implementation details
 
