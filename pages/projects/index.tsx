@@ -69,7 +69,7 @@ const ProjectsPage: FC = () => {
                   <Inline>
                     <FiExternalLink strokeWidth={1} />
                     <div>
-                      <Link href={project.homepageUrl}>{project.homepageUrl}</Link>
+                      <Link href={project.homepageUrl}>{new URL(project.homepageUrl).host}</Link>
                     </div>
                   </Inline>
                 </div>
