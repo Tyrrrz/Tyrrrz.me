@@ -602,6 +602,8 @@ var last = str[^1];
 var part = str[3..^1];
 ```
 
+#### Compatibility packages
+
 Of course, just like any other code that you write, polyfills are a liability that needs to be tested and maintained over time. As an experienced developer you will naturally want to avoid that responsibility and instead seek to take advantage of existing solutions wherever possible. Luckily, here you have several options for that.
 
 First of all, many of the built-in types that were introduced in .NET (Core) have backports provided directly by Microsoft. These are distributed as NuGet packages identified by the [`System.*`](https://nuget.org/packages?q=system.*) and [`Microsoft.Bcl.*`](https://nuget.org/packages?q=microsoft.bcl.*) prefixes, and are specifically intended to act as compatibility layers when targeting older frameworks.
@@ -734,6 +736,8 @@ async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadChunksAsync(Stream stream)
 }
 ```
 
+#### Community polyfills
+
 Generally speaking, the official compatibility packages are worth considering first when it comes to backporting common platform APIs. They are well-tested, optimized for performance, and support a wide range of .NET versions, making them a reliable default for most scenarios.
 
 Being official, however, also means that their scope is rather conservative — they primarily focus on user-facing areas of the framework and leave out many specialized and low-level types, including those that power language features. Additionally, they don't attempt to provide any member polyfills, as that requires relying on the less conventional global-namespace extension blocks.
@@ -810,7 +814,7 @@ While the choice between PolySharp, Polyfill, and PolyShim largely comes down to
 
 Note that PolyShim is added differently from the official compatibility packages — the `Condition="..."` attribute is not required here, and we also mark the reference with `PrivateAssets="all"`. As a source-only package, it can apply framework checks on its own at build time, while remaining a private dependency that doesn't need to flow to our consumers.
 
-Without polyfills, the following code would not compile against every target framework configured for our library. PolyShim, however, makes it work:
+By itself, the following code would not compile against every target framework configured for our library. PolyShim, however, makes it work:
 
 ```csharp
 using System;
@@ -883,7 +887,7 @@ Despite a somewhat overlapping scope, community polyfill packages are not a comp
 
 All that said, even with the flexibility that C# provides, polyfills are not an ultimate solution to the compatibility problem. Some things — such as retroactively modifying type hierarchies (e.g., making `Stream` implement `IAsyncDisposable`) or enabling language features that require explicit runtime support (e.g., [Default Interface Methods](https://learn.microsoft.com/dotnet/csharp/advanced-topics/interface-implementation/default-interface-methods-versions)) — are simply impossible to replicate meaningfully. At the end of the day, supporting older frameworks is always going to be a trade-off, and polyfills can only help offset that cost but not fully eliminate it.
 
-### Dependencies as implementation details
+### Internalizing dependencies
 
 One useful consequence of PolyShim's source-only packaging is that it can remain entirely an implementation detail of our library. Its code gets compiled into our assembly, its types stay internal, and the package itself doesn't flow to consumers. This raises a broader question: could we achieve the same separation for other dependencies that are only used internally and don't participate in our library's public contract?
 
