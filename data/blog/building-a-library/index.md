@@ -638,6 +638,7 @@ With that said, let's imagine that our library needs to use `Span<T>`, `Memory<T
   <ItemGroup>
     <PackageReference
       Include="System.Memory"
+      Version="4.6.3"
       Condition="
         !$([MSBuild]::IsTargetFrameworkCompatible(
           '$(TargetFramework)',
@@ -649,11 +650,11 @@ With that said, let's imagine that our library needs to use `Span<T>`, `Memory<T
           'netcoreapp2.1'
         ))
       "
-      Version="4.6.3"
     />
 
     <PackageReference
       Include="Microsoft.Bcl.AsyncInterfaces"
+      Version="11.0.0"
       Condition="
         !$([MSBuild]::IsTargetFrameworkCompatible(
           '$(TargetFramework)',
@@ -665,7 +666,6 @@ With that said, let's imagine that our library needs to use `Span<T>`, `Memory<T
           'netcoreapp3.0'
         ))
       "
-      Version="11.0.0"
     />
   </ItemGroup>
 
@@ -687,18 +687,18 @@ To better understand how these conditional references translate into the final N
     <authors>YOUR_NAME_HERE</authors>
     <description>Sample library</description>
 
-    <!-- Other metadata omitted for brevity -->
+    <!-- ... -->
 
     <dependencies>
       <!-- Main target (.NET vCurrent) -->
       <group targetFramework="net11.0" />
-      <!-- Intermediate targets that provide compatibility breakpoints -->
+      <!-- Intermediate targets used as compatibility breakpoints -->
       <group targetFramework="net6.0" />
       <group targetFramework="net7.0" />
       <group targetFramework=".NETStandard2.1" />
       <!-- Baseline target -->
       <group targetFramework=".NETStandard2.0">
-        <dependency id="Microsoft.Bcl.AsyncInterfaces" version="1.1.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Bcl.AsyncInterfaces" version="11.0.0" exclude="Build,Analyzers" />
         <dependency id="System.Memory" version="4.6.3" exclude="Build,Analyzers" />
       </group>
     </dependencies>
@@ -738,7 +738,7 @@ async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadChunksAsync(Stream stream)
 
 #### Community polyfills
 
-Generally speaking, the official compatibility packages are worth considering first when it comes to backporting common platform APIs. They are well-tested, optimized for performance, and support a wide range of .NET versions, making them a reliable default for most scenarios.
+Generally speaking, the official compatibility packages should be considered first when it comes to backporting common platform APIs. They are well-tested, optimized for performance, and support a wide range of .NET versions, making them a reliable default for most scenarios.
 
 Being official, however, also means that their scope is rather conservative — they primarily focus on user-facing areas of the framework and leave out many specialized and low-level types, including those that power language features. Additionally, they don't attempt to provide any member polyfills, as that requires relying on the less conventional global-namespace extension blocks.
 
@@ -776,6 +776,7 @@ While the choice between PolySharp, Polyfill, and PolyShim largely comes down to
   <ItemGroup>
     <PackageReference
       Include="System.Memory"
+      Version="4.6.3"
       Condition="
         !$([MSBuild]::IsTargetFrameworkCompatible(
           '$(TargetFramework)',
@@ -787,11 +788,11 @@ While the choice between PolySharp, Polyfill, and PolyShim largely comes down to
           'netcoreapp2.1'
         ))
       "
-      Version="4.6.3"
     />
 
     <PackageReference
       Include="Microsoft.Bcl.AsyncInterfaces"
+      Version="11.0.0"
       Condition="
         !$([MSBuild]::IsTargetFrameworkCompatible(
           '$(TargetFramework)',
@@ -803,10 +804,9 @@ While the choice between PolySharp, Polyfill, and PolyShim largely comes down to
           'netcoreapp3.0'
         ))
       "
-      Version="11.0.0"
     />
 
-    <PackageReference Include="PolyShim" PrivateAssets="all" Version="2.15.0" />
+    <PackageReference Include="PolyShim" Version="2.15.0" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>
@@ -885,48 +885,63 @@ Despite a somewhat overlapping scope, community polyfill packages are not a comp
   - They often leverage unconventional techniques, such as global extension members, to provide broader compatibility than would otherwise be possible.
   - They can also be used to decouple support for language and compiler features from the project's target framework.
 
-All that said, even with the flexibility that C# provides, polyfills are not an ultimate solution to the compatibility problem. Some things — such as retroactively modifying type hierarchies (e.g., making `Stream` implement `IAsyncDisposable`) or enabling language features that require explicit runtime support (e.g., [Default Interface Methods](https://learn.microsoft.com/dotnet/csharp/advanced-topics/interface-implementation/default-interface-methods-versions)) — are simply impossible to replicate meaningfully. At the end of the day, supporting older frameworks is always going to be a trade-off, and polyfills can only help offset that cost but not fully eliminate it.
+All that said, even with the flexibility that C# provides, polyfills are not an ultimate solution to the compatibility problem. Some things — such as retroactively modifying type hierarchies (e.g., making `Stream` implement `IAsyncDisposable`) or enabling language features that require explicit runtime support (e.g., [Default Interface Methods](https://learn.microsoft.com/dotnet/csharp/advanced-topics/interface-implementation/default-interface-methods-versions)) — are currently impossible to replicate meaningfully. At the end of the day, supporting older frameworks is always going to be a trade-off, and polyfills can help offset that cost but not fully eliminate it.
 
 ### Internalizing dependencies
 
-One useful consequence of PolyShim's source-only packaging is that it can remain entirely an implementation detail of our library. Its code gets compiled into our assembly, its types stay internal, and the package itself doesn't flow to consumers. This raises a broader question: could we achieve the same separation for other dependencies that are only used internally and don't participate in our library's public contract?
+In the previous section, we briefly touched upon the concept of source-only NuGet packages and how they integrate by directly including their code in our build process. As a useful consequence, such packages can provide functionality that is entirely internal to the referencing project, avoiding unnecessary exposure and the maintenance obligations that come with it.
 
-Normally, when a library declares a NuGet dependency, that package becomes part of what the consumer receives. Beyond supplying code that our library needs, it can also expose types and members that the consumer can access transitively, introduce version constraints, and interact with other packages in their dependency graph. These effects may be desirable when the dependency forms part of our public API, but they are less useful when it only supports logic behind the scenes.
+However, control over a package's deployment model belongs solely to its author — the `PrivateAssets="all"` attribute is just a marker that tells the toolchain not to communicate the dependency to downstream consumers. If the referenced package was published as a regular precompiled assembly, this will simply obscure the corresponding run-time requirement rather than remove it.
 
-In that sense, keeping a dependency private serves much the same purpose as marking a helper method `internal` instead of `public`: it separates what the library promises to its consumers from how it fulfills that promise. If callers have no reason to interact with a particular dependency, we may prefer not to expose it as part of the package at all.
+Still, it is possible to manually internalize a dependency that wasn't designed for it, but doing so involves modifying the produced Intermediate Language (IL) bytecode instead. For example, using a tool like [ILRepack](https://github.com/gluck/il-repack), we can merge the external dependency into our library assembly after it has been built:
 
-As we've seen, source-only packages make this relatively straightforward. With compiled dependencies, however, setting `PrivateAssets="all"` is not sufficient. It prevents the package reference from flowing to consumers, but our assembly still references the dependency's assembly at run time. Removing it from the package manifest therefore hides the requirement without actually eliminating it.
-
-One established solution is _IL merging_: combining the compiled code and metadata of several assemblies into a single output assembly. Rather than loading the dependency separately, our library then carries its implementation directly. References to the merged types are rewritten accordingly, so ordinary calls continue to work without the original assembly being present.
-
-[ILRepack](https://github.com/gluck/il-repack), a maintained alternative to the now-discontinued [ILMerge](https://github.com/dotnet/ILMerge), provides a command-line tool for this purpose. It takes a primary assembly, followed by the assemblies to incorporate, and produces a merged result. It also supports _internalization_, which hides imported types that aren't required by the primary assembly's public API:
-
-```bash
-dotnet tool install --global dotnet-ilrepack
-ilrepack /internalize /out:MyLibrary.Merged.dll MyLibrary.dll SomeDependency.dll
+```console
+$ ilrepack /internalize /out:MyLibrary.Merged.dll MyLibrary.dll SomeDependency.dll
 ```
 
-Here, `MyLibrary.dll` is the primary assembly whose public API we want to preserve, while `SomeDependency.dll` supplies the implementation we want to absorb. The `/internalize` option prevents its implementation-only types from becoming public types in the merged assembly. Combined with excluding the original package reference from our NuGet dependency list, this lets us distribute the dependency as part of our implementation rather than as a separate consumer-facing package.
+The command invocation above combines `MyLibrary.dll` with `SomeDependency.dll`, producing a single unified asset named `MyLibrary.Merged.dll`. Additionally, the `/internalize` option instructs ILRepack to switch the visibility of absorbed `public` types to `internal`, making them accessible only from within the merged assembly.
 
-Integrating this process into a library build requires some coordination. We need to select the assemblies to merge, resolve their dependencies, and ensure that packaging picks up the merged output instead of the original one. Multi-targeting adds another consideration, since each target produces a separate assembly that needs to be processed independently.
+In effect, this means that the functionality of `SomeDependency.dll` becomes isolated within our library, as though it were authored there in the first place. From the consumer's perspective, any relation `MyLibrary` has with `SomeDependency` becomes completely opaque, turning the latter into an implementation detail.
 
-For a more declarative setup, [Binternal](https://github.com/Tyrrrz/Binternal) wraps ILRepack in an MSBuild extension that lets us internalize individual package or project references. After adding the extension, we can mark a dependency with `Internalize="true"` to have it merged automatically:
+That said, integrating this transformation into the build process is not trivial. We need to select the assemblies to merge, resolve their full dependency graphs, and alter them at the right stage in the pipeline so that packaging picks up the merged output. Multi-targeting adds another consideration, since it produces several sets of binaries that must be handled independently.
+
+To avoid managing all that complexity ourselves, we can instead rely on [Binternal](https://github.com/Tyrrrz/Binternal) — an MSBuild extension that provides the means to merge and internalize dependencies directly from the project file. This allows us to achieve the same effect as the ILRepack command from before, but in a declarative manner, with the transformations applied automatically as part of the build.
+
+For example, let's imagine that our library has taken a dependency on [CliWrap](https://github.com/Tyrrrz/CliWrap) for purposes that remain purely internal. We could choose to embed it into the output assembly by updating `MyLibrary.csproj` as follows:
 
 ```xml
-<ItemGroup>
-  <PackageReference Include="Binternal" PrivateAssets="all" />
+<Project Sdk="Microsoft.NET.Sdk">
 
-  <PackageReference
-    Include="SomeDependency"
-    Internalize="true"
-    PrivateAssets="all"
-  />
-</ItemGroup>
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net11.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+
+    <!-- ... -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- ... -->
+
+    <PackageReference Include="Binternal" Version="1.0.2" PrivateAssets="all" />
+
+    <PackageReference
+      Include="CliWrap"
+      Version="3.10.5"
+      Internalize="true"
+      PrivateAssets="all"
+    />
+  </ItemGroup>
+
+</Project>
 ```
 
-The two attributes on the dependency serve complementary purposes: `Internalize="true"` incorporates its assembly and dependencies into our output, while `PrivateAssets="all"` prevents the original package reference from flowing to consumers. Binternal handles the merging and internalization during the build, avoiding the need to maintain a separate command-line pipeline.
+With Binternal in place, internalization becomes a property of the reference itself, controlled through the `Internalize` attribute. Setting it to `true` marks the dependency for processing, ensuring that it and its own transitive dependencies are merged into the final assembly file, with the type visibility adjusted accordingly.
 
-Of course, merging is not appropriate for every dependency. Types that participate in our public contract generally need to retain their original identity, and code that relies on reflection, assembly names, or external resources may require special handling. We also take responsibility for shipping updates to the incorporated code ourselves. For dependencies that are genuinely private implementation details, however, this can be a useful way to keep the library's consumer-facing footprint aligned with its intended API.
+In this setup, our library no longer needs a separate `CliWrap.dll` at run time and, as a result, doesn't have to impose this requirement on its consumers. Therefore, we also attach `PrivateAssets="all"` to omit the now unnecessary dependency declaration from the package specification.
+
+Generally speaking, assembly internalization serves much the same purpose as marking a utility method `internal` instead of `public` — it separates what the library promises to its consumers from how it fulfills that promise. If callers have no reason to interact with an upstream dependency, embedding it can help preserve that boundary.
+
+Doing so does come with its own set of trade-offs, though: internalized assemblies inherently increase the size of the distributed package, are not identified by NuGet's built-in vulnerability auditing, and cannot be updated independently by consumers to apply security patches or bug fixes. When authoring a library, the benefits of isolation typically outweigh the drawbacks, but those still need to be considered carefully.
 
 ### Strong naming
 
