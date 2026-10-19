@@ -885,7 +885,7 @@ Despite a somewhat overlapping scope, community polyfill packages are not a comp
   - They often leverage unconventional techniques, such as global extension members, to provide broader compatibility than would otherwise be possible.
   - They can also be used to decouple support for language and compiler features from the project's target framework.
 
-All that said, even with the flexibility that C# provides, polyfills are not an ultimate solution to the compatibility problem. Some things — such as retroactively modifying type hierarchies (e.g., making `Stream` implement `IAsyncDisposable`) or enabling language features that require explicit runtime support (e.g., [Default Interface Methods](https://learn.microsoft.com/dotnet/csharp/advanced-topics/interface-implementation/default-interface-methods-versions)) — are currently impossible to replicate meaningfully. At the end of the day, supporting older frameworks is always going to be a trade-off, and polyfills can help offset that cost but not fully eliminate it.
+Nevertheless, even with the flexibility that C# provides, polyfills are not an ultimate solution to the compatibility problem. Some things — such as retroactively modifying type hierarchies (e.g., making `Stream` implement `IAsyncDisposable`) or enabling language features that require explicit runtime support (e.g., [Default Interface Methods](https://learn.microsoft.com/dotnet/csharp/advanced-topics/interface-implementation/default-interface-methods-versions)) — are currently impossible to replicate meaningfully. At the end of the day, supporting older frameworks is always going to be a trade-off, and polyfills can help offset that cost but not fully eliminate it.
 
 ### Internalizing dependencies
 
@@ -893,7 +893,7 @@ In the previous section, we briefly touched upon the concept of source-only NuGe
 
 However, control over a package's deployment model belongs solely to its author — the `PrivateAssets="all"` attribute is just a marker that tells the toolchain not to communicate the dependency to downstream consumers. If the referenced package was published as a regular precompiled assembly, this will simply obscure the corresponding run-time requirement rather than remove it.
 
-Still, it is possible to manually internalize a dependency that wasn't designed for it, but doing so involves modifying the produced Intermediate Language (IL) bytecode instead. For example, using a tool like [ILRepack](https://github.com/gluck/il-repack), we can merge the external dependency into our library assembly after it has been built:
+Still, it is possible to manually internalize a dependency that wasn't designed for it, although doing so involves modifying the Intermediate Language (IL) bytecode instead. For example, using a tool like [ILRepack](https://github.com/gluck/il-repack), we can merge the external dependency into our library assembly after it has been built:
 
 ```console
 $ ilrepack /internalize /out:MyLibrary.Merged.dll MyLibrary.dll SomeDependency.dll
@@ -903,9 +903,9 @@ The command invocation above combines `MyLibrary.dll` with `SomeDependency.dll`,
 
 In effect, this means that the functionality of `SomeDependency.dll` becomes isolated within our library, as though it were authored there in the first place. From the consumer's perspective, any relation `MyLibrary` has with `SomeDependency` becomes completely opaque, turning the latter into an implementation detail.
 
-That said, integrating this transformation into the build process is not trivial. We need to select the assemblies to merge, resolve their full dependency graphs, and alter them at the right stage in the pipeline so that packaging picks up the merged output. Multi-targeting adds another consideration, since it produces several sets of binaries that must be handled independently.
+That said, integrating this transformation into the build process is not trivial. We need to select the assemblies to merge, resolve their full dependency graphs, and alter them at the right stage in the pipeline so that packaging picks up the correct output. Multi-targeting adds another consideration, since it produces several sets of binaries that must be handled independently.
 
-To avoid managing all that complexity ourselves, we can instead rely on [Binternal](https://github.com/Tyrrrz/Binternal) — an MSBuild extension that provides the means to merge and internalize dependencies directly from the project file. This allows us to achieve the same effect as the ILRepack command from before, but in a declarative manner, with the transformations applied automatically as part of the build.
+To avoid managing all that complexity ourselves, we can instead rely on [Binternal](https://github.com/Tyrrrz/Binternal) — an MSBuild extension that provides the means to merge and internalize dependencies directly from the project file. This allows us to achieve the same effect as the ILRepack command from before, but in a declarative manner, with the necessary manipulations applied automatically as part of the build.
 
 For example, let's imagine that our library has taken a dependency on [CliWrap](https://github.com/Tyrrrz/CliWrap) for purposes that remain purely internal. We could choose to embed it into the output assembly by updating `MyLibrary.csproj` as follows:
 
@@ -939,9 +939,11 @@ With Binternal in place, internalization becomes a property of the reference its
 
 In this setup, our library no longer needs a separate `CliWrap.dll` at run time and, as a result, doesn't have to impose this requirement on its consumers. Therefore, we also attach `PrivateAssets="all"` to omit the now unnecessary dependency declaration from the package specification.
 
-Generally speaking, assembly internalization serves much the same purpose as marking a utility method `internal` instead of `public` — it separates what the library promises to its consumers from how it fulfills that promise. If callers have no reason to interact with an upstream dependency, embedding it can help preserve that boundary.
+Generally speaking, assembly internalization serves much the same purpose as marking a utility method `internal` instead of `public` — it separates what the library promises from how it fulfills that promise. If callers have no reason to interact with an upstream dependency, embedding it can help preserve that boundary.
 
-Doing so does come with its own set of trade-offs, though: internalized assemblies inherently increase the size of the distributed package, are not identified by NuGet's built-in vulnerability auditing, and cannot be updated independently by consumers to apply security patches or bug fixes. When authoring a library, the benefits of isolation typically outweigh the drawbacks, but those still need to be considered carefully.
+Beyond keeping implementation details private, this technique may also be used to snapshot a dependency at a specific version. For example, `MyLibrary` might rely on [ImageSharp](https://github.com/SixLabors/ImageSharp) for image handling, while pinning the reference to `2.1.13` to retain .NET Standard 2.0 support, which was dropped in later releases. Merging our own copy of ImageSharp allows consumers (or their other dependencies) to add a newer version of that package without introducing resolution conflicts.
+
+Of course, internalization does come with its own set of trade-offs as well: embedded assemblies inherently increase the distribution footprint, are not identified by NuGet's built-in vulnerability auditing, and cannot be updated independently to apply security patches or bug fixes. When authoring a library, the benefits of isolation can often outweigh the drawbacks, but those still need to be considered carefully.
 
 ### Strong naming
 
