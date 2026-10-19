@@ -893,7 +893,7 @@ In the previous section, we briefly touched upon the concept of source-only NuGe
 
 However, control over a package's deployment model belongs solely to its author — the `PrivateAssets="all"` attribute is just a marker that tells the toolchain not to communicate the dependency to downstream consumers. If the referenced package was published as a regular precompiled assembly, this will simply obscure the corresponding run-time requirement rather than remove it.
 
-Still, it is possible to manually internalize a dependency that wasn't designed for it, although doing so involves modifying the Intermediate Language (IL) bytecode instead. For example, using a tool like [ILRepack](https://github.com/gluck/il-repack), we can merge the external dependency into our library assembly after it has been built:
+Still, it is possible to manually internalize a dependency that wasn't designed for it, although doing so involves modifying the [Intermediate Language (IL)](https://learn.microsoft.com/dotnet/standard/managed-code) bytecode instead. For example, using a tool like [ILRepack](https://github.com/gluck/il-repack), we can merge the external dependency into our library assembly after it has been built:
 
 ```console
 $ ilrepack /internalize /out:MyLibrary.Merged.dll MyLibrary.dll SomeDependency.dll
@@ -939,52 +939,93 @@ With Binternal in place, internalization becomes a property of the reference its
 
 In this setup, our library no longer needs a separate `CliWrap.dll` at run time and, as a result, doesn't have to impose this requirement on its consumers. Therefore, we also attach `PrivateAssets="all"` to omit the now unnecessary dependency declaration from the package specification.
 
-Generally speaking, assembly internalization serves much the same purpose as marking a utility method `internal` instead of `public` — it separates what the library promises from how it fulfills that promise. If callers have no reason to interact with an upstream dependency, embedding it can help preserve that boundary.
+Generally speaking, assembly internalization serves much the same purpose as marking a utility method `internal` instead of `public` — it distinguishes what the library promises from how it fulfills that promise. If callers have no reason to interact with an upstream dependency, embedding it can help preserve that boundary.
 
 Beyond keeping implementation details private, this technique may also be used to snapshot a dependency at a specific version. For example, `MyLibrary` might rely on [ImageSharp](https://github.com/SixLabors/ImageSharp) for image handling, while pinning the reference to `2.1.13` to retain .NET Standard 2.0 support, which was dropped in later releases. Merging our own copy of ImageSharp allows consumers (or their other dependencies) to add a newer version of that package without introducing resolution conflicts.
 
-Of course, internalization does come with its own set of trade-offs as well: embedded assemblies inherently increase the distribution footprint, are not identified by NuGet's built-in vulnerability auditing, and cannot be updated independently to apply security patches or bug fixes. When authoring a library, the benefits of isolation can often outweigh the drawbacks, but those still need to be considered carefully.
+Of course, internalization does come with its set of trade-offs as well: embedded assemblies inherently increase the distribution footprint, are not identified by NuGet's built-in vulnerability auditing, and cannot be updated independently to apply security patches or bug fixes. When authoring a library, the benefits of isolation can often outweigh the drawbacks, but those still need to be considered carefully.
 
 ### Strong naming
 
-Beyond deciding which dependencies to expose, we also need to consider the identity of the assemblies we distribute. One mechanism for this is _strong naming_, which dates back to the early days of .NET Framework and involves signing an assembly with a public/private key pair. The public key becomes part of the assembly's identity alongside its name, version, and culture, helping distinguish libraries that might otherwise have conflicting names.
+A long time ago, when storage space was more limited and developers were encouraged to install common libraries system-wide, the [Global Assembly Cache (GAC)](https://learn.microsoft.com/dotnet/framework/app-domains/gac) was introduced as a mechanism to facilitate that approach in the .NET Framework. The idea was to provide a central location for storing and managing shared assemblies, allowing multiple applications to reference the same dependency without each needing a separate copy.
 
-Strong naming was designed to help address [DLL Hell](https://en.wikipedia.org/wiki/DLL_hell), where applications would encounter conflicting versions of shared libraries. In particular, it allowed assemblies to be installed in the [Global Assembly Cache (GAC)](https://learn.microsoft.com/dotnet/framework/app-domains/gac), a system-wide store that could hold multiple versions side by side and resolve them by their full identities. It was not, however, intended to establish trust in the publisher or guarantee that the code was safe to execute.
+In an attempt to avoid repeating the associated problems that had plagued similar systems at the time (i.e., [DLL Hell](https://en.wikipedia.org/wiki/DLL_hell)), Microsoft envisioned the concept of [_strong naming_](https://learn.microsoft.com/dotnet/standard/assembly/strong-named), which combined the assembly's name, version, culture, and public signing key into a unique identity. This allowed the GAC to distinguish assemblies and persist different versions side by side, while a signature generated with the corresponding private key offered a cryptographic way to verify their integrity.
 
-In the modern .NET ecosystem, the relevance of strong naming has diminished considerably. The GAC has no equivalent in .NET (Core), modern runtimes don't enforce strong-name signatures or strict version matching, and NuGet has superseded the GAC as the standard way to distribute and consume libraries. For libraries that only target .NET (Core), strong naming provides very little practical value.
+Through the evolution of .NET, however, NuGet became the dominant way to distribute and consume libraries, leading the ecosystem to abandon the architectural philosophies that made GAC relevant in the first place. As a result, modern .NET (Core) runtimes neither have a GAC equivalent, nor enforce strong-name signatures and strict version matching in their resolution process.
 
-That said, strong naming still matters when supporting .NET Framework, where a strongly named assembly can only reference other strongly named assemblies. Leaving our library unsigned therefore excludes consumers that rely on this mechanism, even if their target framework is otherwise compatible. This is relevant to our .NET Standard 2.0 target, which allows the library to be used by .NET Framework applications. Some organizations also require strong naming for all dependencies as a matter of policy, regardless of the runtime involved.
+Despite that, seeing as .NET Framework continues to be a deployment target for many legacy applications, strong naming retains relevance to library authors who choose to maintain compatibility with that platform. Additionally, some organizations and enterprise environments mandate signed third-party dependencies as a matter of policy, regardless of the underlying runtime involved.
 
-The conventional way to satisfy this requirement is to generate a public/private key pair using the Windows-only `sn.exe` tool, commit the resulting `.snk` file to the repository, and point the project at it:
+In order to satisfy that requirement and establish a strong name for our assembly, we need to first generate a cryptographic public/private key pair. This can be done by using the `sn.exe` command-line tool, which is provided by the Windows SDK:
 
-```xml
-<PropertyGroup>
-  <AssemblyOriginatorKeyFile>MyLibrary.snk</AssemblyOriginatorKeyFile>
-  <SignAssembly>true</SignAssembly>
-</PropertyGroup>
+```console
+$ sn.exe -k MyLibrary.snk
 ```
 
-For open-source libraries, committing the key pair to the repository is a common practice, allowing contributors to modify and rebuild the code without changing its assembly identity. The private key is then no longer secret, but strong naming is being used here for compatibility rather than as proof of publisher authenticity.
-
-[Snek](https://github.com/Tyrrrz/Snek) automates this setup through an MSBuild extension. Instead of requiring us to generate and maintain a key file, it creates a key pair deterministically during the build and configures the assembly signing automatically. Adding it as a private dependency is enough to enable this behavior:
-
-```xml
-<ItemGroup>
-  <PackageReference Include="Snek" PrivateAssets="all" />
-</ItemGroup>
+```diff
+  ├── .git
+  │   └── (...)
+  ├── MyLibrary
+  │   ├── MyLibrary.csproj
++ │   ├── MyLibrary.snk
+  │   └── (...)
+  ├── MyLibrary.Tests
+  │   ├── MyLibrary.Tests.csproj
+  │   └── (...)
+  ├── .gitignore
+  ├── Directory.Build.props
+  ├── global.json
+  ├── MyLibrary.slnx
+  └── nuget.config
 ```
 
-By default, the key-generation seed is derived from the project's `PackageId` or `AssemblyName`. We can also set it explicitly through the `<AssemblyOriginatorKeySeed>` property:
+After the key file is created, it needs to be passed to MSBuild by referencing it in the project file via the `<AssemblyOriginatorKeyFile>` property, for example as shown below:
 
 ```xml
-<PropertyGroup>
-  <AssemblyOriginatorKeySeed>MyLibrary</AssemblyOriginatorKeySeed>
-</PropertyGroup>
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net11.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+
+    <!-- ... -->
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>MyLibrary.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- ... -->
+  </ItemGroup>
+
+</Project>
 ```
 
-Keeping the seed stable preserves the generated key pair across builds. Changing it changes the assembly's strong-name identity, so it should be treated as a compatibility-sensitive decision once the library has been published. The same caution applies when switching an existing library from a manually maintained key or Snek v1's shared key to Snek v2's generated key.
+Traditionally, the `snk` file would be managed centrally by the organization, exposing it for signing purposes only during the release process. In the modern times, however, it is instead a common practice to just commit the whole key pair directly to the public repository, seeing it more as a means for ensuring compatibility rather than security.
 
-For our multi-targeted library, Snek provides a convenient way to sign all target assemblies consistently without maintaining a separate key file. If we also use IL merging as discussed earlier, the final merged assembly must be signed with the intended key as well, since rewriting an assembly invalidates its original signature.
+Because strong naming is ultimately a legacy technology, the `sn.exe` tool is still locked behind Windows. While it is also possible to install its Mono counterpart on other platforms, it may be easier to leverage an MSBuild extension like [Snek](https://github.com/Tyrrrz/Snek) to automate the process entirely:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net11.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+
+    <!-- ... -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- ... -->
+
+    <PackageReference Include="Snek" Version="2.0.0" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>
+```
+
+With this setup, there is no need to manually generate or maintain a separate key file for signing purposes — Snek will automatically generate it in a cross-platform manner and apply to the resulting assembly. Although the generated key is not static, it is derived deterministically from the project's name, ensuring consistency across builds.
 
 ## Code formatting
 
