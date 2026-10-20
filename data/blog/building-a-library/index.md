@@ -686,7 +686,6 @@ To better understand how these conditional references translate into the final N
     <version>0.0.0-dev</version>
     <authors>YOUR_NAME_HERE</authors>
     <description>Sample library</description>
-
     <!-- ... -->
 
     <dependencies>
@@ -740,9 +739,9 @@ async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadChunksAsync(Stream stream)
 
 Generally speaking, the official compatibility packages should be considered first when it comes to backporting common platform APIs. They are well-tested, optimized for performance, and support a wide range of .NET versions, making them a reliable default for most scenarios.
 
-Being official, however, also means that their scope is rather conservative — they primarily focus on user-facing areas of the framework and leave out many specialized and low-level types, including those that power language features. Additionally, they don't attempt to provide any member polyfills, as that requires relying on the less conventional global-namespace extension blocks.
+Being official, however, also means that their scope is rather conservative — they primarily focus on user-facing areas of the framework and leave out many specialized and low-level types, including those that power language features. Furthermore, they don't attempt to provide any member polyfills, as that requires relying on the less conventional global-namespace extension blocks.
 
-Beyond that, the run-time dependencies introduced by these packages are inherently transitive, so they end up becoming the consumer's dependencies as well. This can be a benefit if the plan is to use the backported APIs as part of the library's external contract, but otherwise prevents us from keeping the compatibility layer private.
+Beyond that, the run-time dependencies introduced by these packages are inherently transitive, so they end up becoming the consumer's dependencies as well. This may be a benefit if the plan is to use the backported APIs as part of the library's external contract, but otherwise prevents us from keeping the compatibility layer private.
 
 This naturally brings us to the second solution: community polyfill libraries, such as [PolySharp](https://github.com/Sergio0694/PolySharp), [Polyfill](https://github.com/SimonCropp/Polyfill), and [PolyShim](https://github.com/Tyrrrz/PolyShim). All these projects were born out of independent efforts to plug the gaps left by Microsoft's compatibility packages, gradually evolving into comprehensive collections of shims and backports for a wide spectrum of different APIs.
 
@@ -889,17 +888,17 @@ Nevertheless, even with the flexibility that C# provides, polyfills are not an u
 
 ### Internalizing dependencies
 
-In the previous section, we briefly touched upon the concept of source-only NuGet packages and how they integrate by directly including their code in our build process. As a useful consequence, such packages can provide functionality that is entirely internal to the referencing project, avoiding unnecessary exposure and the maintenance obligations that come with it.
+In the previous section, we briefly touched upon the concept of source-only NuGet packages and how they integrate by directly including their code in the referencing project's build process. As a useful consequence, such packages can provide functionality that is entirely internal to our library, avoiding unnecessary exposure and the maintenance obligations that come with it.
 
 However, control over a package's deployment model belongs solely to its author — the `PrivateAssets="all"` attribute is just a marker that tells the toolchain not to communicate the dependency to downstream consumers. If the referenced package was published as a regular precompiled assembly, this will simply obscure the corresponding run-time requirement rather than remove it.
 
-Still, it is possible to manually internalize a dependency that wasn't designed for it, although doing so involves modifying the [Intermediate Language (IL)](https://learn.microsoft.com/dotnet/standard/managed-code) bytecode instead. For example, using a tool like [ILRepack](https://github.com/gluck/il-repack), we can merge the external dependency into our library assembly after it has been built:
+Still, it is possible to manually internalize a dependency that wasn't designed for it, although doing so involves modifying the [Intermediate Language (IL)](https://learn.microsoft.com/dotnet/standard/managed-code) bytecode after the build. For example, using a tool like [ILRepack](https://github.com/gluck/il-repack), we can merge the external dependency into our output assembly by running the following command:
 
 ```console
 $ ilrepack /internalize /out:MyLibrary.Merged.dll MyLibrary.dll SomeDependency.dll
 ```
 
-The command invocation above combines `MyLibrary.dll` with `SomeDependency.dll`, producing a single unified asset named `MyLibrary.Merged.dll`. Additionally, the `/internalize` option instructs ILRepack to switch the visibility of absorbed `public` types to `internal`, making them accessible only from within the merged assembly.
+The invocation above combines `MyLibrary.dll` with `SomeDependency.dll`, producing a single unified asset named `MyLibrary.Merged.dll`. Additionally, the `/internalize` option instructs ILRepack to switch the visibility of absorbed `public` types to `internal`, making them accessible only from within the merged assembly.
 
 In effect, this means that the functionality of `SomeDependency.dll` becomes isolated within our library, as though it were authored there in the first place. From the consumer's perspective, any relation `MyLibrary` has with `SomeDependency` becomes completely opaque, turning the latter into an implementation detail.
 
@@ -907,7 +906,7 @@ That said, integrating this transformation into the build process is not trivial
 
 To avoid managing all that complexity ourselves, we can instead rely on [Binternal](https://github.com/Tyrrrz/Binternal) — an MSBuild extension that provides the means to merge and internalize dependencies directly from the project file. This allows us to achieve the same effect as the ILRepack command from before, but in a declarative manner, with the necessary manipulations applied automatically as part of the build.
 
-For example, let's imagine that our library has taken a dependency on [CliWrap](https://github.com/Tyrrrz/CliWrap) for purposes that remain purely internal. We could choose to embed it into the output assembly by updating `MyLibrary.csproj` as follows:
+For example, let's imagine that our library has taken a dependency on [CliWrap](https://github.com/Tyrrrz/CliWrap) for purposes that remain purely internal. We could choose to embed it into the output assembly by updating `MyLibrary.csproj` as shown below:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -915,7 +914,6 @@ For example, let's imagine that our library has taken a dependency on [CliWrap](
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net11.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
-
     <!-- ... -->
   </PropertyGroup>
 
@@ -951,15 +949,17 @@ A long time ago, when storage space was more limited and developers were encoura
 
 In an attempt to avoid repeating the associated problems that had plagued similar systems at the time (i.e., [DLL Hell](https://en.wikipedia.org/wiki/DLL_hell)), Microsoft envisioned the concept of [_strong naming_](https://learn.microsoft.com/dotnet/standard/assembly/strong-named), which combined the assembly's name, version, culture, and public signing key into a unique identity. This allowed the GAC to distinguish assemblies and persist different versions side by side, while a signature generated with the corresponding private key offered a cryptographic way to verify their integrity.
 
-Through the evolution of .NET, however, NuGet became the dominant way to distribute and consume libraries, leading the ecosystem to abandon the architectural philosophies that made GAC relevant in the first place. As a result, modern .NET (Core) runtimes neither have a GAC equivalent, nor enforce strong-name signatures and strict version matching in their resolution process.
+Through the evolution of .NET, however, NuGet became the dominant way to distribute and consume libraries, leading the ecosystem to abandon the architectural philosophies that made GAC relevant in the first place. As a result, modern .NET (Core) runtimes don't implement GAC and don't enforce strong-name signatures or strict version matching in their resolution process.
 
-Despite that, seeing as .NET Framework continues to be a deployment target for many legacy applications, strong naming retains relevance to library authors who choose to maintain compatibility with that platform. Additionally, some organizations and enterprise environments mandate signed third-party dependencies as a matter of policy, regardless of the underlying runtime involved.
+Despite that, seeing as .NET Framework continues to be a deployment target for many legacy applications, strong naming retains relevance to library authors who choose to maintain compatibility with that platform. Moreover, some organizations and enterprise environments mandate signed third-party dependencies as a matter of policy, regardless of the underlying runtime involved.
 
-In order to satisfy that requirement and establish a strong name for our assembly, we need to first generate a cryptographic public/private key pair. This can be done by using the `sn.exe` command-line tool, which is provided by the Windows SDK:
+Luckily, establishing a strong name for an assembly is fairly simple, so it's usually worth doing for that extra bit of audience reach. First, we need to create a cryptographic key pair with the `sn.exe` command-line tool or its cross-platform Mono equivalent:
 
 ```console
-$ sn.exe -k MyLibrary.snk
+$ sn -k MyLibrary.snk
 ```
+
+We can then place the generated key file either in the library's directory or in the solution root if we want to share it across multiple projects. In our example, since only `MyLibrary` is packable, we'll keep the key pair there for convenience:
 
 ```diff
   ├── .git
@@ -978,7 +978,7 @@ $ sn.exe -k MyLibrary.snk
   └── nuget.config
 ```
 
-After the key file is created, it needs to be passed to MSBuild by referencing it in the project file via the `<AssemblyOriginatorKeyFile>` property, for example as shown below:
+Finally, to enable signing for the library, we need to edit the project file by adding the `<SignAssembly>` and `<AssemblyOriginatorKeyFile>` properties. With the setup illustrated above, the updated `MyLibrary.csproj` should look similar to this:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -986,13 +986,12 @@ After the key file is created, it needs to be passed to MSBuild by referencing i
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net11.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
-
     <!-- ... -->
   </PropertyGroup>
 
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>MyLibrary.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>MyLibrary.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -1002,9 +1001,9 @@ After the key file is created, it needs to be passed to MSBuild by referencing i
 </Project>
 ```
 
-Traditionally, the `snk` file would be managed centrally by the organization, exposing it for signing purposes only during the release process. In the modern times, however, it is instead a common practice to just commit the whole key pair directly to the public repository, seeing it more as a means for ensuring compatibility rather than security.
+In an enterprise setting, the `snk` file is often managed centrally and exposed for signing purposes only during the final stages of the release process. For open-source projects, however, it is instead more common to commit the key pair directly to the repository, forgoing the exclusive control over the library's identity in favor of easier collaboration.
 
-Because strong naming is ultimately a legacy technology, the `sn.exe` tool is still locked behind Windows. While it is also possible to install its Mono counterpart on other platforms, it may be easier to leverage an MSBuild extension like [Snek](https://github.com/Tyrrrz/Snek) to automate the process entirely:
+Note that strong naming is explicitly not a security boundary, so keeping the private key secret is unnecessary when signing solely with the goal of broader compatibility. In fact, we can simplify things even further and use another MSBuild extension called [Snek](https://github.com/Tyrrrz/Snek) to get rid of the initial setup and generate the key automatically as part of the build:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -1012,20 +1011,51 @@ Because strong naming is ultimately a legacy technology, the `sn.exe` tool is st
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net11.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
-
     <!-- ... -->
   </PropertyGroup>
 
   <ItemGroup>
     <!-- ... -->
 
-    <PackageReference Include="Snek" Version="2.0.0" PrivateAssets="all" />
+    <PackageReference Include="Snek" Version="2.0.1" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>
 ```
 
-With this setup, there is no need to manually generate or maintain a separate key file for signing purposes — Snek will automatically generate it in a cross-platform manner and apply to the resulting assembly. Although the generated key is not static, it is derived deterministically from the project's name, ensuring consistency across builds.
+With this approach, there is no need to maintain a separate `snk` file in the repository or set the associated configuration properties — both aspects are handled seamlessly behind the scenes. The key pairs generated by Snek are derived deterministically from a seed based on the package ID or assembly name, which ensures their reproducibility between builds and environments.
+
+The last part is particularly important because changing the published signing key also changes the resulting strong-name identity, potentially breaking existing consumers. If you wish to override the seed, for example to establish a shared value across multiple projects in the solution, you can do so via the `<AssemblyOriginatorKeySeed>` property:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net11.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <!-- ... -->
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyOriginatorKeySeed>MySigningSeed</AssemblyOriginatorKeySeed>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- ... -->
+
+    <PackageReference Include="Snek" Version="2.0.1" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>
+```
+
+Either way, having set everything up, we can verify that our library now has a strong name by inspecting the `PublicKeyToken` component of its identity in an IL viewer, such as [dnSpy](https://github.com/dnSpyEx/dnSpy):
+
+```csharp
+// MyLibrary, Version=0.0.0.0, Culture=neutral, PublicKeyToken=13da9c84e227a6eb
+```
+
+In general, even though strong naming is a largely obscure and legacy feature in the .NET ecosystem, I'd still recommend signing your libraries by default. Unless you rely on external run-time dependencies that are themselves not strong named, this is a low-effort way to extend support to a slightly wider set of consumers.
 
 ## Code formatting
 
