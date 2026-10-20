@@ -920,7 +920,7 @@ For example, let's imagine that our library has taken a dependency on [CliWrap](
   <ItemGroup>
     <!-- ... -->
 
-    <PackageReference Include="Binternal" Version="1.0.2" PrivateAssets="all" />
+    <PackageReference Include="Binternal" Version="1.0.3" PrivateAssets="all" />
 
     <PackageReference
       Include="CliWrap"
