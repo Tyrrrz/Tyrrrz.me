@@ -401,7 +401,7 @@ This can be done with the help of [_polyfilling_](<https://en.wikipedia.org/wiki
 Of course, the ability to achieve that heavily depends on the programming language and its capabilities. For example, in JavaScript — where the concept originated — polyfills are authored as standalone scripts that patch global objects or specific prototypes at run time. By contrast, C#'s statically typed and compiled nature precludes that style of polyfilling, but the technique itself remains applicable via the following approaches:
 
 - **Type polyfills**, which re-implement missing built-in types from scratch, replicating their behavior as closely as possible. They match the names and namespaces of their native counterparts so that the compiler resolves the corresponding references to them when the original definitions are not available.
-- **Member polyfills**, which rely on [extension members](https://learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/extension-methods) to shim missing methods, properties, or operators on existing built-in types. They are placed in the global namespace to make them immediately accessible on every relevant receiver, effectively simulating regular members.
+- **Member polyfills**, which rely on [extension members](https://learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/extension-methods) to shim missing methods, properties, operators or indexers on existing built-in types. They are placed in the global namespace to make them immediately accessible on every relevant receiver, effectively simulating regular members.
 
 These approaches can be similarly combined with the SDK-provided preprocessor symbols to ensure that the polyfills are only included in the project when targeting frameworks that don't have the desired APIs. This way, when the library is built for more modern environments, the native implementations are used instead, avoiding any potential conflicts, performance issues, and dead code.
 
@@ -945,15 +945,15 @@ Of course, internalization does come with its set of trade-offs as well: embedde
 
 ### Strong naming
 
-A long time ago, when storage space was more limited and developers were encouraged to install common libraries system-wide, the [Global Assembly Cache (GAC)](https://learn.microsoft.com/dotnet/framework/app-domains/gac) was introduced as a mechanism to facilitate that approach in the .NET Framework. The idea was to provide a central location for storing and managing shared assemblies, allowing multiple applications to reference the same dependency without each needing a separate copy.
+A long time ago, when storage space was more limited and developers were encouraged to install common libraries system-wide, the [Global Assembly Cache (GAC)](https://learn.microsoft.com/dotnet/framework/app-domains/gac) was introduced as a mechanism to facilitate that approach in the .NET Framework. The idea was to provide a central location for storing and managing shared assemblies, letting multiple applications reference the same dependency without each needing a separate copy.
 
 In an attempt to avoid repeating the associated problems that had plagued similar systems at the time (i.e., [DLL Hell](https://en.wikipedia.org/wiki/DLL_hell)), Microsoft envisioned the concept of [_strong naming_](https://learn.microsoft.com/dotnet/standard/assembly/strong-named), which combined the assembly's name, version, culture, and public signing key into a unique identity. This allowed the GAC to distinguish assemblies and persist different versions side by side, while a signature generated with the corresponding private key offered a cryptographic way to verify their integrity.
 
-Through the evolution of .NET, however, NuGet became the dominant way to distribute and consume libraries, leading the ecosystem to abandon the architectural philosophies that made GAC relevant in the first place. As a result, modern .NET (Core) runtimes don't implement GAC and don't enforce strong-name signatures or strict version matching in their resolution process.
+Through the evolution of .NET, however, NuGet became the dominant way to distribute and consume libraries, leading the ecosystem to abandon the architectural philosophies that made GAC relevant in the first place. As a result, modern .NET (Core) runtimes don't implement GAC and also don't enforce strong-name signatures or strict version matching in their resolution process.
 
 Despite that, seeing as .NET Framework continues to be a deployment target for many legacy applications, strong naming retains relevance to library authors who choose to maintain compatibility with that platform. Moreover, some organizations and enterprise environments mandate signed third-party dependencies as a matter of policy, regardless of the underlying runtime involved.
 
-Luckily, establishing a strong name for an assembly is fairly simple, so it's usually worth doing for that extra bit of audience reach. First, we need to create a cryptographic key pair with the `sn.exe` command-line tool or its cross-platform Mono equivalent:
+Fortunately, establishing a strong name for an assembly is fairly simple, so it's usually worth doing for that extra bit of audience reach. First, we need to create a cryptographic key pair with the `sn` command-line tool from either the Windows SDK or Mono:
 
 ```console
 $ sn -k MyLibrary.snk
@@ -1049,17 +1049,21 @@ The last part is particularly important because changing the published signing k
 </Project>
 ```
 
-Either way, having set everything up, we can verify that our library now has a strong name by inspecting the `PublicKeyToken` component of its identity in an IL viewer, such as [dnSpy](https://github.com/dnSpyEx/dnSpy):
+Either way, having set everything up, we can verify that our library now has a strong name by inspecting the `PublicKeyToken` component of its identity in an IL viewer, such as [ILSpy](https://github.com/icsharpcode/ilspy):
 
 ```csharp
 // MyLibrary, Version=0.0.0.0, Culture=neutral, PublicKeyToken=13da9c84e227a6eb
 ```
 
-In general, even though strong naming is a largely obscure and legacy feature in the .NET ecosystem, I'd still recommend signing your libraries by default. Unless you rely on external run-time dependencies that are themselves not strong named, this is a low-effort way to extend support to a slightly wider set of consumers.
+In general, even though it's a largely obscure and legacy feature in the .NET ecosystem, I'd still recommend strong naming your libraries as a standard practice. For the majority of scenarios, this is a reliable way to extend support to a slightly wider range of consumers, without introducing significant development overhead.
+
+One constraint to keep in mind when doing it, however, is that, on .NET Framework, a strongly named assembly is only allowed to reference other assemblies if they are strongly named themselves. Therefore, signing a library early does limit which dependencies you may add to it down the line — although this restriction can also be bypassed by using internalization.
 
 ## Code formatting
 
-Most code gets read way more often than it's written, so it's important to consider readability as one of the core optimization goals. This is no less true for a library than it is for any other type of software, but because code formatting isn't something most .NET developers think much about, I felt it deserved its own section in this article.
+As developers, we spend a far greater amount of time reading code than actually writing it, so it's important to prioritize readability amongst its many optimization goals. One way of achieving that goal is through maintaining a consistent and predictable formatting style, which helps cut down on the visual noise and lets our pattern recognition work more efficiently.
+
+Historically, code formatting has been a neglected aspect in the .NET ecosystem because there was no uniform way to enforce it — most developers relied on their IDEs to apply styling preferences, but those couldn't easily be shared across the team. ?
 
 .NET tooling provides a built-in code formatter that can be invoked through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is highly configurable, allowing you to define your own coding style preferences and enforce them consistently across the entire codebase.
 
@@ -1069,15 +1073,25 @@ That said, this extensive configurability is also what drives most people away f
 
 This is why I personally prefer to use [CSharpier](https://github.com/belav/csharpier) instead. It takes inspiration from JavaScript's [Prettier](https://github.com/prettier/prettier) and builds upon the idea that most developers don't care which formatting style is used, as long as it's consistent and doesn't require manual intervention. As such, CSharpier offers (almost) no configuration options and works out of the box.
 
-You can use CSharpier as a command-line tool or through one of its many IDE extensions, but I think it shines the most when integrated directly into your MSBuild pipeline. To do that, let's add `CSharpier.MSBuild` as a development dependency in our projects:
+You can use CSharpier as a command-line tool or through one of its many IDE extensions, but I think it shines the most when integrated directly into your build pipeline through a — you guessed it — another MSBuild extension. To do that, let's add `CSharpier.MSBuild` as a development dependency in our projects:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- ... -->
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net11.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <!-- ... -->
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyOriginatorKeySeed>MySigningSeed</AssemblyOriginatorKeySeed>
+  </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CSharpier.MSBuild" Version="1.2.6" PrivateAssets="all" />
+    <!-- ... -->
+
+    <PackageReference Include="CSharpier.MSBuild" Version="1.3.0" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>
