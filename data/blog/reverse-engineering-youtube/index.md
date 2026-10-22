@@ -214,10 +214,10 @@ Once you locate the source code URL and download it, you need to parse it. There
 Instead of explaining step-by-step what exactly you need to do, I'll just copy a small part of YoutubeExplode's source code. I made sure to comment it to the best of my ability, so it should be pretty easy to follow.
 
 ```csharp
-private async Task<IReadOnlyList<ICipherOperation>> GetCipherOperationsAsynclsx(string sourceUrl)
+private async Task<IReadOnlyList<ICipherOperation>> GetCipherOperationsAsync(string sourceUrl)
 {
     // Get player source code
-    var sourceRaw = await _httpClient.GetStringAsynclsx(sourceUrl);
+    var sourceRaw = await _httpClient.GetStringAsync(sourceUrl);
 
     // Find the name of the function that handles deciphering
     var entryPoint = Regex.Match(sourceRaw,

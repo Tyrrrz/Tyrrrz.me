@@ -333,9 +333,9 @@ For example, imagine we were using our result type in the following scenario:
 ```csharp
 public interface ITranslationService
 {
-    Task<bool> IsLanguageSupportedAsynclsx(string language);
+    Task<bool> IsLanguageSupportedAsync(string language);
 
-    Task<string> TranslateAsynclsx(string text, string targetLanguage);
+    Task<string> TranslateAsync(string text, string targetLanguage);
 }
 
 public class Translator
@@ -347,12 +347,12 @@ public class Translator
         _translationService = translationService;
     }
 
-    public async Task<Result<string, string>> TranslateAsynclsx(string text, string language)
+    public async Task<Result<string, string>> TranslateAsync(string text, string language)
     {
-        if (!await _translationService.IsLanguageSupportedAsynclsx(language))
+        if (!await _translationService.IsLanguageSupportedAsync(language))
             return Result.Error($"Language {language} is not supported");
 
-        var translated = await _translationService.TranslateAsynclsx(text, language);
+        var translated = await _translationService.TranslateAsync(text, language);
         return Result.Ok(translated);
     }
 }
@@ -439,12 +439,12 @@ public class Translator
         _translationService = translationService;
     }
 
-    public async Task<Result<string, string>> TranslateAsynclsx(string text, string language)
+    public async Task<Result<string, string>> TranslateAsync(string text, string language)
     {
-        if (!await _translationService.IsLanguageSupportedAsynclsx(language))
+        if (!await _translationService.IsLanguageSupportedAsync(language))
             return Result.Error($"Language {language} is not supported");
 
-        var translated = await _translationService.TranslateAsynclsx(text, language);
+        var translated = await _translationService.TranslateAsync(text, language);
         return Result.Ok(translated);
     }
 }

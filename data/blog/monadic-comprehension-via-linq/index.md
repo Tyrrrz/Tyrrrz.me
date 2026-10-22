@@ -423,7 +423,7 @@ public class PaymentProcessor
     };
 
     // Try to get IBAN by registered user's email
-    public async Task<Option<string>> GetIbanAsynclsx(string userEmail)
+    public async Task<Option<string>> GetIbanAsync(string userEmail)
     {
         // Pretend that we are talking to some external server or database here
         await Task.Delay(1000);
@@ -435,7 +435,7 @@ public class PaymentProcessor
     }
 
     // Try to send a payment from IBAN to IBAN
-    public async Task<Option<Guid>> SendPaymentAsynclsx(
+    public async Task<Option<Guid>> SendPaymentAsync(
         string ibanFrom,
         string ibanTo,
         decimal amount)
@@ -453,16 +453,16 @@ public class PaymentProcessor
 }
 ```
 
-Both of the above methods are asynchronous and have potential error outputs: `GetIbanAsynclsx(...)` fails if provided with an unknown email, while `SendPaymentAsynclsx(...)` returns an error for invalid IBANs. With the query syntax we've just introduced, we can easily compose calls to these methods like so:
+Both of the above methods are asynchronous and have potential error outputs: `GetIbanAsync(...)` fails if provided with an unknown email, while `SendPaymentAsync(...)` returns an error for invalid IBANs. With the query syntax we've just introduced, we can easily compose calls to these methods like so:
 
 ```csharp
 var paymentProcessor = new PaymentProcessor();
 
 // Note the `await` in the beginning of the expression
 var paymentId = await
-    from leviIban in paymentProcessor.GetIbanAsynclsx("levi@gmail.com")
-    from olenaIban in paymentProcessor.GetIbanAsynclsx("olena@hotmail.com")
-    from paymentId in paymentProcessor.SendPaymentAsynclsx(leviIban, olenaIban, 100)
+    from leviIban in paymentProcessor.GetIbanAsync("levi@gmail.com")
+    from olenaIban in paymentProcessor.GetIbanAsync("olena@hotmail.com")
+    from paymentId in paymentProcessor.SendPaymentAsync(leviIban, olenaIban, 100)
     select paymentId;
 
 // Prints "d56a5b86-f55b-4707-be4f-138a19272f47"
@@ -480,9 +480,9 @@ Similarly, if any stage of the pipeline ends up failing (i.e., returning a _none
 var paymentProcessor = new PaymentProcessor();
 
 var paymentId = await
-    from joshIban in paymentProcessor.GetIbanAsynclsx("josh@yahoo.com") // this will fail
-    from olenaIban in paymentProcessor.GetIbanAsynclsx("olena@hotmail.com") // this won't be executed
-    from paymentId in paymentProcessor.SendPaymentAsynclsx(joshIban, olenaIban, 100)
+    from joshIban in paymentProcessor.GetIbanAsync("josh@yahoo.com") // this will fail
+    from olenaIban in paymentProcessor.GetIbanAsync("olena@hotmail.com") // this won't be executed
+    from paymentId in paymentProcessor.SendPaymentAsync(joshIban, olenaIban, 100)
     select paymentId;
 
 // Prints "Failed to send payment"
