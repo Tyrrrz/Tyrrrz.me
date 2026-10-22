@@ -286,9 +286,9 @@ To identify a particular implementation of the cipher, YouTube does not rely on 
 var v = {
   splay: !1,
   lactMilliseconds: c.LACT.toString(),
-  playerHeightPixels: Math.trunclsx(c.P_H),
-  playerWidthPixels: Math.trunclsx(c.P_W),
-  vis: Math.trunclsx(c.VIS),
+  playerHeightPixels: Math.trunc(c.P_H),
+  playerWidthPixels: Math.trunc(c.P_W),
+  vis: Math.trunc(c.VIS),
   // Seed for the cipher algorithm:
   signatureTimestamp: 19369,
   // -----------------------------

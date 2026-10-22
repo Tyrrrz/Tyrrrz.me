@@ -16,7 +16,7 @@ var window = Application.Current.MainWindow;
 var source = HwndSource.FromHwnd(new WindowInteropHelper(window).Handle);
 source.AddHook(WndProc);
 
-private IntPtr WndProclsx(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
 {
     // Handle messages...
 
@@ -26,7 +26,7 @@ private IntPtr WndProclsx(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, re
 
 In the example above we use the application's main window as the host, as it typically stays open for as long as the application is running. You can specify a different window through a parameter in the `FromVisual(...)` method, but then make sure to call `source.RemoveHook(...)` and `source.Dispose()` after you're done.
 
-The above approach suffers from not being MVVM-friendly — the `WndProclsx(...)` method, which will most likely be defined in the model layer, is actually coupled to a window. As a result, it can introduce a circular dependency between the view and the model, which may often lead to undesirable consequences.
+The above approach suffers from not being MVVM-friendly — the `WndProc(...)` method, which will most likely be defined in the model layer, is actually coupled to a window. As a result, it can introduce a circular dependency between the view and the model, which may often lead to undesirable consequences.
 
 ## MVVM way
 
@@ -46,15 +46,15 @@ public sealed class SpongeWindow : NativeWindow
         CreateHandle(new CreateParams());
     }
 
-    protected override void WndProclsx(ref Message m)
+    protected override void WndProc(ref Message m)
     {
         WndProcCalled?.Invoke(this, m);
-        base.WndProclsx(ref m); // don't forget this line
+        base.WndProc(ref m); // don't forget this line
     }
 }
 ```
 
-Make sure you don't forget to call `base.WndProclsx(ref m)`, otherwise the window will not initialize correctly.
+Make sure you don't forget to call `base.WndProc(ref m)`, otherwise the window will not initialize correctly.
 
 Now, assuming we have some sort of `WndProcService`, we can use our sponge window like so:
 
