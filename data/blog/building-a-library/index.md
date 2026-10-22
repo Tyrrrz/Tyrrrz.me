@@ -1057,17 +1057,82 @@ Either way, having set everything up, we can verify that our library now has a s
 
 In general, even though it's a largely obscure and legacy feature in the .NET ecosystem, I'd still recommend strong naming your libraries as a standard practice. For the majority of scenarios, this is a reliable way to extend support to a slightly wider range of consumers, without introducing significant development overhead.
 
-One constraint to keep in mind, however, is that, on .NET Framework, a strongly named assembly is only allowed to reference other assemblies if they are strongly named themselves. Therefore, signing a library early does limit which dependencies you may add to it down the line — although this restriction can also be bypassed using internalization.
+One constraint to keep in mind, however, is that, on .NET Framework, a strongly named assembly is only allowed to reference assemblies that are strongly named themselves. Therefore, signing a library early does limit which dependencies you may add to it down the line — although this restriction can also be bypassed using internalization.
 
 ## Code formatting
 
-As developers, we spend a far greater amount of time reading code than actually writing it, so it's a good idea to try to make that experience as efficient as possible. One way of doing that is by enforcing a consistent formatting style to cut down on the cognitive friction caused by inconsequential differences in indentation, brace placement, line lengths, and spacing.
+As developers, we spend a far greater amount of time reading code than actually writing it, so it's a good idea to try to make that experience as efficient as possible. One way of doing that is by enforcing a consistent formatting style to cut down on the visual noise in indentation, brace placement, line lengths, spacing, and other cosmetic details.
 
-Historically, code formatting has been a neglected aspect in the .NET tooling, regarded more as an IDE convenience rather than an independent, first-class concern. Solutions like [StyleCop](https://github.com/stylecop/stylecop) did appear as an attempt to bridge that gap, but they often required dealing with complex configuration files and struggled to maintain acceptable performance due to out-of-process parsing.
+Historically, code formatting has been a neglected aspect in the .NET tooling, regarded more as an IDE convenience rather than an independent, first-class concern. Solutions like [StyleCop](https://github.com/stylecop/stylecop) did appear as an attempt to bridge that gap, but they often required dealing with complex configuration files and struggled to maintain acceptable performance in larger projects.
 
-Most of these issues were fixed with the introduction of [Roslyn](https://github.com/dotnet/roslyn), which provided a an open API for directly enhancing the compilation process. This allowed code formatting tools to integrate seamlessly into the build pipeline as analyzers, ensuring reproducible behavior regardless of the IDE or lack thereof.
+Things changed with the introduction of [Roslyn](https://github.com/dotnet/roslyn), however, as it moved the C# compilation pipeline from a black-box system to an open and extensible platform. Among other things, this enabled tool developers to leverage the same parsing and semantic analysis capabilities used by the compiler itself, including for the purposes of linting and formatting code.
 
-Additionally, starting with .NET 6, the SDK ships with a built-in code formatter that can be invoked through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is highly configurable, allowing you to define your own coding style preferences through a well-known `.editorconfig` file and enforce them consistently across the entire codebase.
+Starting with .NET 6, the SDK also ships a built-in code formatter of its own, generally known as [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format), which can be invoked from the command line or directly from most major IDEs. This formatter is very configurable, allowing you to extensively fine-tune your styling preferences through a conventional [`.editorconfig`](https://learn.microsoft.com/dotnet/fundamentals/code-analysis/configuration-files#editorconfig) file — covering everything from whitespace management to `using` order and `var` usage:
+
+```ini
+root = true
+
+[*.cs]
+# Indentation & Whitespace
+indent_style = space
+indent_size = 4
+
+# Newlines
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+
+# Code Style & Preferences
+csharp_style_var_for_built_in_types = true:warning
+csharp_style_prefer_method_group_conversion = true:suggestion
+csharp_space_between_parentheses = false
+
+# Expressions
+csharp_prefer_simple_using_statement = true:warning
+```
+
+For example, assume we have a source file that looks like this:
+
+```csharp
+namespace MyLibrary;
+
+public class CustomerProcessor {
+    public async Task ProcessOrdersAsync(IEnumerable<string> names) {
+        using (var stream = new MemoryStream()) {
+            var count = 0;
+
+            var filtered = names.Where(x => Filter(x));
+
+            if ( count > 0 ) {
+                await stream.FlushAsync();
+            }
+        }
+    }
+
+    private static bool Filter(string name) => !string.IsNullOrEmpty(name);
+}
+```
+
+```csharp
+namespace MyLibrary;
+
+public class CustomerProcessor
+{
+    public async Task ProcessOrdersAsync(IEnumerable<string> names)
+    {
+        using var stream = new MemoryStream();
+        int count = 0;
+
+        var filtered = names.Where(Filter);
+
+        if (count > 0)
+        {
+            await stream.FlushAsync();
+        }
+    }
+
+    private static bool Filter(string name) => !string.IsNullOrEmpty(name);
+}
+```
 
 That said, this extensive configurability is also what drives most people away from using `dotnet format` in their solutions. Most people would rather write code than spend hours bike-shedding over line widths and bracket placements, because inevitably, where there are many options, there will be disagreements.
 
@@ -1082,10 +1147,6 @@ You can use CSharpier as a command-line tool or through one of its many IDE exte
     <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net11.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <!-- ... -->
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <AssemblyOriginatorKeySeed>MySigningSeed</AssemblyOriginatorKeySeed>
   </PropertyGroup>
 
   <ItemGroup>
