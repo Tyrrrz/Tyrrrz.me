@@ -1057,17 +1057,17 @@ Either way, having set everything up, we can verify that our library now has a s
 
 In general, even though it's a largely obscure and legacy feature in the .NET ecosystem, I'd still recommend strong naming your libraries as a standard practice. For the majority of scenarios, this is a reliable way to extend support to a slightly wider range of consumers, without introducing significant development overhead.
 
-One constraint to keep in mind when doing it, however, is that, on .NET Framework, a strongly named assembly is only allowed to reference other assemblies if they are strongly named themselves. Therefore, signing a library early does limit which dependencies you may add to it down the line — although this restriction can also be bypassed by using internalization.
+One constraint to keep in mind, however, is that, on .NET Framework, a strongly named assembly is only allowed to reference other assemblies if they are strongly named themselves. Therefore, signing a library early does limit which dependencies you may add to it down the line — although this restriction can also be bypassed using internalization.
 
 ## Code formatting
 
-As developers, we spend a far greater amount of time reading code than actually writing it, so it's important to prioritize readability amongst its many optimization goals. One way of achieving that goal is through maintaining a consistent and predictable formatting style, which helps cut down on the visual noise and lets our pattern recognition work more efficiently.
+As developers, we spend a far greater amount of time reading code than actually writing it, so it's a good idea to try to make that experience as efficient as possible. One way of doing that is by enforcing a consistent formatting style to cut down on the cognitive friction caused by inconsequential differences in indentation, brace placement, line lengths, and spacing.
 
-Historically, code formatting has been a neglected aspect in the .NET ecosystem because there was no uniform way to enforce it — most developers relied on their IDEs to apply styling preferences, but those couldn't easily be shared across the team. ?
+Historically, code formatting has been a neglected aspect in the .NET tooling, regarded more as an IDE convenience rather than an independent, first-class concern. Solutions like [StyleCop](https://github.com/stylecop/stylecop) did appear as an attempt to bridge that gap, but they often required dealing with complex configuration files and struggled to maintain acceptable performance due to out-of-process parsing.
 
-.NET tooling provides a built-in code formatter that can be invoked through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is highly configurable, allowing you to define your own coding style preferences and enforce them consistently across the entire codebase.
+Most of these issues were fixed with the introduction of [Roslyn](https://github.com/dotnet/roslyn), which provided a an open API for directly enhancing the compilation process. This allowed code formatting tools to integrate seamlessly into the build pipeline as analyzers, ensuring reproducible behavior regardless of the IDE or lack thereof.
 
-It supports a wide range of formatting options — from basic indentation and spacing rules to more complex C#-specific conventions, such as the placement of braces, the use of expression-bodied members, etc. By defining these preferences in a `.editorconfig` file at the root of your repository, you can ensure that every contributor adheres to the same coding style, regardless of their individual IDE settings.
+Additionally, starting with .NET 6, the SDK ships with a built-in code formatter that can be invoked through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is highly configurable, allowing you to define your own coding style preferences through a well-known `.editorconfig` file and enforce them consistently across the entire codebase.
 
 That said, this extensive configurability is also what drives most people away from using `dotnet format` in their solutions. Most people would rather write code than spend hours bike-shedding over line widths and bracket placements, because inevitably, where there are many options, there will be disagreements.
 
