@@ -97,6 +97,10 @@ export default defineConfig(async () => {
       emptyOutDir: true,
     },
 
+    ssr: {
+      noExternal: ["react-syntax-highlighter"],
+    },
+
     server: {
       port: 3000,
     },
