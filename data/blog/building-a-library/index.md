@@ -1063,31 +1063,82 @@ One constraint to keep in mind, however, is that, on .NET Framework, a strongly 
 
 As developers, we spend a far greater amount of time reading code than actually writing it, so it's a good idea to try to make that experience as efficient as possible. One way of doing that is by enforcing a consistent formatting style to cut down on the visual noise in indentation, brace placement, line lengths, spacing, and other cosmetic details.
 
-Historically, code formatting has been a neglected aspect in the .NET tooling, regarded more as an IDE convenience rather than an independent, first-class concern. Solutions like [StyleCop](https://github.com/stylecop/stylecop) did appear as an attempt to bridge that gap, but they often required dealing with complex configuration files and struggled to maintain acceptable performance in larger projects.
+Historically, code formatting has been a neglected aspect in the .NET world, regarded more as an IDE convenience rather than an independent, first-class concern. Some teams relied on power tools like JetBrains ReSharper to automatically clean up their files, but those required separate paid licenses and lacked headless execution modes for use in continuous integration environments.
 
-Things changed with the introduction of [Roslyn](https://github.com/dotnet/roslyn), however, as it moved the C# compilation pipeline from a black-box system to an open and extensible platform. Among other things, this enabled tool developers to leverage the same parsing and semantic analysis capabilities used by the compiler itself, including for the purposes of linting and formatting code.
+Things improved as .NET started to move from a proprietary development platform to an open-source and CLI-centric model. In particular, the introduction of [Roslyn](https://github.com/dotnet/roslyn) made it so that anyone could leverage the C# compiler's native capabilities for parsing and semantic analysis to provide custom diagnostics and code fixes — including for the purpose of formatting.
 
-Starting with .NET 6, the SDK also ships a built-in code formatter of its own, generally known as [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format), which can be invoked from the command line or directly from most major IDEs. This formatter is very configurable, allowing you to extensively fine-tune your styling preferences through a conventional [`.editorconfig`](https://learn.microsoft.com/dotnet/fundamentals/code-analysis/configuration-files#editorconfig) file — covering everything from whitespace management to `using` order and `var` usage:
+Beginning with .NET 6, the SDK also ships a built-in code formatter of its own, available through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is highly customizable and relies on the industry-standard [`.editorconfig`](https://editorconfig.org) file to configure its styling rules, which can range from whitespace control to various language-specific conventions.
+
+For example, a typical setup for a modern C# solution may look like this:
 
 ```ini
 root = true
 
 [*.cs]
-# Indentation & Whitespace
 indent_style = space
 indent_size = 4
 
-# Newlines
+csharp_style_var_for_built_in_types = true
+csharp_style_var_when_type_is_apparent = true
+csharp_style_var_elsewhere = true
+
+csharp_style_expression_bodied_methods = true
+csharp_style_expression_bodied_constructors = true
+csharp_style_expression_bodied_operators = true
+
+csharp_style_expression_bodied_properties = true
+csharp_style_expression_bodied_indexers = true
+csharp_style_expression_bodied_accessors = true
+
+csharp_style_pattern_matching_over_is_with_cast_check = true
+csharp_style_pattern_matching_over_as_with_null_check = true
+csharp_style_inlined_variable_declaration = true
+csharp_style_throw_expression = true
+csharp_style_conditional_delegate_call = true
+csharp_style_pattern_local_over_anonymous_function = true
+csharp_prefer_simple_default_expression = true
+csharp_style_deconstructed_variable_declaration = true
+
+csharp_preserve_single_line_blocks = true
+csharp_preserve_single_line_statements = false
+csharp_prefer_braces = true
+
+csharp_indent_block_contents = true
+csharp_indent_braces = false
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+csharp_indent_labels = flush_left
+
+csharp_space_after_cast = false
+csharp_space_after_colon_in_inheritance_clause = true
+csharp_space_after_comma = true
+csharp_space_after_dot = false
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_after_semicolon_in_for_statement = true
+csharp_space_around_binary_operators = before_and_after
+csharp_space_around_declaration_statements = do_not_ignore
+csharp_space_before_colon_in_inheritance_clause = true
+csharp_space_before_comma = false
+csharp_space_before_dot = false
+csharp_space_before_open_square_brackets = false
+csharp_space_before_semicolon_in_for_statement = false
+csharp_space_between_empty_square_brackets = false
+csharp_space_between_method_call_empty_parameter_list_parentheses = false
+csharp_space_between_method_call_name_and_opening_parenthesis = false
+csharp_space_between_method_call_parameter_list_parentheses = false
+csharp_space_between_method_declaration_empty_parameter_list_parentheses = false
+csharp_space_between_method_declaration_name_and_open_parenthesis = false
+csharp_space_between_method_declaration_parameter_list_parentheses = false
+csharp_space_between_parentheses = false
+csharp_space_between_square_brackets = false
+
 csharp_new_line_before_open_brace = all
 csharp_new_line_before_else = true
-
-# Code Style & Preferences
-csharp_style_var_for_built_in_types = true:warning
-csharp_style_prefer_method_group_conversion = true:suggestion
-csharp_space_between_parentheses = false
-
-# Expressions
-csharp_prefer_simple_using_statement = true:warning
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_before_members_in_anonymous_types = true
+csharp_new_line_between_query_expression_clauses = true
 ```
 
 For example, assume we have a source file that looks like this:
