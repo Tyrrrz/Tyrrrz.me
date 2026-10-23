@@ -1,5 +1,5 @@
 ---
-title: "The Invisible Parts of Building a Library in .NET"
+title: "The Invisible Parts of Library Development in .NET"
 date: "2026-11-11"
 ---
 
@@ -1037,6 +1037,7 @@ The last part is particularly important because changing the published signing k
   </PropertyGroup>
 
   <PropertyGroup>
+    <!-- Explicit seed for the generated strong-name key pair -->
     <AssemblyOriginatorKeySeed>MySigningSeed</AssemblyOriginatorKeySeed>
   </PropertyGroup>
 
@@ -1067,9 +1068,9 @@ Historically, code formatting has been a neglected aspect in the .NET world, reg
 
 Things improved as .NET started to move from a proprietary development platform to an open-source and CLI-centric model. In particular, the introduction of [Roslyn](https://github.com/dotnet/roslyn) made it so that anyone could leverage the C# compiler's native capabilities for parsing and semantic analysis to provide custom diagnostics and code fixes — including for the purpose of formatting.
 
-Beginning with .NET 6, the SDK also ships a built-in code formatter of its own, available through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is highly customizable and relies on the industry-standard [`.editorconfig`](https://editorconfig.org) file to configure its styling rules, which can range from whitespace control to various language-specific conventions.
+Beginning with .NET 6, the SDK also ships a built-in code formatter of its own, available through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is highly customizable and relies on the industry-standard [`.editorconfig`](https://editorconfig.org) file to define its styling rules, which can range from whitespace control to various language-specific conventions.
 
-For example, a typical setup for a modern C# solution may look like this:
+For example, a typical set of style guidelines for a modern C# solution may be configured as shown below:
 
 ```ini
 root = true
@@ -1141,12 +1142,35 @@ csharp_new_line_before_members_in_anonymous_types = true
 csharp_new_line_between_query_expression_clauses = true
 ```
 
-For example, assume we have a source file that looks like this:
+The `.editorconfig` file follows a hierarchical precedence approach, meaning that its rules cascade down through the directory tree and can be overridden by more specific configurations in nested paths. To make sure our setup is authoritative and applies to the whole codebase, we mark it with `root = true` and place it at the top of the repository:
+
+```diff
+  ├── .git
+  │   └── (...)
+  ├── MyLibrary
+  │   ├── MyLibrary.csproj
+  │   └── (...)
+  ├── MyLibrary.Tests
+  │   ├── MyLibrary.Tests.csproj
+  │   └── (...)
++ ├── .editorconfig
+  ├── .gitignore
+  ├── Directory.Build.props
+  ├── global.json
+  ├── MyLibrary.slnx
+  └── nuget.config
+```
+
+As an illustration, let's imagine that we have a source file that looks like this:
 
 ```csharp
 namespace MyLibrary;
 
 public class CustomerProcessor {
+  private static bool Filter(string name) {
+      return !string.IsNullOrEmpty(name);
+    }
+
     public async Task ProcessOrdersAsync(IEnumerable<string> names) {
         using (var stream = new MemoryStream()) {
             var count = 0;
@@ -1158,16 +1182,18 @@ public class CustomerProcessor {
             }
         }
     }
-
-    private static bool Filter(string name) => !string.IsNullOrEmpty(name);
 }
 ```
+
+With the earlier `.editorconfig` configuration in place, we can run `dotnet format` to automatically fix all style-related issues and reformat the file to the following appearance:
 
 ```csharp
 namespace MyLibrary;
 
 public class CustomerProcessor
 {
+    private static bool Filter(string name) => !string.IsNullOrEmpty(name);
+
     public async Task ProcessOrdersAsync(IEnumerable<string> names)
     {
         using var stream = new MemoryStream();
@@ -1180,8 +1206,6 @@ public class CustomerProcessor
             await stream.FlushAsync();
         }
     }
-
-    private static bool Filter(string name) => !string.IsNullOrEmpty(name);
 }
 ```
 
@@ -1245,8 +1269,6 @@ public static string GetSlug(string title)
 The exact formatting choices are not particularly important here. What matters is that the output is consistent, predictable, and no longer subject to individual preference. As long as the code is valid, the formatter will take care of making it look the way it's supposed to look.
 
 This becomes especially useful when you're working in a team or accepting external contributions in an open-source project. In those scenarios, formatting stops being a convention that contributors are expected to remember and manually follow, and instead turns into an implicit contract that their tooling fulfills automatically. That, in turn, reduces noise in pull requests, avoids pointless style discussions, and helps keep code reviews focused on the actual substance of the change.
-
-More broadly, this is also a small example of a recurring theme in library development: if a repetitive quality-related task can be automated, it probably should be. And once formatting is taken care of, the next obvious step is to automate the rest of the development loop as well — namely building and testing.
 
 ## Workflow automation: building & testing
 
