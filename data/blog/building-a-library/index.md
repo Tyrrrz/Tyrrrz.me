@@ -1058,91 +1058,60 @@ Either way, having set everything up, we can verify that our library now has a s
 
 In general, even though it's a largely obscure and legacy feature in the .NET ecosystem, I'd still recommend strong naming your libraries as a standard practice. For the majority of scenarios, this is a reliable way to extend support to a slightly wider range of consumers, without introducing significant development overhead.
 
-One constraint to keep in mind, however, is that, on .NET Framework, a strongly named assembly is only allowed to reference assemblies that are strongly named themselves. Therefore, signing a library early does limit which dependencies you may add to it down the line — although this restriction can also be bypassed using internalization.
+One constraint to consider, however, is that, on .NET Framework, a strongly named assembly is only allowed to reference other assemblies if they are strongly named themselves. Therefore, signing a library early does limit which dependencies you may add to it down the line — although this restriction can also be bypassed using internalization.
 
 ## Code formatting
 
-As developers, we spend a far greater amount of time reading code than actually writing it, so it's a good idea to try to make that experience as efficient as possible. One way of doing that is by enforcing a consistent formatting style to cut down on the visual noise in indentation, brace placement, line lengths, spacing, and other cosmetic details.
+As developers, we spend a far greater amount of time reading code than actually writing it, so it's a good idea to try to make that experience as efficient as possible. One way of doing that is by enforcing a consistent formatting style to cut down on the visual noise in indentation, bracket placement, line lengths, spacing, and similar inconsequential but distracting details.
 
-Historically, code formatting has been a neglected aspect in the .NET world, regarded more as an IDE convenience rather than an independent, first-class concern. Some teams relied on power tools like JetBrains ReSharper to automatically clean up their files, but those required separate paid licenses and lacked headless execution modes for use in continuous integration environments.
+Historically, code formatting has been a somewhat neglected aspect in the .NET world, regarded more as an IDE convenience rather than an independent, first-class concern. While productivity extensions like [CodeMaid](https://marketplace.visualstudio.com/items?itemName=SteveCadwallader.CodeMaid) and [ReSharper](https://jetbrains.com/resharper) offered great ways to keep your project clean and organized locally, their dependence on Visual Studio made them tedious to set up, hard to share with others, and impossible to use in a continuous integration environment.
 
-Things improved as .NET started to move from a proprietary development platform to an open-source and CLI-centric model. In particular, the introduction of [Roslyn](https://github.com/dotnet/roslyn) made it so that anyone could leverage the C# compiler's native capabilities for parsing and semantic analysis to provide custom diagnostics and code fixes — including for the purpose of formatting.
+Things improved as .NET began to move away from a proprietary and monolithic development platform toward an open-source and CLI-centric model. In particular, the introduction of [Roslyn](https://github.com/dotnet/roslyn) decoupled the compiler's syntax parsing and semantic analysis capabilities from the IDE, enabling the creation of custom diagnostics and code fixes that work directly at the engine level.
 
-Beginning with .NET 6, the SDK also ships a built-in code formatter of its own, available through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is highly customizable and relies on the industry-standard [`.editorconfig`](https://editorconfig.org) file to define its styling rules, which can range from whitespace control to various language-specific conventions.
+Building upon this foundation, newer versions of the .NET SDK also ship with a dedicated code formatter of their own, available through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is designed to be highly customizable, utilizing the industry-standard [`.editorconfig`](https://editorconfig.org) file to define rules that range from whitespace control to language-specific features.
 
-For example, a typical set of style guidelines for a modern C# solution may be configured as shown below:
+For example, a modern C# solution may employ a style convention similar to the one outlined below:
 
 ```ini
 root = true
 
-[*.cs]
+# Global rules
+[*]
 indent_style = space
+indent_size = 2
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# C#-specific rules
+[*.{cs,csx}]
 indent_size = 4
 
-csharp_style_var_for_built_in_types = true
-csharp_style_var_when_type_is_apparent = true
-csharp_style_var_elsewhere = true
+dotnet_sort_system_directives_first = true
 
-csharp_style_expression_bodied_methods = true
-csharp_style_expression_bodied_constructors = true
-csharp_style_expression_bodied_operators = true
+csharp_style_var_for_built_in_types = true:warning
+csharp_style_var_when_type_is_apparent = true:warning
+csharp_style_var_elsewhere = true:warning
 
-csharp_style_expression_bodied_properties = true
-csharp_style_expression_bodied_indexers = true
-csharp_style_expression_bodied_accessors = true
+csharp_style_expression_bodied_methods = true:warning
+csharp_style_expression_bodied_constructors = true:warning
+csharp_style_expression_bodied_operators = true:warning
+csharp_style_expression_bodied_properties = true:warning
+csharp_style_expression_bodied_indexers = true:warning
+csharp_style_expression_bodied_accessors = true:warning
+csharp_style_expression_bodied_lambdas = true:warning
+csharp_style_expression_bodied_local_functions = true:warning
 
-csharp_style_pattern_matching_over_is_with_cast_check = true
-csharp_style_pattern_matching_over_as_with_null_check = true
-csharp_style_inlined_variable_declaration = true
-csharp_style_throw_expression = true
-csharp_style_conditional_delegate_call = true
-csharp_style_pattern_local_over_anonymous_function = true
-csharp_prefer_simple_default_expression = true
-csharp_style_deconstructed_variable_declaration = true
-
-csharp_preserve_single_line_blocks = true
-csharp_preserve_single_line_statements = false
-csharp_prefer_braces = true
-
-csharp_indent_block_contents = true
-csharp_indent_braces = false
-csharp_indent_case_contents = true
-csharp_indent_switch_labels = true
-csharp_indent_labels = flush_left
-
-csharp_space_after_cast = false
-csharp_space_after_colon_in_inheritance_clause = true
-csharp_space_after_comma = true
-csharp_space_after_dot = false
-csharp_space_after_keywords_in_control_flow_statements = true
-csharp_space_after_semicolon_in_for_statement = true
-csharp_space_around_binary_operators = before_and_after
-csharp_space_around_declaration_statements = do_not_ignore
-csharp_space_before_colon_in_inheritance_clause = true
-csharp_space_before_comma = false
-csharp_space_before_dot = false
-csharp_space_before_open_square_brackets = false
-csharp_space_before_semicolon_in_for_statement = false
-csharp_space_between_empty_square_brackets = false
-csharp_space_between_method_call_empty_parameter_list_parentheses = false
-csharp_space_between_method_call_name_and_opening_parenthesis = false
-csharp_space_between_method_call_parameter_list_parentheses = false
-csharp_space_between_method_declaration_empty_parameter_list_parentheses = false
-csharp_space_between_method_declaration_name_and_open_parenthesis = false
-csharp_space_between_method_declaration_parameter_list_parentheses = false
-csharp_space_between_parentheses = false
-csharp_space_between_square_brackets = false
-
-csharp_new_line_before_open_brace = all
-csharp_new_line_before_else = true
-csharp_new_line_before_catch = true
-csharp_new_line_before_finally = true
-csharp_new_line_before_members_in_object_initializers = true
-csharp_new_line_before_members_in_anonymous_types = true
-csharp_new_line_between_query_expression_clauses = true
+dotnet_style_collection_initializer = true:warning
+dotnet_style_object_initializer = true:warning
+dotnet_style_prefer_collection_expression = true:warning
+csharp_style_pattern_matching_prefer_is_pattern = true:warning
+csharp_style_pattern_matching_prefer_switch_expression = true:warning
+csharp_style_prefer_coalesce_expression = true:warning
+csharp_style_prefer_null_propagation = true:warning
+csharp_style_prefer_is_null_check_with_true_false = true:warning
 ```
 
-The `.editorconfig` file follows a hierarchical precedence approach, meaning that its rules cascade down through the directory tree and can be overridden by more specific configurations in nested paths. To make sure our setup is authoritative and applies to the whole codebase, we mark it with `root = true` and place it at the top of the repository:
+The `.editorconfig` file follows a hierarchical precedence approach, meaning that its rules cascade down through the directory tree and can be overridden by more specific configurations in nested paths. To make sure our setup remains authoritative and applies to the whole codebase, we mark it with `root = true` and place it at the top of the repository:
 
 ```diff
   ├── .git
@@ -1161,55 +1130,98 @@ The `.editorconfig` file follows a hierarchical precedence approach, meaning tha
   └── nuget.config
 ```
 
-As an illustration, let's imagine that we have a source file that looks like this:
+As an illustration, let's imagine that we have a piece of code with loose indentation, unconventional bracket placement, incorrectly ordered `using` directives, lack of `var` where appropriate, and other inconsistencies:
 
 ```csharp
+using System;
+using System.Linq;
+using System.Collections.Generic;
+
 namespace MyLibrary;
 
-public class CustomerProcessor {
-  private static bool Filter(string name) {
-      return !string.IsNullOrEmpty(name);
+public class TextTokenizer
+{
+  public bool IsDelimiter(char c) {
+        return c == ',' || c == ';' || char.IsWhiteSpace(c);
     }
 
-    public async Task ProcessOrdersAsync(IEnumerable<string> names) {
-        using (var stream = new MemoryStream()) {
-            var count = 0;
-
-            var filtered = names.Where(x => Filter(x));
-
-            if ( count > 0 ) {
-                await stream.FlushAsync();
+    public IReadOnlyList<string> SplitAndTrim(string source)
+    {
+        if (string.IsNullOrEmpty(source)) {
+            return Array.Empty<string>();
             }
+
+        var tokens = source.Split([',', ';']);
+            List<string> result = new List<string>();
+
+        foreach(var t in tokens) {
+            var cleaned = t.Trim();
+            if (!string.IsNullOrEmpty(cleaned))
+            result.Add(cleaned);
         }
+
+        return result;
     }
 }
 ```
 
-With the earlier `.editorconfig` configuration in place, we can run `dotnet format` to automatically fix all style-related issues and reformat the file to the following appearance:
+With the earlier `.editorconfig` configuration in place, we can simply run `dotnet format` to automatically fix all style-related issues within the file and reformat it to the following presentation:
 
 ```csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace MyLibrary;
 
-public class CustomerProcessor
+public class TextTokenizer
 {
-    private static bool Filter(string name) => !string.IsNullOrEmpty(name);
+    public bool IsDelimiter(char c) => c == ',' || c == ';' || char.IsWhiteSpace(c);
 
-    public async Task ProcessOrdersAsync(IEnumerable<string> names)
+    public IEnumerable<string> SplitAndTrim(string source)
     {
-        using var stream = new MemoryStream();
-        int count = 0;
-
-        var filtered = names.Where(Filter);
-
-        if (count > 0)
+        if (string.IsNullOrEmpty(source))
         {
-            await stream.FlushAsync();
+            return Enumerable.Empty<string>();
         }
+
+        var tokens = source.Split([',', ';']);
+        var result = new List<string>();
+
+        foreach (var t in tokens)
+        {
+            var cleaned = t.Trim();
+            if (!string.IsNullOrEmpty(cleaned))
+                result.Add(cleaned);
+        }
+
+        return result;
     }
 }
+```
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net11.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <!-- ... -->
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Verify code style during build -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+</Project>
 ```
 
 That said, this extensive configurability is also what drives most people away from using `dotnet format` in their solutions. Most people would rather write code than spend hours bike-shedding over line widths and bracket placements, because inevitably, where there are many options, there will be disagreements.
+
+It's also possible to author rules that conflict with each other.
+
+`dotnet format` is also really slow
 
 This is why I personally prefer to use [CSharpier](https://github.com/belav/csharpier) instead. It takes inspiration from JavaScript's [Prettier](https://github.com/prettier/prettier) and builds upon the idea that most developers don't care which formatting style is used, as long as it's consistent and doesn't require manual intervention. As such, CSharpier offers (almost) no configuration options and works out of the box.
 
