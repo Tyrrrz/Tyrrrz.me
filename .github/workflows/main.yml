@@ -36,6 +36,10 @@ jobs:
       - name: Perform linting
         run: npm run lint:check
 
+      # Not running this on CI because not all its results are valuable
+      # - name: Check for dead links
+      #   run: npm run link:check
+
   pack:
     runs-on: ubuntu-latest
     timeout-minutes: 60
