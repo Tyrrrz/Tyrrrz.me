@@ -8,7 +8,8 @@
     "lint": "eslint . --fix",
     "lint:check": "eslint .",
     "format": "prettier . --write",
-    "format:check": "prettier . --check"
+    "format:check": "prettier . --check",
+    "link:check": "markdown-link-check . --ignore node_modules"
   },
   "dependencies": {
     "@giscus/react": "^3.1.0",
@@ -44,6 +45,7 @@
     "feed": "^5.2.1",
     "front-matter": "^4.0.2",
     "globals": "^17.7.0",
+    "markdown-link-check": "^3.15.0",
     "markdown-to-txt": "^2.0.1",
     "prettier": "^3.9.4",
     "prettier-plugin-organize-imports": "^4.3.0",
