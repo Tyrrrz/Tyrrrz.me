@@ -1062,15 +1062,15 @@ One constraint to consider, however, is that, on .NET Framework, a strongly name
 
 ## Code formatting
 
-As developers, we spend a far greater amount of time reading code than actually writing it, so it's a good idea to try to make that experience as efficient as possible. One way of doing that is by enforcing a consistent formatting style to cut down on the visual noise in indentation, bracket placement, line lengths, spacing, and similar inconsequential but distracting details.
+As developers, we spend a far greater amount of time reading code than actually writing it, so it's a good idea to try to make that experience as efficient as possible. One way of doing that is by establishing a consistent formatting style to cut down on the visual noise in indentation, bracket placement, line lengths, spacing, and similar inconsequential but distracting details.
 
-Historically, code formatting has been a somewhat neglected aspect in the .NET world, regarded more as an IDE convenience rather than an independent, first-class concern. While productivity extensions like [CodeMaid](https://marketplace.visualstudio.com/items?itemName=SteveCadwallader.CodeMaid) and [ReSharper](https://jetbrains.com/resharper) offered great ways to keep your project clean and organized locally, their dependence on Visual Studio made them tedious to set up, hard to share with others, and impossible to use in a continuous integration environment.
+Historically, code formatting has been a somewhat neglected aspect in the .NET world, regarded more as an IDE convenience rather than an independent, first-class concern. While productivity extensions like [CodeMaid](https://marketplace.visualstudio.com/items?itemName=SteveCadwallader.CodeMaid) and [ReSharper](https://jetbrains.com/resharper) offered great ways to keep your project clean and organized locally, their dependence on Visual Studio made them tedious to set up, awkward to share with others, and difficult to use in a continuous integration environment.
 
 Things improved as .NET began to move away from a proprietary and monolithic development platform toward an open-source and CLI-centric model. In particular, the introduction of [Roslyn](https://github.com/dotnet/roslyn) decoupled the compiler's syntax parsing and semantic analysis capabilities from the IDE, enabling the creation of custom diagnostics and code fixes that work directly at the engine level.
 
-Building upon this foundation, newer versions of the .NET SDK also ship with a dedicated code formatter of their own, available through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is designed to be highly customizable, utilizing the industry-standard [`.editorconfig`](https://editorconfig.org) file to define rules that range from whitespace control to language-specific features.
+Building upon this foundation, newer versions of the .NET SDK also ship with a dedicated formatter of their own, available through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is designed to be highly customizable, utilizing the industry-standard [`.editorconfig`](https://editorconfig.org) file to define rules that can range from whitespace control to language-specific conventions.
 
-For example, a modern C# solution may employ a style convention similar to the one outlined below:
+Of course, having an enforceable style guide is valuable in any development context, but it is especially important for open-source projects, where contributors often differ in their tooling and editor preferences. To that end, we can adopt the following configuration in our library to maintain a coherent code presentation and encourage modern C# idioms, regardless of who's working on the repository:
 
 ```ini
 root = true
@@ -1109,9 +1109,12 @@ csharp_style_pattern_matching_prefer_switch_expression = true:warning
 csharp_style_prefer_coalesce_expression = true:warning
 csharp_style_prefer_null_propagation = true:warning
 csharp_style_prefer_is_null_check_with_true_false = true:warning
+
+# Avoid conflict between collection expressions and `var` declarations
+dotnet_diagnostic.IDE0028.severity = none
 ```
 
-The `.editorconfig` file follows a hierarchical precedence approach, meaning that its rules cascade down through the directory tree and can be overridden by more specific configurations in nested paths. To make sure our setup remains authoritative and applies to the whole codebase, we mark it with `root = true` and place it at the top of the repository:
+With the `.editorconfig` filled out, we can place it at the root of our directory structure to ensure that its rules apply to all relevant files in the solution. The `root = true` declaration additionally marks this configuration as the local baseline, instructing the formatter not to search farther up the hierarchy for any additional settings:
 
 ```diff
   ├── .git
@@ -1130,7 +1133,7 @@ The `.editorconfig` file follows a hierarchical precedence approach, meaning tha
   └── nuget.config
 ```
 
-As an illustration, let's imagine that we have a piece of code with loose indentation, unconventional bracket placement, incorrectly ordered `using` directives, lack of `var` where appropriate, and other inconsistencies:
+Now that our style guide is in place, let's see how it works in practice. As an illustration, consider the following piece of loosely formatted code with inconsistent indentation, unconventional bracket placement, unordered `using` directives, and other formatting issues:
 
 ```csharp
 using System;
@@ -1151,11 +1154,11 @@ public class TextTokenizer
             return Array.Empty<string>();
             }
 
-        var tokens = source.Split([',', ';']);
+        var tokens = source.Split(new char[] {',', ';'});
             List<string> result = new List<string>();
 
-        foreach(var t in tokens) {
-            var cleaned = t.Trim();
+        foreach(var token in tokens) {
+            var cleaned = token.Trim();
             if (!string.IsNullOrEmpty(cleaned))
             result.Add(cleaned);
         }
@@ -1165,7 +1168,7 @@ public class TextTokenizer
 }
 ```
 
-With the earlier `.editorconfig` configuration in place, we can simply run `dotnet format` to automatically fix all style-related issues within the file and reformat it to the following presentation:
+Running `dotnet format` on the solution will immediately bring this file in line with our established conventions, producing the following clean output:
 
 ```csharp
 using System;
@@ -1178,19 +1181,19 @@ public class TextTokenizer
 {
     public bool IsDelimiter(char c) => c == ',' || c == ';' || char.IsWhiteSpace(c);
 
-    public IEnumerable<string> SplitAndTrim(string source)
+    public IReadOnlyList<string> SplitAndTrim(string source)
     {
         if (string.IsNullOrEmpty(source))
         {
-            return Enumerable.Empty<string>();
+            return Array.Empty<string>();
         }
 
         var tokens = source.Split([',', ';']);
         var result = new List<string>();
 
-        foreach (var t in tokens)
+        foreach (var token in tokens)
         {
-            var cleaned = t.Trim();
+            var cleaned = token.Trim();
             if (!string.IsNullOrEmpty(cleaned))
                 result.Add(cleaned);
         }
