@@ -1,5 +1,6 @@
 {
   "name": "tyrrrz.me",
+  "type": "module",
   "private": true,
   "scripts": {
     "start": "vite",
@@ -16,7 +17,7 @@
     "clsx": "^2.1.1",
     "html-react-parser": "^6.1.3",
     "lodash": "^4.18.1",
-    "minimatch": "^10.2.6",
+    "minimatch": "^11.0.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-icons": "^5.7.0",

@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { resolvePath } from "../utils/assets";
+import { resolvePath } from "../utils/assets.ts";
 
 declare global {
   interface Window {

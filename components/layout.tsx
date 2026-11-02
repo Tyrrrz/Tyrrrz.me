@@ -2,11 +2,11 @@ import { clsx } from "clsx";
 import { FC, PropsWithChildren, useEffect, useMemo, useState } from "react";
 import { FiMenu, FiMoon, FiSun } from "react-icons/fi";
 import { Outlet, useLocation, useNavigation } from "react-router-dom";
-import { useDebounce } from "../hooks/useDebounce";
-import { useTheme } from "../hooks/useTheme";
-import Analytics from "./analytics";
-import Link from "./link";
-import Meta from "./meta";
+import { useDebounce } from "../hooks/useDebounce.ts";
+import { useTheme } from "../hooks/useTheme.ts";
+import Analytics from "./analytics.tsx";
+import Link from "./link.tsx";
+import Meta from "./meta.tsx";
 
 const Loader: FC = () => {
   // Only show the loading indicator if the navigation takes a while.

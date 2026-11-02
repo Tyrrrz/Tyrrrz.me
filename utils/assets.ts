@@ -1,4 +1,4 @@
-import { isAbsoluteUrl } from "./url";
+import { isAbsoluteUrl } from "./url.ts";
 
 export const resolvePath = (path: string) => {
   // Keep non-root-relative paths unchanged

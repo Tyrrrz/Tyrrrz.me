@@ -1,15 +1,16 @@
+import type { Element, Text } from "hast";
 import { FC } from "react";
 import ReactMarkdown from "react-markdown";
-import { slugify } from "../utils/url";
-import Code from "./code";
-import Heading from "./heading";
-import Image from "./image";
-import Link from "./link";
-import List from "./list";
-import Paragraph from "./paragraph";
-import Pre from "./pre";
-import Quote from "./quote";
-import Syntax from "./syntax";
+import { slugify } from "../utils/url.ts";
+import Code from "./code.tsx";
+import Heading from "./heading.tsx";
+import Image from "./image.tsx";
+import Link from "./link.tsx";
+import List from "./list.tsx";
+import Paragraph from "./paragraph.tsx";
+import Pre from "./pre.tsx";
+import Quote from "./quote.tsx";
+import Syntax from "./syntax.tsx";
 
 type MarkdownProps = {
   source: string;
@@ -105,29 +106,22 @@ const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
           return <Quote>{children}</Quote>;
         },
         pre: ({ node, children }) => {
-          // Language is set on the child <code> element
-          if (
-            node &&
-            node.children.length === 1 &&
-            node.children[0] &&
-            node.children[0].type === "element" &&
-            node.children[0].tagName === "code" &&
-            node.children[0].children.length === 1 &&
-            node.children[0].children[0] &&
-            node.children[0].children[0].type === "text"
-          ) {
-            const source = node.children[0].children[0].value;
+          const codeNode = node?.children.find(
+            (child): child is Element => child.type === "element" && child.tagName === "code",
+          );
 
-            const className =
-              typeof node.children[0].properties?.className === "object"
-                ? node.children[0].properties.className?.join(" ")
-                : String(node.children[0].properties?.className);
+          const language = /language-([A-Za-z0-9#+-]+)/u.exec(
+            String(codeNode?.properties?.className || ""),
+          )?.[1];
 
-            const language = className && /language-(\w+)/iu.exec(className)?.[1];
+          const source =
+            codeNode?.children
+              ?.filter((child): child is Text => child.type === "text")
+              .map((child) => child.value)
+              .join("") || "";
 
-            if (language) {
-              return <Syntax source={source} language={language} />;
-            }
+          if (language && source) {
+            return <Syntax source={source} language={language} />;
           }
 
           return <Pre>{children}</Pre>;

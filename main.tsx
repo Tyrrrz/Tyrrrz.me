@@ -1,7 +1,7 @@
 import type { ComponentType } from "react";
 import type { RouteRecord } from "vite-react-ssg";
 import { ViteReactSSG } from "vite-react-ssg";
-import Layout from "./components/layout";
+import Layout from "./components/layout.tsx";
 import "./pages/globals.css";
 
 // When the site is redeployed, previously built asset files (e.g. JS chunks)

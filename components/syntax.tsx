@@ -1,6 +1,6 @@
 import { FC } from "react";
-import { PrismAsyncLight as SyntaxHighlighter } from "react-syntax-highlighter";
-import tomorrow from "react-syntax-highlighter/dist/cjs/styles/prism/tomorrow";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { tomorrow } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
 type SyntaxProps = {
   source: string;

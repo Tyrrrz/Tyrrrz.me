@@ -1,4 +1,4 @@
-import { Donation } from "./index";
+import { Donation } from "./index.ts";
 
 const fakes: Donation[] = [
   {

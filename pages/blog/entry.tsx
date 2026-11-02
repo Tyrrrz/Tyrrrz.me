@@ -3,17 +3,17 @@ import { FC } from "react";
 import { FiCalendar, FiClock } from "react-icons/fi";
 import { useParams } from "react-router-dom";
 import { blogPosts } from "virtual:blog";
-import Heading from "../../components/heading";
-import Image from "../../components/image";
-import Inline from "../../components/inline";
-import Link from "../../components/link";
-import Markdown from "../../components/markdown";
-import Meta from "../../components/meta";
-import UkraineAlert from "../../components/ukraineAlert";
-import type { BlogPost } from "../../data/blog";
-import { useTheme } from "../../hooks/useTheme";
-import { resolvePath } from "../../utils/assets";
-import { isAbsoluteUrl } from "../../utils/url";
+import Heading from "../../components/heading.tsx";
+import Image from "../../components/image.tsx";
+import Inline from "../../components/inline.tsx";
+import Link from "../../components/link.tsx";
+import Markdown from "../../components/markdown.tsx";
+import Meta from "../../components/meta.tsx";
+import UkraineAlert from "../../components/ukraineAlert.tsx";
+import type { BlogPost } from "../../data/blog/index.ts";
+import { useTheme } from "../../hooks/useTheme.ts";
+import { resolvePath } from "../../utils/assets.ts";
+import { isAbsoluteUrl } from "../../utils/url.ts";
 
 const CoverSection: FC<{
   post: BlogPost;

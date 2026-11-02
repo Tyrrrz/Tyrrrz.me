@@ -7,11 +7,11 @@ import {
   loadBlogPosts,
   publishBlogFeed,
   publishBlogPostAssets,
-} from "./data/blog";
-import { loadDonations, publishDonationStats } from "./data/donate";
-import { loadProjects, publishProjectStats } from "./data/projects";
-import { loadSpeakingEngagements } from "./data/speaking";
-import { bufferIterable } from "./utils/async";
+} from "./data/blog/index.ts";
+import { loadDonations, publishDonationStats } from "./data/donate/index.ts";
+import { loadProjects, publishProjectStats } from "./data/projects/index.ts";
+import { loadSpeakingEngagements } from "./data/speaking/index.ts";
+import { bufferIterable } from "./utils/async.ts";
 
 const virtualPlugin = (id: string, getCode: () => string) => {
   const resolvedId = `\0${id}`;
@@ -102,6 +102,7 @@ export default defineConfig(async () => {
     },
 
     server: {
+      host: true,
       port: 3000,
     },
 
