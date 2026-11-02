@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { Head } from "vite-react-ssg";
-import { resolvePath } from "../utils/assets";
+import { resolvePath } from "../utils/assets.ts";
 
 type ImageProps = {
   src: string;

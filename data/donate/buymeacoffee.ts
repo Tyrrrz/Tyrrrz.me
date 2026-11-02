@@ -1,4 +1,4 @@
-import { Donation } from "./index";
+import { Donation } from "./index.ts";
 
 export const getBuyMeACoffeeDonations = async function* () {
   // BuyMeACoffee donations are no longer supported, so return a constant array of previous donors

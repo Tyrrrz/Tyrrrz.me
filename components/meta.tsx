@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { useLocation } from "react-router-dom";
 import { Head } from "vite-react-ssg";
-import { resolveAbsoluteUrl, resolvePath } from "../utils/assets";
+import { resolveAbsoluteUrl, resolvePath } from "../utils/assets.ts";
 
 type MetaProps = {
   title?: string;

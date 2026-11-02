@@ -2,11 +2,11 @@ import { clsx } from "clsx";
 import { FC } from "react";
 import { FiArchive, FiCode, FiDownload, FiExternalLink, FiStar } from "react-icons/fi";
 import { projects as rawProjects } from "virtual:projects";
-import Heading from "../../components/heading";
-import Inline from "../../components/inline";
-import Link from "../../components/link";
-import Meta from "../../components/meta";
-import Paragraph from "../../components/paragraph";
+import Heading from "../../components/heading.tsx";
+import Inline from "../../components/inline.tsx";
+import Link from "../../components/link.tsx";
+import Meta from "../../components/meta.tsx";
+import Paragraph from "../../components/paragraph.tsx";
 
 const ProjectsPage: FC = () => {
   const projects = [...rawProjects].sort((a, b) => {

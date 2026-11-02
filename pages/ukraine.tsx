@@ -1,10 +1,10 @@
 import { FC } from "react";
-import Heading from "../components/heading";
-import Link from "../components/link";
-import List from "../components/list";
-import ListItem from "../components/listItem";
-import Meta from "../components/meta";
-import Paragraph from "../components/paragraph";
+import Heading from "../components/heading.tsx";
+import Link from "../components/link.tsx";
+import List from "../components/list.tsx";
+import ListItem from "../components/listItem.tsx";
+import Meta from "../components/meta.tsx";
+import Paragraph from "../components/paragraph.tsx";
 
 const UkrainePage: FC = () => {
   return (

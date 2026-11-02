@@ -1,4 +1,4 @@
-import { Project } from "./index";
+import { Project } from "./index.ts";
 
 const fakes: Project[] = [
   {

@@ -1,5 +1,6 @@
 {
   "name": "tyrrrz.me",
+  "type": "module",
   "private": true,
   "scripts": {
     "start": "vite",
