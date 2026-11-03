@@ -894,8 +894,8 @@ However, control over a package's deployment model belongs solely to its author 
 
 Still, it is possible to manually internalize a dependency that wasn't designed for it, although doing so involves modifying the [Intermediate Language (IL)](https://learn.microsoft.com/dotnet/standard/managed-code) bytecode after the build. For example, using a tool like [ILRepack](https://github.com/gluck/il-repack), we can merge the external dependency into our output assembly by running the following command:
 
-```console
-$ ilrepack /internalize /out:MyLibrary.Merged.dll MyLibrary.dll SomeDependency.dll
+```bash
+ilrepack /internalize /out:MyLibrary.Merged.dll MyLibrary.dll SomeDependency.dll
 ```
 
 The invocation above combines `MyLibrary.dll` with `SomeDependency.dll`, producing a single unified asset named `MyLibrary.Merged.dll`. Additionally, the `/internalize` option instructs ILRepack to switch the visibility of absorbed `public` types to `internal`, making them accessible only from within the merged assembly.
@@ -955,8 +955,8 @@ Despite that, seeing as .NET Framework continues to be a deployment target for m
 
 Fortunately, establishing a strong name for an assembly is fairly simple, so it's usually worth doing for that extra bit of audience reach. First, we need to create a cryptographic key pair with the `sn` command-line tool from either the Windows SDK or Mono:
 
-```console
-$ sn -k MyLibrary.snk
+```bash
+sn -k MyLibrary.snk
 ```
 
 We can then place the generated key file either in the library's directory or in the solution root if we want to share it across multiple projects. In our example, since only `MyLibrary` is packable, we'll keep the key pair there for convenience:
@@ -1068,9 +1068,9 @@ Historically, code formatting has been a somewhat neglected aspect in the .NET w
 
 Things improved as .NET began to move away from a proprietary and monolithic development platform toward an open-source and CLI-centric model. In particular, the introduction of [Roslyn](https://github.com/dotnet/roslyn) decoupled the compiler's syntax parsing and semantic analysis capabilities from the IDE, enabling the creation of custom diagnostics and code fixes — including for the purpose of formatting — that operate directly at the engine level.
 
-Building upon this foundation, newer versions of the .NET SDK also ship with a dedicated formatter of their own, available through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is designed to be highly customizable, offering a wide variety of supported rules that can be configured via the industry-standard [`.editorconfig`](https://editorconfig.org) file.
+Taking advantage of this foundation, newer releases of the .NET SDK even come with a dedicated formatter built in, available through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is designed to be highly customizable, offering a wide variety of supported rules that can be configured via the industry-standard [`.editorconfig`](https://editorconfig.org) file.
 
-Of course, a formal and enforceable style guide is valuable in any development context, but it is especially important for open-source projects, where contributors often differ in their tooling and editor preferences. As an example, here's a formatting policy we could adopt in our repository to maintain consistent whitespace, organize `using` directives, and encourage modern C# idioms:
+Of course, a formal and enforceable style guide is valuable in any development context, but it is especially important for open-source projects, where contributors often differ in their tooling and editor preferences. As an example, here's a formatting policy we could adopt in our repository to ensure that all changes follow the same whitespace conventions and make use of modern C# idioms where appropriate:
 
 ```ini
 root = true
@@ -1290,7 +1290,7 @@ This becomes especially useful when you're working in a team or accepting extern
 Just like any other software project, developing a library is an iterative process that revolves around the repeated cycle of writing and testing code. The setup we've established so far, along with the tooling provided by .NET, makes this process really simple — we can build and test our entire solution by running a single command:
 
 ```bash
-$ dotnet test
+dotnet test
 
 Microsoft (R) Test Execution Command Line Tool Version 17.8.0 (x64)
 Copyright (c) Microsoft Corporation.  All rights reserved.
@@ -2191,8 +2191,8 @@ The simplest version of this is still manual: create a release on GitHub for the
 
 ![release notes](release-notes.png)
 
-```console
-$ gh release create 1.2.3 --repo my/repo --generate-notes
+```bash
+gh release create 1.2.3 --repo my/repo --generate-notes
 ```
 
 If you'd rather avoid that manual step, the same process can be automated through the GitHub CLI, which is already available on GitHub-hosted runners. All we need to do is extend the `deploy` job with one more step:
