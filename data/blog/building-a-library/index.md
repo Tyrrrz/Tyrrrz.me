@@ -1068,9 +1068,9 @@ Historically, code formatting has been a somewhat neglected aspect in the .NET w
 
 Things improved as .NET began to move away from a proprietary and monolithic development platform toward an open-source and CLI-centric model. In particular, the introduction of [Roslyn](https://github.com/dotnet/roslyn) decoupled the compiler's syntax parsing and semantic analysis capabilities from the IDE, enabling the creation of custom diagnostics and code fixes — including for the purpose of formatting — that operate directly at the engine level.
 
-Taking advantage of this foundation, newer releases of the .NET SDK even come with a dedicated formatter built in, available through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is designed to be highly customizable, offering a wide variety of supported rules that can be configured via the industry-standard [`.editorconfig`](https://editorconfig.org) file.
+Taking advantage of this foundation, newer releases of the .NET SDK even come with a dedicated formatter built in, available through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is designed to be highly customizable, supporting a wide variety of styling rules that can be toggled and configured via the industry-standard [`.editorconfig`](https://editorconfig.org) file.
 
-Of course, a formal and enforceable style guide is valuable in any development context, but it is especially important for open-source projects, where contributors often differ in their tooling and editor preferences. As an example, here's a formatting policy we could adopt in our repository to ensure that all changes follow the same whitespace conventions and make use of modern C# idioms where appropriate:
+Of course, a formal and enforceable code style is valuable in any development context, but it is especially important for open-source projects, where contributors often differ in their tooling and editor preferences. As an example, here's a simple ruleset we could adopt in our repository to ensure that all incoming changes follow the same whitespace conventions and make use of modern C# idioms where appropriate:
 
 ```ini
 root = true
@@ -1114,7 +1114,7 @@ csharp_style_prefer_is_null_check_with_true_false = true:warning
 dotnet_diagnostic.IDE0028.severity = none
 ```
 
-With the `.editorconfig` filled out, we can place it at the root of our directory structure to ensure that its rules apply to all relevant files in the solution. The `root = true` declaration additionally marks this configuration as the local baseline, instructing the formatter not to search farther up the hierarchy for any additional settings:
+Because `.editorconfig` files apply hierarchically, the scope of each one depends on where it is located. To establish the above configuration as the baseline for the entire solution, we can mark the file with `root = true` and place it at the top of our directory structure:
 
 ```diff
   ├── .git
@@ -1133,7 +1133,7 @@ With the `.editorconfig` filled out, we can place it at the root of our director
   └── nuget.config
 ```
 
-Now that our style guide is in place, let's see how it works in practice. As an illustration, consider the following piece of loosely formatted code with inconsistent indentation, unconventional bracket placement, unordered `using` directives, and other formatting issues:
+Now that our style guide is set up, let's see how it works in practice. As an illustration, consider the following piece of loosely formatted code that contains inconsistent indentation, unconventional bracket placement, unordered `using` directives, unnecessarily explicit variable declarations, and other issues:
 
 ```csharp
 using System;
@@ -1168,7 +1168,7 @@ public class TextTokenizer
 }
 ```
 
-Running `dotnet format` on the solution will immediately bring this file in line with our established conventions, producing the following clean output:
+Running `dotnet format` on the solution will immediately bring this snippet in line with our previously established rules, producing a result that looks like this:
 
 ```csharp
 using System;
@@ -1203,28 +1203,38 @@ public class TextTokenizer
 }
 ```
 
+In practice, the main benefit of automated formatting isn't so much that it's able to clean up particularly messy source files, but rather that it lets us stop thinking about styling altogether. By delegating that responsibility to a tool, we are free to author code in any shape we find convenient in the moment, knowing that it will ultimately end up with the expected presentation anyway.
+
+To make that development loop explicit rather than just leaving it to a convention, we can also enforce the analyzer-backed `.editorconfig` rules as part of the build itself, surfacing any corresponding violations through warnings and errors. This is achieved by enabling the `<EnforceCodeStyleInBuild>` property in our shared `Directory.Build.props` configuration, thereby applying it to all projects in the solution:
+
 ```xml
-<Project Sdk="Microsoft.NET.Sdk">
+<Project>
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net11.0</TargetFrameworks>
-    <IsPackable>true</IsPackable>
-    <!-- ... -->
-  </PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>annotations</Nullable>
+    <Nullable
+      Condition="$([MSBuild]::IsTargetFrameworkCompatible(
+        '$(TargetFramework)',
+        'netstandard2.1'
+      ))"
+    >enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
-  <PropertyGroup>
-    <!-- Verify code style during build -->
+     <!-- Verify code style during build -->
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
+
+  <!-- ... -->
 
 </Project>
 ```
 
-That said, this extensive configurability is also what drives most people away from using `dotnet format` in their solutions. Most people would rather write code than spend hours bike-shedding over line widths and bracket placements, because inevitably, where there are many options, there will be disagreements.
+Despite its name, `<EnforceCodeStyleInBuild>` does not actually run `dotnet format` as part of the build. Instead, it only enables the analyzer-backed code-style diagnostics during compilation, turning violations into warnings or errors according to their configured severity. This covers semantic conventions such as preferring `var` or expression-bodied members, but leaves purely textual concerns like indentation, spacing, and line breaks unenforced.
 
-It's also possible to author rules that conflict with each other.
+If we want the build to normalize those aspects as well, we can go a step further and integrate the full formatter through a custom MSBuild task that invokes `dotnet format` automatically. This closes the loop between writing and formatting code, but comes at a considerable performance cost: `dotnet format` is relatively slow, and running it as part of every build can make the development cycle noticeably less responsive.
 
-`dotnet format` is also really slow
+Performance aside, the formatter's extensive configuration surface presents another problem. Having so many rules to choose from makes it easy to get drawn into bike-shedding over inconsequential details such as line widths and bracket placement. Some options may also interact in unexpected ways or even directly conflict with one another, causing their respective fixes to fight over the same code and, in extreme cases, leaving source files in a broken state.
 
 This is why I personally prefer to use [CSharpier](https://github.com/belav/csharpier) instead. It takes inspiration from JavaScript's [Prettier](https://github.com/prettier/prettier) and builds upon the idea that most developers don't care which formatting style is used, as long as it's consistent and doesn't require manual intervention. As such, CSharpier offers (almost) no configuration options and works out of the box.
 
