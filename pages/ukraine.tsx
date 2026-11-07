@@ -1,8 +1,6 @@
 import { FC } from "react";
 import Heading from "../components/heading.tsx";
 import Link from "../components/link.tsx";
-import List from "../components/list.tsx";
-import ListItem from "../components/listItem.tsx";
 import Meta from "../components/meta.tsx";
 import Paragraph from "../components/paragraph.tsx";
 
@@ -13,11 +11,6 @@ const UkrainePage: FC = () => {
 
       <section>
         <Heading>#StandWithUkraine</Heading>
-
-        <div>
-          <div className="h-10 bg-blue-500" />
-          <div className="h-10 bg-yellow-400" />
-        </div>
 
         <Paragraph>
           My name is Oleksii, I&apos;m a software developer from Kyiv, Ukraine. On{" "}
@@ -58,59 +51,14 @@ const UkrainePage: FC = () => {
           the Armed Forces of Ukraine. It&apos;s not clear when this war will end, but it&apos;s
           clear that it won&apos;t end by itself.
         </Paragraph>
-
-        <Paragraph>
-          If you are sympathetic to our cause and wish to help, I have compiled a list of funds and
-          organizations that I personally trust and recommend donating to. When it comes to
-          financial aid, it&apos;s best to avoid large global funds, such as Red Cross or UN Crisis
-          Relief, because they have very limited presence in Ukraine and typically can&apos;t
-          provide the most necessary support.
-        </Paragraph>
-
-        <List>
-          <ListItem>
-            <Link href="https://dzygaspaw.com/support?source=tyrrrz">
-              <span className="font-semibold">Dzyga&apos;s Paw</span> Foundation
-            </Link>{" "}
-            (defensive & humanitarian aid)
-          </ListItem>
-
-          <ListItem>
-            <Link href="https://savelife.in.ua/en/donate-en/?source=tyrrrz">
-              <span className="font-semibold">Come Back Alive</span> Foundation
-            </Link>{" "}
-            (defensive aid)
-          </ListItem>
-
-          <ListItem>
-            <Link href="https://prytulafoundation.org/en/home/support_page">
-              <span className="font-semibold">Serhiy Prytula</span> Foundation
-            </Link>{" "}
-            (defensive & humanitarian aid)
-          </ListItem>
-
-          <ListItem>
-            <Link href="https://koloua.com/en/donate?source=tyrrrz">
-              <span className="font-semibold">Kolo</span> Foundation
-            </Link>{" "}
-            (defensive aid)
-          </ListItem>
-
-          <ListItem>
-            <Link href="https://donate.wck.org/give/506339/donation/checkout/donation/checkout?source=tyrrrz">
-              <span className="font-semibold">World Central Kitchen</span>
-            </Link>{" "}
-            (humanitarian aid)
-          </ListItem>
-
-          <ListItem>
-            <Link href="/donate">Personal donations to me</Link> are directed to support my own
-            needs, including equipment and supplies
-          </ListItem>
-        </List>
       </section>
 
       <div className="my-6 text-center text-xl font-light">Glory to Ukraine! Glory to Heroes!</div>
+
+      <div>
+        <div className="h-10 bg-blue-500" />
+        <div className="h-10 bg-yellow-400" />
+      </div>
     </>
   );
 };
