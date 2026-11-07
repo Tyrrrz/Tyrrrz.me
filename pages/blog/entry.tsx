@@ -53,10 +53,14 @@ const ArticleSection: FC<{
   );
 };
 
-const UkraineSection: FC = () => {
+const UkraineSection: FC<{
+  post: BlogPost;
+}> = ({ post }) => {
   return (
     <section>
-      <UkraineAlert />
+      <UkraineAlert
+        variant={new Date(post.date).getUTCFullYear() > 2026 ? "frontline" : "default"}
+      />
     </section>
   );
 };
@@ -160,7 +164,7 @@ const BlogPostPage: FC = () => {
 
         {/* Detailed info */}
         <CoverSection post={post} />
-        <UkraineSection />
+        <UkraineSection post={post} />
         <ArticleSection post={post} />
         <SubscribeSection />
         <CommentSection post={post} />
