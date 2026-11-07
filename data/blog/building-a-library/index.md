@@ -620,22 +620,13 @@ With that said, let's imagine that our library needs to use `Span<T>`, `Memory<T
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net11.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
-    <IsTrimmable
-      Condition="$([MSBuild]::IsTargetFrameworkCompatible(
-        '$(TargetFramework)',
-        'net6.0'
-      ))"
-    >true</IsTrimmable>
-    <IsAotCompatible
-      Condition="$([MSBuild]::IsTargetFrameworkCompatible(
-        '$(TargetFramework)',
-        'net7.0'
-      ))"
-    >true</IsAotCompatible>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- ... -->
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- ... -->
+
+    <!-- Backport Span<T>, Memory<T> and related types -->
     <PackageReference
       Include="System.Memory"
       Version="4.6.3"
@@ -652,6 +643,7 @@ With that said, let's imagine that our library needs to use `Span<T>`, `Memory<T
       "
     />
 
+    <!-- Backport IAsyncEnumerable<T> and related types -->
     <PackageReference
       Include="Microsoft.Bcl.AsyncInterfaces"
       Version="11.0.0"
@@ -757,61 +749,18 @@ While the choice between PolySharp, Polyfill, and PolyShim largely comes down to
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net11.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
-    <IsTrimmable
-      Condition="$([MSBuild]::IsTargetFrameworkCompatible(
-        '$(TargetFramework)',
-        'net6.0'
-      ))"
-    >true</IsTrimmable>
-    <IsAotCompatible
-      Condition="$([MSBuild]::IsTargetFrameworkCompatible(
-        '$(TargetFramework)',
-        'net7.0'
-      ))"
-    >true</IsAotCompatible>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- ... -->
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference
-      Include="System.Memory"
-      Version="4.6.3"
-      Condition="
-        !$([MSBuild]::IsTargetFrameworkCompatible(
-          '$(TargetFramework)',
-          'netstandard2.1'
-        ))
-        AND
-        !$([MSBuild]::IsTargetFrameworkCompatible(
-          '$(TargetFramework)',
-          'netcoreapp2.1'
-        ))
-      "
-    />
-
-    <PackageReference
-      Include="Microsoft.Bcl.AsyncInterfaces"
-      Version="11.0.0"
-      Condition="
-        !$([MSBuild]::IsTargetFrameworkCompatible(
-          '$(TargetFramework)',
-          'netstandard2.1'
-        ))
-        AND
-        !$([MSBuild]::IsTargetFrameworkCompatible(
-          '$(TargetFramework)',
-          'netcoreapp3.0'
-        ))
-      "
-    />
-
+    <!-- PolyShim doesn't need to be referenced conditionally -->
     <PackageReference Include="PolyShim" Version="2.15.0" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>
 ```
 
-Note that PolyShim is added differently from the official compatibility packages — the `Condition="..."` attribute is not required here, and we also mark the reference with `PrivateAssets="all"`. As a source-only package, it can apply framework checks on its own at build time, while remaining a private dependency that doesn't need to flow to our consumers.
+Note that PolyShim is included differently from the official compatibility packages — the `Condition="..."` attribute is not required here, and we also mark the reference with `PrivateAssets="all"`. As a source-only package, it can apply framework checks on its own at build time, while remaining a private dependency that doesn't need to flow to our consumers.
 
 By itself, the following code would not compile against every target framework configured for our library. PolyShim, however, makes it work:
 
@@ -843,7 +792,7 @@ public class User
 }
 ```
 
-Beyond just being a collection of polyfills, PolyShim can also adapt its capabilities when referenced alongside the official compatibility packages. For example, since our project uses `System.Memory` and `Microsoft.Bcl.AsyncInterfaces`, it will disable its own implementations of the corresponding types, but will still provide related member polyfills that complement them:
+Beyond just being a collection of polyfills, PolyShim can also adapt its capabilities when used alongside the official compatibility packages. For example, if we restore prior references to `System.Memory` and `Microsoft.Bcl.AsyncInterfaces`, PolyShim will disable its own implementations of the corresponding types, but will still provide related member polyfills that complement them:
 
 ```csharp
 using System;
@@ -892,6 +841,8 @@ In the previous section, we briefly touched upon the concept of source-only NuGe
 
 However, control over a package's deployment model belongs solely to its author — the `PrivateAssets="all"` attribute is just a marker that tells the toolchain not to communicate the dependency to downstream consumers. If the referenced package was published as a regular precompiled assembly, this will simply obscure the corresponding run-time requirement rather than remove it.
 
+#### Merging IL
+
 Still, it is possible to manually internalize a dependency that wasn't designed for it, although doing so involves modifying the [Intermediate Language (IL)](https://learn.microsoft.com/dotnet/standard/managed-code) bytecode after the build. For example, using a tool like [ILRepack](https://github.com/gluck/il-repack), we can merge the external dependency into our output assembly by running the following command:
 
 ```bash
@@ -903,6 +854,8 @@ The invocation above combines `MyLibrary.dll` with `SomeDependency.dll`, produci
 In effect, this means that the functionality of `SomeDependency.dll` becomes isolated within our library, as though it were authored there in the first place. From the consumer's perspective, any relation `MyLibrary` has with `SomeDependency` becomes completely opaque, turning the latter into an implementation detail.
 
 That said, integrating this transformation into the build process is not trivial. We need to select the assemblies to merge, resolve their full dependency graphs, and alter them at the right stage in the pipeline so that packaging picks up the correct output. Multi-targeting adds another consideration, since it produces several sets of binaries that must be handled independently.
+
+#### Automated merging with Binternal
 
 To avoid managing all that complexity ourselves, we can instead rely on [Binternal](https://github.com/Tyrrrz/Binternal) — an MSBuild extension that provides the means to merge and internalize dependencies directly from the project file. This allows us to achieve the same effect as the ILRepack command from before, but in a declarative manner, with the necessary manipulations applied automatically as part of the build.
 
@@ -920,8 +873,10 @@ For example, let's imagine that our library has taken a dependency on [CliWrap](
   <ItemGroup>
     <!-- ... -->
 
+    <!-- Binternal enables the Internalize attribute on references -->
     <PackageReference Include="Binternal" Version="1.0.3" PrivateAssets="all" />
 
+    <!-- Make this dependency an internal part of our output assembly -->
     <PackageReference
       Include="CliWrap"
       Version="3.10.5"
@@ -952,6 +907,8 @@ In an attempt to avoid repeating the associated problems that had plagued simila
 Through the evolution of .NET, however, NuGet became the dominant way to distribute and consume libraries, leading the ecosystem to abandon the architectural philosophies that made GAC relevant in the first place. As a result, modern .NET (Core) runtimes don't implement GAC and also don't enforce strong-name signatures or strict version matching in their resolution process.
 
 Despite that, seeing as .NET Framework continues to be a deployment target for many legacy applications, strong naming retains relevance to library authors who choose to maintain compatibility with that platform. Moreover, some organizations and enterprise environments mandate signed third-party dependencies as a matter of policy, regardless of the underlying runtime involved.
+
+#### Signing with a key file
 
 Fortunately, establishing a strong name for an assembly is fairly simple, so it's usually worth doing for that extra bit of audience reach. First, we need to create a cryptographic key pair with the `sn` command-line tool from either the Windows SDK or Mono:
 
@@ -987,9 +944,8 @@ Finally, to enable signing for the library, we need to edit the project file by 
     <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net11.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <!-- ... -->
-  </PropertyGroup>
 
-  <PropertyGroup>
+    <!-- Enable strong naming -->
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>MyLibrary.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
@@ -1003,7 +959,9 @@ Finally, to enable signing for the library, we need to edit the project file by 
 
 In an enterprise setting, the `snk` file is often managed centrally and exposed for signing purposes only during the final stages of the release process. For open-source projects, however, it is instead more common to commit the key pair directly to the repository, forgoing the exclusive control over the library's identity in favor of easier collaboration.
 
-Note that strong naming is explicitly not a security boundary, so keeping the private key secret is unnecessary when signing solely with the goal of broader compatibility. In fact, we can simplify things even further and use another MSBuild extension called [Snek](https://github.com/Tyrrrz/Snek) to get rid of the initial setup and generate the key automatically as part of the build:
+#### Automated signing with Snek
+
+Since strong naming is explicitly not a security boundary, keeping the private key secret is unnecessary when signing solely for broader compatibility. In fact, we can simplify things even further and use another MSBuild extension called [Snek](https://github.com/Tyrrrz/Snek) to get rid of the initial setup and generate the key automatically as part of the build:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -1017,6 +975,7 @@ Note that strong naming is explicitly not a security boundary, so keeping the pr
   <ItemGroup>
     <!-- ... -->
 
+    <!-- Enable strong naming with an autogenerated (but deterministic) key -->
     <PackageReference Include="Snek" Version="2.0.1" PrivateAssets="all" />
   </ItemGroup>
 
@@ -1032,11 +991,8 @@ The last part is particularly important because changing the published signing k
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net11.0</TargetFrameworks>
-    <IsPackable>true</IsPackable>
     <!-- ... -->
-  </PropertyGroup>
 
-  <PropertyGroup>
     <!-- Explicit seed for the generated strong-name key pair -->
     <AssemblyOriginatorKeySeed>MySigningSeed</AssemblyOriginatorKeySeed>
   </PropertyGroup>
@@ -1067,6 +1023,8 @@ As developers, we spend a far greater amount of time reading code than actually 
 Historically, code formatting has been a somewhat neglected aspect in the .NET world, regarded more as an IDE convenience rather than an independent, first-class concern. While productivity extensions like [CodeMaid](https://marketplace.visualstudio.com/items?itemName=SteveCadwallader.CodeMaid) and [ReSharper](https://jetbrains.com/resharper) offered great ways to keep your project clean and organized locally, their dependence on Visual Studio made them tedious to set up, difficult to share with others, and impossible to use in a continuous integration environment.
 
 Things improved as .NET began to move away from a proprietary and monolithic development platform toward an open-source and CLI-centric model. In particular, the introduction of [Roslyn](https://github.com/dotnet/roslyn) decoupled the compiler's syntax parsing and semantic analysis capabilities from the IDE, enabling the creation of custom diagnostics and code fixes — including for the purpose of formatting — that operate directly at the engine level.
+
+### Built-in formatter
 
 Taking advantage of this foundation, newer releases of the .NET SDK even come with a dedicated formatter built in, available through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is designed to be highly customizable, supporting a wide variety of styling rules that can be toggled and configured via the industry-standard [`.editorconfig`](https://editorconfig.org) file.
 
@@ -1205,7 +1163,7 @@ public class TextTokenizer
 
 In practice, the main benefit of automated formatting isn't so much that it's able to clean up particularly messy source files, but rather that it lets us stop thinking about styling altogether. By delegating that responsibility to a tool, we are free to author code in any shape we find convenient in the moment, knowing that it will ultimately end up with the expected presentation anyway.
 
-To make that development loop explicit rather than just leaving it to a convention, we can also enforce the analyzer-backed `.editorconfig` rules as part of the build itself, surfacing any corresponding violations through warnings and errors. This is achieved by enabling the `<EnforceCodeStyleInBuild>` property in our shared `Directory.Build.props` configuration, thereby applying it to all projects in the solution:
+To make that development loop explicit rather than just leaving it to a convention, we can also enforce `.editorconfig` rules as part of the build itself, surfacing any corresponding violations through Roslyn diagnostics. This is achieved by enabling the `<EnforceCodeStyleInBuild>` property in each project where this behavior is desired, or globally via `Directory.Build.props`:
 
 ```xml
 <Project>
@@ -1213,15 +1171,10 @@ To make that development loop explicit rather than just leaving it to a conventi
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
     <Nullable>annotations</Nullable>
-    <Nullable
-      Condition="$([MSBuild]::IsTargetFrameworkCompatible(
-        '$(TargetFramework)',
-        'netstandard2.1'
-      ))"
-    >enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- ... -->
 
-     <!-- Verify code style during build -->
+     <!-- Verify code style automatically during build -->
+     <!-- You will still need to separately run `dotnet format` to fix violations -->
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
@@ -1229,6 +1182,10 @@ To make that development loop explicit rather than just leaving it to a conventi
 
 </Project>
 ```
+
+In effect, this transforms the style guide from a recommendation into an acceptance criterion. With warnings treated as errors, any violation prevents the build from succeeding and an output assembly from being produced. Code-style issues are therefore no longer merely cosmetic concerns, but diagnostics that must be resolved before the code can be considered valid.
+
+### Zero-configuration formatting with CSharpier
 
 Despite its name, `<EnforceCodeStyleInBuild>` does not actually run `dotnet format` as part of the build. Instead, it only enables the analyzer-backed code-style diagnostics during compilation, turning violations into warnings or errors according to their configured severity. This covers semantic conventions such as preferring `var` or expression-bodied members, but leaves purely textual concerns like indentation, spacing, and line breaks unenforced.
 
