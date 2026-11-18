@@ -120,11 +120,33 @@ const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
               .map((child) => child.value)
               .join("") || "";
 
-          if (language && source) {
-            return <Syntax source={source} language={language} />;
+          const meta = (codeNode?.data as { meta?: string } | undefined)?.meta?.trim();
+          const title = meta
+            ? /^(?:(?:title|file|filename)=)?(?:"([^"]*)"|'([^']*)'|(\S+))/u
+                .exec(meta)
+                ?.slice(1)
+                .find((x) => x)
+            : undefined;
+
+          const block =
+            language && source ? (
+              <Syntax source={source} language={language} />
+            ) : (
+              <Pre>{children}</Pre>
+            );
+
+          if (!title) {
+            return block;
           }
 
-          return <Pre>{children}</Pre>;
+          return (
+            <div className="my-4 overflow-hidden rounded border border-purple-500 [&>*]:!my-0 [&>*]:!rounded-none [&>*]:!border-none">
+              <div className="border-b border-purple-500 bg-purple-200 px-4 py-1 font-mono text-sm dark:bg-purple-800">
+                {title}
+              </div>
+              {block}
+            </div>
+          );
         },
         code: ({ children }) => {
           return <Code>{children}</Code>;
