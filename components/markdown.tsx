@@ -120,11 +120,22 @@ const Markdown: FC<MarkdownProps> = ({ source, transformUrl }) => {
               .map((child) => child.value)
               .join("") || "";
 
-          if (language && source) {
-            return <Syntax source={source} language={language} />;
-          }
+          const title = (codeNode?.data as { meta?: string } | undefined)?.meta?.trim();
 
-          return <Pre>{children}</Pre>;
+          return (
+            <div className="my-4 overflow-hidden rounded border border-purple-500 *:my-0! *:rounded-none! *:border-none!">
+              {title && (
+                <div className="border-b border-purple-500 bg-purple-200 px-4 py-2 font-mono text-sm dark:bg-purple-800">
+                  {title}
+                </div>
+              )}
+              {language && source ? (
+                <Syntax source={source} language={language} />
+              ) : (
+                <Pre>{children}</Pre>
+              )}
+            </div>
+          );
         },
         code: ({ children }) => {
           return <Code>{children}</Code>;

@@ -121,7 +121,7 @@ To better understand what that means in practice, let's revisit an example from 
 ```csharp
 public class LocationProvider
 {
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient _http;
 
     /* ... */
 
@@ -133,7 +133,7 @@ public class LocationProvider
             : "";
 
         // Impure
-        var json = await _httpClient.GetJsonAsync($"http://ip-api.com/json/{ipAddressFormatted}");
+        var json = await _http.GetJsonAsync($"http://ip-api.com/json/{ipAddressFormatted}");
 
         // Pure
         var latitude = json.GetProperty("lat").GetDouble();
