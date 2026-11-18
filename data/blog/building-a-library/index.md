@@ -1028,9 +1028,9 @@ For code formatting, among other things, this foundation provided the means to d
 
 ### Built-in style analyzers
 
-Since .NET 6, the SDK also comes with dedicated, built-in tooling for enforcing consistent formatting in C# (and VB) projects, based on Roslyn and the well-established [EditorConfig](https://editorconfig.org) standard. This tooling is designed to be opt-in, relatively unopinionated, and highly customizable — featuring a wide variety of rules that cover everything from whitespace control to language idioms.
+Since .NET 6, the SDK also comes with dedicated, built-in tooling for enforcing consistent formatting in C# (and VB) projects, based on Roslyn and the well-established [EditorConfig](https://editorconfig.org) standard. This tooling is designed to be opt-in, relatively unopinionated, and highly customizable — featuring a wide variety of analyzers that cover everything from whitespace control to language idioms.
 
-To make use of it, we first need to create an `.editorconfig` file that will serve as the formal style guide for our codebase. Although it's possible to generate one through `dotnet new editorconfig`, the resulting template contains hundreds of predefined settings, which are cumbersome to review and fine-tune. Instead, let's start with a smaller, more focused configuration that establishes general layout conventions and a few C#-specific preferences:
+To make use of it, we first need to create an `.editorconfig` file that will serve as the formal style guide for our codebase. Although it's possible to generate one through `dotnet new editorconfig`, the resulting template contains hundreds of predefined settings, which are cumbersome to review and fine-tune. Instead, let's start with a smaller, more focused ruleset that establishes general layout conventions and a few C#-specific preferences:
 
 ```ini .editorconfig
 root = true
@@ -1077,7 +1077,7 @@ dotnet_diagnostic.IDE0028.severity = none
 dotnet_diagnostic.IDE0055.severity = warning
 ```
 
-Because EditorConfig files resolve hierarchically, the scope of each one depends on where it is located. In order to adopt the above configuration as the baseline for the entire solution, we can mark the file with `root = true` and place it at the top of our directory structure:
+Because EditorConfig files resolve hierarchically, the scope of each one depends on where it is located. In order to adopt the above settings as the baseline for the entire repository, we can mark the file with `root = true` and place it at the top of our directory structure:
 
 ```diff
   ├── .git
@@ -1096,7 +1096,7 @@ Because EditorConfig files resolve hierarchically, the scope of each one depends
   └── nuget.config
 ```
 
-Once that's done, most code editors and IDEs will automatically detect our style rules and apply them to the files we edit. However, to ensure that our codebase stays consistent as a whole, we should also integrate these checks into the build itself, surfacing any associated issues as warnings or errors. This can be achieved by enabling the `<EnforceCodeStyleInBuild>` property, either in the project or globally through `Directory.Build.props`:
+Many code editors and IDEs support EditorConfig natively, so they will automatically find the corresponding configuration and apply its rules to any files we edit. However, to ensure that our codebase stays consistent as a whole, we should also integrate these checks into the build itself, surfacing associated issues through compilation diagnostics. This can be achieved by enabling the `<EnforceCodeStyleInBuild>` property for each project in the solution:
 
 ```xml Directory.Build.props
 <Project>
