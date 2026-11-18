@@ -212,9 +212,9 @@ Here, the provided `url` value is the base part of the stream URL, but it's miss
 
 Normally, when running in the browser, the deciphering process is performed by the player itself, using the instructions stored within it. The exact set of cipher operations and their order changes with each version, so the only way to reproduce this process programmatically is by downloading the player's source code and extracting the implementation from there.
 
-To do that, you need to first identify the latest version of the player, which can be done by querying the `/iframe_api` endpoint. It's the same endpoint that YouTube uses for embedding videos on third-party websites, and it returns a script file that looks like this:
+To do that, you need to first identify the latest version of the player, which can be done by querying the `https://www.youtube.com/iframe_api` endpoint. It's the same endpoint that YouTube uses for embedding videos on third-party websites, and it returns a script file that looks like this:
 
-```javascript GET https://www.youtube.com/iframe_api
+```javascript
 var scriptUrl = "https://www.youtube.com/s/player/4248d311/www-widgetapi.vflset/www-widgetapi.js";
 
 /* ... omitted ~40 lines of irrelevant code ... */
