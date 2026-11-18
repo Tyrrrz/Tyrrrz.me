@@ -21,8 +21,7 @@ Besides `/get_video_info`, YouTube has also dropped many other endpoints, such a
 
 In particular, much of the data previously obtainable from `/get_video_info` can now be pulled using the `/youtubei/v1/player` route. Unlike its predecessor, this endpoint expects a `POST` request — and the payload looks like this:
 
-```json
-// POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
+```json POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
 {
   "videoId": "e_S9VvJM1PI",
   "context": {
@@ -161,8 +160,7 @@ While it is possible to simulate the same flow programmatically — by authentic
 
 [As it turns out](https://github.com/TeamNewPipe/NewPipe/issues/8102#issuecomment-1081085801), there is **one obscure YouTube client that lets you access age-gated videos completely unauthenticated**, and that's the **embedded player used for Smart TV browsers**. This means that if you impersonate this client in the initial request, you can get working stream manifests for age-restricted videos, without worrying about cookies or user credentials. To do that, update the request body as follows:
 
-```json
-// POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
+```json POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
 {
   "videoId": "e_S9VvJM1PI",
   "context": {
@@ -216,7 +214,7 @@ Normally, when running in the browser, the deciphering process is performed by t
 
 To do that, you need to first identify the latest version of the player, which can be done by querying the `/iframe_api` endpoint. It's the same endpoint that YouTube uses for embedding videos on third-party websites, and it returns a script file that looks like this:
 
-```javascript
+```javascript GET https://www.youtube.com/iframe_api
 var scriptUrl = "https://www.youtube.com/s/player/4248d311/www-widgetapi.vflset/www-widgetapi.js";
 
 /* ... omitted ~40 lines of irrelevant code ... */
@@ -298,8 +296,7 @@ var v = {
 
 Finally, update the original request to the `/youtubei/v1/player` endpoint to include the retrieved value inside the JSON payload. Specifically, the timestamp should be passed as part of an additional top-level object called `playbackContext`:
 
-```json
-// POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
+```json POST https://www.youtube.com/youtubei/v1/player?key=AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w
 {
   "videoId": "e_S9VvJM1PI",
   "context": {
@@ -378,7 +375,7 @@ As a result, you can use this approach to bypass the rate limiting mechanism by 
 
 Below is an example of how that entire logic can be implemented using the [curl](https://curl.se) command-line utility in a simple Bash script:
 
-```bash
+```bash download-stream-in-chunks.sh
 # Set the URL of the stream
 URL='https://rr12---sn-3c27sn7d.googlevideo.com/videoplayback?...'
 
