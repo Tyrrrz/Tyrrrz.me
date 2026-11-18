@@ -908,7 +908,7 @@ Through the evolution of .NET, however, NuGet became the dominant way to distrib
 
 Despite that, seeing as .NET Framework continues to be a deployment target for many legacy applications, strong naming retains relevance to library authors who choose to maintain compatibility with that platform. Moreover, some organizations and enterprise environments mandate signed third-party dependencies as a matter of policy, regardless of the underlying runtime involved.
 
-#### Signing with a key file
+#### Generating a key file
 
 Fortunately, establishing a strong name for an assembly is fairly simple, so it's usually worth doing for that extra bit of audience reach. First, we need to create a cryptographic key pair with the `sn` command-line tool from either the Windows SDK or Mono:
 
@@ -1012,7 +1012,7 @@ Either way, having set everything up, we can verify that our library now has a s
 // MyLibrary, Version=0.0.0.0, Culture=neutral, PublicKeyToken=13da9c84e227a6eb
 ```
 
-In general, even though it's a largely obscure and legacy feature in the .NET ecosystem, I'd still recommend strong naming your libraries as a standard practice. For the majority of scenarios, this is a reliable way to extend support to a slightly wider range of consumers, without introducing significant development overhead.
+In general, even though it's a largely obscure and legacy feature in the .NET ecosystem, I'd still recommend strong naming your libraries as a standard practice. For the majority of scenarios, this is a reliable way to extend support to a slightly wider range of consumers, without imposing significant development overhead.
 
 One constraint to consider, however, is that, on .NET Framework, a strongly named assembly is only allowed to reference other assemblies if they are strongly named themselves. Therefore, signing a library early does limit which dependencies you may add to it down the line — although this restriction can also be bypassed using internalization.
 
@@ -1022,13 +1022,15 @@ As developers, we spend a far greater amount of time reading code than actually 
 
 Historically, code formatting has been a somewhat neglected aspect in the .NET world, regarded more as an IDE convenience rather than an independent, first-class concern. While productivity extensions like [CodeMaid](https://marketplace.visualstudio.com/items?itemName=SteveCadwallader.CodeMaid) and [ReSharper](https://jetbrains.com/resharper) offered great ways to keep your project clean and organized locally, their dependence on Visual Studio made them tedious to set up, difficult to share with others, and impossible to use in a continuous integration environment.
 
-Things improved as .NET began to move away from a proprietary and monolithic development platform toward an open-source and CLI-centric model. In particular, the introduction of [Roslyn](https://github.com/dotnet/roslyn) decoupled the compiler's syntax parsing and semantic analysis capabilities from the IDE, enabling the creation of custom diagnostics and code fixes — including for the purpose of formatting — that operate directly at the engine level.
+The situation improved as .NET began to move away from a proprietary and monolithic development platform toward a decentralized and command-line-centric model. In particular, the introduction of [Roslyn](https://github.com/dotnet/roslyn) decoupled the compiler's syntax parsing and semantic analysis capabilities from the IDE, exposing them through public interfaces directly to external tools.
 
-### Built-in formatter
+For code formatting, among other things, this foundation provided the means to detect, report, and fix style violations using common infrastructure, instead of relying on editor-specific facilities or complex hand-rolled source processors. As a result, style conventions could be applied uniformly across the entire solution, regardless of the contributor or their environment, both locally and in automation pipelines.
 
-Taking advantage of this foundation, newer releases of the .NET SDK even come with a dedicated formatter built in, available through the [`dotnet format`](https://learn.microsoft.com/dotnet/core/tools/dotnet-format) command. This formatter is designed to be highly customizable, supporting a wide variety of styling rules that can be toggled and configured via the industry-standard [`.editorconfig`](https://editorconfig.org) file.
+### Built-in style analyzers
 
-Of course, a formal and enforceable code style is valuable in any development context, but it is especially important for open-source projects, where contributors often differ in their tooling and editor preferences. As an example, here's a simple ruleset we could adopt in our repository to ensure that all incoming changes follow the same whitespace conventions and make use of modern C# idioms where appropriate:
+Since .NET 6, the SDK also comes with dedicated, built-in tooling for enforcing consistent formatting in C# (and VB) projects, based on Roslyn and the well-established [EditorConfig](https://editorconfig.org) standard. This tooling is designed to be opt-in, relatively unopinionated, and highly customizable — featuring a wide variety of rules that cover everything from whitespace control to language idioms.
+
+To make use of it, we first need to create an `.editorconfig` file that will serve as the formal style guide for our codebase. Although it's possible to generate one through `dotnet new editorconfig`, the resulting template contains hundreds of predefined settings, which are cumbersome to review and fine-tune. Instead, let's start with a smaller, more focused configuration that establishes general layout conventions and a few C#-specific preferences:
 
 ```ini
 root = true
@@ -1068,11 +1070,14 @@ csharp_style_prefer_coalesce_expression = true:warning
 csharp_style_prefer_null_propagation = true:warning
 csharp_style_prefer_is_null_check_with_true_false = true:warning
 
-# Avoid conflict between collection expressions and `var` declarations
+# Avoid conflicts between collection expressions and `var` declarations
 dotnet_diagnostic.IDE0028.severity = none
+
+# Increase severity for whitespace-related issues
+dotnet_diagnostic.IDE0055.severity = warning
 ```
 
-Because `.editorconfig` files apply hierarchically, the scope of each one depends on where it is located. To establish the above configuration as the baseline for the entire solution, we can mark the file with `root = true` and place it at the top of our directory structure:
+Because EditorConfig files resolve hierarchically, the scope of each one depends on where it is located. In order to establish the above configuration as the baseline for the entire solution, we can mark the file with `root = true` and place it at the top of our directory structure:
 
 ```diff
   ├── .git
@@ -1091,7 +1096,27 @@ Because `.editorconfig` files apply hierarchically, the scope of each one depend
   └── nuget.config
 ```
 
-Now that our style guide is set up, let's see how it works in practice. As an illustration, consider the following piece of loosely formatted code that contains inconsistent indentation, unconventional bracket placement, unordered `using` directives, unnecessarily explicit variable declarations, and other issues:
+Once that's done, most code editors and IDEs will automatically detect our style rules and apply them to the files we edit. However, to ensure that our codebase stays consistent as a whole, we should also integrate these checks into the build itself, surfacing any associated issues as warnings or errors. This can be achieved by enabling the `<EnforceCodeStyleInBuild>` property, either in the project or globally through `Directory.Build.props`:
+
+```xml
+<Project>
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>annotations</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- ... -->
+
+     <!-- Verify code style automatically during build -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <!-- ... -->
+
+</Project>
+```
+
+As an illustration, let's imagine that our library contains the following piece of loosely formatted code that involves inconsistent indentation, unconventional bracket placement, along with several other violations of our previously established conventions:
 
 ```csharp
 using System;
@@ -1125,6 +1150,26 @@ public class TextTokenizer
     }
 }
 ```
+
+With our new setup, running `dotnet build` on the solution will flag a number of formatting and style issues. Because we also have `<TreatWarningsAsErrors>` enabled, these otherwise advisory warnings are promoted to errors, preventing the build from completing successfully:
+
+```
+TextTokenizer.cs(9,3): error IDE0055: Fix formatting
+TextTokenizer.cs(9,34): error IDE0055: Fix formatting
+TextTokenizer.cs(15,42): error IDE0055: Fix formatting
+TextTokenizer.cs(17,9): error IDE0055: Fix formatting
+TextTokenizer.cs(19,47): error IDE0055: Fix formatting
+TextTokenizer.cs(19,55): error IDE0055: Fix formatting
+TextTokenizer.cs(20,9): error IDE0055: Fix formatting
+TextTokenizer.cs(22,16): error IDE0055: Fix formatting
+TextTokenizer.cs(22,37): error IDE0055: Fix formatting
+TextTokenizer.cs(25,13): error IDE0055: Fix formatting
+TextTokenizer.cs(10,9): error IDE0022: Use expression body for method
+TextTokenizer.cs(20,13): error IDE0007: use 'var' instead of explicit type
+TextTokenizer.cs(19,35): error IDE0300: Collection initialization can be simplified
+```
+
+In effect, this creates an experience where style violations are treated the same way as any other build defect.
 
 Running `dotnet format` on the solution will immediately bring this snippet in line with our previously established rules, producing a result that looks like this:
 
@@ -1162,28 +1207,6 @@ public class TextTokenizer
 ```
 
 In practice, the main benefit of automated formatting isn't so much that it's able to clean up particularly messy source files, but rather that it lets us stop thinking about styling altogether. By delegating that responsibility to a tool, we are free to author code in any shape we find convenient in the moment, knowing that it will ultimately end up with the expected presentation anyway.
-
-To make that development loop explicit rather than just leaving it to a convention, we can also enforce `.editorconfig` rules as part of the build itself, surfacing any corresponding violations through Roslyn diagnostics. This is achieved by enabling the `<EnforceCodeStyleInBuild>` property in each project where this behavior is desired, or globally via `Directory.Build.props`:
-
-```xml
-<Project>
-
-  <PropertyGroup>
-    <LangVersion>latest</LangVersion>
-    <Nullable>annotations</Nullable>
-    <!-- ... -->
-
-     <!-- Verify code style automatically during build -->
-     <!-- You will still need to separately run `dotnet format` to fix violations -->
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-  </PropertyGroup>
-
-  <!-- ... -->
-
-</Project>
-```
-
-In effect, this transforms the style guide from a recommendation into an acceptance criterion. With warnings treated as errors, any violation prevents the build from succeeding and an output assembly from being produced. Code-style issues are therefore no longer merely cosmetic concerns, but diagnostics that must be resolved before the code can be considered valid.
 
 ### Zero-configuration formatting with CSharpier
 
@@ -1252,7 +1275,7 @@ The exact formatting choices are not particularly important here. What matters i
 
 This becomes especially useful when you're working in a team or accepting external contributions in an open-source project. In those scenarios, formatting stops being a convention that contributors are expected to remember and manually follow, and instead turns into an implicit contract that their tooling fulfills automatically. That, in turn, reduces noise in pull requests, avoids pointless style discussions, and helps keep code reviews focused on the actual substance of the change.
 
-## Workflow automation: building & testing
+## Workflow automation
 
 Just like any other software project, developing a library is an iterative process that revolves around the repeated cycle of writing and testing code. The setup we've established so far, along with the tooling provided by .NET, makes this process really simple — we can build and test our entire solution by running a single command:
 
