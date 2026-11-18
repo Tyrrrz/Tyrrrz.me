@@ -407,7 +407,7 @@ These approaches can be similarly combined with the SDK-provided preprocessor sy
 
 Going back to our earlier example, let's explore how we can backport `Environment.ProcessId` to retain compatibility with our existing .NET Standard 2.0 target. Seeing as the `Environment` type itself exists universally and it's only the `ProcessId` property that is absent on older frameworks, this scenario is a good fit for the member polyfill approach:
 
-```csharp
+```csharp EnvironmentPolyfills.cs
 #if !NET5_0_OR_GREATER
 
 using System;
@@ -479,7 +479,7 @@ var processId = Environment.ProcessId;
 
 For an alternative example, suppose we wanted to leverage the [`System.Index`](https://learn.microsoft.com/dotnet/api/system.index) and [`System.Range`](https://learn.microsoft.com/dotnet/api/system.range) types in our library. Since they were introduced in .NET Core 3.0, we'd need to backport them as well to continue supporting the .NET Standard 2.0 baseline. Here's how the type polyfill approach can help us achieve that:
 
-```csharp
+```csharp IndexRangePolyfills.cs
 #if !NETCOREAPP3_0_OR_GREATER && !NETSTANDARD2_1_OR_GREATER
 
 namespace System;
@@ -1032,7 +1032,7 @@ Since .NET 6, the SDK also comes with dedicated, built-in tooling for enforcing 
 
 To make use of it, we first need to create an `.editorconfig` file that will serve as the formal style guide for our codebase. Although it's possible to generate one through `dotnet new editorconfig`, the resulting template contains hundreds of predefined settings, which are cumbersome to review and fine-tune. Instead, let's start with a smaller, more focused configuration that establishes general layout conventions and a few C#-specific preferences:
 
-```ini
+```ini .editorconfig
 root = true
 
 # Global rules
