@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import { FC, PropsWithChildren, useEffect, useMemo, useState } from "react";
 import { FiMenu, FiMoon, FiSun } from "react-icons/fi";
-import { Outlet, useLocation, useNavigation } from "react-router-dom";
+import { Outlet, ScrollRestoration, useLocation, useNavigation } from "react-router-dom";
 import { useDebounce } from "../hooks/useDebounce.ts";
 import { useTheme } from "../hooks/useTheme.ts";
 import Analytics from "./analytics.tsx";
@@ -186,6 +186,7 @@ const Layout: FC = () => {
     <>
       <Meta />
       <Analytics />
+      <ScrollRestoration />
       <Page />
     </>
   );
