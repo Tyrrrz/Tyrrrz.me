@@ -1077,7 +1077,7 @@ dotnet_diagnostic.IDE0028.severity = none
 dotnet_diagnostic.IDE0055.severity = warning
 ```
 
-Because EditorConfig files resolve hierarchically, the scope of each one depends on where it is located. In order to adopt the above settings as the baseline for the entire repository, we can mark the file with `root = true` and place it at the top of our directory structure:
+Because EditorConfig files resolve hierarchically, the scope of each one depends on where it is located. In order to adopt the above configuration as the baseline for the entire repository, we can mark the file with `root = true` and place it at the top of our directory structure:
 
 ```diff
   ├── .git
@@ -1096,7 +1096,7 @@ Because EditorConfig files resolve hierarchically, the scope of each one depends
   └── nuget.config
 ```
 
-Many code editors and IDEs support EditorConfig natively, so they will automatically find the corresponding configuration and apply its rules to any files we edit. However, to ensure that our codebase stays consistent as a whole, we should also integrate these checks into the build itself, surfacing associated issues through compilation diagnostics. This can be achieved by enabling the `<EnforceCodeStyleInBuild>` property for each project in the solution:
+Many IDEs support EditorConfig natively, so they will automatically detect these rules and apply them to the files we edit. However, to align with our goal of an environment-agnostic development experience, we should also integrate the same checks into the build itself, where they can be enforced consistently through compiler-level diagnostics. To do that, we need to enable the `<EnforceCodeStyleInBuild>` property for all projects in the solution:
 
 ```xml Directory.Build.props
 <Project>
@@ -1116,7 +1116,7 @@ Many code editors and IDEs support EditorConfig natively, so they will automatic
 </Project>
 ```
 
-As an illustration, let's imagine that our library contains the following piece of loosely formatted code that involves inconsistent indentation, unconventional bracket placement, along with several other violations of our previously established conventions:
+As an illustration, let's imagine that our library contains the following piece of deliberately messy code, which violates several of our freshly established style conventions:
 
 ```csharp TextTokenizer.cs
 using System;
@@ -1151,22 +1151,22 @@ public class TextTokenizer
 }
 ```
 
-With our new setup, running `dotnet build` on the solution will flag a number of formatting and style issues. Because we also have `<TreatWarningsAsErrors>` enabled, these otherwise advisory warnings are promoted to errors, preventing the build from completing successfully:
+If we attempt to build the solution in this state, the tooling will flag each violation according to the severity defined in the EditorConfig file. In our case, all our rules are configured to report warnings, but with `<TreatWarningsAsErrors>` enabled globally, the corresponding violations get promoted to errors and fail the process outright:
 
 ```
 TextTokenizer.cs(9,3): error IDE0055: Fix formatting
 TextTokenizer.cs(9,34): error IDE0055: Fix formatting
+TextTokenizer.cs(10,9): error IDE0022: Use expression body for method
 TextTokenizer.cs(15,42): error IDE0055: Fix formatting
 TextTokenizer.cs(17,9): error IDE0055: Fix formatting
+TextTokenizer.cs(19,35): error IDE0300: Collection initialization can be simplified
 TextTokenizer.cs(19,47): error IDE0055: Fix formatting
 TextTokenizer.cs(19,55): error IDE0055: Fix formatting
 TextTokenizer.cs(20,9): error IDE0055: Fix formatting
+TextTokenizer.cs(20,13): error IDE0007: use 'var' instead of explicit type
 TextTokenizer.cs(22,16): error IDE0055: Fix formatting
 TextTokenizer.cs(22,37): error IDE0055: Fix formatting
 TextTokenizer.cs(25,13): error IDE0055: Fix formatting
-TextTokenizer.cs(10,9): error IDE0022: Use expression body for method
-TextTokenizer.cs(20,13): error IDE0007: use 'var' instead of explicit type
-TextTokenizer.cs(19,35): error IDE0300: Collection initialization can be simplified
 ```
 
 In effect, setting `<EnforceCodeStyleInBuild>` to `true` turns our style guide into a hard requirement, ensuring that all code in the solution adheres to the same conventions. This is particularly useful in collaborative environments, where multiple developers may have different formatting habits, as it guarantees that the final source code remains consistent and readable.
