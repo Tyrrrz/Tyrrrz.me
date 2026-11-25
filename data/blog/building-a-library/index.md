@@ -1022,15 +1022,15 @@ As developers, we spend a far greater amount of time reading code than actually 
 
 Historically, code formatting has been a somewhat neglected aspect in the .NET world, regarded more as an IDE convenience rather than an independent, first-class concern. While productivity extensions like [CodeMaid](https://marketplace.visualstudio.com/items?itemName=SteveCadwallader.CodeMaid) and [ReSharper](https://jetbrains.com/resharper) offered great ways to keep your project clean and organized locally, their dependence on Visual Studio made them tedious to set up, difficult to share with others, and impossible to use in a continuous integration environment.
 
-The situation improved as .NET began to move away from a proprietary and monolithic development platform toward a decentralized and command-line-centric model. In particular, the introduction of [Roslyn](https://github.com/dotnet/roslyn) decoupled the compiler's syntax parsing and semantic analysis capabilities from the IDE, exposing them through public interfaces directly to external tools.
+The situation improved as .NET began to move away from a proprietary and monolithic model toward becoming a decentralized and command-line-centric development platform. In particular, the introduction of [Roslyn](https://github.com/dotnet/roslyn) decoupled the compiler's syntax parsing and semantic analysis capabilities from the IDE, exposing them through public interfaces directly to external tools.
 
 For code formatting, among other things, this foundation provided the means to detect, report, and fix style violations using common infrastructure, instead of relying on editor-specific facilities or complex hand-rolled source processors. As a result, style conventions could be applied uniformly across the entire solution, regardless of the contributor or their environment, both locally and in automation pipelines.
 
 ### Built-in style analyzers
 
-Since .NET 6, the SDK also comes with dedicated, built-in tooling for enforcing consistent formatting in C# (and VB) projects, based on Roslyn and the well-established [EditorConfig](https://editorconfig.org) standard. This tooling is designed to be opt-in, relatively unopinionated, and highly customizable — featuring a wide variety of analyzers that cover everything from whitespace control to language idioms.
+Since .NET 5, the SDK also comes with dedicated, built-in tooling for enforcing consistent formatting in C# (and VB) projects, based on Roslyn and the well-established [EditorConfig](https://editorconfig.org) standard. This tooling is designed to be opt-in, relatively unopinionated, and highly customizable — featuring a wide variety of analyzers that cover everything from whitespace control to language idioms.
 
-To make use of it, we first need to create an `.editorconfig` file that will serve as the formal style guide for our codebase. Although it's possible to generate one through `dotnet new editorconfig`, the resulting template contains hundreds of predefined settings, which are cumbersome to review and fine-tune. Instead, let's start with a smaller, more focused ruleset that establishes general layout conventions and a few C#-specific preferences:
+To make use of it, we first need to create an `.editorconfig` file that will serve as the formal style guide for our codebase. Although it's possible to generate one through `dotnet new editorconfig`, the default template populates it with hundreds of predefined settings, which can be overwhelming early on. Instead, let's manually establish a smaller ruleset that focuses on a few general layout conventions and C#-specific preferences:
 
 ```ini .editorconfig
 root = true
@@ -1064,11 +1064,11 @@ csharp_style_expression_bodied_local_functions = true:warning
 dotnet_style_collection_initializer = true:warning
 dotnet_style_object_initializer = true:warning
 dotnet_style_prefer_collection_expression = true:warning
-csharp_style_pattern_matching_prefer_is_pattern = true:warning
-csharp_style_pattern_matching_prefer_switch_expression = true:warning
-csharp_style_prefer_coalesce_expression = true:warning
-csharp_style_prefer_null_propagation = true:warning
-csharp_style_prefer_is_null_check_with_true_false = true:warning
+csharp_style_prefer_pattern_matching = true:warning
+csharp_style_prefer_switch_expression = true:warning
+dotnet_style_coalesce_expression = true:warning
+dotnet_style_null_propagation = true:warning
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:warning
 
 # Avoid conflicts between collection expressions and `var` declarations
 dotnet_diagnostic.IDE0028.severity = none
@@ -1077,7 +1077,7 @@ dotnet_diagnostic.IDE0028.severity = none
 dotnet_diagnostic.IDE0055.severity = warning
 ```
 
-Because EditorConfig files resolve hierarchically, the scope of each one depends on where it is located. In order to adopt the above configuration as the baseline for the entire repository, we can mark the file with `root = true` and place it at the top of our directory structure:
+EditorConfig files resolve hierarchically, so the scope of each one depends on where it is located. Because our intention is to adopt the above configuration for the entire repository, we mark it with `root = true` and place the corresponding file at the top of the directory structure:
 
 ```diff
   ├── .git
@@ -1096,7 +1096,7 @@ Because EditorConfig files resolve hierarchically, the scope of each one depends
   └── nuget.config
 ```
 
-Many IDEs support EditorConfig natively, so they will automatically detect these rules and apply them to the files we edit. However, to align with our goal of an environment-agnostic development experience, we should also integrate the same checks into the build itself, where they can be enforced consistently through compiler-level diagnostics. To do that, we need to enable the `<EnforceCodeStyleInBuild>` property for all projects in the solution:
+Many IDEs support EditorConfig natively, so they will automatically detect these rules and apply them to the files we edit. However, to align with our goal of an environment-agnostic development experience, we should also integrate the same checks into the build itself, where they can be enforced consistently through compiler-level diagnostics. This is achieved by enabling the `<EnforceCodeStyleInBuild>` property — either per project or globally via `Directory.Build.props`:
 
 ```xml Directory.Build.props
 <Project>
@@ -1116,7 +1116,7 @@ Many IDEs support EditorConfig natively, so they will automatically detect these
 </Project>
 ```
 
-As an illustration, let's imagine that our library contains the following piece of deliberately messy code, which violates several of our freshly established style conventions:
+As an illustration, let's suppose that our library contains a particularly messy code file, which violates several of the style conventions that we've just established:
 
 ```csharp TextTokenizer.cs
 using System;
@@ -1151,7 +1151,7 @@ public class TextTokenizer
 }
 ```
 
-If we attempt to build the solution in this state, the tooling will flag each violation according to the severity defined in the EditorConfig file. In our case, all our rules are configured to report warnings, but with `<TreatWarningsAsErrors>` enabled globally, the corresponding violations get promoted to errors and fail the process outright:
+If we now attempt to run `dotnet build` on the solution, the tooling will flag each of these violations according to the severity assigned in the EditorConfig file. In our case, they are reported as warnings, but the previously configured `<TreatWarningsAsErrors>` property escalates them to errors, causing the build to fail with the following output:
 
 ```
 TextTokenizer.cs(9,3): error IDE0055: Fix formatting
