@@ -859,7 +859,7 @@ That said, integrating this transformation into the build process is not trivial
 
 To avoid managing all that complexity ourselves, we can instead rely on [Binternal](https://github.com/Tyrrrz/Binternal) — an MSBuild extension that provides the means to merge and internalize dependencies directly from the project file. This allows us to achieve the same effect as the ILRepack command from before, but in a declarative manner, with the necessary manipulations applied automatically as part of the build.
 
-For example, let's imagine that our library has taken a dependency on [CliWrap](https://github.com/Tyrrrz/CliWrap) for purposes that remain purely internal. We could choose to embed it into the output assembly by updating `MyLibrary.csproj` as shown below:
+For example, let's imagine that we have taken [CliWrap](https://github.com/Tyrrrz/CliWrap) as a dependency in our library, for purposes that remain purely internal. We could choose to embed it into the output assembly by updating `MyLibrary.csproj` as shown below:
 
 ```xml MyLibrary.csproj
 <Project Sdk="Microsoft.NET.Sdk">
@@ -1077,7 +1077,7 @@ dotnet_diagnostic.IDE0028.severity = none
 dotnet_diagnostic.IDE0055.severity = warning
 ```
 
-EditorConfig files resolve hierarchically, so the scope of each one depends on where it is located. Because our intention is to adopt the above configuration for the entire repository, we mark it with `root = true` and place the corresponding file at the top of the directory structure:
+EditorConfig files are resolved hierarchically, so the scope of each one depends on where it is located. Because our intention is to adopt the above configuration as the baseline for the entire repository, we mark it with `root = true` and place it at the top of the directory structure:
 
 ```diff
   ├── .git
@@ -1096,7 +1096,7 @@ EditorConfig files resolve hierarchically, so the scope of each one depends on w
   └── nuget.config
 ```
 
-Many IDEs support EditorConfig natively, so they will automatically detect these rules and apply them to the files we edit. However, to align with our goal of an environment-agnostic development experience, we should also integrate the same checks into the build itself, where they can be enforced consistently through compiler-level diagnostics. This is achieved by enabling the `<EnforceCodeStyleInBuild>` property — either per project or globally via `Directory.Build.props`:
+Out of the box, many IDEs will detect these rules automatically and apply them to the code as we edit it. However, to align with our goal of an environment-agnostic development experience, we should also integrate the same checks into the build itself, where they can be enforced consistently through compiler-level diagnostics. This is achievable by enabling the `<EnforceCodeStyleInBuild>` property — either per project or globally via `Directory.Build.props`:
 
 ```xml Directory.Build.props
 <Project>
@@ -1116,7 +1116,7 @@ Many IDEs support EditorConfig natively, so they will automatically detect these
 </Project>
 ```
 
-As an illustration, let's suppose that our library contains a particularly messy code file, which violates several of the style conventions that we've just established:
+As an illustration, let's suppose our library contains a particularly messy source file, which violates several of the style conventions that we have just established:
 
 ```csharp TextTokenizer.cs
 using System;
@@ -1151,7 +1151,7 @@ public class TextTokenizer
 }
 ```
 
-If we now attempt to run `dotnet build` on the solution, the tooling will flag each of these violations according to the severity assigned in the EditorConfig file. In our case, they are reported as warnings, but the previously configured `<TreatWarningsAsErrors>` property escalates them to errors, causing the build to fail with the following output:
+With the new setup, attempting to run `dotnet build` on the solution will cause the tooling to flag each of these violations according to the severity assigned in the EditorConfig file. Since we have `<TreatWarningsAsErrors>` enabled as well, our warning-level diagnostics force the build to fail outright, emitting the following messages in the process:
 
 ```
 TextTokenizer.cs(9,3): error IDE0055: Fix formatting
@@ -1169,9 +1169,9 @@ TextTokenizer.cs(22,37): error IDE0055: Fix formatting
 TextTokenizer.cs(25,13): error IDE0055: Fix formatting
 ```
 
-In effect, setting `<EnforceCodeStyleInBuild>` to `true` turns our style guide into a hard requirement, ensuring that all code in the solution adheres to the same conventions. This is particularly useful in collaborative environments, where multiple developers may have different formatting habits, as it guarantees that the final source code remains consistent and readable.
+In effect, setting `<EnforceCodeStyleInBuild>` to `true` turns our style guide into a hard requirement — if the source code does not conform to the specified rules, it will simply not be able to compile. This is especially valuable in collaborative environments, as it guarantees consistency for all developers, even if they don't get EditorConfig feedback in their IDEs (or choose to ignore it).
 
-Now, in order to fix all those issues, we can run `dotnet format` on the solution. This command will automatically apply the necessary changes to bring the code in line with our established rules. After running the command, the previously messy snippet will be reformatted to look like this:
+Now, to fix all those issues and bring that file in line with our conventions, we can use the `dotnet format` command, provided by the .NET SDK. It will automatically resolve the relevant configuration and apply the necessary changes, reformatting our example snippet to look like this:
 
 ```csharp TextTokenizer.cs
 using System;
@@ -1206,7 +1206,7 @@ public class TextTokenizer
 }
 ```
 
-In practice, the main benefit of automated formatting isn't so much that it's able to clean up particularly messy source files, but rather that it lets us stop thinking about styling altogether. By delegating that responsibility to a tool, we are free to author code in any shape we find convenient in the moment, knowing that it will ultimately end up with the expected presentation anyway.
+From a practical standpoint, the main benefit of automated formatting isn't so much that it's able to clean up particularly messy source files, but rather that it lets us stop thinking about styling altogether. By delegating that responsibility to a tool, we are free to author code in any shape we find convenient in the moment, knowing that it will ultimately end up with the expected presentation anyway.
 
 ### Zero-configuration formatting with CSharpier
 
